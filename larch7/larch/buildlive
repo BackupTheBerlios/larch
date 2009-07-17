@@ -1,0 +1,562 @@
+# buildlive - functions to build larch live CD
+#
+# Author: Michael Towers (larch42 at googlemail dot com)
+#
+# This file is part of the larch project.
+#
+#    larch is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    larch is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with larch; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+#----------------------------------------------------------------------------
+# 2009.07.16
+
+
+init()
+{
+    # This is the working area - it must be inside ${INSTLDIR} because of
+    # the use of chroot for some functions
+    LARCHDIR=/.larch
+    LARCHBUILD=${INSTLDIR}${LARCHDIR}
+    # Location for the live medium image
+    CDDIR=${LARCHDIR}/cd
+    CDDATA=${INSTLDIR}${CDDIR}
+
+    echo "//"
+    echo "// **********************************************************"
+    echo "//"
+    if [ -n "${REUSE}" ] && [ -e ${CDDATA}/larch/system.sqf ]; then
+        echo "// ***** Recreating live CD with old squashed system"
+        REGEN="yes"
+    else
+        echo "// *****    Creating live CD from system at '${INSTLDIR}'"
+        REGEN="no"
+    fi
+
+    echo "//"
+    echo "// This will delete EVERYTHING under  ::: ${CDDATA} :::"
+    echo "//"
+    if [ -z "${DONTASK}" ]; then
+        echo "// I really mean it ... Are you sure you want to do this?"
+        echo "// **********************************************************"
+        # Await yes or no
+        read -p "[y/N]: " ans
+        if [ -z "$( echo ${ans} | grep '^ *[yY]' )" ]; then return 0; fi
+        echo
+    fi
+
+    rm -Rf ${LARCHBUILD}/tmp
+    mkdir -p ${LARCHBUILD}/tmp
+
+    # Get kernel file-name, version and initcpio file-name
+    if ! find_kernel; then
+        return 1
+    fi
+
+    # If not building live CD from currently running system, chroot is
+    # needed sometimes. 'chrootx' simplifies this a bit.
+    if [ -n  "${INSTLDIR}" ]; then
+        chrootx="chroot ${INSTLDIR} "
+    else
+        chrootx=""
+    fi
+
+    # Test for necessary packages/modules
+    fail=0
+    aufs=''
+    if ! ${chrootx}grep /squashfs.ko \
+            /lib/modules/${KVERSION}/modules.dep &>/dev/null; then
+        echo "Error: No squashfs module found"
+        fail=1
+    fi
+    if ${chrootx}grep /aufs.ko \
+            /lib/modules/${KVERSION}/modules.dep &>/dev/null; then
+        aufs='_aufs'
+        echo "Using aufs"
+    elif ${chrootx}grep /unionfs.ko \
+            /lib/modules/${KVERSION}/modules.dep &>/dev/null; then
+        echo "Using unionfs"
+    else
+        echo "Error: No aufs or unionfs module found"
+        fail=1
+    fi
+
+    mustpacs="larch-live squashfs-tools"
+    if [ -z "${XOVERLAY}" ]; then
+        mustpacs="${mustpacs} lzop"
+    fi
+    if [ -z "${GRUB}" ]; then
+        mustpacs="${mustpacs} syslinux"
+    fi
+    if [ -z "${USB}" ]; then
+        mustpacs="${mustpacs} cdrkit|cdrtools eject"
+    for p in ${mustpacs}; do
+        if echo ${p} | ( IFS=\| ; f=1 ; while read q; do
+                    pac=$( ls ${INSTLDIR}/var/lib/pacman/local | egrep "^${q}-[^-]+-[^-]+$" )
+                    if [ -n "${pac}" ]; then
+                        f=0
+                        break
+                    fi
+                done
+                [  ${f} -eq 1 ] )
+        then
+            echo "Error: Package ${p} is not installed on target"
+            fail=1
+        fi
+    done
+
+    if [ ${fail} -ne 0 ]; then
+        return 1
+    fi
+
+    # If using old system.sqf file move it to a temporary, safe location
+    if [ ${REGEN} = "yes" ]; then
+        echo "// moving old system image to ${LARCHBUILD}/tmp"
+        mv -f ${CDDATA}/larch/system.sqf ${LARCHBUILD}/tmp
+    fi
+}
+
+
+############ Generate glibc locales to an overlay (a slightly tricky business)
+mklocales ()
+{
+    mkdir -p ${LARCHBUILD}/tmp/overlay/etc
+    mkdir -p ${LARCHBUILD}/tmp/overlay/usr/lib
+    echo
+    echo "********** Generating locales to an overlay **********"
+    echo
+#NEW: 'locales' in profile, a list of the desired locales (replaces
+# locale.gen)
+    rm -f ${INSTLDIR}/etc/locale.gen_new
+    rm -Rf ${INSTLDIR}/usr/lib/locale.save
+    if [ -f ${PROFILE}/locales ]; then
+        echo "###+++ autogen"   >${INSTLDIR}/etc/locale.gen_new
+        cat ${PROFILE}/locales >>${INSTLDIR}/etc/locale.gen_new
+        echo "###--- autogen" >>${INSTLDIR}/etc/locale.gen_new
+        # Append the original file, with all lines commented out and lines
+        # from '###+++' to '###---' deleted
+        cat ${INSTLDIR}/etc/locale.gen | sed -e "/###+++/,/###---/ d" \
+                -e "s|^\([^#].*\)|#\1|" >>${INSTLDIR}/etc/locale.gen_new
+
+        mv -f ${INSTLDIR}/etc/locale.gen ${INSTLDIR}/etc/locale.gen_old
+        mv -f ${INSTLDIR}/etc/locale.gen_new ${INSTLDIR}/etc/locale.gen
+        cp ${INSTLDIR}/etc/locale.gen ${LARCHBUILD}/tmp/overlay/etc
+        cp -a ${INSTLDIR}/usr/lib/locale ${INSTLDIR}/usr/lib/locale.save
+    fi
+
+    ${chrootx}/usr/sbin/locale-gen
+    cp -a ${INSTLDIR}/usr/lib/locale ${LARCHBUILD}/tmp/overlay/usr/lib
+    # /usr/lib/locale will be excluded from system.sqf
+
+    # Restore old and move results to overlay?
+    if [ -f ${INSTLDIR}/etc/locale.gen_old ]; then
+        mv -f ${INSTLDIR}/etc/locale.gen_old ${INSTLDIR}/etc/locale.gen
+        rm -Rf ${INSTLDIR}/usr/lib/locale
+        mv ${INSTLDIR}/usr/lib/locale.save ${INSTLDIR}/usr/lib/locale
+    fi
+}
+
+
+################# Generate ssh keys to an overlay
+ssh_keys ()
+{
+    echo
+    echo "************** Generating ssh keys to overlay (/etc/ssh) **************"
+    echo
+    # ssh initialisation - done here so that it doesn't need to be done
+    # when the live system boots
+    if ! [ -x ${INSTLDIR}/usr/sbin/sshd ]; then
+        echo " --- Failed, openssh not installed"
+        return 1
+    fi
+
+    mkdir -p ${LARCHBUILD}/tmp/overlay/etc/ssh
+    if [ -n  "${INSTLDIR}" ]; then
+        # Do it on the newly built system, in case the host doesn't have ssh
+        mount --bind /dev ${INSTLDIR}/dev
+        ssh_keys_gen
+        umount ${INSTLDIR}/dev
+    else
+        ssh_keys_gen
+    fi
+}
+
+ssh_keys_gen ()
+{
+    ${chrootx}/bin/sh -c "{\
+        /usr/bin/ssh-keygen -t rsa1 -N \"\" -f ${LARCHDIR}/tmp/overlay/etc/ssh/ssh_host_key >/dev/null;\
+        /usr/bin/ssh-keygen -t rsa -N \"\" -f ${LARCHDIR}/tmp/overlay/etc/ssh/ssh_host_rsa_key >/dev/null;\
+        /usr/bin/ssh-keygen -t dsa -N \"\" -f ${LARCHDIR}/tmp/overlay/etc/ssh/ssh_host_dsa_key >/dev/null;\
+        }"
+}
+#-----------------------------------
+
+
+
+############ ENTRY POINT - mklive ###############
+
+#+++++++mklive: main function for building larch system from
+#               Arch installation at ${INSTLDIR}, which can
+#               be '' to use currently running Arch installation.
+
+mklive ()
+{
+    init || return 1
+    ssh_keys
+    mklocales
+
+    ############## START: copying data to boot medium image directory (CDDATA)
+
+    # Clear out the directory.
+    echo "// copying cd-root to ${CDDATA}"
+    rm -Rf ${CDDATA}
+    mkdir -p ${CDDATA}
+
+    # cd-root: first general stuff, then from profile
+    cp -R ${LARCHDATA}/cd-root/* ${CDDATA}
+    if [ -n "${PROFILE}" ] && [ -d ${PROFILE}/cd-root ]; then
+        cp -Rf ${PROFILE}/cd-root/* ${CDDATA}
+    fi
+
+    # kernel
+    echo "// copying kernel from ${INSTLDIR}/boot to ${CDDATA}/boot"
+    echo "//  ... using ${VMLINUZ}"
+    cp -f ${INSTLDIR}/boot/${VMLINUZ} ${CDDATA}/boot/vmlinuz
+    # Remember file name (to ease update handling)
+    mkdir -p ${CDDATA}/larch/copy
+    echo "${VMLINUZ}" > ${CDDATA}/larch/copy/vmlinuz
+
+    ### Generate initcpio (using chroot if necessary) then copy it to CDDATA
+
+    # Fix up larch mkinitcpio.conf for unionfs/aufs
+    if [ -n "${aufs}" ]; then
+        ufs="_aufs"
+    else
+        ufs="_unionfs"
+    fi
+    sed -i "s|___aufs___|${ufs}|g" ${INSTLDIR}/etc/mkinitcpio.conf.larch
+
+    presets=( $( cd ${INSTLDIR}/etc/mkinitcpio.d ; echo kernel26*.preset ) )
+    if [ ${#presets[@]} -ne 1 ]; then
+        echo "Error: Couldn't find usable /etc/mkinitcpio.d/kernel26*.preset"
+        return 1
+    fi
+    # Save original preset file (unless a '*.larchsave' is already present)
+    pfile=( $( ls ${INSTLDIR}/etc/mkinitcpio.d/*.larchsave 2>/dev/null ) )
+    if [ ${#pfile[@]} -ne 1 ]; then
+        mkdir -p {LARCHBUILD}/tmp/overlay/etc/mkinitcpio.d
+        cp ${INSTLDIR}/etc/mkinitcpio.d/${presets} ${LARCHBUILD}/tmp/overlay/etc/mkinitcpio.d/${presets}.larchsave
+    fi
+
+    # Adjust larch.preset file for custom kernels
+    sed -i "s|___|${presets%.preset}|" ${INSTLDIR}/etc/mkinitcpiod/larch.preset
+
+    # Replace 'normal' preset in overlay
+    cp ${INSTLDIR}/etc/mkinitcpio.d/larch.preset ${LARCHBUILD}/tmp/overlay/etc/mkinitcpio.d/${presets}
+
+    # Generate initramfs
+    ${chrootx}/sbin/mkinitcpio -p larch
+
+    #!!!!! This can't be allowed if ${INSTLDIR} = ''
+    # mkinitcpio seems to use the '/tmp' directory, so clear it out
+    if [ -n  "${INSTLDIR}" ]; then
+        rm -rf ${INSTLDIR}/tmp/*
+    fi
+
+    mv ${INSTLDIR}/boot/larchnew.img ${CDDATA}/boot/larch.img
+    ### END of initcpio generation
+
+    ### if no saved system.sqf, squash the Arch installation at ${INSTLDIR}
+    if [ ! -e "${LARCHBUILD}/tmp/system.sqf" ]; then
+        # root directories which are not included in the squashed system.sqf
+        ignoredirs="boot dev mnt media proc sys tmp ${LARCHDIR} .livesys"
+        # /var stuff
+        ignoredirs="${ignoredirs} var/log var/tmp var/lock var/cache/pacman/pkg"
+        # others
+        ignoredirs="${ignoredirs} usr/lib/locale"
+
+        echo "// creating compressed image of linux system: system.sqf"
+        mksquash "/" "${LARCHDIR}/tmp/system.sqf" -e ${ignoredirs}
+        if [ $? -ne 0 ]; then
+            return 1
+        fi
+    fi
+
+    # move system.sqf to boot-medium image directory
+    echo "// moving squashed system image from ${LARCHBUILD}/tmp"
+    mv ${LARCHBUILD}/tmp/system.sqf ${CDDATA}/larch
+    if [ $? -ne 0 ]; then
+        echo "Error: failed to move system.sqf to build area"
+        return 1
+    fi
+
+    ##### Prepare initial overlay
+    echo "// building overlay"
+
+    # Copy over the overlay from the selected profile
+    if [ -n "${PROFILE}" ] && [ -d ${PROFILE}/rootoverlay ]; then
+        cp -rf ${PROFILE}/rootoverlay/* ${LARCHBUILD}/tmp/overlay
+    fi
+
+    if ! [ -f ${LARCHBUILD}/tmp/overlay/etc/inittab ]; then
+        cp ${INSTLDIR}/etc/inittab ${LARCHBUILD}/tmp/overlay/etc
+    fi
+    sed -i "s|/etc/rc.shutdown|/etc/rc.larch.shutdown|" \
+            ${LARCHBUILD}/tmp/overlay/etc/inittab
+
+#TODO: Only support complete rc.conf?
+# I'm not sure about that - the reduced version does have advantages!
+    # Generate customized /etc/rc.conf
+    if [ -n "${PROFILE}" ] && [ -f ${PROFILE}/rcconfx ]; then
+        # If there is one in the given overlay, start with that
+        if [ ! -f ${LARCHBUILD}/tmp/overlay/etc/rc.conf ]; then
+            # else copy the default one
+            cp ${INSTLDIR}/etc/rc.conf ${LARCHBUILD}/tmp/overlay/etc
+        fi
+        cat ${PROFILE}/rcconfx | grep -v "^#" | grep "=" | { while read line; do
+                var="$( echo ${line} | cut -d'=' -f1 )"
+                sed -i "s|^${var}=.*|${line}|" \
+                        ${LARCHBUILD}/tmp/overlay/etc/rc.conf
+            done }
+    fi
+
+    # Add hostname to /etc/hosts localhost, if making new rc.conf
+    if [ -f ${LARCHBUILD}/tmp/overlay/etc/rc.conf ]; then
+        hosts=${LARCHBUILD}/tmp/overlay/etc/hosts
+        if ! [ -f ${LARCHBUILD}/tmp/overlay/etc/hosts ]; then
+            cp ${INSTLDIR}/etc/hosts ${LARCHBUILD}/tmp/overlay/etc
+        fi
+        (   . ${LARCHBUILD}/tmp/overlay/etc/rc.conf;
+            lh="127.0.0.1       localhost.localdomain   localhost       ";
+            sed -i "s|^127\.0\.0\.1.*|${lh}${HOSTNAME}|" ${hosts}
+        )
+    fi
+
+    # Handle /mnt
+    mkdir -p ${LARCHBUILD}/tmp/overlay/mnt
+    for d in $( ls ${INSTLDIR}/mnt ); do
+        if [ -d ${INSTLDIR}/mnt/${d} ]; then
+            mkdir ${LARCHBUILD}/tmp/overlay/mnt/${d}
+        fi
+    done
+
+    # Ensure there is a /boot directory
+    mkdir -p ${LARCHBUILD}/tmp/overlay/boot
+
+    echo "// creating compressed image of larch mods: mods.sqf"
+
+    # Make 'mods' archive from all but /etc
+    mksquash "${LARCHDIR}/tmp/overlay" "${CDDIR}/larch/mods.sqf" -e etc
+    if [ $? -ne 0 ]; then
+        return 1
+    fi
+
+    echo "// creating compressed image of remaining larch mods: overlay.ovl"
+
+    # Compress the overlay (with root dir 'overlay' retained)
+    ${chrootx} bash -c "tar -cf - -C ${LARCHDIR}/tmp overlay/etc |
+            lzop > ${CDDIR}/larch/overlay.ovl"
+
+    rm -rf ${LARCHBUILD}/tmp/overlay
+
+    ##### End of overlay creation
+    ############## END: copying data to boot medium image directory (CDDATA)
+
+    # The boot medium image is now ready
+    buildiso
+}
+
+
+
+########## START: functions for building iso from image directory ##########
+
+#+++++++buildiso: set up boot medium image folder and then
+#                 create iso or call usb medium handler
+
+buildiso ()
+{
+    if [ -f ${CDDATA}/boot/vmlinuz ]; then
+        bd=${CDDATA}/boot
+    else
+        bd=${CDDATA}/isolinux
+    fi
+    if [ -n "${GRUB}" ]; then
+        rm -rf ${CDDATA}/isolinux
+
+        mkdir -p ${CDDATA}/boot/grub
+        cp ${INSTLDIR}/usr/lib/grub/i386-pc/* ${CDDATA}/boot/grub
+
+        if [ -n "${USB}" ]; then
+            usbboot_grub ${INSTLDIR}
+        else
+            echo "// creating GRUB-booting LiveCD ISO image..."
+            mkiso "-b boot/grub/stage2_eltorito"
+        fi
+    else
+        mv ${CDDATA}/boot/{vmlinuz,larch.img} ${CDDATA}/isolinux
+        rm -rf ${CDDATA}/boot
+
+        isolinuxbin=${INSTLDIR}/usr/lib/syslinux/isolinux.bin
+        if [ -f ${isolinuxbin} ]; then
+            cp ${isolinuxbin} ${CDDATA}/isolinux
+        else
+            echo "Error: ${isolinuxbin} not found -"
+            echo "      syslinux must be installed on live system"
+            return 1
+        fi
+
+        if [ -n "${USB}" ]; then
+            usbboot ${INSTLDIR}
+        else
+            echo "// creating isolinux-booting LiveCD ISO image..."
+            mkiso "-b isolinux/isolinux.bin -c isolinux/isolinux.boot"
+        fi
+    fi
+}
+
+#+++++++mkiso: helper function for calling mkisofs
+
+mkiso ()
+{
+    ${chrootx}/usr/bin/mkisofs -r -l $1 \
+        -no-emul-boot -boot-load-size 4 -boot-info-table \
+        -input-charset=UTF-8 \
+        -publisher "designed by gradgrind, licence: GPL" \
+        -A "larch-7" \
+        -o "${LARCHDIR}/mylivecd.iso" "${CDDIR}"
+
+    if [ $? -eq 0 ]; then
+        echo "// Your ISO has been created as ${LARCHBUILD}/mylivecd.iso"
+    else
+        echo "Error: iso build failed" 1>&2
+        return 1
+    fi
+}
+
+########## END: functions for building iso ##########
+
+
+
+#+++++++mksquash: helper function for using mksquashfs via chroot
+
+mksquash ()
+{
+    if [ -n "${INSTLDIR}" ]; then
+        eval chroot ${INSTLDIR} /sbin/mksquashfs $*
+    else
+        /sbin/mksquashfs $*
+    fi
+    if [ $? -ne 0 ]; then
+        echo "Error: squash failed --- mksquashfs $*"
+        return 1
+    fi
+    chmod oga-x "${INSTLDIR}/$2" # remove execute attrib
+}
+
+
+#+++++++find_kernel: helper function to get kernel information
+# Must set two variables:
+#   VMLINUZ=<name of kernel file in /boot>
+#   KVERSION=<version as directory name in /lib/modules>
+#   KINITCPIO=<name of initcpio file in /boot>
+
+# A script 'kernel' in the profile is 'sourced' if it is present. It can thus
+# be used as an alternative way of setting these variables.
+
+find_kernel ()
+{
+    # Discover kernel
+    if  [ -n "${PROFILE}" ] && [ -f ${PROFILE}/kernel ]; then
+        . ${PROFILE}/kernel
+    else
+        VMLINUZ=( $( ls ${INSTLDIR}/boot | grep -E ".*vmlinuz.*" ) )
+        if [ ${#VMLINUZ[@]} -gt 1 ]; then
+            echo "Error - more than 1 kernel found:"
+            for k in ${VMLINUZ[@]}; do
+                echo "        $k"
+            done
+            return 1
+        elif [ ${#VMLINUZ[@]} -ne 1 ]; then
+            echo "Error - no kernel found"
+            return 1
+        fi
+
+        # Seek initcpio file-name
+        KINITCPIO=( $( ls ${INSTLDIR}/boot/*.img | grep -v "\-fallback" ) )
+        if [ ${#KINITCPIO[@]} -gt 1 ]; then
+            echo "Error - more than 1 initcpio image (*.img) found:"
+            for k in ${KINITCPIO[@]}; do
+                echo "        $k"
+            done
+            return 1
+        elif [ ${#KINITCPIO[@]} -ne 1 ]; then
+            echo "Error - no initcpio image (*.img) found"
+            return 1
+        fi
+
+        # Discover kernel version
+        KVERSION=""
+        KVERSIONS=$( ls ${INSTLDIR}/lib/modules )
+        for kv in ${KVERSIONS}; do
+            # Check for 'build' symlink
+            if [ -h ${INSTLDIR}/lib/modules/${kv}/build ]; then
+                if [ -n "${KVERSION}" ]; then
+                    echo "Error - more than one set of kernel modules in ${INSTLDIR}/lib/modules"
+                    return 1
+                fi
+                KVERSION=${kv}
+            else
+                # Dubious set of modules found
+                echo "WARNING:"
+                echo "  You seem to have installed a package containing modules"
+                echo "which aren't compatible with your kernel."
+                echo "Please check that this won't cause problems."
+                echo "Maybe you need the corresponding package"
+                echo "for your kernel?"
+                km=$( find ${INSTLDIR}/lib/modules/${kv} -name "*.ko" | \
+                        sed "s|^${INSTLDIR}||" )
+                pkgs=""
+                for m in ${km}; do
+                    # Use pacman to find the owning package
+                    p=$( ${chrootx}pacman -Qo ${m} )
+                    # Extract the package name, and surround it with '|'s for easier matching
+                    pname="|$( echo "${p}" | cut -d " " -f 5 )|"
+                    # Only report each package once
+                    if [ -z "$( echo ${pkgs} | grep "${pname}" )" ]; then
+                        pkgs="${pkgs} ${pname}"
+                        echo ${p}
+                        echo "   Package: $( echo "${pname}" | \
+                                sed "s/|//g" )"
+                        echo
+                    fi
+                done
+                # Await yes or no
+                read -p "Continue? [y/N]: " ans
+                if [ -z "$( echo ${ans} | grep '^ *[yY]' )" ]; then return 0; fi
+            fi
+        done
+    fi
+    if [ -z "${KVERSION}" ]; then
+        echo "Error - couldn't find kernel modules"
+        return 1
+    fi
+    echo "// Kernel version: ${KVERSION}"
+    # Must regenerate kernel dependency files
+    echo "//  -> regenerating kernel dependencies"
+    if [ -n "${INSTLDIR}" ]; then
+        depmod -b "${INSTLDIR}" "${KVERSION}"
+    else
+        depmod "${KVERSION}"
+    fi
+    echo
+}

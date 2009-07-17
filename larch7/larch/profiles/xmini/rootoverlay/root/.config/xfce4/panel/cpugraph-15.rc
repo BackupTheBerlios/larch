@@ -1,0 +1,12 @@
+UpdateInterval=2
+TimeScale=0
+Width=30
+Mode=0
+Frame=1
+AssociateCommand=xterm top
+ColorMode=0
+Foreground1=#25DF25
+Foreground2=#FF0000
+Background=#FFFFFF
+Foreground3=#0000FF
+

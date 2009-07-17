@@ -1,0 +1,19 @@
+# Maintainer: Michael Towers (larch42 at googlemail dot com)
+# 2009.07.16
+pkgname=larch-live
+pkgver=7.0.0
+pkgrel=1
+
+pkgdesc="larch: compulsory components for the live system"
+url="http://larch.berlios.de"
+depends=()
+arch=(i686 x86_64)
+license=('GPL')
+
+build() {
+  mkdir -p ${startdir}/pkg/opt/larch-live
+  cp -dr ${startdir}/run ${startdir}/pkg/opt/larch-live
+  cp -dr ${startdir}/session-save ${startdir}/pkg/opt/larch-live
+  cp -dr ${startdir}/etc ${startdir}/pkg
+  cp -dr ${startdir}/lib ${startdir}/pkg
+}

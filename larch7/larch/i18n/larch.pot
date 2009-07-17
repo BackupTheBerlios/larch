@@ -1,0 +1,223 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2009-06-07 11:34+CEST\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: modules/base.py:75
+msgid "No pacman executable found"
+msgstr ""
+
+#: modules/base.py:125
+msgid "Unknown configuration option: %s"
+msgstr ""
+
+#: modules/base.py:160
+msgid "Profile '%s' already exists"
+msgstr ""
+
+#: modules/base.py:175
+msgid "Profile '%s' exists already."
+msgstr ""
+
+#: modules/command.0.py:71
+msgid "You cancelled the operation."
+msgstr ""
+
+#: modules/installation.py:161
+msgid ""
+"Cannot copy database for '%s' repository:\n"
+"  Directory %s doesn't exist."
+msgstr ""
+
+#: modules/installation.py:166
+msgid "Copying database for '%s' repository failed"
+msgstr ""
+
+#: modules/installation.py:173
+msgid "Couldn't synchronize pacman database (pacman -Sy)"
+msgstr ""
+
+#: modules/installation.py:195
+msgid "Couldn't write to the installation path (%s)."
+msgstr ""
+
+#: modules/installation.py:199
+msgid "The installation path (%s) is mounted 'nodev'."
+msgstr ""
+
+#: modules/installation.py:207
+msgid "The installation path (%s) is mounted 'noexec'."
+msgstr ""
+
+#: modules/installation.py:257
+msgid "Package installation failed"
+msgstr ""
+
+#: modules/main.py:112
+msgid "This error could not be handled."
+msgstr ""
+
+#: modules/main.py:156
+msgid "Root process died."
+msgstr ""
+
+#: modules/projectpage.py:54
+msgid "Profile directory mismatch: '%s' vs. '%s'"
+msgstr ""
+
+#: modules/projectpage.py:58
+msgid "Profile '%s' doesn't exist"
+msgstr ""
+
+#: tmp/larch.glade.h:1
+msgid "***"
+msgstr ""
+
+#: tmp/larch.glade.h:2
+msgid "Add Package(s)     [-S]"
+msgstr ""
+
+#: tmp/larch.glade.h:3
+msgid "Advanced Configuration"
+msgstr ""
+
+#: tmp/larch.glade.h:4
+msgid "Advanced Options"
+msgstr ""
+
+#: tmp/larch.glade.h:5
+msgid "Arch Mirror:"
+msgstr ""
+
+#: tmp/larch.glade.h:6
+msgid "Browse for Template"
+msgstr ""
+
+#: tmp/larch.glade.h:7
+msgid "Browse for package file to Add / Update    [-U]"
+msgstr ""
+
+#: tmp/larch.glade.h:8
+msgid "Change"
+msgstr ""
+
+#: tmp/larch.glade.h:9
+msgid "Choose Existing Profile:"
+msgstr ""
+
+#: tmp/larch.glade.h:10
+msgid "Choose Existing Project:"
+msgstr ""
+
+#: tmp/larch.glade.h:11
+msgid ""
+"Do I really want\n"
+" to be able to select\n"
+" whether each repo\n"
+" is synchronized or\n"
+" copied?"
+msgstr ""
+
+#: tmp/larch.glade.h:16
+msgid "Edit 'addedpacks'"
+msgstr ""
+
+#: tmp/larch.glade.h:17
+msgid "Edit 'baseveto'"
+msgstr ""
+
+#: tmp/larch.glade.h:18
+msgid "Edit Profile"
+msgstr ""
+
+#: tmp/larch.glade.h:19
+msgid "Edit pacman.conf template"
+msgstr ""
+
+#: tmp/larch.glade.h:20
+msgid "Installation"
+msgstr ""
+
+#: tmp/larch.glade.h:21
+msgid "Installation Path:"
+msgstr ""
+
+#: tmp/larch.glade.h:22
+msgid "Larchify"
+msgstr ""
+
+#: tmp/larch.glade.h:23
+msgid "Log"
+msgstr ""
+
+#: tmp/larch.glade.h:24
+msgid "New Profile:"
+msgstr ""
+
+#: tmp/larch.glade.h:25
+msgid "New Project:"
+msgstr ""
+
+#: tmp/larch.glade.h:26
+msgid "Package Cache:"
+msgstr ""
+
+#: tmp/larch.glade.h:27
+msgid "Package-db Source:"
+msgstr ""
+
+#: tmp/larch.glade.h:28
+msgid "Pacman Sources"
+msgstr ""
+
+#: tmp/larch.glade.h:29
+msgid "Prepare Medium"
+msgstr ""
+
+#: tmp/larch.glade.h:30
+msgid "Profile:"
+msgstr ""
+
+#: tmp/larch.glade.h:31
+msgid "Project Settings"
+msgstr ""
+
+#: tmp/larch.glade.h:32
+msgid "Project:"
+msgstr ""
+
+#: tmp/larch.glade.h:33
+msgid "Remove Package(s)     [-Rs]"
+msgstr ""
+
+#: tmp/larch.glade.h:34
+msgid "Rename"
+msgstr ""
+
+#: tmp/larch.glade.h:35
+msgid "Synchronize db"
+msgstr ""
+
+#: tmp/larch.glade.h:36
+msgid "_Install"
+msgstr ""
+
+#: tmp/larch.glade.h:37
+msgid "larch"
+msgstr ""
+
+#: tmp/larch.glade.h:38
+msgid "larch Repository:"
+msgstr ""

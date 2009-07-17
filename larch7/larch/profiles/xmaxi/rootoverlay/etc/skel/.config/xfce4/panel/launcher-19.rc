@@ -1,0 +1,12 @@
+[Entry 0]
+Name=CD/DVD Writer
+Comment=Burn CDs and DVDs
+Icon=xcdroast
+Exec=k3b
+Terminal=false
+StartupNotify=true
+
+[Global]
+MoveFirst=false
+ArrowPosition=0
+

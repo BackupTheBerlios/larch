@@ -1,0 +1,76 @@
+rc.sysinit handling (needs inittab entry?)
+
+creation of images using UUID and/or LABEL
+
+locale handling on larchify /?
+
+
+
+Documentation for new initramfs features (LABEL/UUID booting?)
+
+Documentation for new overlay (modsNN.sqf) saving option. Also merging
+of overlays into new system.sqf.
+
+Initramfs generation and kernel kernel updating:
+ The 'normal' mechanism is used, via 'mkinitcpio -p kernel26${KERNEL_NAME}'
+so if a custom kernel is used (KERNEL_NAME!=""), some adjustment will
+be necessary ... (???)
+ In larch-live there is a replacement kernel26.preset (kernel26.preset.larch),
+which larch will copy to kernel26.preset, moving the original version to
+kernel26.preset.larchsave. But remember when installing with larchin, the
+first choice of file should be kernel26.preset.pacsave (?) before
+kernel26.preset.larchsave.
+
+Need to test standard /etc/rc.sysinit in a larch system - probably not
+directly from /etc/inittab but via a customized start script, a new
+/etc/rc.sysinit-larch. If necessary it could generate a modified version
+of /etc/rc.sysinit dynamically.
+
+Dynamic generation of larch version of /etc/rc.shutdown, using sed to
+modify standard version - thus hopefully avoiding need to constantly
+update larch to match initscripts changes. Possibly put this customizing
+script in /etc/inittab as a replacement for /etc/rc.shutdown, but it
+could be generated at any time from booting onwards.
+
+Gather together and document clearly all the bits of standard Arch that
+larch tweaks, so that larchbuild, larchin and other users can manage
+them easily.
+
+I may want to consider built-in support for persistent data storage
+(separate from the session saving), e.g. by supporting a '/data'
+folder, possibly sym-linked from home folders, e.g.
+   /home/user/DATA -> /data/user
+This data folder would not be in tmpfs, but on flash memory or disk.
+Note that if the same partition is used for the larch system and this
+persistent data area, the partition must be mounted rw, which might
+be undesirable. It would also add some complication to the live larch
+scripts.
+
+
+
+larchin
+=======
+
+Modify to handle the new larch approach to booting and script replacement.
+
+BUT also try to get new design a bit further. It seems quite a bit cleaner
+and should be more interactive (uses a separate thread for interfacing
+to the installation routines).
+
+glade is not perfect (LOTS of bugs), but using it would reduce the amount
+of gui code and make the program more accessible to others.
+Another possibility might be a web interface using some javascript widget
+library or other (e.g. yui). Of course there is no rad designer for these,
+but they might be easier to use than gtk/qt.
+
+In any case trying to get a gui interface which is control-element
+orientated and not toolkit orientated might be a useful step, so that
+any front-end which can implement or emulate the required control-elements
+could be plugged in.
+
+long-term
+.........
+
+LVM and RAID, but I must say I am not really convinced that they should get
+in. Ideally larchin's design would allow plug-ins to be developed easily.
+

@@ -1,0 +1,8 @@
+[Entry 0]
+Name=Quit
+Exec=larchquit.py xfce
+Terminal=false
+StartupNotify=true
+Comment=Exit the current session
+Icon=gnome-logout
+

@@ -1,0 +1,15 @@
+#
+# patch file for /etc/rc.conf
+#
+MODULES=(!snd_pcsp)
+
+LOCALE="en_US.utf8"
+HARDWARECLOCK="UTC"
+TIMEZONE="Europe/Berlin"
+KEYMAP="us"
+
+HOSTNAME="larch5"
+
+eth0="dhcp"
+
+DAEMONS=(syslog-ng @network dbus hal !gdm !cups !crond !sshd)

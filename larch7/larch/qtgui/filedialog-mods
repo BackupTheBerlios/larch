@@ -1,0 +1,59 @@
+>>> from PyQt4 import QtGui
+>>> a = QtGui.QApplication([])
+>>> w = QtGui.QFileDialog()
+>>> w.show()
+>>> w.show()
+>>> w.children()
+[<PyQt4.QtGui.QFileSystemModel object at 0xb7d482ac>, <PyQt4.QtGui.QGridLayout object at 0xb7d482ec>, <PyQt4.QtGui.QLabel object at 0xb7d4832c>, <PyQt4.QtGui.QComboBox object at 0xb7d4836c>, <PyQt4.QtGui.QToolButton object at 0xb7d483ac>, <PyQt4.QtGui.QToolButton object at 0xb7d483ec>, <PyQt4.QtGui.QToolButton object at 0xb7d4842c>, <PyQt4.QtGui.QToolButton object at 0xb7d4846c>, <PyQt4.QtGui.QToolButton object at 0xb7d484ac>, <PyQt4.QtGui.QToolButton object at 0xb7d484ec>, <PyQt4.QtGui.QSplitter object at 0xb7d4852c>, <PyQt4.QtGui.QLabel object at 0xb7d4856c>, <PyQt4.QtGui.QLineEdit object at 0xb7d485ac>, <PyQt4.QtGui.QDialogButtonBox object at 0xb7d485ec>, <PyQt4.QtGui.QLabel object at 0xb7d4862c>, <PyQt4.QtGui.QComboBox object at 0xb7d4866c>, <PyQt4.QtGui.QCompleter object at 0xb7d486ac>, <PyQt4.QtGui.QActionGroup object at 0xb7d486ec>, <PyQt4.QtGui.QAction object at 0xb7d4872c>, <PyQt4.QtGui.QAction object at 0xb7d4876c>, <PyQt4.QtGui.QAction object at 0xb7d487ac>, <PyQt4.QtGui.QAction object at 0xb7d487ec>, <PyQt4.QtGui.QAction object at 0xb7d4882c>, <PyQt4.QtGui.QAction object at 0xb7d4886c>, <PyQt4.QtGui.QSizeGrip object at 0xb7d488ac>]
+>>> w.show()
+>>> l=QtGui.QLabel("my label")
+>>> for c in w.children():
+...   print c, c.objectName()
+... 
+<PyQt4.QtGui.QFileSystemModel object at 0xb7d482ac> qt_filesystem_model
+<PyQt4.QtGui.QGridLayout object at 0xb7d482ec> gridLayout
+<PyQt4.QtGui.QLabel object at 0xb7d4832c> lookInLabel
+<PyQt4.QtGui.QComboBox object at 0xb7d4836c> lookInCombo
+<PyQt4.QtGui.QToolButton object at 0xb7d483ac> backButton
+<PyQt4.QtGui.QToolButton object at 0xb7d483ec> forwardButton
+<PyQt4.QtGui.QToolButton object at 0xb7d4842c> toParentButton
+<PyQt4.QtGui.QToolButton object at 0xb7d4846c> newFolderButton
+<PyQt4.QtGui.QToolButton object at 0xb7d484ac> listModeButton
+<PyQt4.QtGui.QToolButton object at 0xb7d484ec> detailModeButton
+<PyQt4.QtGui.QSplitter object at 0xb7d4852c> splitter
+<PyQt4.QtGui.QLabel object at 0xb7d4856c> fileNameLabel
+<PyQt4.QtGui.QLineEdit object at 0xb7d485ac> fileNameEdit
+<PyQt4.QtGui.QDialogButtonBox object at 0xb7d485ec> buttonBox
+<PyQt4.QtGui.QLabel object at 0xb7d4862c> fileTypeLabel
+<PyQt4.QtGui.QComboBox object at 0xb7d4866c> fileTypeCombo
+<PyQt4.QtGui.QCompleter object at 0xb7d486ac> 
+<PyQt4.QtGui.QActionGroup object at 0xb7d486ec> 
+<PyQt4.QtGui.QAction object at 0xb7d4872c> 
+<PyQt4.QtGui.QAction object at 0xb7d4876c> qt_goto_parent_action
+<PyQt4.QtGui.QAction object at 0xb7d487ac> qt_rename_action
+<PyQt4.QtGui.QAction object at 0xb7d487ec> qt_delete_action
+<PyQt4.QtGui.QAction object at 0xb7d4882c> qt_show_hidden_action
+<PyQt4.QtGui.QAction object at 0xb7d4886c> qt_new_folder_action
+<PyQt4.QtGui.QSizeGrip object at 0xb7d488ac> 
+>>> l = w.layout()
+>>> l
+<PyQt4.QtGui.QGridLayout object at 0xb7d482ec>
+>>> l.rowCount()
+4
+>>> lbl=QtGui.QLabel("my label")
+>>> l.addWidget(lbl,4,0)
+>>> w.show()
+>>> w.show()
+>>> l.itemAtPosition ( 3, 1 )
+<PyQt4.QtGui.QWidgetItem object at 0xb7d4832c>
+>>> l.itemAtPosition ( 3, 1 ).widget()
+<PyQt4.QtGui.QComboBox object at 0xb7d4836c>
+>>> l.itemAtPosition ( 3, 1 ).widget().hide()
+>>> lbl.hide()
+>>> w.show()
+>>> e = QtGui.QLineEdit()
+>>> l.addWidget(e, 3, 1)
+>>> w.show()
+>>> e.text()
+PyQt4.QtCore.QString(u'abc')
+>>> 

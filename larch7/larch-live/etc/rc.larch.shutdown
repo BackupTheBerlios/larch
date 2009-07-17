@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# rc.larch.shutdown
+
+# This replaces rc.shutdown in inittab
+# 2009.07.16
+
+# Create shutdown script dynamically from normal rc.shutdown.
+# The clock should only be set if ... (?)
+# Handle session saving, CD ejection, etc.
+
+#???
+# Better to do session saving before unmounting swap?
+# OTOH shouldn't the unmount filesystems be done before session-saving?
+# What would happen, actually, if swap was being used at this point?
+# Is it possible to tidy it up?
+
+newfile=/.livesys/shutdown
+
+dosessionsave ()
+{
+    ############################# Include session saving functions
+    . /opt/larch-live/session-save/shutdown2
+    if [ -f /tmp/checkse ]; then
+        . /tmp/checkse
+    else
+        checkse
+    fi
+
+    if [ -n "${saving}" ] && ! session_save; then
+        echo
+        echo "If you know what you are doing, you may be able to recover"
+        echo "something from this unpleasant situation."
+        echo
+        echo "You may use the command line to investigate further ..."
+        echo
+        echo "When finished please enter 'exit', the shutdown process will"
+        echo "then continue."
+        sh -i
+    fi
+}
+
+doeject ()
+{
+    if [ -n "${ejectdev}" ]; then
+        echo "Ejecting live CD"
+        eject ${ejectdev}
+        echo "========================================"
+        echo "It's safe to switch the computer off now"
+        echo -ne "Press Enter to continue"
+        read junk
+    fi
+
+    # This shouldn't be needed, but better safe than sorry?
+    sync
+}
+
+
+cat /etc/rc.shutdown | sed '/Remounting/,/^stat/ d' > ${newfile}
+
+if [ -z "$SAVECLOCK" ]; then
+    sed -i "s|/sbin/hwclock.*|echo ' ... hardware save suppressed'|" ${newfile}
+fi
+
+# This would delete all the clock setting stuff (so long as upstream changes
+# doesn't f*** it up)
+#sed '/Clock/,/^stat/ d' -i ${newfile}
+
+# If I did want to insert something before swapoff, I could do something like
+#sed -i '/Swap/ i\
+#preparesessionsave
+#' ${newfile}
+
+sed -i '/Power/ i\
+dosessionsave
+doeject
+' ${newfile}
+
+# Run the script
+. ${newfile}

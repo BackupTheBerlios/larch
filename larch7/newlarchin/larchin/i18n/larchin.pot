@@ -1,0 +1,699 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2009-02-18 22:03+CET\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: modules/gtk/dialogs.py:34
+msgid "larchin Error"
+msgstr ""
+
+#: modules/gtk/dialogs.py:44 modules/gtk/dialogs.py:54
+#: modules/gtk/dialogs.py:66
+msgid "larchin"
+msgstr ""
+
+#: modules/gtk/doinstall_gui.py:28
+msgid "System copy progress"
+msgstr ""
+
+#: modules/gtk/doinstall_gui.py:34
+msgid "Installed (MiB): "
+msgstr ""
+
+#: modules/gtk/grub_gui.py:40
+msgid "Boot Device: "
+msgstr ""
+
+#: modules/gtk/grub_gui.py:47
+msgid "Select menu.lst to import: "
+msgstr ""
+
+#: modules/gtk/grub_gui.py:51
+msgid "None"
+msgstr ""
+
+#: modules/gtk/grub_gui.py:56 modules/gtk/grub_gui.py:105
+#: modules/stages/grub.py:89
+msgid "Edit menu.lst"
+msgstr ""
+
+#: modules/gtk/grub_gui.py:97
+msgid "Select menu.lst to use: "
+msgstr ""
+
+#: modules/gtk/guimain.py:44
+msgid "Installer for Arch Linux"
+msgstr ""
+
+#: modules/gtk/guimain.py:66
+msgid "larchin - log"
+msgstr ""
+
+#: modules/gtk/guimain.py:75
+msgid "Reporting"
+msgstr ""
+
+#: modules/gtk/guimain.py:208
+msgid "Stages"
+msgstr ""
+
+#: modules/gtk/guimain.py:245
+msgid "Attempt to select non-existent stage: %s"
+msgstr ""
+
+#: modules/gtk/installstart_gui.py:37
+msgid "Partition"
+msgstr ""
+
+#: modules/gtk/installstart_gui.py:37 modules/gtk/selpart_gui.py:41
+msgid "Mount Point"
+msgstr ""
+
+#: modules/gtk/installstart_gui.py:38
+msgid "Size"
+msgstr ""
+
+#: modules/gtk/installstart_gui.py:38 modules/gtk/selpart_gui.py:42
+msgid "Format"
+msgstr ""
+
+#: modules/gtk/installstart_gui.py:39
+msgid "Fmt Flags"
+msgstr ""
+
+#: modules/gtk/installstart_gui.py:39
+msgid "Mnt Flags"
+msgstr ""
+
+#: modules/gtk/ntfs_gui.py:38
+msgid "Delete this partition"
+msgstr ""
+
+#: modules/gtk/ntfs_gui.py:41
+msgid "WARNING: All data on this partition will be lost"
+msgstr ""
+
+#: modules/gtk/ntfs_gui.py:44
+msgid "Set new size of NTFS partition (GB)"
+msgstr ""
+
+#: modules/gtk/ntfs_gui.py:49 modules/install.py:343 modules/install.py:351
+#: modules/install.py:363 modules/install.py:372
+msgid "Shrink NTFS partition"
+msgstr ""
+
+#: modules/gtk/ntfs_gui.py:112
+msgid "This partition (size %s) will be retained unchanged"
+msgstr ""
+
+#: modules/gtk/ntfs_gui.py:115
+msgid ""
+"This partition is too full to shrink\n"
+"\n"
+msgstr ""
+
+#: modules/gtk/ntfs_gui.py:175
+msgid "NTFS Partitions"
+msgstr ""
+
+#: modules/gtk/ntfs_gui.py:182
+msgid "NTFS Partition:  "
+msgstr ""
+
+#: modules/gtk/ntfs_gui.py:186
+msgid "Total capacity of drive:  "
+msgstr ""
+
+#: modules/gtk/rootpw_gui.py:33
+msgid "Enter new root password:"
+msgstr ""
+
+#: modules/gtk/rootpw_gui.py:44
+msgid "Reenter new root password:"
+msgstr ""
+
+#: modules/gtk/selpart_gui.py:41
+msgid "   Size   "
+msgstr ""
+
+#: modules/gtk/selpart_gui.py:41
+msgid " Partition "
+msgstr ""
+
+#: modules/gtk/selpart_gui.py:42
+msgid "File-system"
+msgstr ""
+
+#: modules/gtk/selpart_gui.py:42
+msgid "Mnt Opts"
+msgstr ""
+
+#: modules/gtk/selpart_gui.py:43
+msgid "Fmt Opts"
+msgstr ""
+
+#: modules/gtk/selpart_gui.py:101
+msgid "No partitions available on this device"
+msgstr ""
+
+#: modules/gtk/selpart_gui.py:117
+msgid "Configuring partitions on drive "
+msgstr ""
+
+#: modules/gtk/selpart_gui.py:264
+msgid "Mount Options for %s, mounted at %s"
+msgstr ""
+
+#: modules/gtk/selpart_gui.py:301
+msgid "Formatting Options for %s"
+msgstr ""
+
+#: modules/gtk/stage.py:43
+msgid "Sorry, I'm afraid there is at present no information for this stage."
+msgstr ""
+
+#: modules/gtk/stage.py:52
+msgid "larchin Help"
+msgstr ""
+
+#: modules/install.py:86
+msgid "Configuration item not found: %s"
+msgstr ""
+
+#: modules/install.py:99
+msgid "Tidying up failed, there may still be devices mounted"
+msgstr ""
+
+#: modules/install.py:206
+msgid ""
+"Error scanning devices:\n"
+" %s\n"
+"Shall I create an msdos partition table on %s?"
+msgstr ""
+
+#: modules/install.py:211
+msgid ""
+"Couldn't create partition table:\n"
+" %s"
+msgstr ""
+
+#: modules/install.py:343
+msgid "Test run ..."
+msgstr ""
+
+#: modules/install.py:350
+msgid "This is for real, shrinking file-system ..."
+msgstr ""
+
+#: modules/install.py:362
+msgid "Resizing partition ..."
+msgstr ""
+
+#: modules/install.py:371
+msgid "Fitting file-system to new partition ..."
+msgstr ""
+
+#: modules/install.py:481
+msgid ""
+"The partition mounted at %s is not empty. This could have bad consequences if you attempt to install to it. Please reconsider.\n"
+"\n"
+" Do you still want to install to it?"
+msgstr ""
+
+#: modules/install.py:761 modules/install.py:764
+msgid "GRUB problem"
+msgstr ""
+
+#: modules/install.py:764
+msgid "No initramfs found"
+msgstr ""
+
+#: modules/install.py:806
+msgid "Couldn't set root password:"
+msgstr ""
+
+#: modules/stages/end.py:28
+msgid "For any further help please contact the authors."
+msgstr ""
+
+#: modules/stages/end.py:32
+msgid "If all went well, your installation should now be bootable. Click on OK to quit the installer."
+msgstr ""
+
+#: modules/stages/end.py:41
+msgid "Finished!"
+msgstr ""
+
+#: modules/stages/finddevices.py:29
+msgid ""
+"On the basis of the detected disk(-like) devices a choice of devices for automatic partitioning will be offered.\n"
+"Only devices with no mounted partitions will be offered for automatic partitioning, any others will be listed but will not be selectable.\n"
+"The automatically calculated partitioning scheme allows only a limited amount of tweaking, so if you want more control over the partitioning of your disk drives and the location of the installation, you will need to select manual partitioning. This will normally allow the use of the external tools cfdisk and gparted.\n"
+"In the case of manual partitioning the selection of the mount points is done separately in the \"Select Installation Partitions\" stage, which will be skipped if the automatic partitioning scheme is accepted.\n"
+"Selecting one of the devices offered for automatic partitioning will not immediately cause it to be modified, so try it out without fear. You can return here via the stage menu."
+msgstr ""
+
+#: modules/stages/finddevices.py:51
+msgid ""
+"Disk(-like) devices will be detected and offered for automatic partitioning.\n"
+"\n"
+"If a device has mounted partitions it will not be offered for automatic partitioning. If you want to partition such a device, you must select the \"Manual Partitioning\" stage."
+msgstr ""
+
+#: modules/stages/finddevices.py:93
+msgid "Manual partitioning"
+msgstr ""
+
+#: modules/stages/finddevices.py:96 modules/stages/partmanu.py:72
+msgid "No disk(-like) devices were found, so Arch Linux can not be installed on this machine"
+msgstr ""
+
+#: modules/stages/finddevices.py:104
+msgid "Disk Discovery"
+msgstr ""
+
+#: modules/stages/grub.py:34
+msgid ""
+"GRUB allows the booting of more than one operating system.\n"
+"Normally it will be installed to the 'master boot record' on the first disk drive, but the new Linux system can also be booted from an existing GRUB."
+msgstr ""
+
+#: modules/stages/grub.py:46
+msgid "Install GRUB to MBR - make it the main bootloader"
+msgstr ""
+
+#: modules/stages/grub.py:53
+msgid "Add new installation to existing GRUB menu."
+msgstr ""
+
+#: modules/stages/grub.py:58
+msgid "Install GRUB to installation partition."
+msgstr ""
+
+#: modules/stages/grub.py:121
+msgid "Edit existing menu.lst"
+msgstr ""
+
+#: modules/stages/grub.py:228
+msgid "Configure Bootloader"
+msgstr ""
+
+#: modules/stages/installrun.py:29
+msgid ""
+"The installation process is now running. The individual operations being performed are listed in the report window.\n"
+"\n"
+"1) Format swap partitions.\n"
+"2) Format installation partitions.\n"
+"3) Mount installation partitions.\n"
+"4) Copy system to installation partitions.\n"
+"5) Generate new initramfs.\n"
+"6) Generate new /etc/fstab.\n"
+"7) Unmount installation partitions."
+msgstr ""
+
+#: modules/stages/installrun.py:76
+msgid "Mounted partition %s at %s"
+msgstr ""
+
+#: modules/stages/installrun.py:80
+msgid "Unmounted installation partitions."
+msgstr ""
+
+#: modules/stages/installrun.py:82
+msgid ""
+"\n"
+"Installation completed successfully."
+msgstr ""
+
+#: modules/stages/installrun.py:84
+msgid ""
+"\n"
+"Press 'OK' to continue"
+msgstr ""
+
+#: modules/stages/installrun.py:87
+msgid ""
+"\n"
+"Installation failed"
+msgstr ""
+
+#: modules/stages/installrun.py:89
+msgid "Couldn't mount installation partition(s)"
+msgstr ""
+
+#: modules/stages/installrun.py:100
+msgid "Formatting partition %s as swap ..."
+msgstr ""
+
+#: modules/stages/installrun.py:124
+msgid "Formatting partition %s as %s ..."
+msgstr ""
+
+#: modules/stages/installrun.py:137
+msgid "ERROR: No root (/) partition selected"
+msgstr ""
+
+#: modules/stages/installrun.py:148
+msgid "Estimating installation size ..."
+msgstr ""
+
+#: modules/stages/installrun.py:162
+msgid "Starting actual installation ..."
+msgstr ""
+
+#: modules/stages/installrun.py:167
+msgid "--- Copying %s"
+msgstr ""
+
+#: modules/stages/installrun.py:174
+msgid "---"
+msgstr ""
+
+#: modules/stages/installrun.py:175
+msgid "Replacing/removing 'live'-specific stuff"
+msgstr ""
+
+#: modules/stages/installrun.py:179
+msgid "Copying of system completed."
+msgstr ""
+
+#: modules/stages/installrun.py:180
+msgid "Generating initramfs (this could take a while ...)"
+msgstr ""
+
+#: modules/stages/installrun.py:182
+msgid "Generating /etc/fstab"
+msgstr ""
+
+#: modules/stages/installrun.py:208
+msgid "Installing ..."
+msgstr ""
+
+#: modules/stages/installstart.py:31
+msgid "If you press OK now the chosen partitions will be formatted and mounted and then the running system will be copied onto them."
+msgstr ""
+
+#: modules/stages/installstart.py:38
+msgid "Please check that the formatting of the following partitions and their use within the new installation (mount-points) corresponds with what you had in mind. Accidents could well result in serious data loss."
+msgstr ""
+
+#: modules/stages/installstart.py:83
+msgid "Confirmation"
+msgstr ""
+
+#: modules/stages/ntfs.py:31
+msgid ""
+"If a partition is occupied by a Windows operating system (using the NTFS file-system), you have here the option of shrinking it to create enough space for Arch Linux.\n"
+"As the automatic partitioning utility only considers space after the last NTFS partition, it may under certain circumstances be necessary to delete such a partition, which can also be done here.\n"
+"If you need more sophisticated partition management you will have to resort to the manual tools. This automatic partitioning is only suitable for situations where space for the new Linux installation is to be allocated at the end of a disk, after 0 or more NTFS partitions.\n"
+"\n"
+"As the operations offered here are potentially quitedestructive please consider carefully before using them."
+msgstr ""
+
+#: modules/stages/ntfs.py:59
+msgid "(Potential) free space at end of drive:  "
+msgstr ""
+
+#: modules/stages/ntfs.py:239
+msgid ""
+"You are about to shrink %s. Make sure you have backed up any important data.\n"
+"\n"
+"Continue?"
+msgstr ""
+
+#: modules/stages/ntfs.py:248
+msgid ""
+"Sorry, resizing failed. Here is the error report:\n"
+"\n"
+msgstr ""
+
+#: modules/stages/ntfs.py:268
+msgid "Modify Windows Partition"
+msgstr ""
+
+#: modules/stages/partitions.py:37
+msgid ""
+"To make straightforward installations easier it is possible to choose a simple automatic division of your disk drive for the Arch Linux installation.\n"
+"\n"
+"WARNING: If you have an operating system already installed on this drive which you wish to keep, you must perform partitioning manually (or use the existing partitions) by selecting 'Edit disk partitions manually' (or 'Select Installation Partitions') from the stage menu.\n"
+"EXCEPTION: if the existing operating system uses the NTFS file-system (Windows), it is also possible to use automatic partitioning, if enough space is free, or has been freed by deleting or shrinking one or more NTFS partitions.\n"
+"\n"
+"Here only space after the last NTFS partition will be available for the new Linux installation. If you want to use some or all of the space occupied by Windows, you must shrink or remove the last NTS partitions first (by returning to the appropriate stage)."
+msgstr ""
+
+#: modules/stages/partitions.py:66
+msgid "Total capacity of drive %s:  "
+msgstr ""
+
+#: modules/stages/partitions.py:81
+msgid ""
+"One or more NTFS (Windows) partitions were found. These will be retained. The available space is thus reduced to %3.1f GB.\n"
+"Allocation will begin at partition %d."
+msgstr ""
+
+#: modules/stages/partitions.py:95
+msgid ""
+"Check for bad blocks when formatting swap partition.\n"
+"Clear this when running in VirtualBox (it takes forever)."
+msgstr ""
+
+#: modules/stages/partitions.py:105
+msgid "Space for Linux system:  "
+msgstr ""
+
+#: modules/stages/partitions.py:126
+msgid "Set size of '/home' partition (GB)"
+msgstr ""
+
+#: modules/stages/partitions.py:127
+msgid "Create partition for user data (/home)"
+msgstr ""
+
+#: modules/stages/partitions.py:128
+msgid ""
+"The creation of a separate partition for user data (in the folder /home) allows you to keep this separate from the system files.\n"
+"One advantage is that the operating system can later be freshly installed without destroying your data."
+msgstr ""
+
+#: modules/stages/partitions.py:141
+msgid "There is too little free space on this drive to make a separate partition for user data (/home) worthwhile."
+msgstr ""
+
+#: modules/stages/partitions.py:147
+msgid "Set size of swap partition (GB)"
+msgstr ""
+
+#: modules/stages/partitions.py:148
+msgid "Create swap partition"
+msgstr ""
+
+#: modules/stages/partitions.py:149
+msgid ""
+"No swap partition allocated.\n"
+"Unless you have more memory than you will ever need it is a good idea to set aside some disk space for a swap partition. 0.5 - 1.0 GB should be plenty for most purposes."
+msgstr ""
+
+#: modules/stages/partitions.py:166
+msgid ""
+"You are about to perform a destructive operation on the data on your disk drive (%s):\n"
+"    Repartitioning (removing old and creating new partitions)\n"
+"\n"
+"This is a risky business, so don't proceed if you have not backed up your important data.\n"
+"\n"
+"Continue?"
+msgstr ""
+
+#: modules/stages/partitions.py:249
+msgid "Automatic Partitioning"
+msgstr ""
+
+#: modules/stages/partmanu.py:28
+msgid ""
+"Here you can choose a partitioning tool and/or disk(-like) device in order to prepare your system to receive an Arch Linux installation.\n"
+"\n"
+"'cfdisk' is a console based tool which should always be available. It must be started with the name of the device on which it is to be used.\n"
+"\n"
+"'gparted' is a fancy gui-tool which can do much more, including resizing partitions, but it  may not always be available. The device to be edited can be selected from within the program."
+msgstr ""
+
+#: modules/stages/partmanu.py:47
+msgid "Use gparted (recommended)"
+msgstr ""
+
+#: modules/stages/partmanu.py:67
+msgid "Use cfdisk on %s (%s)"
+msgstr ""
+
+#: modules/stages/partmanu.py:77
+msgid ""
+"WARNING: Editing partitions on a device with mounted partitions (those marked in red) is likely to cause a lot of trouble!\n"
+"If possible, unmount them and then restart this program."
+msgstr ""
+
+#: modules/stages/partmanu.py:85
+msgid "Use existing partitions / finished editing partitions"
+msgstr ""
+
+#: modules/stages/partmanu.py:105
+msgid "Edit Partitions Manually"
+msgstr ""
+
+#: modules/stages/rootpw.py:30
+msgid ""
+"You should enter a hard-to-guess password for the root account on the newly installed system. Use a mixture of letters, digits and other characters. The password may be left empty, but that will make it more difficult to make use of the root account for system administration.\n"
+"\n"
+"If you are not a linux expert, you are strongly advised not to lose/forget the password you set here."
+msgstr ""
+
+#: modules/stages/rootpw.py:51
+msgid ""
+"The passwords are not identical,\n"
+"  Please try again."
+msgstr ""
+
+#: modules/stages/rootpw.py:64
+msgid "Set Administrator Password"
+msgstr ""
+
+#: modules/stages/selpart.py:31
+msgid ""
+"The device partitions used for the Arch Linux installation can be manually selected here.\n"
+"There must be at least an adequately large root ('/') partition, but the system can be split over a number of partitions, for example it is often desirable to have a separate '/home' partition to keep user data separate from system data and programs. This can be helpful when updating or changing the operating system.\n"
+"\n"
+"Also fairly common are separate partitions for one or more of '/boot', '/opt', '/usr', '/var', but it is advisable to inform yourself of the pros and cons before considering these."
+msgstr ""
+
+#: modules/stages/selpart.py:136
+msgid "You must specify a root ('/') partition"
+msgstr ""
+
+#: modules/stages/selpart.py:230
+msgid "disable boot-time checks"
+msgstr ""
+
+#: modules/stages/selpart.py:231
+msgid "Normally an ext3 file-system will be checked every 30 mounts or so. With a large partition this can take quite a while, and some people like to disable this and just rely on the journalling."
+msgstr ""
+
+#: modules/stages/selpart.py:236
+msgid "directory indexing"
+msgstr ""
+
+#: modules/stages/selpart.py:237
+msgid "This is supposed to speed up access."
+msgstr ""
+
+#: modules/stages/selpart.py:239
+msgid "full journal"
+msgstr ""
+
+#: modules/stages/selpart.py:240
+msgid "This is supposed to increase data safety, at some small cost in speed (and disk space?)"
+msgstr ""
+
+#: modules/stages/selpart.py:251
+msgid "noatime"
+msgstr ""
+
+#: modules/stages/selpart.py:252
+msgid "Disables recording atime (access time) to disk, thus speeding up disk access. This is unlikely to cause problems (famous last words ...). Important for flash devices"
+msgstr ""
+
+#: modules/stages/selpart.py:263
+msgid "noauto"
+msgstr ""
+
+#: modules/stages/selpart.py:264
+msgid "Don't mount this partition during system initialization."
+msgstr ""
+
+#: modules/stages/selpart.py:295
+msgid "Select Install Partitions"
+msgstr ""
+
+#: modules/stages/swaps.py:28
+msgid ""
+"Any existing swap partitions on the drives will be found  and offered for formatting. It is generally good to have a swap partition, but it is not necessary if you have more memory than you will ever need.\n"
+"\n"
+" 0.5 - 1.0 GB of swap space should be plenty for most purposes, but you may well need more if you are suspending to swap."
+msgstr ""
+
+#: modules/stages/swaps.py:45
+msgid "The following swap partitions are currently in use and will not be formatted (they shouldn't need it!)."
+msgstr ""
+
+#: modules/stages/swaps.py:49 modules/stages/swaps.py:63
+msgid "size"
+msgstr ""
+
+#: modules/stages/swaps.py:60
+msgid "The following swap partitions will be formatted if you select them for inclusion."
+msgstr ""
+
+#: modules/stages/swaps.py:68
+msgid ""
+"Check for bad blocks when formatting.\n"
+"Clear this when running in VirtualBox (it takes forever)."
+msgstr ""
+
+#: modules/stages/swaps.py:73
+msgid "There are no swap partitions available. If the installation computer does not have a large amount of memory, you are strongly advised to create one before continuing."
+msgstr ""
+
+#: modules/stages/swaps.py:95
+msgid "Include Swap Partitions"
+msgstr ""
+
+#: modules/stages/welcome.py:29
+msgid ""
+"This will install Arch Linux from this \"live\" system on your computer. This program was written for the <i>larch</i> project:\n"
+"       http://larch.berlios.de\n"
+"\n"
+"It is free software, released under the GNU General Public License.\n"
+"\n"
+msgstr ""
+
+#: modules/stages/welcome.py:39
+msgid ""
+"This installation program concentrates on just the most essential aspects of Arch Linux system installation: disk preparation, copying of the system data, generation of the initramfs, setting up the GRUB bootloader and setting the root password.\n"
+"The remaining configuration of the system can be performed before running this program. This is one advantage of installing from a 'live' system - the configuration can be set up and tested before installation.\n"
+"Configuration can of course also be performed later, on the running installed system, if you prefer.\n"
+"\n"
+"Simple graphical programs for setting the xorg keyboard layout (xkmap), for adding users (luser) and for setting the locale (localed) are available in the larch repository, and may be found in the 'system' category of the menu if they have been installed.\n"
+"\n"
+"Other useful sources of information concerning installation are the Arch Linux Installation Guide, and the Arch Linux wiki, for example the Beginner's Guide.\n"
+"\n"
+"Click on the 'OK' button to start."
+msgstr ""
+
+#: modules/stages/welcome.py:67
+msgid "Welcome to <i>larchin</i>"
+msgstr ""
+
+#: run/larchin.py:38
+msgid "This error could not be handled."
+msgstr ""
+
+#: run/larchin.py:70
+msgid ""
+"Usage:\n"
+"          larchin.py \t\t\t\t # local installation\n"
+"          larchin.py target-address \t # remote installation\n"
+msgstr ""
+
+#: run/larchin.py:73
+msgid "Bad arguments"
+msgstr ""
+

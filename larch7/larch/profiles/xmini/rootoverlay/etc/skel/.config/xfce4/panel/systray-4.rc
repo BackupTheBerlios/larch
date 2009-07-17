@@ -1,0 +1,7 @@
+[Global]
+ShowFrame=false
+Rows=1
+
+[Applications]
+xfce4-power-manager=false
+

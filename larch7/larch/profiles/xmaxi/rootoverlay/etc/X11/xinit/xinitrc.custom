@@ -1,0 +1,13 @@
+# Set the keymap
+xkmap-set
+
+case ${desktop} in
+    xfce ) exec ck-launch-session xfce4-session ;;
+
+# Now these are only wild guesses!
+    gnome ) exec ck-launch-session gnome-session ;;
+
+    kde ) exec ck-launch-session startkde ;;
+
+    * ) ;;
+esac

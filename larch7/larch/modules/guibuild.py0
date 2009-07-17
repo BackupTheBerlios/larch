@@ -1,0 +1,199 @@
+#!/usr/bin/env python
+#
+# guibuild.py
+#
+# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+#
+# This file is part of the larch project.
+#
+#    larch is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    larch is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with larch; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+#----------------------------------------------------------------------------
+# 2009.06.20
+
+"""Build a gui from a layout description.
+"""
+
+from PyQt4 import QtGui, QtCore
+import re
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++
+#TODO
+guiformats = {"f1": "$%s#",
+        "larchformat": "<strong><em>%s</em></strong>",
+        "titleformat": "<strong>%s</strong>"
+    }
+# Note that the formats actually need to be available before parsing
+# the gui description, because '_F' is called directly.
+# It would be nice to be able to avoid that!
+
+
+#----------------------------------------------------
+
+def _TEXT(item):
+    """A function to add formatting markup to a string, if the item is a
+    list. If it is a string it is returned as is.
+
+    The markup must be supplied in the dictionary 'guiformats'.
+    At present this function fails 'gracefully', using no formatting
+    if the given format is not defined and a dummy text if not enough
+    texts are supplied.
+    """
+    def subf(mo):
+        i = int(mo.group(1))
+        if i > len(subs):
+            return "***Not Defined***"
+        else:
+            return subs[i - 1]
+
+    if isinstance(item, str) or isinstance(item, unicode):
+        return item
+
+    # Need to do %-substitution
+    format = item[0]
+    rex = re.compile(r"%(\d)")
+    subs = []
+    for a in item[1:]:
+        if isinstance(a, tuple):
+            f = guiformats.get(a[1])
+            if f:
+                text = f % a[0]
+            else:
+                text = a[0]
+        else:
+            text = a
+        subs.append(text)
+    return rex.sub(subf, format)
+
+
+# Widget classes
+class Widget:
+    def __init__(self, name, title, header, items, layout):
+        self.mainwidget = QtGui.QWidget()
+        self.layout = QtGui.QVBoxLayout()
+        self.mainwidget.setLayout(self.layout)
+        self.mainwidget.setWindowTitle(title)
+
+#What about a break?
+        if header:
+            self.header = QtGui.QLabel(_TEXT(header))
+            self.layout.addWidget(self.header)
+        else:
+            self.header = None
+
+        #???
+        for obj in items:
+            if obj.name:
+                self.__dict__[obj.name] = obj
+
+    def init(self):
+
+
+class Notebook:
+    def __init__(self, name, *args):
+        self.name = name
+
+class Frame:
+    def __init__(self, name, text=""):
+        self.name = name
+
+class OptionalFrame:
+    def __init__(self, name, text=""):
+        self.name = name
+
+class Label:
+    def __init__(self, name, text=""):
+        self.name = name
+        self.widget = QtGui.QLabel(_TEXT(text))
+
+    def align(self, pos):
+        if pos == "center":
+            a = QtCore.Qt.AlignCenter
+        else:
+            a = QtCore.Qt.AlignRight
+        self.widget.setAlignment(a)
+
+
+class Button:
+    def __init__(self, name, text=""):
+        self.name = name
+        self.widget = QtGui.QPushButton(_TEXT(text))
+
+class ComboBox:
+    def __init__(self, name):
+        self.name = name
+
+class LineEdit:
+    def __init__(self, name, text=""):
+        self.name = name
+
+class CheckList:
+    def __init__(self, name, title=""):
+        self.name = name
+
+
+# Layout classes
+class MAIN:
+    def __init__(self, child):
+        self.name = None
+
+class PARENT:
+    def __init__(self, parent, child):
+        self.name = None
+
+class VBOX:
+    def __init__(self, name, items):
+        self.name = name
+
+class HBOX:
+    def __init__(self, name, items):
+        self.name = name
+
+class GRID:
+    def __init__(self, name, *rows):
+        self.name = name
+
+class HSPACE:
+    def __init__(self, name):
+        self.name = name
+
+class VSPACE:
+    def __init__(self, name):
+        self.name = name
+
+class HLINE:
+    def __init__(self, name):
+        self.name = name
+
+class VLINE:
+    def __init__(self, name):
+        self.name = name
+
+
+
+
+
+if __name__ == "__main__":
+    app = QtGui.QApplication([])
+    def _(text): return text
+
+    print _TEXT(u"Hello")
+    print _TEXT(["1:%1, 2:%2, 3:%3", ("FIRST", "f1"), "SECOND"])
+    d = {}
+    execfile("gui.layout.py", globals(), d)
+    print "Returns:", d
+    d["larch"].mainwidget.show()
+    app.exec_()
+

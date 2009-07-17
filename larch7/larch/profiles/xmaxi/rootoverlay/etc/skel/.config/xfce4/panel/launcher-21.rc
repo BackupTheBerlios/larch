@@ -1,0 +1,12 @@
+[Entry 0]
+Name=Image Editor
+Comment=GIMP - editor for raster images
+Icon=gimp
+Exec=gimp
+Terminal=false
+StartupNotify=false
+
+[Global]
+MoveFirst=false
+ArrowPosition=0
+

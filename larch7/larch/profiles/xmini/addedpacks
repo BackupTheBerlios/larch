@@ -1,0 +1,93 @@
+# These are needed to build a live CD
+larch-live
+squashfs-tools
+lzop
+
+syslinux
+
+aufs2-util
+
+# In case necessary (depends on kernel)
+#aufs2
+
+# To eject a cd
+eject
+
+# Useful for use as installer, etc.
+ntfsprogs
+parted
+
+sudo
+
+lsof
+cdrkit
+dvd+rw-tools
+
+base-devel
+larch
+
+# generally useful tools which don't require X
+#mtools is required by syslinux
+openssh
+dosfstools
+lynx
+mc
+unzip
+zip
+alsa-lib
+alsa-oss
+alsa-utils
+cdparanoia
+cdrdao
+cups
+
+# Xorg packages
+xorg-server
+xorg-xkb-utils
+xorg-xauth
+xorg-server-utils
+xorg-xinit
+xorg-input-drivers
+xorg-video-drivers
+
+# X apps
+luser
+localed
+xkmap
+gparted
+
+larchin
+
+firefox
+thunderbird
+
+# xfce
+xfce4
+thunar-volman
+thunar-archive-plugin
+xfce4-systemload-plugin
+xfce4-cpugraph-plugin
+xfce4-screenshooter
+xfce4-fsguard-plugin
+xfce4-datetime-plugin
+xfce4-mount-plugin
+xfce4-cpufreq-plugin
+xfce4-diskperf-plugin
+xfce4-mount-plugin
+xfce4-power-manager
+xfce4-sensors-plugin
+xfce4-xkb-plugin
+gstreamer0.10-good-plugins
+xfburn
+gamin
+
+#desktop-file-utils is required by thunar, etc.
+gimp
+wicd
+
+#geany
+
+ttf-dejavu
+
+slim
+slim-theme-dlarch

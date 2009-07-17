@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# xkmap-set - run this during X start to set the keyboard selected by xkmap
+#             for the current user
+
+if [ -f ~/.xkmap.conf ]; then
+    cfile="$( readlink -f ~/.xkmap.conf )"
+else
+    echo "xkmap-set: No settings file found (~/.xkmap.conf)" 1>&2
+    echo "     Leaving default keyboard layout." 1>&2
+    exit 1
+fi
+
+read model layout variant <${cfile}
+if [ "${variant}" != "Standard" ]; then
+    varg="-variant ${variant}"
+fi
+
+setxkbmap -rules xorg -model ${model} -layout ${layout} ${varg}
