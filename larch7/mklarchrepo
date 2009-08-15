@@ -21,9 +21,9 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2008.02.27
+# 2009.08.01
 
-# This script should be run in place to create/update a repository for larch5.
+# This script should be run in place to create/update a repository for larch7.
 
 # The default is 'larchrepo' in the current directory, which can be a symlink
 repodir="$( readlink -f larchrepo )"
@@ -75,6 +75,6 @@ for ad in $( ls ${scriptdir}/abs ); do
     fi
 done
 
-${fkroot} ${scriptdir}/larch/run/gen_repo ${repodir} larch5
+${fkroot} ${scriptdir}/larch/run/gen_repo ${repodir} larch7
 
 echo "Repository at ${repodir} created/updated."
