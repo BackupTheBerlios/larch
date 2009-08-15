@@ -1,0 +1,77 @@
+
+gui: tooltips
+
+use of old system.sqf: I THINK only changing of the base installed system
+should invalidate this, but I should check carefully. It is not easy to
+detect all possible changes to the base system, but pacman operations
+should be no problem (I haven't implemented these yet). Maybe it'll be
+clearer when I've gone through the build script.
+
+
+medium
+------
+
+iso burn to CD/DVD?
+open browser on cd-root(?) folder
+
+I am doing the device formatting on the host machine.
+These functions could be run chroot, but you would
+need at least /dev bind-mounted.
+
+Only ext2 and vfat are supported for larch partitions.
+
+
+Installation page
+-----------------
+
+Some features not yet implemented.
+
+
+Threading
+---------
+
+Could still be the odd hiccup here...
+
+
+Quitting
+--------
+
+If I do a premature break (quit) I need to check that all mounted stuff
+(including dev,proc,sys) gets unmounted. This might be eased if I keep a
+record of everything that I have mounted.
+
+
+Breaking
+--------
+
+As threads in python cannot be killed (they must be exited), it is a bit
+tricky to break a long command (e.g. install, squash) without killing the
+whole program.
+I use exceptions to terminate 'supershell' commands and then terminate
+the program. It might be possible to adapt this a bit to interrupt a command
+in the worker thread, but dealing with the consequences of an interrupted
+command might be difficult in the case of the program not being terminated,
+so for the moment no other interruption than a terminal one is supported.
+
+
+
+
+
+
+NOTES
+=====
+
+Looking at the now rather extensive and complicated python code one might
+well ask what the point of it was, it certainly has nothing to do with
+Arch's "KISS" idea. Well, I admit it. The initial aim was to make larch
+(even) easier to use and tidy up one or two aspects of the code which could
+be a bit problematic for inexperienced users. I hoped that by providing a
+gui the user would not need such detailed documentation, which (let's face
+it) generally doesn't get read anyway.
+
+The number of options offered by larch can be a bit bewildering and I hope
+that a graphical presentation will help to give a better overview of these.
+For what it's worth, choosing python as the implementation language to
+(largely) replace bash makes internationalization relatively easy. Of course
+a simple internationalized command line python program would have been
+possible, too.

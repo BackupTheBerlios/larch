@@ -1,0 +1,22 @@
+### These should probably be present
+syslinux
+cdrkit
+# In case necessary (depends on kernel)
+#aufs2
+# To eject a cd
+eject
+
+# Useful for use as installer, etc.
+ntfsprogs
+parted
+
+# generally useful tools which don't require X
+openssh
+dosfstools
+lynx
+mc
+unzip
+zip
+
+lsof
+dvd+rw-tools

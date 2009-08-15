@@ -1,0 +1,352 @@
+# German translations for larch package.
+# Copyright (C) 2009 ORGANIZATION
+# Automatically generated, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: larch 7\n"
+"POT-Creation-Date: 2009-08-04 22:10+CEST\n"
+"PO-Revision-Date: 2009-08-04 22:10+CEST\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: modules/base.py:73
+msgid "No pacman executable found"
+msgstr ""
+
+#: modules/base.py:123
+msgid "Unknown configuration option: %s\n"
+msgstr ""
+
+#: modules/base.py:169
+msgid "No name for new profile"
+msgstr ""
+
+#: modules/base.py:173
+msgid "Profile '%s' already exists"
+msgstr ""
+
+#: modules/base.py:187
+msgid "Profile '%s' exists already."
+msgstr ""
+
+#: modules/editor.layout.py:10
+msgid "Editor"
+msgstr ""
+
+#: modules/gui.layout.py:13
+msgid "Live Arch Linux Construction Kit"
+msgstr ""
+
+#: modules/gui.layout.py:15
+msgid "View Log"
+msgstr "Protokoll Zeigen"
+
+#: modules/gui.layout.py:20
+msgid "Project Settings"
+msgstr "Projekteinstellungen"
+
+#: modules/gui.layout.py:21
+msgid "Installation"
+msgstr ""
+
+#: modules/gui.layout.py:22
+msgid "Larchify"
+msgstr ""
+
+#: modules/gui.layout.py:23
+msgid "Prepare Medium"
+msgstr "Medium Vorbereiten"
+
+#: modules/gui.layout.py:29
+msgid "Profile"
+msgstr ""
+
+#: modules/gui.layout.py:30
+msgid "Choose Existing Profile:"
+msgstr ""
+
+#: modules/gui.layout.py:31
+msgid "New Profile:"
+msgstr ""
+
+#: modules/gui.layout.py:33
+msgid "Browse for Profile"
+msgstr ""
+
+#: modules/gui.layout.py:34
+msgid "Rename"
+msgstr ""
+
+#: modules/gui.layout.py:35 modules/gui.layout.py:43
+msgid "Delete"
+msgstr ""
+
+#: modules/gui.layout.py:38 modules/gui.layout.py:57
+msgid "Advanced Options"
+msgstr ""
+
+#: modules/gui.layout.py:39
+msgid "Project"
+msgstr ""
+
+#: modules/gui.layout.py:40
+msgid "Choose Existing Project:"
+msgstr ""
+
+#: modules/gui.layout.py:42
+msgid "New Project"
+msgstr ""
+
+#: modules/gui.layout.py:45
+msgid "Installation Path:"
+msgstr ""
+
+#: modules/gui.layout.py:47 modules/gui.layout.py:64 modules/gui.layout.py:68
+msgid "Change"
+msgstr ""
+
+#: modules/gui.layout.py:51
+msgid "Edit Profile"
+msgstr ""
+
+#: modules/gui.layout.py:52
+msgid "Edit 'addedpacks'"
+msgstr ""
+
+#: modules/gui.layout.py:53
+msgid "Edit 'baseveto'"
+msgstr ""
+
+#: modules/gui.layout.py:54
+msgid "Edit pacman.conf options"
+msgstr ""
+
+#: modules/gui.layout.py:55
+msgid "Edit pacman.conf repositories"
+msgstr ""
+
+#: modules/gui.layout.py:58
+msgid "Use project mirrorlist for installation"
+msgstr ""
+
+#: modules/gui.layout.py:59
+msgid "Edit project mirrorlist"
+msgstr ""
+
+#: modules/gui.layout.py:61
+msgid "Use local mirror for installation"
+msgstr ""
+
+#: modules/gui.layout.py:62
+msgid "URL:"
+msgstr ""
+
+#: modules/gui.layout.py:66
+msgid "Package Cache:"
+msgstr ""
+
+#: modules/gui.layout.py:70
+msgid "Synchronize db"
+msgstr ""
+
+#: modules/gui.layout.py:71
+msgid "Update / Add package    [-U]"
+msgstr ""
+
+#: modules/gui.layout.py:72 modules/gui.layout.py:73
+msgid "Add package(s)    [-S]"
+msgstr ""
+
+#: modules/gui.layout.py:75
+msgid "Install"
+msgstr ""
+
+#: modules/guibuild.py:167
+msgid "Unknown Dialog button: %s"
+msgstr ""
+
+#: modules/guibuild.py:184
+msgid "Enter the value here:"
+msgstr ""
+
+#: modules/guibuild.py:186
+msgid "Enter Information"
+msgstr ""
+
+#: modules/guibuild.py:198
+msgid "Confirmation"
+msgstr ""
+
+#: modules/guibuild.py:206
+msgid "Information"
+msgstr ""
+
+#: modules/guibuild.py:455
+msgid "Signal '%s' is not defined for '%s'."
+msgstr ""
+
+#: modules/guibuild.py:464
+msgid "Signal '%s' is defined more than once."
+msgstr ""
+
+#: modules/guibuild.py:479
+msgid "Signal '%s' couldn't be connected."
+msgstr ""
+
+#: modules/guibuild.py:510
+msgid "Attempted to define widget '%s' twice."
+msgstr ""
+
+#: modules/guibuild.py:642
+msgid "Unknown node type: %s"
+msgstr ""
+
+#: modules/guibuild.py:681
+msgid "Unknown widget: %s"
+msgstr ""
+
+#: modules/guibuild.py:689
+msgid "Error"
+msgstr ""
+
+#: modules/guibuild.py:695
+msgid "Warning"
+msgstr ""
+
+#: modules/guibuild.py:703
+msgid "This error could not be handled."
+msgstr ""
+
+#: modules/guibuild.py:847
+msgid "Do you really want to quit the program?"
+msgstr ""
+
+#: modules/installation.py:139
+msgid "Couldn't synchronize pacman database (pacman -Sy)"
+msgstr ""
+
+#: modules/installation.py:162
+msgid "Couldn't write to the installation path (%s)."
+msgstr ""
+
+#: modules/installation.py:166
+msgid "The installation path (%s) is mounted 'nodev'."
+msgstr ""
+
+#: modules/installation.py:174
+msgid "The installation path (%s) is mounted 'noexec'."
+msgstr ""
+
+#: modules/installation.py:225
+msgid "Package installation failed"
+msgstr ""
+
+#: modules/installpage.py:83
+msgid "Editing pacman.conf options only"
+msgstr ""
+
+#: modules/installpage.py:89
+msgid "Editing pacman.conf repositories only"
+msgstr ""
+
+#: modules/installpage.py:103
+msgid "Editing '%s'"
+msgstr ""
+
+#: modules/installpage.py:132
+msgid "Editing mirrorlist: Uncomment ONE entry"
+msgstr ""
+
+#: modules/installpage.py:147
+msgid "Enter new local mirror path:"
+msgstr ""
+
+#: modules/installpage.py:159
+msgid "Enter new package cache path:"
+msgstr ""
+
+#: modules/installpage.py:186
+msgid "Function not yet implemented"
+msgstr ""
+
+#: modules/log.layout.py:10
+msgid "Here you can follow the progress of the commands."
+msgstr ""
+
+#: modules/log.layout.py:14
+msgid "Clear"
+msgstr ""
+
+#: modules/log.layout.py:15
+msgid "Hide"
+msgstr ""
+
+#: modules/main.py:152
+msgid "ui not ready for enquiry"
+msgstr ""
+
+#: modules/main.py:278
+msgid "CONFIG ERROR"
+msgstr ""
+
+#: modules/main.py:289
+msgid "This error could not be handled"
+msgstr ""
+
+#: modules/main.py:332
+msgid "Unexpected response from ui"
+msgstr ""
+
+#: modules/main.py:347
+msgid "Unexpected message from ui"
+msgstr ""
+
+#: modules/main.py:352
+msgid "Unexpected end of 'supershell' process."
+msgstr ""
+
+#: modules/main.py:361
+msgid "Main process received illegal command"
+msgstr ""
+
+#: modules/projectpage.py:64
+msgid "Profile directory mismatch: '%s' vs. '%s'"
+msgstr ""
+
+#: modules/projectpage.py:96
+msgid "Select profile source folder and enter new name"
+msgstr ""
+
+#: modules/projectpage.py:97
+msgid "New name:"
+msgstr ""
+
+#: modules/projectpage.py:113
+msgid "Enter new name for current profile:"
+msgstr ""
+
+#: modules/projectpage.py:122
+msgid "Do you really want to delete profile '%s'?"
+msgstr ""
+
+#: modules/projectpage.py:133
+msgid "Enter new installation path:"
+msgstr ""
+
+#: modules/projectpage.py:151
+msgid "Enter name for new project:"
+msgstr ""
+
+#: modules/projectpage.py:161
+msgid "Can't delete the only existing project."
+msgstr ""
+
+#: modules/projectpage.py:163
+msgid "Do you really want to delete project '%s'?"
+msgstr ""
