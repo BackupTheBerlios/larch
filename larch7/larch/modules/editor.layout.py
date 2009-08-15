@@ -1,5 +1,5 @@
 # GUI description for larch log window
-# 2009.06.29
+# 2009.08.04
 
 #Maybe this is a bit too minimal, so that it would be worth supplying it
 # as a special case, rather like the error dialogs.
@@ -32,7 +32,7 @@ Signals = [
 # without having to change the base description.
 
 Attributes = [
-
+["editor", "size", "600_400"],
 ]
 
 StringFormats = {

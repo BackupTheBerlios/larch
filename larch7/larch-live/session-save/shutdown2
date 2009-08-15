@@ -19,9 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.07.16
-
-#TODO: Add multiple-overlay option (no merging).
+# 2009.08.15
 
 
 # This function can be called before the proper shutdown, in order to
@@ -35,7 +33,7 @@ checkse ()
     bootdev=$( cat /.livesys/bootdevice )
     ejectdev=''
     savedev=${bootdev}
-    cdroms=$( cat /proc/sys/dev/cdrom/info | { while read a b c; do
+    cdroms=$( cat /proc/sys/dev/cdrom/info 2>/dev/null | { while read a b c; do
             if [ "${a}" = "drive" -a "${b}" = "name:" ]; then
                 echo "${c}"
                 break
@@ -94,8 +92,9 @@ autocheckse ()
 # 'dosaving' to perform the actual saving operation.
 session_save ()
 {
-    if [ -f ${savepath}/larch/save-menu ]; then
-        . ${savepath}/larch/save-menu
+    overlaypath=${savepath}/larch
+    if [ -f ${overlaypath}/save-menu ]; then
+        . ${overlaypath}/save-menu
 
     elif [ -f /tmp/xlogout ]; then
         if grep "-" /tmp/xlogout &>/dev/null; then
@@ -128,27 +127,28 @@ session_save ()
         ${unmount}
         return ${res}
     fi
-
+}
 
 # Perform the session saving, handling simple recompression by calling
-# 'saveovl', and calling 'merge_overlay' to handle overlay merging.
+# 'saveovl' (function), and calling 'merge_overlay' (script) to handle
+# overlay merging.
 dosaving()
 {
-    # Check whether kernel and / or initramfs have been updated, and
+    # Check whether initramfs and/or kernel have been updated, and
     # write to medium if necessary.
     if [ -f /boot/larchnew.img ]; then
         if ! mount -o remount,rw /.livesys/medium; then
             echo "ERROR: New initramfs - couldn't mount boot device rw"
             return 1
         fi
-        if [ -f /.livesys/medium/syslinux/vmlinuz ]; then
+        if [ -f /.livesys/medium/syslinux/larch.kernel ]; then
             sdir=/.livesys/medium/syslinux
         else
             sdir=/.livesys/medium/boot
         fi
         mv /boot/larchnew.img ${sdir}/larch.img
-        vmlinuz="$( cat /.livesys/vmlinuz )"
-        [ -f /boot/${vmlinuz} ] && mv /boot/${vmlinuz} ${sdir}/vmlinuz
+        vmlinuz="$( cat /.livesys/medium/larch/kernelname )"
+        [ -f /boot/${vmlinuz} ] && mv /boot/${vmlinuz} ${sdir}/larch.kernel
         mount -o remount,ro /.livesys/medium
     fi
 
@@ -162,42 +162,36 @@ dosaving()
     fi
 
     # Save autologin user
-    mkdir -p ${savepath}/larch/copy
+    mkdir -p ${overlaypath}/copy
     if [ -f /tmp/newuser ]; then
-        cat /tmp/newuser >${savepath}/larch/copy/autologin
+        cat /tmp/newuser >${overlaypath}/copy/autologin
     else
-        :> ${savepath}/larch/copy/autologin
+        :> ${overlaypath}/copy/autologin
     fi
     if [ $? -ne 0 ]; then
         echo "ERROR: Couldn't save autologin user"
         return 1
     fi
 
-    rm -f ${savepath}/overlay.ovl~
+    rm -f ${overlaypath}/overlay.ovl~
 
     if [ -z "${merge}" ]; then
-        ! saveovl ${savepath} && return 1
+        ! saveovl && return 1
     else
-        rm -f ${savepath}/mods.sqf~
-        /opt/larch-live/session-save/merge_overlay ${savepath}
+        rm -f ${overlaypath}/mods.sqf~
+        /opt/larch/session-save/merge_overlay ${overlaypath}
         if [ $? -ne 0 ]; then
             echo "Trying to recover by just saving overlay"
-            ! saveovl ${savepath} && return 1
+            ! saveovl && return 1
         fi
     fi
+
+    return 0
 }
 
 
 saveovl ()
 {
-    savepath=$1
-    if ! [ -d "${savepath}" ]; then
-        echo "ERROR: no 'savepath' folder"
-        echo "Usage:"
-        echo "   saveovl path/to/folder"
-        return 1
-    fi
-
     utype="$( cat /.livesys/utype )"
     if [ "${utype}" = "aufs" ]; then
         # flush pseudo-links (which keep track of changed hard linked files)
@@ -216,10 +210,10 @@ saveovl ()
 
     echo "Recompressing overlay"
     tar -cf - ${excludes} -C /.livesys ${savedirs} | \
-            lzop > ${savepath}/overlay.ovl_
+            lzop > ${overlaypath}/overlay.tar.lzo_
     if [ $? -ne 0 ]; then
         echo "ERROR: couldn't save overlay"
-        rm -f ${savepath}/overlay.ovl_
+        rm -f ${overlaypath}/overlay.tar.lzo_
         return 1
     fi
 

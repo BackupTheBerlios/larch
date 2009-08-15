@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-#2009.07.13
+#2009.08.15
 
 # Replacement for msg which includes leading and trailing spaces
 msg_ () { [ "${quiet}" != "y" ] && echo "$@"; }
@@ -78,7 +78,7 @@ run_hook ()
     while [ ${waittime} -ne ${waitcount} ]; do
 
         if [ "x${uuid}" != "x" ]; then
-            [ ${waitcount} -eq 0 ] && msg "::Looking for UUID ${uuid}"
+            [ ${waitcount} -eq 0 ] && msg ":: Looking for UUID ${uuid}"
             if [ -e /dev/disk/by-uuid/${uuid} ]; then
                 ldev0=$( /bin/readlink /dev/disk/by-uuid/${uuid} )
                 LDEV=/dev/${ldev0##*/}
@@ -86,7 +86,7 @@ run_hook ()
             fi
 
         elif [ "x${label}" != "x" ]; then
-            [ ${waitcount} -eq 0 ] && msg "::Looking for LABEL ${label}"
+            [ ${waitcount} -eq 0 ] && msg ":: Looking for LABEL ${label}"
             if [ -e /dev/disk/by-label/${label} ]; then
                 ldev0=$( /bin/readlink /dev/disk/by-label/${label} )
                 LDEV=/dev/${ldev0##*/}
@@ -94,7 +94,7 @@ run_hook ()
             fi
 
         elif [ "x${root}" != "x" ]; then
-            [ ${waitcount} -eq 0 ] && msg "::Looking for ${root}"
+            [ ${waitcount} -eq 0 ] && msg ": Looking for ${root}"
             # Set LDEV directly, e.g. /dev/sda1
             if [ -e ${root} ]; then
                 LDEV=${root}
@@ -102,7 +102,7 @@ run_hook ()
             fi
 
         else
-            [ ${waitcount} -eq 0 ] && msg "::Looking for boot device"
+            [ ${waitcount} -eq 0 ] && msg ":: Looking for boot device"
             if [ "x${nocd}" = "x" ]; then
                 # Look for CD
                 cdroms=$( /bin/cat /proc/sys/dev/cdrom/info | { while read a b c; do

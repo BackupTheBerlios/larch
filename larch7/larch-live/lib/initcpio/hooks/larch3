@@ -23,7 +23,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.07.16
+# 2009.09.13
 
 #TODO:
 # Is c2r still relevant? I should test it!
@@ -45,7 +45,7 @@ run_hook ()
 
     modsSqf=${ovlpath}/mods.sqf
     # Overlay file and directory:
-    overlay=${ovlpath}/overlay.ovl
+    overlay=${ovlpath}/overlay.tar.lzo
 
     # Deal with new archives
     if [ -f ${overlay}_ ]; then
@@ -175,7 +175,7 @@ run_hook ()
     /bin/mkdir /union/proc
     /bin/mkdir /union/dev
     # Minimal device nodes needed before udev does its work (now done in rc.sysinit?)
-    #/bin/mknod /union/dev/console c 5 1
+    /bin/mknod /union/dev/console c 5 1
     #/bin/mknod /union/dev/null c 1 3
     #/bin/mknod /union/dev/zero c 1 5
 
@@ -223,27 +223,31 @@ EOT
     :>/union/var/log/wtmp
     :>/union/var/log/utmp
     :>/union/var/log/btmp
-    /bin/chmod 0600 /union/var/log/btmp
+    /tfs/system/bin/chmod 0600 /union/var/log/btmp
     :>/union/var/log/lastlog
 
     msg ":: End of live system set-up"
 
-    # Now some tweaks to alter 'init' actions from non-larch hooks, etc.
-    # Override rootdelay from usb hook
-    if [ "x${larchdelay}" = "x"  ]; then
-        # To avoid spurious udevd pid numbers
-        export rootdelay=1
-    else
-        # Allow adjustment via boot option
-        export rootdelay=${larchdelay}
-    fi
-    # root must be set to something or other, even though larch doesn't
-    # need it ...
-    export root="${LDEV}"
-}
+    # This is in archiso ... why?
+    #if [ -d /proc/sys/dev/cdrom ]; then
+    #    echo 0 > /proc/sys/dev/cdrom/lock
+    #    echo 0 > /proc/sys/dev/cdrom/autoeject
+    #fi
 
-#######
-# The actual root switch occurs later, when 'init' execs 'kinit'.
-# I handle this by overwriting the 'kinit' binary with my own script.
-# This will unmount dev, sys and proc and then exec run-init.
-#######
+    # The rest is copied from archiso
+    if [ "${break}" = "y" ]; then
+        echo ":: Break requested, type 'exit' to resume operation"
+        echo "   NOTE: klibc contains no 'ls' binary, use 'echo *' instead"
+        PS1="ramfs$ " /bin/sh -i
+    fi
+
+    udevpid=$(/bin/minips -C udevd -o pid=)
+    [ "x${udevpid}" != "x" ] && /bin/kill -9 $udevpid 2>&1 >/dev/null
+    #Yep, we're bailing out here.  We don't need kinit.
+    msg ":: Passing control to Arch Linux Initscripts...Please Wait"
+
+    umount /sys
+    umount /proc
+    #umount /dev
+    exec /bin/run-init -c /dev/console /union /sbin/init ${CMDLINE}
+}

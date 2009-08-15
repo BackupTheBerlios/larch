@@ -3,7 +3,7 @@
 # rc.larch.shutdown
 
 # This replaces rc.shutdown in inittab
-# 2009.07.16
+# 2009.08.14
 
 # Create shutdown script dynamically from normal rc.shutdown.
 # The clock should only be set if ... (?)
@@ -20,7 +20,7 @@ newfile=/.livesys/shutdown
 dosessionsave ()
 {
     ############################# Include session saving functions
-    . /opt/larch-live/session-save/shutdown2
+    . /opt/larch/session-save/shutdown2
     if [ -f /tmp/checkse ]; then
         . /tmp/checkse
     else
@@ -55,9 +55,13 @@ doeject ()
     sync
 }
 
+# Maybe remounting / as ro is ok ...
+#cat /etc/rc.shutdown | sed '/Remounting/,/^stat/ d' > ${newfile}
+cp -f /etc/rc.shutdown ${newfile}
 
-cat /etc/rc.shutdown | sed '/Remounting/,/^stat/ d' > ${newfile}
-
+# An alternative here would be to set HARDWARECLOCK='LIVE'
+# If that is done in rc.conf, --localtime will be read during booting
+# and nothing will be saved, so long as USEDIRECTISA is not 'yes'
 if [ -z "$SAVECLOCK" ]; then
     sed -i "s|/sbin/hwclock.*|echo ' ... hardware save suppressed'|" ${newfile}
 fi
@@ -71,10 +75,15 @@ fi
 #preparesessionsave
 #' ${newfile}
 
-sed -i '/Power/ i\
-dosessionsave
-doeject
-' ${newfile}
+# An alternative might be to redefine the function printsep, but that might
+# be more complicated than this approach!
+# Ideally there would be a hook at this point in the rc.shutdown script ...
+sed '/Power/ i\
+# larch session saving\
+dosessionsave\
+doeject\
+
+' -i ${newfile}
 
 # Run the script
 . ${newfile}

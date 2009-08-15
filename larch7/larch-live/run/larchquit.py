@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.06.03
+# 2009.08.08
 
 import gtk
 import os
@@ -140,7 +140,7 @@ class QuitMenu(gtk.VBox):
         fhbox.pack_end(fobox, False)
 
         # Try to discover whether session-saving is possible
-        if (os.system("/opt/larch-live/session-save/checksave") == 0):
+        if (os.system("/opt/larch/session-save/checksave") == 0):
             self.b_save.set_active(True)
             self.relogin.set_active(True)
         else:

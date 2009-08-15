@@ -1,5 +1,5 @@
 # GUI description for larch log window
-# 2009.06.25
+# 2009.08.04
 
 Namespace = "log:"
 
@@ -11,8 +11,8 @@ Widgets = [
 
 # Main Widget
 ["*TextEdit", "logtext", "ro"],
-["Button", "^log_clear", _("Clear")],
-["Button", "^log_hide", _("Hide")],
+["Button", "log_clear", _("Clear")],
+["Button", "log_hide", _("Hide")],
 
 ]
 
@@ -25,6 +25,9 @@ Signals = [
 #    -> <newname> [None, [<actual args>]]
 #[<source-widget>, <signal>, <newname>, <tag>]
 #    -> <newname> [<tag>, [<actual args>]]
+["log_clear", "clicked", "$$$clearlog$$$"],
+["log_hide", "clicked", "$$$hidelog$$$"],
+
 ]
 
 
@@ -45,7 +48,7 @@ Layout = [
 # without having to change the base description.
 
 Attributes = [
-
+["log", "size", "600_400"],
 ]
 
 StringFormats = {

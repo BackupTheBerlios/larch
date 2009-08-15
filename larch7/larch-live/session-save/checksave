@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. /opt/larch-live/session-save/shutdown2
+. /opt/larch/session-save/shutdown2
 
 checkse
 

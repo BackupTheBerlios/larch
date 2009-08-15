@@ -22,12 +22,12 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.06.30
+# 2009.08.15
 
 """Build a gui from a layout description.
 """
 
-import sys, traceback
+import os, sys, traceback
 from PyQt4 import QtGui, QtCore
 import re, json
 
@@ -104,15 +104,23 @@ class TopLevel:
         if on:
             # doesn't work:
             #w.setCursor(QtCore.Qt.BusyCursor)
-            app.setOverrideCursor(QtCore.Qt.BusyCursor)
-            w.setEnabled(False)
+            app.setOverrideCursor(QtCore.Qt.BusyCursor)     #qt
+            w.setEnabled(False)                             #qt
         else:
             #w.unsetCursor()
-            app.restoreOverrideCursor()
-            w.setEnabled(True)
+            app.restoreOverrideCursor()                     #qt
+            w.setEnabled(True)                              #qt
 
     def setVisible(self, on=True):
         self.widget.setVisible(on)                          #qt
+
+    def x_set_size(self, w_h):
+        w, h = [int(i) for i in w_h.split("_")]
+        self.widget.resize(w, h)                            #qt
+
+    def getSize(self):
+        s = self.widget.size()                              #qt
+        return "%d_%d" % (s.width(), s.height())
 
 
 class Widget(QtGui.QWidget):                                #qt
@@ -227,12 +235,22 @@ class Frame(QtGui.QGroupBox):                               #qt
     def __init__(self, text=""):
         QtGui.QGroupBox.__init__(self, _TEXT(text))         #qt
 
+    def enable(self, on):
+        self.setEnabled(on)                                 #qt
+
 
 class OptionalFrame(Frame):                                 #qt
+    s_default = "toggled"
+    s_signals = {
+            "toggled": "toggled(bool)"                      #qt
+        }
     def __init__(self, text=""):                            #qt
         Frame.__init__(self, text)                          #qt
         self.setCheckable(True)                             #qt
         self.setChecked(False)                              #qt
+
+    def enable(self, on):
+        self.setChecked(on)                                 #qt
 
 
 class Label(QtGui.QLabel):                                  #qt
@@ -258,6 +276,9 @@ class Button(QtGui.QPushButton):                            #qt
     def __init__(self, text=""):
         QtGui.QPushButton.__init__(self, _TEXT(text))       #qt
 
+    def enable(self, on):
+        self.setEnabled(on)                                 #qt
+
 
 class ToggleButton(QtGui.QPushButton):                      #qt
     s_default = "toggled"
@@ -270,6 +291,46 @@ class ToggleButton(QtGui.QPushButton):                      #qt
 
     def set(self, on):
         self.setChecked(on)                                 #qt
+
+
+class CheckBox(QtGui.QCheckBox):                            #qt
+    # A bit of work is needed to get True/False state       #qt
+    # instead of 0/1/2                                      #qt
+    s_default = "toggled"
+    s_signals = {
+            "toggled": "stateChanged(int)"                  #qt
+        }
+    def __init__(self, text=""):
+        QtGui.QCheckBox.__init__(self, _TEXT(text))         #qt
+
+    def set(self, on):
+        self.setCheckState(2 if on else 0)                  #qt
+
+    def active(self):
+        return self.checkState() != QtCore.Qt.Unchecked     #qt
+
+    def s_toggled(self, state):                             #qt
+        """Convert the argument to True/False.
+        """                                                 #qt
+        return (state != QtCore.Qt.Unchecked,)              #qt
+
+    def enable(self, on):
+        self.setEnabled(on)                                 #qt
+
+
+class RadioButton(QtGui.QRadioButton):                      #qt
+    s_default = "toggled"
+    s_signals = {
+            "toggled": "toggled(bool)"                      #qt
+        }
+    def __init__(self, text=""):
+        QtGui.QPushButton.__init__(self, _TEXT(text))       #qt
+
+    def set(self, on):
+        self.setChecked(on)                                 #qt
+
+    def active(self):
+        return self.isChecked()                             #qt
 
 
 class ComboBox(QtGui.QComboBox):                            #qt
@@ -290,6 +351,23 @@ class ComboBox(QtGui.QComboBox):                            #qt
         self.blockSignals(False)
 
 
+class ListChoice(QtGui.QListWidget):                        #qt
+    s_default = "changed"
+    s_signals = {
+            "changed": "currentRowChanged(int)" ,           #qt
+        }
+    def __init__(self):
+        QtGui.QListWidget.__init__(self)                    #qt
+
+    def set(self, items, index=0):
+        self.blockSignals(True)
+        self.clear()
+        if items:
+            self.addItems(items)
+            self.setCurrentRow(index)
+        self.blockSignals(False)
+
+
 class LineEdit(QtGui.QLineEdit):                            #qt
     s_default = "changed"
     s_signals = {
@@ -301,6 +379,9 @@ class LineEdit(QtGui.QLineEdit):                            #qt
 
     def set(self, text=""):
         self.setText(text)                                  #qt
+
+    def get(self):
+        return unicode(self.text())                         #qt
 
     def x_set_readonly(self, ro):
         self.setReadOnly(ro == "true")                      #qt
@@ -452,10 +533,10 @@ class Signal:
         self.name = name
         self.tag = tag
         try:
-            handler = getattr(self, source.s_handler)
+            self.convert = getattr(source, "s_%s" % signal)
         except:
-            handler = self.signal
-        if QtCore.QObject.connect(source, QtCore.SIGNAL(sig), handler): #qt
+            self.convert = None
+        if QtCore.QObject.connect(source, QtCore.SIGNAL(sig), self.signal): #qt
             self.name = name
             if l != self:
                 l.append(self)
@@ -466,6 +547,8 @@ class Signal:
             return
 
     def signal(self, *args):
+        if self.convert:
+            args = self.convert(*args)
         guiapp.send("^", "%s %s" % (self.name, json.dumps([self.tag, args])))
 
 #    def disconnect(self):
@@ -483,9 +566,10 @@ class GuiApp:
 
 
     def init(self, windowfiles):
+        dir = os.path.dirname(__file__)
         for f in windowfiles:
             d = {}
-            execfile(f, globals(), d)
+            execfile("%s/%s" % (dir, f), globals(), d)
             self.windows.append(WidgetTree(d))
 
 
@@ -672,7 +756,7 @@ def gui_error(message, title=None):
     if not title:
         title = _("Error")
     d = QtGui.QMessageBox.critical(None, title, message)    #qt
-    sys.exit(1)
+    app.exit(1)
 
 def gui_warning(message, title=None):
     if not title:
@@ -697,10 +781,13 @@ widget_table = {
     "Frame": Frame,
     "Button": Button,
     "ToggleButton": ToggleButton,
+    "RadioButton": RadioButton,
+    "CheckBox": CheckBox,
     "Label": Label,
     "CheckList": CheckList,
     "OptionalFrame": OptionalFrame,
     "ComboBox": ComboBox,
+    "ListChoice": ListChoice,
     "LineEdit": LineEdit,
     "TextEdit": TextEdit,
 }
@@ -779,7 +866,12 @@ specials_table["specialFileDialog"] = specialFileDialog
 if __name__ == "__main__":
     # Could get the gui files from sys.argv[1:]
     app = QtGui.QApplication([])                            #qt
-    def _(text): return text
+
+    import gettext
+    lang = os.getenv("LANG")
+    if lang:
+        gettext.install('larch', 'i18n', unicode=1)
+
     class Larch(GuiApp):
         dummyargs = "[null, []]"
         def __init__(self):
@@ -787,12 +879,18 @@ if __name__ == "__main__":
 
         def init(self):
             GuiApp.init(self, ["gui.layout.py", "log.layout.py",
-                    "editor.layout.py"])
+                    "editor.layout.py", "partlist.layout.py"])
             self.logwidget = self.widgets["log:logtext"]
             self.widgets["log:log"].widget.trapclose = self.dohide
+            self.widgets[":larch"].widget.trapclose = self.doquit
 
         def new_line(self, line):
-            source, text = str(line).split(":", 1)
+            text = str(line).strip()
+
+            #DEBUG
+            #sys.stderr.write(text+'\n')
+            #sys.stderr.flush()
+
             if text.startswith("_!_"):
                 einfo = json.loads(text[3:])
                 if einfo[0] == "Warning":
@@ -800,18 +898,14 @@ if __name__ == "__main__":
                 else:
                     gui_error(*einfo[1:])
 
-            elif source == "M":
+            elif text.startswith("!") or text.startswith("?"):
                 GuiApp.new_line(self, text)
-            elif (source == "G") and text.startswith("^log:"):
-                text = text.rstrip()
-                if text.startswith("^log:log_clear*clicked"):
-                    self.logwidget.set()
-                elif text.startswith("^log:log_hide*clicked"):
-                    self.dohide()
-                else:
-                    sys.stderr.write("???%s\n" % text)
+
+            elif text.startswith("/"):
+                app.quit()
+
             else:
-                self.got("%s:%s" % (source, text.rstrip()))
+                self.got(text.rstrip())
 
         def got(self, line):
             self.logwidget.append_and_scroll(line)
@@ -820,6 +914,10 @@ if __name__ == "__main__":
             self.send("^", "$$$hidelog$$$ " + Larch.dummyargs)
             return True
 
+        def doquit(self, *args):
+            if confirmDialog(_("Do you really want to quit the program?")):
+                self.send("^", "$$$uiquit$$$ " + Larch.dummyargs)
+            return True
 
     # We need a global GuiApp instance
     guiapp = Larch()

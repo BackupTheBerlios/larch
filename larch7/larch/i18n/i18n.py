@@ -3,7 +3,7 @@
 
 # i18n.py
 
-#2009-06-07
+#2009-08-03
 # Copyright 2009 Michael Towers
 
 # This file is part of the larch project.
@@ -31,15 +31,7 @@ e.g. "fr", as argument.
 The steps it performs are roughly given below. If you prefer a gui have a
 look at poedit (uses wxwidgets).
 
-1) Generally something like: pygettext.py -p i18n -o larch.pot0 *.py
-
-1a) Create the files for the glade texts, and merge them in. This requires
-the gettext tools for 'C':
-intltool-extract -l --type=gettext/glade path/to/larch.glade
-xgettext -k_ -kN_ -o glade.po tmp/larch.glade.h
-# Remove the header:
-sed '1,/^$/ d' -i glade.po
-cat larch.pot0 glade.po >larch.pot
+1) Generally something like: pygettext.py -p i18n -o larch.pot *.py
 
 2) cd i18n ; msginit -i larchin.pot -l de
 
@@ -79,20 +71,9 @@ print "Generating internationalization for language '%s'\n" % lang
 print "    If you wanted a different language run 'i18n.py <language>'"
 print "    For example 'i18n.py fr'\n"
 
-dirs = ["run", "modules", "modules/gtk"]
+dirs = ["modules"]
 allpy = [os.path.join(d, "*.py") for d in dirs]
-call(["mkdir", "-p", "tmp"])
-call(["pygettext.py", "-p", "tmp", "-o", "larch.pot0"] + allpy)
-
-# Now add the glade file
-gladefile="modules/gtk/larch.glade"
-call(["intltool-extract", "-l", "--type=gettext/glade", gladefile])
-call(["xgettext", "-k_", "-kN_", "-o", "tmp/glade.po", "tmp/larch.glade.h"])
-call(["sed", "1,/^$/ d", "-i", "tmp/glade.po"])
-fh = open("i18n/larch.pot", "w")
-call(["cat", "tmp/larch.pot0", "tmp/glade.po"], stdout=fh)
-fh.close()
-call(["rm", "-rf", "tmp"])
+call(["pygettext.py", "-p", "i18n", "-o", "larch.pot"] + allpy)
 
 os.chdir(thisdir)
 langfile = lang + ".po"

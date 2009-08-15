@@ -21,7 +21,12 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2008.12.09
+# 2009.08.15
+
+echo "WARNING! This is old stuff, not yet updated."
+echo "Don't use it with larch-7."
+echo
+exit
 
 REPO="ftp://ftp.berlios.de/pub/larch/larch5.3/i686"
 #REPO=file://$( readlink -f larchrepo )
