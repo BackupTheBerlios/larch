@@ -1,16 +1,16 @@
-# GUI description for larch log window
-# 2009.08.04
+# GUI description for larch partition choice dialog
+# 2009.08.12
 
-#Maybe this is a bit too minimal, so that it would be worth supplying it
-# as a special case, rather like the error dialogs.
-
-Namespace = "editor:"
+Namespace = "parts:"
 
 Widgets = [
-["*Dialog",  "editor", _("Editor"), "larchicon.png"],
+["*Dialog",  "parts", _("Choose Partition"), "larchicon.png"],
 
-["*Label", "label"],
-["*TextEdit", "text"],
+["*Label", "label", _("BE CAREFUL - if you select the wrong\n"
+        "   partition you might well destroy your system!"
+        "\n\nSelect the partition to receive the larch system:")],
+["*ListChoice", "list"],
+["*LineEdit", "choice"],
 
 #OK and Cancel pushbuttons, or Save and Discard - QDialogButtonBox?
 ["DialogButtons", "buttons", "Save", "Discard"],
@@ -22,6 +22,7 @@ Widgets = [
 ################# Signals
 Signals = [
 ["+INTERNAL", "buttons"],
+["list", "changed", "$parts:list*changed$"]
 ]
 
 
@@ -32,7 +33,7 @@ Signals = [
 # without having to change the base description.
 
 Attributes = [
-["editor", "size", "600_400"],
+#["parts", "size", "600_400"],
 ]
 
 StringFormats = {
@@ -41,5 +42,5 @@ StringFormats = {
 
 Layout = [
 # Main widget
-["+MAIN", ["label", "text", "buttons"]],
+["+MAIN", ["label", "list", "choice", "buttons"]],
 ]

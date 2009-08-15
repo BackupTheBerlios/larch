@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.06.26
+# 2009.08.11
 
 """This module handles the basic framework and configuration of the
 larch build system.
@@ -29,7 +29,7 @@ larch build system.
 Access configs only via config.get and config.set (as far as possible).
 """
 
-import os, shutil
+import sys, os, shutil
 from ConfigParser import SafeConfigParser
 
 config_dir = ".config/larch"        # within the user's home directory
@@ -38,17 +38,30 @@ project0 = "larch0"
 
 # Some default values for the config file
 defaults = {    "install_path"  : "/home/larchbuild",
-                "pacman_cache"  : "",         # => Use pacman's default
-                "pacman_sync"   : "/var/lib/pacman/sync",
-                "copy-db-list"  : "",         # Repo dbs to copy (not sync)
-                "profile"       : "",         # => Use default, needs initialization
+                "pacman_cache"  : "/var/cache/pacman/pkg",
+                "profile"       : "",       # => Use default, needs initialization
                 "larch_url"     : "ftp://ftp.berlios.de/pub/larch/larch7/",
-                "mirror"        : "",         # => Not set
-                "platform"      : "",         # => Needs initialization
+                "platform"      : "",       # => Needs initialization
+                "uselocalmirror" : "",
+                "localmirror"   : "",
+                "usemirrorlist" : "",
+                "filebrowser"   : "xdg-open %",
+                "medium_iso"    : "yes",    # "yes" / ""
+                "medium_btldr"  : "grub",   # "grub" / "syslinux" / "none"
+                "medium_search" : "nodevice", # "nodevice" / "uuid" / "label" / "device"
+                "medium_label"  : "LARCH-7",
     }
 
 
 class LarchConfig:
+    # The following paths are all based on the installation directory (as
+    # they would be found within a chroot command), so if you want to
+    # address them from the host, run them through the ipath function.
+    larch_build_dir = "/.larch"
+    medium_dir = "/.larch/cd"
+    overlay_build_dir = "/.larch/tmp/overlay"
+    system_sqf = "/.larch/system.sqf"
+
     def __init__(self, home):
         self.current_dir = os.getcwd()
         self.home_dir = home
@@ -95,6 +108,17 @@ class LarchConfig:
         self.setproject(project)
 
 
+    def ipath(self, path=""):
+        p = self.get("install_path").rstrip("/")
+        x = path.strip("/")
+        if x:
+            return p + "/" + x
+        elif p:
+            return p
+        else:
+            return "/"
+
+
     def setproject(self, project):
         if project not in self.getsections():
             # Create a section for the project.
@@ -120,7 +144,9 @@ class LarchConfig:
             return self.config.get(self.project, item)
         elif defaults.has_key(item):
             return defaults[item]
-        larch_error(_("Unknown configuration option: %s") % item)
+        sys.stderr.write(_("Unknown configuration option: %s\n") % item)
+        sys.stderr.flush()
+        assert False
 
 
     def set(self, item, value):

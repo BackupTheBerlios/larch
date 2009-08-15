@@ -1,0 +1,20 @@
+# /etc/rc.larch.local
+
+# This file (after the line starting '###START') is prefixed to
+# /etc/rc.local in a larch live system.
+
+###START
+#!/bin/sh
+# Delete everything up to the line starting '###LARCH' if this system is
+# installed as a normal (non-union-root) system to hard disk (etc.).
+
+grep "^aufs */ " /proc/mounts               >/etc/mtab.new
+grep "^unionfs */ " /proc/mounts            >>/etc/mtab.new
+grep "^tmpfs */.livesys " /proc/mounts      >>/etc/mtab.new
+if [ -d /.livesys/medium/larch ]; then
+    grep " /.livesys/medium " /proc/mounts  >>/etc/mtab.new
+fi
+grep -v "^rootfs " /etc/mtab                >>/etc/mtab.new
+mv /etc/mtab.new /etc/mtab
+
+###LARCH - End of larch live system additions

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.06.24
+# 2009.08.05
 
 """This is the initial module of the larch live-builder program. It should
 be started with su or sudo, but in such a way that the environment variable
@@ -29,8 +29,8 @@ be started with su or sudo, but in such a way that the environment variable
 possible to change the configuration files within larch, preserving the
 correct ownership.
 
-To run the user interface and main program as a normal user, separate
-processes are spawned, which communicate with the initial (root) process
+To run the user interface and main program as a normal user, a separate
+process is spawned, which communicates with the initial (root) process
 via pipes. Threads are used to avoid communication problems
 which might arise with blocking operations. The 'supershell' operations
 are spawned by a thread of the root process.
@@ -55,57 +55,48 @@ def chid():
     os.setuid(userinfo[0])
 
 
-def larchroot(gui, uid, gid, home):
+def larchroot(uid, gid, home):
     global userinfo, commqueue
     userinfo = [uid, gid, home]
     commqueue = Queue()
     mainprocess = Popen(["%s/main.py" % module_dir] + sys.argv,
             preexec_fn=chid, stdin=PIPE, stdout=PIPE)
-    guiprocess = Popen(gui,
-            preexec_fn=chid, stdin=PIPE, stdout=PIPE)
     supershell = Supershell()
 
-    # Start threads to read input from the subprocesses
-    mthread = threading.Thread(target=tstart, args=(mainprocess, "M"))
+    # Start thread to read input from the subprocess
+    mthread = threading.Thread(target=mtstart, args=(mainprocess, "M"))
     mthread.start()
-    gthread = threading.Thread(target=tstart, args=(guiprocess, "G"))
-    gthread.start()
 
     while True:
         # Is there a problem if one of the processes dies?
 
         line = commqueue.get()
-
-        #DEBUG
-        #sys.stdout.write("larch~" + line)
-
         code, text = line.split(":", 1)
         if code[0] == "X":
-            mainprocess.stdin.write(line)
+            mainprocess.stdin.write(text)
 
         elif code[0] == "M":
             if text[0] == ">":
+                # A normal superuser command
                 supershell.run(text[1:])
-            elif text[0] == "$":
+            elif text[0] == ".":
+                # If a superuser command is running, kill it
                 supershell.kill()
-
-        elif code[0] == "G":
-            mainprocess.stdin.write(line)
-            # I suppose it might seem a bit superfluous sending the gui its
-            # own output back, but it might make sense for logging.
-            #continue?
+            elif text[0] == "/":
+                # Quit requested
+                #supershell.kill()
+                mainprocess.kill()
+                break
 
         else:
             errout("BUG, bad message: '%s'" % line)
             # exits
 
-        # All lines, including commands, are passed to the gui, for logging
-        guiprocess.stdin.write(line)
 
     sys.exit(mainprocess.returncode)
 
 
-def tstart(process, flag):
+def mtstart(process, flag):
         """A thread function for reading input from a subprocess line by
         line. The lines are placed in the communication queue.
         """
@@ -154,7 +145,7 @@ class Supershell:
             if not line:
                 break
             # Pass on the output of the process
-            commqueue.put("X:" + line)
+            commqueue.put("X:-" + line)
 
         self.process.wait()
         commqueue.put("X:@%d\n" % self.process.returncode)
@@ -166,18 +157,13 @@ class Supershell:
         As the 'start' method blocks, this can only be called from the
         main thread.
         """
-        self.process.kill()
+        if self.process:
+            self.process.kill()
 
 
 if __name__ == "__main__":
     if os.getuid() != 0:
         errout("You won't have much fun unless you run this as root!\n\n", 0)
 
-    # Various ui toolkits could be supported, but at the moment there
-    # is only ...
-    if True:
-        # In list form suitable for subprocess.Popen()
-        guiexec = ["%s/guibuild.py" % module_dir]
-
     pwdinfo = pwd.getpwnam(os.environ["USER"])
-    larchroot(guiexec, pwdinfo[2], pwdinfo[3], pwdinfo[5])
+    larchroot(pwdinfo[2], pwdinfo[3], pwdinfo[5])

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.06.07
+# 2009.08.15
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -46,80 +46,69 @@ class Installation:
         return
 
 
-    def make_pacman_conf(self, veto=[]):
+    def make_pacman_conf(self, mirror="final"):
         """Construct the pacman.conf file used by larch.
-        If a list of repository names is passed in 'veto' these will not
-        be included in the result.
         This pacman.conf must be regenerated if anything concerning the
-        repositories changes. It might be easier to regenerate every time
-        it is used.
+        repositories changes. To simplify matters it should be regenerated
+        every time it is used.
+        The 'mirror' parameter allows the generated pacman.conf to be tweaked
+        slightly. With its default value, "final", the version for the live
+        system is generated (as specified in pacman.conf.larch); if the
+        value is "local", a local mirror will be used for all repositories
+        which it supplies. Otherwise entries specified by 'Include' will
+        be taken from the (project) config variable "mirror", if it is
+        specified - if it is not specified, the host must have a valid
+        /etc/pacman.d/mirrorlist.
         The return value is a list of the names of the repositories which
         are included.
 
-        *** A template for pacman.conf ***
-
-        To make it easier to edit the relevant bits of pacman.conf
-        automatically a special template form is used. There is a default
-        form supplied with larch (data/pacman.conf.0), which should be
-        updated if the default pacman.conf in the pacman package gets
-        changed. A customized version can be supplied in the profile
-        (also under the name pacman.conf.0). When larch needs to use
-        'pacman -S' this template will be filled out with the available
-        information to produce the pacman.conf which is then used.
-
-        Basically the same version of this file will be used in the
-        installed system, unless the profile provides an etc/pacman.conf
-        file in the overlay.
+        To make it a little easier to manage upstream changes to the default
+        pacman.conf, a separate file (pacman.conf.larch) is used to specify
+        the repositories to use. The contents of this file are used to modify
+        the basic pacman.conf file, which may be the default version or one
+        provided in the profile.
         """
-        # The 'DBPath' cannot be easily changed when the -r option to
-        # pacman is used, because the given value is then treated as an
-        # absolute path.
-        self.pacmandbdir = "var/lib/pacman/sync"
+        platform = config.get("platform")
+        if mirror == "local":
+            localmirror = config.get("localmirror")
+        elif mirror == "final":
+            localmirror = None
+        else:
+            localmirror = config.get("mirror")
         repos = []
-        pc0 = os.path.join(config.profile, "pacman.conf.0")
-        if not os.path.isfile():
-            pc0 = os.path.join(base_dir, "data/pacman.conf.0"))
+        pc0 = os.path.join(config.get("profile"), "pacman.conf.options")
+        if not os.path.isfile(pc0):
+            pc0 = os.path.join(base_dir, "data/pacman.conf")
+        pc1 = os.path.join(config.get("profile"), "pacman.conf.larch")
+        if not os.path.isfile(pc1):
+            pc1 = os.path.join(base_dir, "data/pacman.conf.larch")
 
         fhi = open(pc0)
         fho = open(os.path.join(config.working_dir, "pacman.conf"), "w")
-        skipping = False
+        fho.write(pacmanoptions(fhi.read()))
+        fhi.close()
+
+        # Get the repositories from pacman.conf.larch
+        fhi = open(pc1)
+        section = ""
         for line in fhi:
-            if line.startswith("#***"):
-                continue
-            if skipping:
-                if line.strip():
-                    skipping = False
-                    fho.write("\n")
-                continue
-            if line.startswith("*** "):
-                repo = line.split[1]
-                if repo in veto:
-                    skipping = True
-                    continue
-                repos.append(repo)
-                fho.write("[%s]\n" % repo)
-                if repo == "larch":
-                    url = config.get("larch_url") + config.get("platform")
-                    fho.write("Server = %s\n" % url)
-                else:
-                    # Do I want to support multiple mirrors?
-                    # I could return a list, or simply a multiline string.
-                    # Of course the code here would need to be changed
-                    # accordingly.
-                    url = config.get("mirror").replace("$repo", repo)
-                    if url:
-                        fho.write("Server = %s%s\n" % (url,
-                                config.get("platform"))
-                    # If no mirror is set the mirrorlist from the host
-                    # will be used (/etc/pacman.d/mirrorlist), as long as
-                    # pacman.conf has appropriate entries (by default
-                    # this should be the case).
-            else:
+            if line.startswith("["):
+                section = line.strip().strip("[]")
+                repos.append(section)
+            if section:
+                if line.startswith("Server") or line.startswith("Include"):
+                    if (mirror == "local"):
+                        line = "Server = %s\n" % localmirror.replace(
+                                "*repo*", section)
+                    elif (mirror != "final" and line.startswith("Include")
+                            and config.get("usemirrorlist")):
+                        mf = os.path.join(config.working_dir, "mirrorlist")
+                        if os.path.isfile(mf):
+                            line.replace("/etc/pacman.d/mirrorlist", mf)
+                    line = line.replace("*platform*", platform)
                 fho.write(line)
-                if line.startswith("["):
-                    repo = line.strip().strip("[]")
-                    if repo != "options":
-                        repos.append(repo)
+            if not line.strip():
+                section = ""
 
         fhi.close()
         fho.close()
@@ -132,8 +121,8 @@ class Installation:
         changes. It might be easier to regenerate every time pacman is used.
         """
         self.pacman_cmd = ("%s -r %s --config %s --noconfirm --noprogressbar" %
-                (config.pacman, config.get("installation_path"),
-                 os.path.join(config.get("working_dir"), "pacman.conf")))
+                (config.pacman, config.get("install_path"),
+                 os.path.join(config.working_dir, "pacman.conf")))
         cache = config.get("pacman_cache")
         if cache:
             self.pacman_cmd += " --cachedir %s" % cache
@@ -141,37 +130,14 @@ class Installation:
 
     def update_db(self):
         """This updates or creates the pacman-db in the installation.
-        Some or all of the repository-dbs may be copied from existing
-        versions, the rest are fetched using 'pacman -Sy' together with
+        This is done using using 'pacman ... -Sy' together with
         an appropriate pacman.conf file.
         """
-        copydbs = config.get("copy-db-list").split()
-        repos = self.make_pacman_conf(copydbs)
-        syncdir = os.path.join(config.get("install_path", self.pacmandbdir)
-        supershell("mkdir -p %s" % syncdir)
-        for r in copydbs:
-            sdir = os.path.join(config.get("pacman_sync"), r)
-            ddir = os.path.join(syncdir, r)
-            stag = os.path.isfile(os.path.join(sdir, ".lastupdate"))
-            dtag = os.path.isfile(os.path.join(ddir, ".lastupdate"))
-            if (    os.path.isfile(stag) and os.path.isfile(dtag) and
-                    filecmp.cmp(stag, dtag)):
-                continue
-            if not os.path.isdir(sdir):
-                config_error(_("Cannot copy database for '%s' repository:\n"
-                        "  Directory %s doesn't exist.") % (r, sdir))
-                return False
-            supershell("rm -rf %s" % ddir)
-            if not supershell("cp -a %s %s" % (sdir, syncdir)).ok:
-                run_error(_("Copying database for '%s' repository failed")
-                        % os.path.basename(sdir))
-                return False
-
-        if repos:
-            self.make_pacman_command()
-            if not supershell("%s -Sy" % self.pacman_cmd).ok:
-                run_error(_("Couldn't synchronize pacman database (pacman -Sy)"))
-                return False
+        self.make_pacman_conf("local" if config.get("uselocalmirror") else "")
+        self.make_pacman_command()
+        if not supershell("%s -Sy" % self.pacman_cmd).ok:
+            run_error(_("Couldn't synchronize pacman database (pacman -Sy)"))
+            return False
         return True
 
 
@@ -181,17 +147,18 @@ class Installation:
         file 'addedpacks' (in the profile).
         """
 
-        installation_path = config.get("installation_path")
+        installation_path = config.get("install_path")
 
+        # Can't delete the whole directory because it might be a mount point
         if os.path.isdir(installation_path):
             supershell("rm -rf %s/{*,.*}" % installation_path)
 
         # Ensure installation directory exists and check that device nodes
         # can be created (creating /dev/null is also a workaround for an
         # Arch bug - which may have been fixed, but this does no harm)
-        if not (supershell("mkdir -p %s/dev" % installation_path).ok and
-                supershell("mknod -m 666 %s/dev/null c 1 3" %
-                        installation_path).ok):
+        if not (supershell("mkdir -p %s/{dev,proc,sys}" % installation_path).ok
+                and supershell("mknod -m 666 %s/dev/null c 1 3" %
+                installation_path).ok):
             config_error(_("Couldn't write to the installation path (%s).") %
                     installation_path)
             return False
@@ -210,14 +177,15 @@ class Installation:
         supershell("rm %s/echo" % installation_path)
 
         # Fetch package database
-        if not self.update_db():
+        if not (supershell("mkdir -p %s/var/lib/pacman" % installation_path).ok
+                and self.update_db()):
             return False
 
         # Get list of packages in 'base' group, removing those in the
         # list of vetoed packages.
         veto_packages = []
-        veto_file = os.path.join(config.get("profile_dir"), "baseveto")
-        if os.isfile(veto_file):
+        veto_file = os.path.join(config.get("profile"), "baseveto")
+        if os.path.isfile(veto_file):
             fh = open(veto_file)
             for line in fh:
                 line = line.strip()
@@ -233,12 +201,12 @@ class Installation:
                 packages.append(l[1])
 
         # Add necessary packages
-        for p in ["larch-live", "squashfs-tools", "lzop"]:
+        for p in ["larch-live", "squashfs-tools", "aufs2-util", "lzop"]:
             if p not in packages:
                 packages.append(p)
 
         # Add additional packages and groups, from 'addedpacks' file.
-        addedpacks_file = os.path.join(config.profile, "addedpacks")
+        addedpacks_file = os.path.join(config.get("profile"), "addedpacks")
         fh = open(addedpacks_file)
         for line in fh:
             line = line.strip()
@@ -252,31 +220,64 @@ class Installation:
         # make a local custom repository and include that in 'addedpacks'.
 
         # Now do the actual installation.
-        ok = self.pacmancall("-S", " ".join(packages)))
+        ok = self.pacmancall("-S", " ".join(packages))
         if not ok:
-            run_error(_("Package installation failed"))
+            config_error(_("Package installation failed"))
+        else:
+            # Build the final version of pacman.conf
+            self.make_pacman_conf("final")
+            supershell("cp -f %s %s" % (
+                    os.path.join(config.working_dir, "pacman.conf"),
+                    os.path.join(installation_path, "etc/pacman.conf")))
+            # Replace mirrorlist
+            mf = os.path.join(config.working_dir, "mirrorlist")
+            if not (config.get("usemirrorlist") and os.path.isfile(mf)):
+                mf = "/etc/pacman.d/mirrorlist"
+                if not os.path.isfile(mf):
+                    mf = os.path.join(base_dir, "data", "mirrorlist.%s" %
+                    config.get("platform"))
+            supershell("cp -f %s %s" % (mf,
+                    os.path.join(installation_path, "etc/pacman.d/mirrorlist")))
+
         return ok
 
 
     def pacmancall(self, op, arg):
-        # (a) Prepare the destination directory
-        supershell("mkdir -p %s/{sys,proc} &&"
-                " mount --bind /sys %s/sys && mount --bind /proc %s/proc"
-                % ((config.install_path,)*3))
+        """Mount-bind the sys and proc directories before calling the
+        pacman command built by make_pacman_command to perform operation
+        'op' (e.g. '-S') with argument(s) 'arg' (a string).
+        Then unmount sys and proc and return True if the command succeeded.
+        """
+        ipath = config.get("install_path")
+        # (a) Prepare the destination environment (bind mounts)
+        command.mount("/sys", "%s/sys" % ipath, "--bind")
+        command.mount("/proc", "%s/proc" % ipath, "--bind")
 
         # (b) Call pacman
         # Note that I will probably want incremental output from this.
         ok = supershell("%s %s %s" % (self.pacman_cmd, op, arg)).ok
 
         # (c) Remove bound mounts
-        supershell("umount %s/proc && umount %s/sys"
-                % ((config.install_path,)*2))
-
+        command.unmount("%s/sys" % ipath)
+        command.unmount("%s/proc" % ipath)
+        # Some chroot scripts might need /etc/mtab
+        supershell(":> %s/etc/mtab" % ipath)
         return ok
 
 
-
-if __name__ == "__main__":
-    pass
-
+def pacmanoptions(text):
+    """A filter for pacman.conf to remove the repository info.
+    """
+    texto = ""
+    block = ""
+    for line in text.splitlines():
+        block += line + "\n"
+        if line.startswith("#["):
+            break
+        if line.startswith("[") and not line.startswith("[options]"):
+            break
+        if not line.strip():
+            texto += block
+            block = ""
+    return texto
 

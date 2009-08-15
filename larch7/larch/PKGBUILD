@@ -1,33 +1,29 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.07.16
+# 2009.08.15
 pkgname=larch
-pkgver=7.0.0
+pkgver=7.0.2
 pkgrel=1
 
 # If I need the architecture, I can get it as ${CARCH}
 
 pkgdesc="Scripts for generating live Archlinux CDs and USB-sticks"
 url="http://larch.berlios.de"
-depends=()
+depends=(pyqt)
 arch=(i686 x86_64)
 license=('GPL')
 #install=${pkgname}.install
 
 build() {
-  mkdir -p ${startdir}/pkg/opt/larch
-  cp -dr ${startdir}/run ${startdir}/pkg/opt/larch
-  cp -dr ${startdir}/cd-root ${startdir}/pkg/opt/larch
-  cp -dr ${startdir}/docs ${startdir}/pkg/opt/larch
-  cp -dr ${startdir}/profile0 ${startdir}/pkg/opt/larch
-  cp -dr ${startdir}/profiles ${startdir}/pkg/opt/larch
-  cp -dr ${startdir}/etc ${startdir}/pkg
-  cp ${startdir}/buildlive ${startdir}/pkg/opt/larch
-
-  mkdir -p ${startdir}/pkg/usr/share/pixmaps
-  cp ${startdir}/larch.png ${startdir}/pkg/usr/share/pixmaps
-  mkdir -p ${startdir}/pkg/usr/share/applications
-  cp ${startdir}/larchdoc.desktop ${startdir}/pkg/usr/share/applications
-
-  # Adjust python script for architecture
-  sed "s/_CARCH_/${CARCH}/" -i ${startdir}/pkg/opt/larch/run/getPackageServer
+  mkdir -p ${pkgdir}/opt/larch
+  for d in buildscripts cd-root data docs i18n modules profiles run; do
+    cp -dr ${startdir}/${d} ${pkgdir}/opt/larch
+  done
+  
+  cp -dr ${startdir}/etc ${pkgdir}
+  cp ${startdir}/{larchicon.png,larch80.png} ${pkgdir}/opt/larch
+  
+  mkdir -p ${pkgdir}/usr/share/pixmaps
+  cp ${startdir}/larch.png ${pkgdir}/usr/share/pixmaps
+  mkdir -p ${pkgdir}/usr/share/applications
+  cp ${startdir}/larchdoc.desktop ${pkgdir}/usr/share/applications
 }

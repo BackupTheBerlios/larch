@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.06.25
+# 2009.08.12
 
 Namespace = ":"
 
@@ -12,7 +12,7 @@ Widgets = [
 ["Label", "header", ["%1 %2", ("larch", "larchformat"),
         (_("Live Arch Linux Construction Kit"), "titleformat")]],
 
-["*ToggleButton", "^showlog", _("View Log")],
+["*ToggleButton", "showlog", _("View Log")],
 
 
 # Main widget
@@ -51,25 +51,21 @@ Widgets = [
 ["Frame", "edit_profile", _("Edit Profile")],
   ["Button", "^addedpacks", _("Edit 'addedpacks'")],
   ["Button", "^baseveto", _("Edit 'baseveto'")],
-  ["Button", "^pacmanconf", _("Edit pacman.conf template")],
-
-["Frame", "pacman_sources", _("Pacman Sources")],
-  ["Label", "larch_repo", _("larch Repository:")],
-  ["*LineEdit", "larch_repo_show"],
-  ["Button", "^larch_repo_change", _("Change")],
-  ["Label", "mirror", _("Arch Mirror:")],
-  ["*LineEdit", "mirror_show"],
-  ["Button", "^mirror_change", _("Change")],
+  ["Button", "^pacmanconf", _("Edit pacman.conf options")],
+  ["Button", "^repos", _("Edit pacman.conf repositories")],
 
 ["OptionalFrame", "settings_advanced", _("Advanced Options")],
-  ["*CheckList", "host_db", _("Synchronize to host db")],
+  ["*OptionalFrame", "^mirrorlist", _("Use project mirrorlist")],
+  ["Button", "^mirrorlist_change", _("Edit project mirrorlist")],
+
+  ["*OptionalFrame", "^use_local_mirror", _("Use local mirror for installation")],
+    ["Label", "l1", _("URL:")],
+    ["*LineEdit", "local_mirror"],
+    ["Button", "^local_mirror_change", _("Change")],
 
   ["Label", "cache", _("Package Cache:")],
   ["*LineEdit", "cache_show"],
   ["Button", "^cache_change", _("Change")],
-  ["Label", "db", _("Package db Source:")],
-  ["*LineEdit", "db_show"],
-  ["Button", "^db_change", _("Change")],
 
   ["Button", "^sync", _("Synchronize db")],
   ["Button", "^update", _("Update / Add package    [-U]")],
@@ -80,17 +76,61 @@ Widgets = [
 
 
 # Larchify Page
-#TODO
+["Label", "larchify", _("Not much to choose here ...\n"
+        "The system to be compressed must be installed and ready.")],
+["Button", "^locales", _("Edit supported locales")],
+["Button", "^rcconf", _("Edit Arch configuration file (/etc/rc.conf)")],
+
+["OptionalFrame", "larchify_advanced", _("Advanced Options")],
+  ["Button", "^initcpio", _("Edit mkinitcpio.conf")],
+  ["Button", "^overlay", _("Edit overlay (open in file browser)")],
+  ["Button", "^filebrowser", _("(Configure file browser command)")],
+  ["*CheckBox", "^ssh", _("Generate ssh keys")],
+  ["*CheckBox", "oldsquash", _("Reuse existing system.sqf")],
+
+["Button", "^build", _("Larchify")],
 
 
 # Prepare Medium Page
-#TODO
+["Frame", "mediumtype", _("Medium Type")],
+  ["*RadioButton", "iso", "iso (CD/DVD)"],
+  ["*RadioButton", "^partition", _("Partition (disk / USB-stick):")],
+  ["*Frame", "framepart", ""],
+    ["*LineEdit", "larchpart"],
+    ["Button", "^selectpart", _("Choose")],
+    ["*CheckBox", "noformat", _("Don't format")],
+
+["Frame", "bootloader", _("Bootloader")],
+  ["*RadioButton", "^grub", "GRUB"],
+  ["*RadioButton", "^syslinux", "syslinux/isolinux"],
+  ["*RadioButton", "^none", _("None (you'll need to provide some means of booting)")],
+
+["*Frame", "detection", _("Medium Detection")],
+  ["*RadioButton", "^uuid", "UUID"],
+  ["*RadioButton", "^label", "LABEL"],
+  ["*RadioButton", "^device", _("Partition")],
+  ["*RadioButton", "^nodevice", "Search for larch system (with larchboot)"],
+
+  ["Label", "lm1", _("Medium label:")],
+  ["*LineEdit", "labelname"],
+  ["Button", "^changelabel", _("Change")],
+
+["*CheckBox", "larchboot", _("Bootable using larchboot search")],
+
+["Button", "^bootlines", _("Edit boot entries")],
+["Button", "^grubtemplate", _("Edit grub template")],
+["Button", "^syslinuxtemplate", _("Edit syslinux/isolinux template")],
+
+["*Button", "^bootcd", _("Create boot iso")],
+["Button", "^make", _("Create larch medium")],
 
 ]
 
 
 ################# Signals
 Signals = [
+
+["showlog", "toggled", "$showlog*toggled$"],
 
 ]
 
@@ -108,8 +148,8 @@ Layout = [
      ["HSPACE", "hsh2"],
 
 # Project Settings Page
-["+LAYOUT", "page_settings", "vb2"],
-["VBOX", "vb2", ["settings_profile", "vs1", "options_advanced"]],
+["+LAYOUT", "page_settings", "vb_ps"],
+["VBOX", "vb_ps", ["settings_profile", "vs1", "options_advanced"]],
  ["VSPACE", "vs1"],
 
 ["+LAYOUT", "settings_profile", "g1"],
@@ -128,41 +168,76 @@ Layout = [
 ["HBOX", "hb1", ["choose_project", "choose_project_combo", "new_project", "project_delete"]],
 
 # Installation Page
-["+LAYOUT", "page_installation", "vb4"],
-["VBOX", "vb4", ["edit_profile", "pacman_sources", "settings_advanced",
-        "hl1", "hb4"]],
+["+LAYOUT", "page_installation", "vb_pi"],
+["VBOX", "vb_pi", ["edit_profile", "settings_advanced", "hl1", "hb4"]],
  ["HLINE", "hl1"],
 
-["+LAYOUT", "edit_profile", "hb2"],
-["HBOX", "hb2", ["addedpacks", "baseveto", "pacmanconf"]],
-
-["+LAYOUT", "pacman_sources", "g2"],
+["+LAYOUT", "edit_profile", "g2"],
 ["GRID", "g2",
-        ["larch_repo", "larch_repo_show", "larch_repo_change"],
-        ["mirror",     "mirror_show",     "mirror_change"]
+        ["addedpacks", "baseveto"],
+        ["pacmanconf", "repos"]
     ],
 
-["+LAYOUT", "settings_advanced", "hb3"],
-["HBOX", "hb3", ["host_db", "vl2", "vb5"]],
- ["VLINE", "vl2"],
+["+LAYOUT", "settings_advanced", "vb5"],
+["VBOX", "vb5", ["hbi1", "hb5", "hl2", "g3"]],
+  ["HBOX", "hbi1", ["mirrorlist", "use_local_mirror"]],
+  ["HBOX", "hb5", ["cache", "cache_show", "cache_change"]],
+  ["HLINE", "hl2"],
+  ["GRID", "g3",
+        ["sync", "update"],
+        ["add", "remove"]
+    ],
+
+["+LAYOUT", "mirrorlist", "hb2"],
+["HBOX", "hb2", ["mirrorlist_change"]],
+
+["+LAYOUT", "use_local_mirror", "hb6"],
+["HBOX", "hb6", ["l1", "local_mirror", "local_mirror_change"]],
 
 ["HBOX", "hb4", ["hs1", "install"]],
  ["HSPACE", "hs1"],
-  # hb3 contents
-  ["VBOX", "vb5", ["g3", "hl2", "g4"]],
-   ["HLINE", "hl2"],
 
-    ["GRID", "g3",
-        ["cache", "cache_show", "cache_change"],
-        ["db",    "db_show",    "db_change"]
-    ],
+# Larchify Page
+["+LAYOUT", "page_larchify", "vb_pl"],
+["VBOX", "vb_pl", ["larchify", "vbs1", "locales", "rcconf",
+        "vbs2", "larchify_advanced", "hbl1"]],
+["VSPACE", "vbs1"],
+["VSPACE", "vbs2"],
 
-    ["GRID", "g4",
-        ["sync", "update"],
-        ["add",  "remove"]
-    ],
+["+LAYOUT", "larchify_advanced", "vbl1"],
+["VBOX", "vbl1", ["initcpio", "overlay", "filebrowser", "ssh", "oldsquash"]],
+
+["HBOX", "hbl1", ["hsl1", "build"]],
+ ["HSPACE", "hsl1"],
+
+# Prepare Medium Page
+["+LAYOUT", "page_medium", "vb_pm"],
+["VBOX", "vb_pm", ["mediumtype", "bootloader", "detection",
+        "hbm3", "vsm1", "hlm1", "hbm4"]],
+  ["VSPACE", "vsm1"],
+  ["HLINE", "hlm1"],
+
+["+LAYOUT", "mediumtype", "vbm1"],
+["VBOX", "vbm1", ["iso", "hbm11"]],
+  ["HBOX", "hbm11", ["partition", "framepart"]],
+  ["+LAYOUT", "framepart", "hbm1"],
+  ["HBOX", "hbm1", ["larchpart", "selectpart", "noformat"]],
+
+["+LAYOUT", "bootloader", "hbm21"],
+["HBOX", "hbm21", ["grub", "syslinux", "none"]],
+
+["+LAYOUT", "detection", "vbm3"],
+["VBOX", "vbm3", ["hbm2a", "hbm2b"]],
+  ["HBOX", "hbm2a", ["device", "uuid", "label", "nodevice"]],
+  ["HBOX", "hbm2b", ["lm1", "labelname", "changelabel"]],
+
+["HBOX", "hbm3", ["bootlines", "grubtemplate", "syslinuxtemplate"]],
+
+["HBOX", "hbm4", ["bootcd", "vlm1", "larchboot", "make"]],
+  ["VLINE", "vlm1"],
 
 ]
+
 
 # Attributes are supported on the understanding that they can be
 # interpreted rather freely, and maybe not at all.
@@ -174,8 +249,9 @@ Attributes = [
 ["choose_profile", "align", "right"],
 ["new_profile", "align", "right"],
 ["installation_path_show", "readonly", "true"],
-["larch_repo_show", "readonly", "true"],
-["mirror_show", "readonly", "true"],
+["local_mirror", "readonly", "true"],
+["larchpart", "readonly", "true"],
+["labelname", "readonly", "true"],
 ]
 
 StringFormats = {

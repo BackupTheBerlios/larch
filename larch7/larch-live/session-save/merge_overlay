@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.07.16
+# 2009.08.12
 
 # Tries to rebuild mods.sqf on aufs, otherwise adds a new modsNN.sqf overlay
 
@@ -115,12 +115,12 @@ newmods ()
         return 1
     fi
 
-    echo "Recreating top overlay to ${overlaypath}/overlay.ovl_"
+    echo "Recreating top overlay to ${overlaypath}/overlay.tar.lzo_"
     # Compress the overlay (with root dir 'overlay' retained)
-    tar -cf - -C /.livesys overlay/etc | lzop > ${overlaypath}/overlay.ovl_
+    tar -cf - -C /.livesys overlay/etc | lzop > ${overlaypath}/overlay.tar.lzo_
     if [ $? -ne 0 ]; then
-        echo "ERROR: couldn't create ${overlaypath}/overlay.ovl_"
-        rm -f ${overlaypath}/overlay.ovl_
+        echo "ERROR: couldn't create ${overlaypath}/overlay.tar.lzo_"
+        rm -f ${overlaypath}/overlay.tar.lzo_
         return 1
     fi
 }

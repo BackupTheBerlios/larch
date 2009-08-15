@@ -21,7 +21,16 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
+<<<<<<< HEAD
 # 2009.08.01
+=======
+# 2009.08.15
+
+echo "WARNING! This is old stuff, not yet updated."
+echo "Don't use it with larch-7."
+echo
+exit
+>>>>>>> 9b2e0261cd1cb33f7b9636cedee433527243d814
 
 #TODO:
 #Actually this whole script should be superseded in larch7 ...

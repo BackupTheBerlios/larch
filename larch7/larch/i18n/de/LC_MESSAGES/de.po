@@ -1,27 +1,26 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR ORGANIZATION
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# German translations for larch package.
+# Copyright (C) 2009 ORGANIZATION
+# Automatically generated, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: larch 7\n"
 "POT-Creation-Date: 2009-08-04 22:10+CEST\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2009-08-04 22:10+CEST\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: ENCODING\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: modules/base.py:73
 msgid "No pacman executable found"
 msgstr ""
 
 #: modules/base.py:123
-msgid ""
-"Unknown configuration option: %s\n"
+msgid "Unknown configuration option: %s\n"
 msgstr ""
 
 #: modules/base.py:169
@@ -46,11 +45,11 @@ msgstr ""
 
 #: modules/gui.layout.py:15
 msgid "View Log"
-msgstr ""
+msgstr "Protokoll Zeigen"
 
 #: modules/gui.layout.py:20
 msgid "Project Settings"
-msgstr ""
+msgstr "Projekteinstellungen"
 
 #: modules/gui.layout.py:21
 msgid "Installation"
@@ -62,7 +61,7 @@ msgstr ""
 
 #: modules/gui.layout.py:23
 msgid "Prepare Medium"
-msgstr ""
+msgstr "Medium Vorbereiten"
 
 #: modules/gui.layout.py:29
 msgid "Profile"
@@ -351,4 +350,3 @@ msgstr ""
 #: modules/projectpage.py:163
 msgid "Do you really want to delete project '%s'?"
 msgstr ""
-

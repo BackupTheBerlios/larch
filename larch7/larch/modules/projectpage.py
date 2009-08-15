@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.06.30
+# 2009.08.15
 
 import os
 
@@ -130,14 +130,13 @@ class ProjectPage:
         # If the path is "/", the installation page should be inhibited,
         # but that is handled by 'setup'.
         ok, path = command.uiask("textLineDialog",
-                _("Enter new installation path:"),
+                _("WARNING: Double check your path -\n"
+                "  If you make a mistake here it could destroy your system!"
+                "\n\nEnter new installation path:"),
                 None, self.installpath)
         if ok:
-            path = path.strip().rstrip("/")
-            if path == "":
-                path = "/"
-            self.installpath = path
-            config.set("install_path", path)
+            self.installpath = "/" + path.strip().strip("/")
+            config.set("install_path", self.installpath)
             self.setup()
 
 
@@ -159,6 +158,7 @@ class ProjectPage:
         if len(self.projects) < 2:
             command.uiask("infoDialog",
                     _("Can't delete the only existing project."))
-        else:
+        elif command.uiask("confirmDialog",
+                _("Do you really want to delete project '%s'?") % self.project):
             config.deleteproject(self.project)
             self.setup()
