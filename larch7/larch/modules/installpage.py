@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.15
+# 2009.08.16
 
 import os, shutil
 from installation import Installation, pacmanoptions
@@ -84,11 +84,10 @@ class InstallPage:
                 label=_("Editing pacman.conf repositories only"))
 
     def edit_mirrorlist(self):
-        f = os.path.join(config.working_dir, "mirrorlist")
+        f = config.working_dir + "/mirrorlist"
         fi = "/etc/pacman.d/mirrorlist"
         if not os.path.isfile(fi):
-            fi = os.path.join(base_dir, "data", "mirrorlist.%s" %
-                    config.get("platform"))
+            fi = base_dir + "/data/mirrorlist.%s" % config.get("platform")
         command.edit(f, fi, label=_("Editing mirrorlist: Uncomment ONE entry"))
 
 
