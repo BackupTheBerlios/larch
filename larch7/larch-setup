@@ -21,23 +21,15 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-<<<<<<< HEAD
-# 2009.08.01
-=======
 # 2009.08.15
 
 echo "WARNING! This is old stuff, not yet updated."
 echo "Don't use it with larch-7."
 echo
 exit
->>>>>>> 9b2e0261cd1cb33f7b9636cedee433527243d814
 
-#TODO:
-#Actually this whole script should be superseded in larch7 ...
-#The mirror selection won't work with the new mirrorlist file format.
-#pacman.conf handling should have changed.
 
-REPO="ftp://ftp.berlios.de/pub/larch/larch7/i686"
+REPO="ftp://ftp.berlios.de/pub/larch/larch5.3/i686"
 #REPO=file://$( readlink -f larchrepo )
 
 if [ "$1" = "-h" ]; then
@@ -95,9 +87,9 @@ if ! [ -f larch-*.pkg.tar.gz ]; then
     rm -rf tmp
     mkdir tmp
     cd tmp
-    fetch larch7.db.tar.gz
-    tar -xzf larch7.db.tar.gz
-    d=$( ls | grep "^larch-7" )
+    fetch larch5.db.tar.gz
+    tar -xzf larch5.db.tar.gz
+    d=$( ls | grep "^larch-5" )
     larchpak=$( grep -A 1 -e "%FILENAME%" ${d}/desc | grep -v "%" )
     cd ${scriptdir}
     fetch ${larchpak}
@@ -105,7 +97,7 @@ fi
 
 rm -rf tmp
 mkdir tmp
-tar -xzf larch-7*.pkg.tar.gz -C tmp
+tar -xzf larch-5*.pkg.tar.gz -C tmp
 mv tmp/opt/larch .
 rm -rf tmp
 
