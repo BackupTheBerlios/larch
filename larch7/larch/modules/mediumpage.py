@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.15
+# 2009.08.16
 
 import os
 
@@ -38,13 +38,13 @@ class MediumPage:
                 (":grubtemplate*clicked", self.edit_grubtemplate),
                 (":syslinuxtemplate*clicked", self.edit_syslinuxtemplate),
                 (":partition*toggled", self.partition_toggled),
-                (":nodevice*toggled", self.search_toggled),
-                (":uuid*toggled", self.uuid_toggled),
-                (":label*toggled", self.label_toggled),
-                (":device*toggled", self.device_toggled),
-                (":grub*toggled", self.grub_toggled),
-                (":syslinux*toggled", self.syslinux_toggled),
-                (":none*toggled", self.none_toggled),
+                (":$nodevice*toggled", self.search_toggled),
+                (":$uuid*toggled", self.uuid_toggled),
+                (":$label*toggled", self.label_toggled),
+                (":$device*toggled", self.device_toggled),
+                (":$grub*toggled", self.grub_toggled),
+                (":$syslinux*toggled", self.syslinux_toggled),
+                (":$none*toggled", self.none_toggled),
                 (":selectpart*clicked", self.selectpart),
                 (":changelabel*clicked", self.changelabel),
                 ("$parts:list*changed$", self.part_selected),
@@ -70,10 +70,11 @@ class MediumPage:
         self.partition_toggled(not iso)
 
         btldr = config.get("medium_btldr")
-        command.ui(":%s.set" % btldr, True)
+
+        command.ui(":$%s.set" % btldr, True)
 
         search = config.get("medium_search")
-        command.ui(":%s.set" % search, True)
+        command.ui(":$%s.set" % search, True)
         command.ui(":larchboot.set", search == "nodevice")
 
         command.ui(":labelname.set", config.get("medium_label"))
