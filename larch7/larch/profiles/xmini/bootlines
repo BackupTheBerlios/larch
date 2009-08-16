@@ -5,11 +5,14 @@
 # There may be no empty lines within a block.
 
 comment:
-title: larch boot to gdm
+title: larch boot to xfce desktop
 options:
 
-comment: As we have gdm in the DAEMOMS list it's probably 
-comment: good to have a boot option without xorg.
+comment:
+title: larch boot to xfce desktop, with DRI disabled
+options: nodri
+
+comment: Might be useful if there is some trouble with starting xorg
 title: larch boot to console
 options: nox
 

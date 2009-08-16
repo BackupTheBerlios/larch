@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.15
+# 2009.08.16
 
 import os
 
@@ -112,7 +112,7 @@ class Medium:
                             block += "label %02d\n" % i
                             block += "MENU LABEL %s\n" % title
                             block += "kernel larch.kernel\n"
-                            block += "append initrd larch.img %s %s\n" % (bootp, options)
+                            block += "append initrd=larch.img %s %s\n" % (bootp, options)
 
                         if i > 1:
                             fho.write("\n")

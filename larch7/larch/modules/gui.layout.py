@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.08.15
+# 2009.08.16
 
 Namespace = ":"
 
@@ -91,6 +91,7 @@ Widgets = [
 
 
 # Prepare Medium Page
+#   - note that most of the RadioButtons need $names so that they are not blocked
 ["Frame", "mediumtype", _("Medium Type")],
   ["*RadioButton", "iso", "iso (CD/DVD)"],
   ["*RadioButton", "^partition", _("Partition (disk / USB-stick):")],
@@ -100,15 +101,15 @@ Widgets = [
     ["*CheckBox", "noformat", _("Don't format")],
 
 ["Frame", "bootloader", _("Bootloader")],
-  ["*RadioButton", "^grub", "GRUB"],
-  ["*RadioButton", "^syslinux", "syslinux/isolinux"],
-  ["*RadioButton", "^none", _("None (you'll need to provide some means of booting)")],
+  ["*RadioButton", "^$grub", "GRUB"],
+  ["*RadioButton", "^$syslinux", "syslinux/isolinux"],
+  ["*RadioButton", "^$none", _("None (you'll need to provide some means of booting)")],
 
 ["*Frame", "detection", _("Medium Detection")],
-  ["*RadioButton", "^uuid", "UUID"],
-  ["*RadioButton", "^label", "LABEL"],
-  ["*RadioButton", "^device", _("Partition")],
-  ["*RadioButton", "^nodevice", "Search for larch system (with larchboot)"],
+  ["*RadioButton", "^$uuid", "UUID"],
+  ["*RadioButton", "^$label", "LABEL"],
+  ["*RadioButton", "^$device", _("Partition")],
+  ["*RadioButton", "^$nodevice", "Search for larch system (with larchboot)"],
 
   ["Label", "lm1", _("Medium label:")],
   ["*LineEdit", "labelname"],
@@ -223,11 +224,11 @@ Layout = [
   ["HBOX", "hbm1", ["larchpart", "selectpart", "noformat"]],
 
 ["+LAYOUT", "bootloader", "hbm21"],
-["HBOX", "hbm21", ["grub", "syslinux", "none"]],
+["HBOX", "hbm21", ["$grub", "$syslinux", "$none"]],
 
 ["+LAYOUT", "detection", "vbm3"],
 ["VBOX", "vbm3", ["hbm2a", "hbm2b"]],
-  ["HBOX", "hbm2a", ["device", "uuid", "label", "nodevice"]],
+  ["HBOX", "hbm2a", ["$device", "$uuid", "$label", "$nodevice"]],
   ["HBOX", "hbm2b", ["lm1", "labelname", "changelabel"]],
 
 ["HBOX", "hbm3", ["bootlines", "grubtemplate", "syslinuxtemplate"]],

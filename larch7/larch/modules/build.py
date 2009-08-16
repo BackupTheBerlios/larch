@@ -146,9 +146,14 @@ class Builder:
         if os.path.isdir("%s/rootoverlay" % self.profile):
             supershell("cp -rf %s/rootoverlay/* %s" % (self.profile, self.overlay))
         # Prepare inittab
-        inittab = "%s/etc/inittab" % self.overlay
+        inittab = self.overlay + "/etc/inittab"
+        itsave = inittab + ".larchsave"
+        it0 = self.installation0 + "/etc/inittab"
+        if (not os.path.isfile(it0 + ".larchsave")) and (not os.path.isfile(itsave)):
+            # Save the original, if there isn't already a saved one
+            supershell("cp %s %s" % (it0, itsave))
         if not os.path.isfile(inittab):
-            supershell("cp %s/etc/inittab %s/etc" % (self.installation0, self.overlay))
+            supershell("cp %s/etc/inittab %s/etc" % (it0, inittab))
         supershell('sed -i "s|/etc/rc.shutdown|/etc/rc.larch.shutdown|" %s' % inittab)
 
         # Handle /etc/rc.conf
