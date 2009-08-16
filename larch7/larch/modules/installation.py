@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.15
+# 2009.08.16
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -75,7 +75,12 @@ class Installation:
         elif mirror == "final":
             localmirror = None
         else:
-            localmirror = config.get("mirror")
+            localmirror = config.working_dir + "/mirrorlist"
+            if not os.path.isfile(localmirror):
+                localmirror = "/etc/pacman.d/mirrorlist"
+                if not os.path.isfile(localmirror):
+                    localmirror = (base_dir + "/data/mirrorlist.%s"
+                            % config.get("platform"))
         repos = []
         pc0 = config.get("profile") + "/pacman.conf.options"
         if not os.path.isfile(pc0):
