@@ -1,15 +1,8 @@
-# These are needed to build a live CD
-larch-live
-squashfs-tools
-lzop
-
+### These should probably be present
 syslinux
-
-aufs2-util
-
+cdrkit
 # In case necessary (depends on kernel)
 #aufs2
-
 # To eject a cd
 eject
 
@@ -17,23 +10,23 @@ eject
 ntfsprogs
 parted
 
-sudo
-
-lsof
-cdrkit
-dvd+rw-tools
-
-base-devel
-larch
-
 # generally useful tools which don't require X
-#mtools is required by syslinux
 openssh
+sshfs
 dosfstools
 lynx
 mc
 unzip
 zip
+
+lsof
+dvd+rw-tools
+
+sudo
+
+base-devel
+larch
+
 alsa-lib
 alsa-oss
 alsa-utils
@@ -56,7 +49,8 @@ localed
 xkmap
 gparted
 
-larchin
+# Not yet updated for larch-7
+#larchin
 
 firefox
 thunderbird
@@ -85,9 +79,9 @@ gamin
 gimp
 wicd
 
-#geany
+geany
 
 ttf-dejavu
 
-slim
-slim-theme-dlarch
+gdm
+dlarch-theme-gdm

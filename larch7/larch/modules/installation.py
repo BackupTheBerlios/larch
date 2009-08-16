@@ -43,7 +43,8 @@ class Installation:
         # Construct the pacman command to use for working with the larch
         # installation - call this whenever pacman is needed.
         #self.make_pacman_command()
-        return
+        self.pacman_cmd = None
+
 
 
     def make_pacman_conf(self, mirror="final"):
@@ -76,15 +77,15 @@ class Installation:
         else:
             localmirror = config.get("mirror")
         repos = []
-        pc0 = os.path.join(config.get("profile"), "pacman.conf.options")
+        pc0 = config.get("profile") + "/pacman.conf.options"
         if not os.path.isfile(pc0):
-            pc0 = os.path.join(base_dir, "data/pacman.conf")
-        pc1 = os.path.join(config.get("profile"), "pacman.conf.larch")
+            pc0 = base_dir + "/data/pacman.conf"
+        pc1 = config.get("profile") + "/pacman.conf.larch"
         if not os.path.isfile(pc1):
-            pc1 = os.path.join(base_dir, "data/pacman.conf.larch")
+            pc1 = base_dir + "/data/pacman.conf.larch"
 
         fhi = open(pc0)
-        fho = open(os.path.join(config.working_dir, "pacman.conf"), "w")
+        fho = open(config.working_dir + "/pacman.conf", "w")
         fho.write(pacmanoptions(fhi.read()))
         fhi.close()
 
@@ -102,7 +103,7 @@ class Installation:
                                 "*repo*", section)
                     elif (mirror != "final" and line.startswith("Include")
                             and config.get("usemirrorlist")):
-                        mf = os.path.join(config.working_dir, "mirrorlist")
+                        mf = config.working_dir + "/mirrorlist"
                         if os.path.isfile(mf):
                             line.replace("/etc/pacman.d/mirrorlist", mf)
                     line = line.replace("*platform*", platform)
@@ -122,23 +123,10 @@ class Installation:
         """
         self.pacman_cmd = ("%s -r %s --config %s --noconfirm --noprogressbar" %
                 (config.pacman, config.get("install_path"),
-                 os.path.join(config.working_dir, "pacman.conf")))
+                 config.working_dir + "/pacman.conf"))
         cache = config.get("pacman_cache")
         if cache:
             self.pacman_cmd += " --cachedir %s" % cache
-
-
-    def update_db(self):
-        """This updates or creates the pacman-db in the installation.
-        This is done using using 'pacman ... -Sy' together with
-        an appropriate pacman.conf file.
-        """
-        self.make_pacman_conf("local" if config.get("uselocalmirror") else "")
-        self.make_pacman_command()
-        if not supershell("%s -Sy" % self.pacman_cmd).ok:
-            run_error(_("Couldn't synchronize pacman database (pacman -Sy)"))
-            return False
-        return True
 
 
     def install(self):
@@ -147,7 +135,7 @@ class Installation:
         file 'addedpacks' (in the profile).
         """
 
-        installation_path = config.get("install_path")
+        installation_path = config.ipath()
 
         # Can't delete the whole directory because it might be a mount point
         if os.path.isdir(installation_path):
@@ -184,7 +172,7 @@ class Installation:
         # Get list of packages in 'base' group, removing those in the
         # list of vetoed packages.
         veto_packages = []
-        veto_file = os.path.join(config.get("profile"), "baseveto")
+        veto_file = config.get("profile") + "/baseveto"
         if os.path.isfile(veto_file):
             fh = open(veto_file)
             for line in fh:
@@ -206,7 +194,7 @@ class Installation:
                 packages.append(p)
 
         # Add additional packages and groups, from 'addedpacks' file.
-        addedpacks_file = os.path.join(config.get("profile"), "addedpacks")
+        addedpacks_file = config.get("profile") + "/addedpacks"
         fh = open(addedpacks_file)
         for line in fh:
             line = line.strip()
@@ -224,22 +212,44 @@ class Installation:
         if not ok:
             config_error(_("Package installation failed"))
         else:
+            # Some chroot scripts might need /etc/mtab
+            supershell(":> %s/etc/mtab" % installation_path)
+
             # Build the final version of pacman.conf
             self.make_pacman_conf("final")
             supershell("cp -f %s %s" % (
-                    os.path.join(config.working_dir, "pacman.conf"),
-                    os.path.join(installation_path, "etc/pacman.conf")))
+                    config.working_dir + "/pacman.conf",
+                    installation_path + "/etc/pacman.conf"))
             # Replace mirrorlist
-            mf = os.path.join(config.working_dir, "mirrorlist")
+            mf = config.working_dir + "/mirrorlist"
             if not (config.get("usemirrorlist") and os.path.isfile(mf)):
                 mf = "/etc/pacman.d/mirrorlist"
                 if not os.path.isfile(mf):
-                    mf = os.path.join(base_dir, "data", "mirrorlist.%s" %
-                    config.get("platform"))
+                    mf = base_dir + "/data/mirrorlist.%s" % config.get("platform")
             supershell("cp -f %s %s" % (mf,
-                    os.path.join(installation_path, "etc/pacman.d/mirrorlist")))
+                    installation_path + "/etc/pacman.d/mirrorlist"))
 
         return ok
+
+
+    def update_db(self):
+        """This updates or creates the pacman-db in the installation.
+        This is done using using 'pacman ... -Sy' together with
+        an appropriate pacman.conf file.
+        """
+        ok = self.x_pacman("-Sy")
+        if not ok:
+            run_error(_("Couldn't synchronize pacman database (pacman -Sy)"))
+        return ok
+
+
+    def x_pacman(self, op, arg="", mounts=True):
+        self.make_pacman_conf("local" if config.get("uselocalmirror") else "")
+        self.make_pacman_command()
+        if mounts:
+            return self.pacmancall(op, arg)
+        else:
+            return supershell("%s %s %s" % (self.pacman_cmd, op, arg)).ok
 
 
     def pacmancall(self, op, arg):
@@ -248,7 +258,7 @@ class Installation:
         'op' (e.g. '-S') with argument(s) 'arg' (a string).
         Then unmount sys and proc and return True if the command succeeded.
         """
-        ipath = config.get("install_path")
+        ipath = config.ipath()
         # (a) Prepare the destination environment (bind mounts)
         command.mount("/sys", "%s/sys" % ipath, "--bind")
         command.mount("/proc", "%s/proc" % ipath, "--bind")
@@ -260,8 +270,6 @@ class Installation:
         # (c) Remove bound mounts
         command.unmount("%s/sys" % ipath)
         command.unmount("%s/proc" % ipath)
-        # Some chroot scripts might need /etc/mtab
-        supershell(":> %s/etc/mtab" % ipath)
         return ok
 
 

@@ -207,6 +207,33 @@ def infoDialog(message, title=None):
     QtGui.QMessageBox.information(None, title, message)
 
 
+fileDialogDir = "/"
+def fileDialog(message, start=None, title=None, dir=False, create=False, filter=None):
+    # filter is a list: first a textual description, then acceptable glob filenames
+    global fileDialogDir
+    if not start:
+        start = fileDialogDir
+    dlg = QtGui.QFileDialog(None, message, start)           #qt
+    if title:
+        dlg.setWindowTitle(title)                           #qt
+    dlg.setReadOnly(not create)                             #qt
+    if dir:
+        dlg.setFileMode(dlg.Directory)                      #qt
+    elif not create:
+        dlg.setFileMode(dlg.ExistingFile)                   #qt
+    if filter:
+        dlg.setNameFilter("%s (%s)" % (filter[0], " ".join(filter[1:])))    #qt
+    if dlg.exec_():
+        path = str(dlg.selectedFiles()[0]).strip()
+        if os.path.isdir(path):
+            fileDialogDir = path
+        elif os.path.isfile(path):
+            fileDialogDir = os.path.dirname(path)
+        return path
+    else:
+        return ""
+
+
 class Notebook(QtGui.QTabWidget):                           #qt
     s_default = "changed"
     s_signals = {
@@ -796,6 +823,7 @@ specials_table = {
     "textLineDialog": textLineDialog,
     "infoDialog": infoDialog,
     "confirmDialog": confirmDialog,
+    "fileDialog": fileDialog,
 }
 
 layout_table = {

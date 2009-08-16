@@ -12,6 +12,7 @@ parted
 
 # generally useful tools which don't require X
 openssh
+sshfs
 dosfstools
 lynx
 mc

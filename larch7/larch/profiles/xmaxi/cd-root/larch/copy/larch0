@@ -15,10 +15,13 @@ fi
 # start gdm from rc.conf
 sed -i '/^DAEMONS=/ s|!gdm|@gdm|' ${INSTALL}/etc/rc.conf
 
-# Copy xorg.conf.nodri to target xorg.conf if necessary
-if grep nodri /proc/cmdline &>/dev/null; then
-    cp -f /etc/X11/xorg.conf.nodri ${INSTALL}/etc/X11/xorg.conf
-fi
+# Adjust xorg.conf for no DRI if necessary
+for x in $(cat /proc/cmdline); do
+    if [ "${x}" = "nodri" ]; then
+        sed 's|^#nodri||' -i ${INSTALL}/etc/X11/xorg.conf
+        break
+    fi
+done
 
 #***************************************************#
 # Replace uses of larchquit in xfce panels and menu.#

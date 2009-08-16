@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.15
+# 2009.08.16
 
 
 # This function can be called before the proper shutdown, in order to
@@ -33,25 +33,26 @@ checkse ()
     bootdev=$( cat /.livesys/bootdevice )
     ejectdev=''
     savedev=${bootdev}
-    cdroms=$( cat /proc/sys/dev/cdrom/info 2>/dev/null | { while read a b c; do
-            if [ "${a}" = "drive" -a "${b}" = "name:" ]; then
-                echo "${c}"
+    if [ -f /proc/sys/dev/cdrom/info ]; then
+        cdroms=$( cat /proc/sys/dev/cdrom/info | { while read a b c; do
+                if [ "${a}" = "drive" -a "${b}" = "name:" ]; then
+                    echo "${c}"
+                    break
+                fi
+            done
+        } )
+        for d in ${cdroms}; do
+            if [ "/dev/${d}" = "${bootdev}" ]; then
+                # booted from CD/DVD, by default no session-save possible
+                savedev=''
+                if grep "^${bootdev} " /proc/mounts &>/dev/null; then
+                    # it needs to be ejected
+                    ejectdev=${bootdev}
+                fi
                 break
             fi
         done
-    } )
-    for d in ${cdroms}; do
-        if [ "/dev/${d}" = "${bootdev}" ]; then
-            # booted from CD/DVD, by default no session-save possible
-            savedev=''
-            if grep "^${bootdev} " /proc/mounts &>/dev/null; then
-                # it needs to be ejected
-                ejectdev=${bootdev}
-            fi
-            break
-        fi
-    done
-
+    fi
     ############################# Deal with session saving
     savepath=/.livesys/medium
     savemount="${savepath}"

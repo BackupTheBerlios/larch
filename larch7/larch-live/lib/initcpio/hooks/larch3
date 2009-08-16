@@ -23,7 +23,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.13
+# 2009.08.16
 
 #TODO:
 # Is c2r still relevant? I should test it!
@@ -215,6 +215,9 @@ EOT
         done
         # Any further entries can be added at a later point in the boot process
     fi
+
+    # Only needed to suppress an error message from /etc/rc.sysinit
+    echo "rootfs / rootfs rw 0 0" >/union/etc/mtab
 
     # Handle special features of /var
     /bin/mkdir -p -m 1777 /union/var/tmp

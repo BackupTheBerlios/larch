@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# x10d_fstab  - add detected devices to fstab (for live system) 
+# x10d_fstab  - add detected devices to fstab (for live system)
 #
 # Author: Michael Towers (larch42 at googlemail dot com)
 #
@@ -21,8 +21,10 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.05.27
+# 2009.08.16
 
+# Passing '-n' as command-line option will just report on the
+# changes that would be made, nothing will be written to /etc/fstab.
 
 # Get a list of partitions which could, potentially be mounted.
 # Return the device basename, a tag: '+' for removable or '-' for not,
@@ -45,6 +47,8 @@ usables ()
             part=${dev:5}
             echo -n "${part}"
             bdev=${part:0:3}
+            # skip loop devices
+            [ "${bdev}" = "loo" ] && continue
             if [ $( cat /sys/block/${bdev}/removable 2>/dev/null ) -ne 0 ]; then
                 echo -n " + "
             else
@@ -56,7 +60,7 @@ usables ()
 
  # This may be useful, too:
  #blkid -o value -s UUID -s TYPE /dev/sda8
- 
+
 # test if the script is started by root user. If not, exit
 if [ $UID -ne 0 ]; then
     echo "Only root can run ${APP}"; exit 1
@@ -65,8 +69,6 @@ fi
 # In addition, mountpoints will be generated
 MNT=/mnt
 
-# Passing '-n' as command-line option will just report on the
-# changes that would be made.
 if [ "$1" = "-n" ]; then
     DST=""
 else
@@ -87,13 +89,13 @@ usables | while read part rem fstype; do
         fi
         mp=$( basename ${part} )
         if [ "${fstype}" = "ntfs" ]; then
-            printf "/dev/%-12s %-12s %-8s users,noauto,utf8,umask=0   0 0\n" \
+            eval printf '"/dev/%-12s %-12s %-8s users,noauto,utf8,umask=0   0 0\n"' \
                     ${part} ${MNT}/${mp} ntfs-3g ${DST}
         elif [ "${fstype}" = "vfat" ]; then
-            printf "/dev/%-12s %-12s %-8s users,noauto,utf8,umask=0   0 0\n" \
+            eval printf '"/dev/%-12s %-12s %-8s users,noauto,utf8,umask=0   0 0\n"' \
                     ${part} ${MNT}/${mp} vfat ${DST}
         else
-            printf "/dev/%-12s %-12s %-8s users,noauto,noatime   0 0\n" \
+            eval printf '"/dev/%-12s %-12s %-8s users,noauto,noatime   0 0\n"' \
                     ${part} ${MNT}/${mp} ${fstype} ${DST}
         fi
         if [ -n "${DST}" ]; then
@@ -101,20 +103,22 @@ usables | while read part rem fstype; do
         fi
     done
 
-# CD devices
-#for dev in $( cat /proc/sys/dev/cdrom/info 2>/dev/null | head -n 3 | \
-#        tail -n 1 | cut -d ":" -f 2 ); do
-#    mountdir="${dev}_cd"
-#    mkdir ${MNT}/${mountdir}
-#    printf "%-12s %-12s %-8s user,noauto,exec,unhide 0     0\n" \
-#            /dev/${dev} /mnt/${mountdir} auto >>${DEST}
-#done
+### CD devices
+#if [ -f /proc/sys/dev/cdrom/info ]; then
+#    for dev in $( cat /proc/sys/dev/cdrom/info 2>/dev/null | head -n 3 | \
+#            tail -n 1 | cut -d ":" -f 2 ); do
+#        mountdir="${dev}_cd"
+#        mkdir ${MNT}/${mountdir}
+#        eval printf '"%-12s %-12s %-8s user,noauto,exec,unhide 0     0\n"' \
+#                /dev/${dev} /mnt/${mountdir} auto >>${DEST}
+#    done
+#fi
 
-#echo ${DST}
-#echo "# This would do for a floppy" ${DST}
-#echo "#/dev/fd0        /mnt/floppy    vfat,ext2 rw,user,noauto,noatime    0     0" ${DST}
-#echo "#    +   mkdir /mnt/floppy" ${DST}
-#echo ${DST}
-#echo "# E.g. for USB storage:" ${DST}
-#echo "#/dev/sdb1        /mnt/usb      auto      rw,user,noauto,noatime   0     0" ${DST}
-#echo "#    +   mkdir /mnt/usb" ${DST}
+#eval echo ${DST}
+#eval echo "# This would do for a floppy" ${DST}
+#eval echo "#/dev/fd0        /mnt/floppy    vfat,ext2 rw,user,noauto,noatime    0     0" ${DST}
+#eval echo "#    +   mkdir /mnt/floppy" ${DST}
+#eval echo ${DST}
+#eval echo "# E.g. for USB storage:" ${DST}
+#eval echo "#/dev/sdb1        /mnt/usb      auto      rw,user,noauto,noatime   0     0" ${DST}
+#eval echo "#    +   mkdir /mnt/usb" ${DST}

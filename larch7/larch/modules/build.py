@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.15
+# 2009.08.16
 
 import os, sys
 from glob import glob
@@ -43,9 +43,7 @@ class Builder:
         self.medium = config.ipath(config.medium_dir)
 
         self.system_sqf = config.ipath(config.system_sqf)
-        sqf = "%s/larch/system.sqf" % self.medium
-        if os.path.isfile(sqf):
-            supershell("mv %s %s" % (sqf, self.larch_dir))
+        if os.path.isfile(self.medium + "/larch/system.sqf"):
             return True
         else:
             return os.path.isfile(self.system_sqf)
@@ -69,7 +67,11 @@ class Builder:
         self.overlay = config.ipath(config.overlay_build_dir)
         command.log("#Initializing larchify process")
 
-        if not useoldsqf:
+        if useoldsqf:
+            if os.path.isfile(self.medium + "/larch/system.sqf"):
+                supershell("mv %s/larch/system.sqf %s" %
+                        (self.medium, self.larch_dir))
+        else:
             supershell("rm -f %s" % self.system_sqf)
 
         # Clean out temporary area and create overlay directory

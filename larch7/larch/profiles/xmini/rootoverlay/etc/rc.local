@@ -3,10 +3,7 @@
 # /etc/rc.local: Local multi-user startup script.
 #
 
-# Set up automatically logged in user (larch live system only)
-if [ -f /.livesys/autologin ]; then
-    cp /.livesys/autologin /tmp/newuser
-fi
+x10d_fstab
 
 # Restore saved sound volume, etc.
 alsactl restore
