@@ -1,5 +1,5 @@
 # Set the keymap
-xkmap-set
+#xkmap-set
 
 case ${desktop} in
     xfce ) exec ck-launch-session xfce4-session ;;

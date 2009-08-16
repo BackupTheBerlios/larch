@@ -21,16 +21,10 @@ need at least /dev bind-mounted.
 Only ext2 and vfat are supported for larch partitions.
 
 
-Installation page
------------------
-
-Some features not yet implemented.
-
-
 Threading
 ---------
 
-Could still be the odd hiccup here...
+Could still be the odd hiccup here, but seems to be working well.
 
 
 Quitting

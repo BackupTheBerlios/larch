@@ -26,9 +26,6 @@
 import os, shutil
 from installation import Installation, pacmanoptions
 
-#TODO: remove (just for testing)
-#import sys
-
 
 class InstallPage:
     """This class manages the page dealing with Arch installation.
@@ -44,7 +41,7 @@ class InstallPage:
                 (":use_local_mirror*toggled", self.toggle_local_mirror),
                 (":local_mirror_change*clicked", self.new_local_mirror_path),
                 (":cache_change*clicked", self.new_cache_path),
-                (":sync*clicked", self.dosync),
+                (":sync*clicked", self.installation.update_db),
                 (":update*clicked", self.doupdate),
                 (":add*clicked", self.doadd),
                 (":remove*clicked", self.doremove),
@@ -127,17 +124,30 @@ class InstallPage:
             command.ui(":cache_show.set", path)
 
 
-    def dosync(self):
-        command.NYI()
-
-
     def doupdate(self):
-        command.NYI()
+        f = command.uiask("fileDialog", _("Package to add/update"),
+                None, "pacman -U", False, False,
+                (_("Packages"), "*.pkg.tar.gz"))
+        if f:
+            if not self.installation.x_pacman("-U", f):
+                run_error(_("Error during package update."))
 
 
     def doadd(self):
-        command.NYI()
+        ok, plist = command.uiask("textLineDialog",
+                _("Enter the names of packages to install -"
+                "\n  separated by spaces:"),
+                "pacman -S")
+        if ok and plist.strip():
+            if not self.installation.x_pacman("-S", plist):
+                run_error(_("Error during package installation."))
 
 
     def doremove(self):
-        command.NYI()
+        ok, plist = command.uiask("textLineDialog",
+                _("Enter the names of packages to remove -"
+                "\n  separated by spaces:"),
+                "pacman -Rs")
+        if ok and plist.strip():
+            if not self.installation.x_pacman("-Rs", plist):
+                run_error(_("Error during package removal."))

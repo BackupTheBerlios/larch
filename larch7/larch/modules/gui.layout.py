@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.08.12
+# 2009.08.15
 
 Namespace = ":"
 
@@ -70,14 +70,13 @@ Widgets = [
   ["Button", "^sync", _("Synchronize db")],
   ["Button", "^update", _("Update / Add package    [-U]")],
   ["Button", "^add", _("Add package(s)    [-S]")],
-  ["Button", "^remove", _("Add package(s)    [-S]")],
+  ["Button", "^remove", _("Remove package(s)    [-Rs]")],
 
 ["Button", "^install", _("Install")],
 
 
 # Larchify Page
-["Label", "larchify", _("Not much to choose here ...\n"
-        "The system to be compressed must be installed and ready.")],
+["Label", "larchify", _("The system to be compressed must be installed and ready.")],
 ["Button", "^locales", _("Edit supported locales")],
 ["Button", "^rcconf", _("Edit Arch configuration file (/etc/rc.conf)")],
 

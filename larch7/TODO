@@ -4,7 +4,6 @@ creation of images using UUID and/or LABEL
 
 locale handling on larchify /?
 
-replace setup script
 
 
 Documentation for new initramfs features (LABEL/UUID booting?)

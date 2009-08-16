@@ -1,0 +1,20 @@
+# The information here will be adapted for the bootloader and inserted into its configuration
+# file at the place marked '###LARCH'
+# This header will be removed. 
+# Each block must have an empty line before and after it.
+# There may be no empty lines within a block.
+
+comment:
+title: larch boot to gdm
+options:
+
+comment: As we have gdm in the DAEMOMS list it's probably 
+comment: good to have a boot option without xorg.
+title: larch boot to console
+options: nox
+
+comment:
+title: larch with swap
+options: swap
+
+# END OF FILE

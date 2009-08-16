@@ -3,18 +3,13 @@
 # rc.larch.shutdown
 
 # This replaces rc.shutdown in inittab
-# 2009.08.14
+# 2009.08.16
 
 # Create shutdown script dynamically from normal rc.shutdown.
-# The clock should only be set if ... (?)
-# Handle session saving, CD ejection, etc.
+# The hardware clock is not set,
+# handle session saving, CD ejection, etc.
 
-#???
-# Better to do session saving before unmounting swap?
-# OTOH shouldn't the unmount filesystems be done before session-saving?
-# What would happen, actually, if swap was being used at this point?
-# Is it possible to tidy it up?
-
+# Build a modified version of rc.shutdown dynamically
 newfile=/.livesys/shutdown
 
 dosessionsave ()
@@ -84,6 +79,9 @@ dosessionsave\
 doeject\
 
 ' -i ${newfile}
+
+# Remove the boot medium from /etc/mtab so that eject works
+sed "/ \/.livesys\/medium / d" -i /etc/mtab
 
 # Run the script
 . ${newfile}

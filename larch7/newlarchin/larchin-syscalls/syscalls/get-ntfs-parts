@@ -1,8 +1,0 @@
-#!/bin/sh
-
-# get-ntfs-parts
-
-# Return a simple list of NTFS partitions on device $1.
-# If $1 is not given  it will return NTFS partitions on all devices.
-
-blkid -c /dev/null -o device -t TYPE=ntfs $1
