@@ -59,10 +59,10 @@ class InstallPage:
         self.profile = config.get("profile")
         command.ui(":cache_show.set", config.get("pacman_cache"))
 
-        if config.get("usemirrorlist"):
-            command.ui(":mirrorlist.enable", True)
-        if config.get("uselocalmirror"):
-            command.ui(":use_local_mirror.enable", True)
+        ulm = (config.get("uselocalmirror") != "")
+        command.ui(":mirrorlist.enable", config.get("usemirrorlist") != "")
+        command.ui(":mirrorlist.frameEnable", not ulm)
+        command.ui(":use_local_mirror.enable", ulm)
         command.ui(":local_mirror.set", config.get("localmirror"))
 
 
@@ -87,7 +87,10 @@ class InstallPage:
         f = config.working_dir + "/mirrorlist"
         fi = "/etc/pacman.d/mirrorlist"
         if not os.path.isfile(fi):
-            fi = base_dir + "/data/mirrorlist.%s" % config.get("platform")
+            fi = base_dir + "/mirrorlist"
+            if not os.path.isfile(fi):
+                config_error(_("No 'mirrorlist' file found"))
+                return
         command.edit(f, fi, label=_("Editing mirrorlist: Uncomment ONE entry"))
 
 
@@ -97,6 +100,7 @@ class InstallPage:
 
     def toggle_local_mirror(self, on):
         config.set("uselocalmirror", "yes" if on else "")
+        command.ui(":mirrorlist.frameEnable", not on)
 
 
     def new_local_mirror_path(self):

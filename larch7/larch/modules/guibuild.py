@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.15
+# 2009.08.17
 
 """Build a gui from a layout description.
 """
@@ -278,6 +278,9 @@ class OptionalFrame(Frame):                                 #qt
 
     def enable(self, on):
         self.setChecked(on)                                 #qt
+
+    def frameEnable(self, on):
+        self.setEnabled(on)                                 #qt
 
 
 class Label(QtGui.QLabel):                                  #qt

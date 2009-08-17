@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.16
+# 2009.08.17
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -32,19 +32,7 @@ import os, filecmp
 
 class Installation:
     def __init__(self):
-        # Do a completely inadequate check for a valid installation?
-        # (An adequate check is impossible.)
-
-
-        # Generate pacman.conf, including larch repo - call this whenever
-        # pacman.conf is needed.
-        #self.make_pacman_conf()
-
-        # Construct the pacman command to use for working with the larch
-        # installation - call this whenever pacman is needed.
-        #self.make_pacman_command()
         self.pacman_cmd = None
-
 
 
     def make_pacman_conf(self, mirror="final"):
@@ -79,8 +67,7 @@ class Installation:
             if not os.path.isfile(localmirror):
                 localmirror = "/etc/pacman.d/mirrorlist"
                 if not os.path.isfile(localmirror):
-                    localmirror = (base_dir + "/data/mirrorlist.%s"
-                            % config.get("platform"))
+                    localmirror = (base_dir + "/mirrorlist")
         repos = []
         pc0 = config.get("profile") + "/pacman.conf.options"
         if not os.path.isfile(pc0):
@@ -95,6 +82,17 @@ class Installation:
         fhi.close()
 
         # Get the repositories from pacman.conf.larch
+        #  - first find a substitute for /etc/pacman.d/mirrorlist
+        mf = None
+        f = config.working_dir + "/mirrorlist"
+        if config.get("usemirrorlist") and os.path.isfile(f):
+            mf = f
+        f = base_dir + "/mirrorlist"
+        if ((not os.path.isfile("/etc/pacman.d/mirrorlist")) and (not mf)
+                and os.path.isfile(f)):
+            mf = f
+
+        # - then update the Server entries, if necessary
         fhi = open(pc1)
         section = ""
         for line in fhi:
@@ -106,11 +104,15 @@ class Installation:
                     if (mirror == "local"):
                         line = "Server = %s\n" % localmirror.replace(
                                 "*repo*", section)
-                    elif (mirror != "final" and line.startswith("Include")
-                            and config.get("usemirrorlist")):
-                        mf = config.working_dir + "/mirrorlist"
-                        if os.path.isfile(mf):
-                            line.replace("/etc/pacman.d/mirrorlist", mf)
+                    elif (mirror != "final") and line.startswith("Include"):
+                        s = line.split("=", 1)[1].split("#")[0].strip()
+                        if s == "/etc/pacman.d/mirrorlist":
+                            if mf:
+                                line = "Server = %s\n" % mf
+                            elif not os.path.isfile("/etc/pacman.d/mirrorlist"):
+                                config_error(_("No 'mirrorlist' file found"))
+                                break
+
                     line = line.replace("*platform*", platform)
                 fho.write(line)
             if not line.strip():
