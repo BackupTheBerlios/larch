@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.16
+# 2009.08.17
 
 import os
 
@@ -132,6 +132,8 @@ class MediumPage:
                 if fields[5] in ["0", "5", "82"]:
                     #debug("No")
                     continue        # ignore uninteresting partitions
+                if fields[0] in mounteds:
+                    continue        # ignore mounted patitions
                 # Keep a tuple (partition, size in MiB)
                 self.partlist.append((fields[0], fields[3]))
 
