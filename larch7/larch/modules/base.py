@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.11
+# 2009.08.17
 
 """This module handles the basic framework and configuration of the
 larch build system.
@@ -40,7 +40,6 @@ project0 = "larch0"
 defaults = {    "install_path"  : "/home/larchbuild",
                 "pacman_cache"  : "/var/cache/pacman/pkg",
                 "profile"       : "",       # => Use default, needs initialization
-                "larch_url"     : "ftp://ftp.berlios.de/pub/larch/larch7/",
                 "platform"      : "",       # => Needs initialization
                 "uselocalmirror" : "",
                 "localmirror"   : "",
@@ -76,12 +75,12 @@ class LarchConfig:
             # also create that.
             os.makedirs(self.working_dir)
 
-        #self.pacman = supershell("which pacman").result
-        #if not self.pacman: ...
         self.pacman = "/usr/bin/pacman"
         if not os.path.isfile(self.pacman):
-        #TODO: Is this right?
-            self.pacman = os.path.join(base_dir, "pacman")
+            # If the host is not Arch, there will be no pacman.
+            # (If there is some other program at "/usr/bin/pacman" that's
+            # a real spanner in the works.)
+            self.pacman = base_dir + "/pacman"
             if not os.path.isfile(self.pacman):
                 fatal_error(_("No pacman executable found"))
 

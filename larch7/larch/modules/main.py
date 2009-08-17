@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.15
+# 2009.08.17
 
 """This is the main module of the actual larch code, which is started by
 the 'larch.py' script as a separate process.
@@ -55,7 +55,6 @@ from Queue import Queue
 import json
 
 import base
-__builtin__.config = base.LarchConfig(os.environ["HOME"])
 
 from projectpage import ProjectPage
 from installpage import InstallPage
@@ -67,16 +66,10 @@ def debug(text):
     sys.stderr.flush()
 __builtin__.debug = debug
 
-#---------------------------
-#def tr(s):
-#    return s
-#__builtin__._ = tr
-
 import gettext
 lang = os.getenv("LANG")
 if lang:
     gettext.install('larch', base_dir+'/i18n', unicode=1)
-#---------------------------
 
 
 class Command:
@@ -503,11 +496,13 @@ if __name__ == "__main__":
     guiprocess = Popen(guiexec, cwd=base_dir, stdin=PIPE, stdout=PIPE)
     gthread = simple_thread(gtstart, guiprocess)
 
+    __builtin__.command = Command()
+    __builtin__.config = base.LarchConfig(os.environ["HOME"])
+
     lthread = simple_thread(ltstart)
 
     ithread = simple_thread(itstart)
 
-    __builtin__.command = Command()
     __builtin__.supershell = command.supershell
     command.run()
     mainloop(sys.stdin)
