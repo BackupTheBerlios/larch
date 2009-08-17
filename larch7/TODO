@@ -1,11 +1,4 @@
-rc.sysinit handling (needs inittab entry?)
-
-creation of images using UUID and/or LABEL
-
 locale handling on larchify /?
-
-replace setup script
-
 
 Documentation for new initramfs features (LABEL/UUID booting?)
 
@@ -21,11 +14,6 @@ which larch will copy to kernel26.preset, moving the original version to
 kernel26.preset.larchsave. But remember when installing with larchin, the
 first choice of file should be kernel26.preset.pacsave (?) before
 kernel26.preset.larchsave.
-
-Need to test standard /etc/rc.sysinit in a larch system - probably not
-directly from /etc/inittab but via a customized start script, a new
-/etc/rc.sysinit-larch. If necessary it could generate a modified version
-of /etc/rc.sysinit dynamically.
 
 Dynamic generation of larch version of /etc/rc.shutdown, using sed to
 modify standard version - thus hopefully avoiding need to constantly
