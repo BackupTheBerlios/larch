@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.05
+# 2009.08.18
 
 """This is the initial module of the larch live-builder program. It should
 be started with su or sudo, but in such a way that the environment variable
@@ -139,13 +139,14 @@ class Supershell:
         return until the process has completed, so it should not be called
         from a thread that needs to be reactive.
         """
-        self.process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
+        self.process = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT,
+                universal_newlines=True)
         while True:
             line = self.process.stdout.readline()
             if not line:
                 break
             # Pass on the output of the process
-            commqueue.put("X:-" + line)
+            commqueue.put("X:-%s\n" % line.rstrip())
 
         self.process.wait()
         commqueue.put("X:@%d\n" % self.process.returncode)

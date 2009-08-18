@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.17
+# 2009.08.18
 
 """This is the main module of the actual larch code, which is started by
 the 'larch.py' script as a separate process.
@@ -42,7 +42,7 @@ The main job of the program is handled by the imported modules and run
 in a separate thread.
 """
 
-import os, sys, traceback
+import os, sys, traceback, re
 
 import __builtin__
 __builtin__.base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -471,12 +471,28 @@ def itstart():
         commqueue.put("X:%s" % line)
 
 
+re_progress = re.compile(r"X:-\[.*\](.* ([0-9]+)%)")
 def ltstart():
     """A thread function for reading log lines from the log queue and
     passing them to the logger.
     """
+    progress = ""
     while True:
         line = logqueue.get()
+        # Filter the output of mksquashfs
+        m = re_progress.match(line)
+        if m:
+            if not progress:
+                command.ui("log:logtext.append_and_scroll", "dummy\n")
+            percent = m.group(2)
+            if progress == percent:
+                continue
+            else:
+                progress = percent
+                command.ui("log:logtext.undo")
+                line = "X:++++%s\n" % m.group(1)
+        else:
+            progress = ""
         command.ui("log:logtext.append_and_scroll", line)
 
 

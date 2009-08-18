@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.17
+# 2009.08.18
 
 """Build a gui from a layout description.
 """
@@ -456,6 +456,9 @@ class TextEdit(QtGui.QTextEdit):
 
     def get(self):
         return unicode(self.toPlainText())                  #qt
+
+    def undo(self):
+        self.undo()                                         #qt
 
 
 # Layout classes
