@@ -458,7 +458,7 @@ class TextEdit(QtGui.QTextEdit):
         return unicode(self.toPlainText())                  #qt
 
     def undo(self):
-        self.undo()                                         #qt
+        QtGui.QTextEdit.undo(self)                          #qt
 
 
 # Layout classes
