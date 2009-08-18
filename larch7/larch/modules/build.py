@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.16
+# 2009.08.18
 
 import os, sys
 from glob import glob
@@ -129,8 +129,7 @@ class Builder:
             # others
             ignoredirs += " usr/lib/locale"
 
-#TODO: It would be nice to have a progress report ...
-            if not command.chroot('/sbin/mksquashfs "/" "%s" -no-progress -e %s'
+            if not command.chroot('/sbin/mksquashfs "/" "%s" -e %s'
                     % (config.system_sqf, ignoredirs)):
                 command.error("Warning", _("Squashing system.sqf failed"))
                 return False
@@ -188,8 +187,7 @@ class Builder:
         supershell("mkdir -p %s/boot" % self.overlay)
 
         command.log("#Squashing mods.sqf")
-#TODO: It would be nice to have a progress report ...
-        if not command.chroot('/sbin/mksquashfs "%s" "%s/larch/mods.sqf" -no-progress -e etc'
+        if not command.chroot('/sbin/mksquashfs "%s" "%s/larch/mods.sqf" -e etc'
                 % (config.overlay_build_dir, config.medium_dir)):
             command.error("Warning", _("Squashing mods.sqf failed"))
             return False
