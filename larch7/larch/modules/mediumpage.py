@@ -111,10 +111,6 @@ class MediumPage:
         config.set("medium_iso", "" if on else "yes")
 
 
-        command.ui(":detection.enable", on)
-        command.ui(":bootcd.enable", on)
-
-
     def selectpart(self):
         # Present a list of available partitions (maybe only unmounted ones?)
         # First get a list of mounted devices
@@ -209,25 +205,30 @@ class MediumPage:
 
         if iso:
             device = ""
+            label = ""
+            partsel = ""
+            format = False
+            larchboot = True
         else:
             device = command.uiask(":larchpart.get")
             if not device:
                 config_error(_("No partition selected for larch"))
                 return False
 
-        label = config.get("medium_label")
+            label = config.get("medium_label")
 
-        partsel = config.get("medium_search")
-        # "nodevice" / "uuid" / "label" / "device"
-        if partsel == "nodevice":
-            partsel = ""
-        elif partsel == "device":
-            partsel = "partition"
+            partsel = config.get("medium_search")
+            # "nodevice" / "uuid" / "label" / "device"
+            if partsel == "nodevice":
+                partsel = ""
+            elif partsel == "device":
+                partsel = "partition"
 
-        format = not command.uiask(":noformat.active")
+            format = not command.uiask(":noformat.active")
+            larchboot = command.uiask(":larchboot.active")
 
-        self.mediumbuilder.make(btype, device, label, partsel, format,
-                command.uiask(":larchboot.active"))
+        self.mediumbuilder.make(btype, device, label, partsel,
+                format, larchboot)
         # btype is "boot" (grub), "syslinux", "isolinux" or "" (no bootloader)
         # For cd/dvd (iso), device is ""
         # partsel = "uuid", "label", "partition", or ""

@@ -36,6 +36,27 @@ mvbackup()
 }
 
 
+do_c2r()
+{
+    msg ":: Copying base system to RAM, this will take a while ..."
+    /bin/cat ${sysSqf} > /tfs/system.sqf
+    if [ $? -ne 0 ]; then return 1; fi
+    sysSqf=/tfs/system.sqf
+
+    msg ":: Copying base system filter to RAM"
+    modpath=/tfs/modsqfs
+    /bin/mkdir ${modpath}
+    /bin/cat ${filterSqf} > ${modpath}/filter.sqf
+    if [ $? -ne 0 ]; then return 1; fi
+    filterSqf=${modpath}/filter.sqf
+
+    msg ":: Copying mods archive to RAM, this might take a while ..."
+    /bin/cat ${modsSqf} > ${modpath}/mods.sqf
+    if [ $? -ne 0 ]; then return 1; fi
+    modsSqf=${modpath}/mods.sqf
+}
+
+
 run_hook ()
 {
     [ "x${LDEV}" = "x" ] && return
@@ -69,29 +90,11 @@ run_hook ()
 
     # Boot option copy-to-ram (c2r)
     if [ "${c2r}" = "y" ]; then
-        msg ":: Copying base system to RAM, this will take a while ..."
-        /bin/cat ${sysSqf} > /tfs/system.sqf
-        if [ $? -ne 0 ]; then
+        if ! do_c2r; then
             err "Sorry, not enough RAM"
             break="y"
             return
         fi
-        sysSqf=/tfs/system.sqf
-
-        msg ":: Copying base system filter to RAM"
-        modpath=/tfs/modsqfs
-        /bin/mkdir ${modpath}
-
-
-        msg ":: Copying mods archive to RAM, this might take a while ..."
-        /bin/cat ${modsSqf} > ${modpath}/mods.sqf
-            if [ $? -ne 0 ]; then
-                err "Sorry, not enough RAM"
-                break="y"
-                return
-            fi
-        done
-        modsSqf=${modpath}/mods.sqf
 
         # force use of swap (if available)
         swap="y"
