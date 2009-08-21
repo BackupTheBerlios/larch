@@ -23,10 +23,18 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.16
+# 2009.08.21
 
 #TODO:
 # Is c2r still relevant? I should test it!
+
+
+mvbackup()
+{
+    /bin/mv ${1} ${1}~
+    /bin/mv ${1}_ ${1}
+}
+
 
 run_hook ()
 {
@@ -43,21 +51,19 @@ run_hook ()
         . ${cdmount}/larch/boot-init
     fi
 
+    # 'filter' file (contains only whiteouts)
+    filterSqf=${ovlpath}/filter.sqf
+    # Squashed overlay (mods) file
     modsSqf=${ovlpath}/mods.sqf
     # Overlay file and directory:
     overlay=${ovlpath}/overlay.tar.lzo
 
-    # Deal with new archives
-    if [ -f ${overlay}_ ]; then
+    # Deal with new mods archive
+    if [ -f ${modsSqf}_ ] || [ -f ${filterSqf}_ ]; then
+        msg ":: Updating overlay archives"
         /bin/mount -o remount,rw ${LDEV} ${cdmount}
-        /bin/mv ${overlay} ${overlay}~
-        /bin/mv ${overlay}_ ${overlay}
-
-        if [ -f ${modsSqf}_ ]; then
-            # aufs-merge system only
-            /bin/mv ${modsSqf} ${modsSqf}~
-            /bin/mv ${modsSqf}_ ${modsSqf}
-        fi
+        [ -f ${modsSqf}_ ] && mvbackup ${modsSqf}
+        [ -f ${filterSqf}_ ] && mvbackup ${filterSqf}
         /bin/mount -o remount,ro ${LDEV} ${cdmount}
     fi
 
@@ -72,11 +78,13 @@ run_hook ()
         fi
         sysSqf=/tfs/system.sqf
 
-        msg ":: Copying mods archive(s) to RAM, this might take a while ..."
+        msg ":: Copying base system filter to RAM"
         modpath=/tfs/modsqfs
         /bin/mkdir ${modpath}
-        for m in ${ovlpath}/mods*.sqf; do
-            /bin/cat ${m} > ${modpath}/${m##*/}
+
+
+        msg ":: Copying mods archive to RAM, this might take a while ..."
+        /bin/cat ${modsSqf} > ${modpath}/mods.sqf
             if [ $? -ne 0 ]; then
                 err "Sorry, not enough RAM"
                 break="y"
@@ -102,34 +110,26 @@ run_hook ()
     # Begin preparing union mount command
     layers="/tfs/system=${sqfmnt}"
 
+    # Count loop devices
+    loopn=1
+
+    if [ -f ${filterSqf} ]; then
+        msg_v ":: Adding squashed base system filter (filter.sqf)"
+        /bin/mkdir /tfs/filter
+        # The klibc mount command doesn't support '-o loop'
+        /bin/losetup /dev/loop${loopn} ${filterSqf}
+        /bin/mount -r -t squashfs /dev/loop${loopn} /tfs/filter
+        layers="/tfs/filter=${ovlmnt}:${layers}"
+        loopn=$(( ${loopn} + 1 ))
+    fi
+
     msg_v ":: Adding initial squashed overlay (mods.sqf)"
     /bin/mkdir /tfs/mods
     # The klibc mount command doesn't support '-o loop'
-    /bin/losetup /dev/loop1 ${modsSqf}
-    /bin/mount -r -t squashfs /dev/loop1 /tfs/mods
-    layers="/tfs/mods=${ovlmnt}:${layers}"
-    LOOP_NUM=1
-
-    if [ -f ${modpath}/mods01.sqf ]; then
-        msg_v ":: Adding indexed squashed overlays (modsNN.sqf)"
-        for sqf in ${modpath}/mods??.sqf; do
-            LOOP_NUM=$(( ${LOOP_NUM} + 1 ))
-            if ! [ -b /dev/loop${LOOP_NUM} ]; then
-                /bin/mknod /dev/loop${LOOP_NUM} b 7 ${LOOP_NUM}
-            fi
-            f=${sqf##*/}        # Strips up to and including last '/'
-            mp=${f%.*}          # Strips from last '.' (inclusive)
-            /bin/mkdir /tfs/${mp}
-            # The klibc mount command doesn't support '-o loop'
-            if ! /bin/losetup /dev/loop${LOOP_NUM} ${sqf}; then
-                echo "!! ERROR: Cannot mount loop device /dev/loop${LOOP_NUM}"
-                break="y"
-                return
-            fi
-            /bin/mount -r -t squashfs /dev/loop${LOOP_NUM} /tfs/${mp}
-            layers="/tfs/${mp}=${ovlmnt}:${layers}"
-        done
-    fi
+    /bin/losetup /dev/loop2 ${modsSqf}
+    /bin/mount -r -t squashfs /dev/loop2 /tfs/mods
+    layers="/tfs/mods=${sqfmnt}:${layers}"
+    loopn=$(( ${loopn} + 1 ))
 
     # Make stuff in 'system' available by providing the loader
     # and library path
@@ -139,8 +139,12 @@ run_hook ()
 
     # Unpack the overlay (/tfs/overlay)
     msg ":: Initializing writable layer for union (overlay)"
-    /tfs/system/usr/bin/lzop -d < ${overlay} | \
-            /tfs/system/bin/tar -C /tfs -xf -
+    if [ -f ${overlay} ]; then
+        /tfs/system/usr/bin/lzop -d < ${overlay} | \
+                /tfs/system/bin/tar -C /tfs -xf -
+    else
+        /bin/mkdir /tfs/overlay
+    fi
 
     msg ":: Setting up union file system"
 
@@ -155,8 +159,9 @@ run_hook ()
     /bin/mkdir /union/.livesys
     /bin/mount -o bind /tfs /union/.livesys
     /bin/mount -o bind /tfs/system /union/.livesys/system
-    /bin/mount -o bind /tfs/overlay /union/.livesys/overlay
+    [ -d /tfs/filter ] && /bin/mount -o bind /tfs/filter /union/.livesys/filter
     /bin/mount -o bind /tfs/mods /union/.livesys/mods
+    /bin/mount -o bind /tfs/overlay /union/.livesys/overlay
 
     # Copy the installation tidy-up script (for removing custom live-only stuff),
     # and any other files in 'larch/copy' directory

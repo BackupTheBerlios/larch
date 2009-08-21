@@ -2,7 +2,7 @@
 #
 # larch-locales - Generate glibc locales to an overlay (a slightly tricky business)
 #
-#2009.08.08
+#2009.08.21
 
 # If there is a 'locales' file in the profile (which contains a list of the
 # desired locales, like 'locale.gen') it will be used for the generation,
@@ -48,7 +48,7 @@ fi
 cp -a ${INSTLDIR}/usr/lib/locale ${OVERLAYDIR}/usr/lib
 # /usr/lib/locale will be excluded from system.sqf
 
-# Restore old and move results to overlay?
+# Restore old locale files
 if [ -f ${INSTLDIR}/etc/locale.gen_old ]; then
     mv -f ${INSTLDIR}/etc/locale.gen_old ${INSTLDIR}/etc/locale.gen
     rm -Rf ${INSTLDIR}/usr/lib/locale

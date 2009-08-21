@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.17
+# 2009.08.21
 
 import os
 
@@ -37,7 +37,11 @@ class MediumPage:
                 (":bootlines*clicked", self.edit_bootlines),
                 (":grubtemplate*clicked", self.edit_grubtemplate),
                 (":syslinuxtemplate*clicked", self.edit_syslinuxtemplate),
-                (":partition*toggled", self.partition_toggled),
+
+                (":mediumtype*changed", self.partition_toggled),
+
+
+
                 (":$nodevice*toggled", self.search_toggled),
                 (":$uuid*toggled", self.uuid_toggled),
                 (":$label*toggled", self.label_toggled),
@@ -62,12 +66,9 @@ class MediumPage:
         """
         self.profile = config.get("profile")
 
-        iso = config.get("medium_iso") != ""
-        if iso:
-            command.ui(":iso.set", True)
-        else:
-            command.ui(":partition.set", True)
-        self.partition_toggled(not iso)
+        part = 1 if config.get("medium_iso") == "" else 0
+        command.ui(":mediumtype.set", part)
+        self.partition_toggled(part)
 
         btldr = config.get("medium_btldr")
 
@@ -105,9 +106,11 @@ class MediumPage:
         _medium_btldr("none", on)
 
 
-    def partition_toggled(self, on):
+    def partition_toggled(self, page):
+        on = (page == 1)
         config.set("medium_iso", "" if on else "yes")
-        command.ui(":framepart.enable", on)
+
+
         command.ui(":detection.enable", on)
         command.ui(":bootcd.enable", on)
 

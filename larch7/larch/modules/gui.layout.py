@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.08.16
+# 2009.08.21
 
 Namespace = ":"
 
@@ -21,6 +21,7 @@ Widgets = [
             ("page_installation", _("Installation")),
             ("page_larchify", _("Larchify")),
             ("page_medium", _("Prepare Medium")),
+            ("page_tweaks", _("Installation Tweaks")),
         ]
     ],
 
@@ -67,12 +68,15 @@ Widgets = [
   ["*LineEdit", "cache_show"],
   ["Button", "^cache_change", _("Change")],
 
+["Button", "^install", _("Install")],
+
+
+# Installation Tweaks Page
+["Frame", "pacmanops", _("Package Management")],
   ["Button", "^sync", _("Synchronize db")],
   ["Button", "^update", _("Update / Add package    [-U]")],
   ["Button", "^add", _("Add package(s)    [-S]")],
   ["Button", "^remove", _("Remove package(s)    [-Rs]")],
-
-["Button", "^install", _("Install")],
 
 
 # Larchify Page
@@ -92,28 +96,34 @@ Widgets = [
 
 # Prepare Medium Page
 #   - note that most of the RadioButtons need $names so that they are not blocked
-["Frame", "mediumtype", _("Medium Type")],
-  ["*RadioButton", "iso", "iso (CD/DVD)"],
-  ["*RadioButton", "^partition", _("Partition (disk / USB-stick):")],
-  ["*Frame", "framepart", ""],
-    ["*LineEdit", "larchpart"],
-    ["Button", "^selectpart", _("Choose")],
-    ["*CheckBox", "noformat", _("Don't format")],
+["*Notebook", "^mediumtype", [
+            ("medium_iso", "iso (CD/DVD)"),
+            ("medium_partition", _("Partition (disk / USB-stick)")),
+        ]
+    ],
 
-["Frame", "bootloader", _("Bootloader")],
-  ["*RadioButton", "^$grub", "GRUB"],
-  ["*RadioButton", "^$syslinux", "syslinux/isolinux"],
-  ["*RadioButton", "^$none", _("None (you'll need to provide some means of booting)")],
+["Label", "lmiso", _("There are no options specific to iso media.")],
+
+["Label", "lm2", _("Partition:")],
+["*LineEdit", "larchpart"],
+["Button", "^selectpart", _("Choose")],
+["*CheckBox", "noformat", _("Don't format")],
 
 ["*Frame", "detection", _("Medium Detection")],
   ["*RadioButton", "^$uuid", "UUID"],
   ["*RadioButton", "^$label", "LABEL"],
   ["*RadioButton", "^$device", _("Partition")],
-  ["*RadioButton", "^$nodevice", "Search for larch system (with larchboot)"],
+  ["*RadioButton", "^$nodevice", "Search (for larchboot)"],
 
   ["Label", "lm1", _("Medium label:")],
   ["*LineEdit", "labelname"],
   ["Button", "^changelabel", _("Change")],
+
+["Frame", "bootloader", _("Bootloader")],
+  ["*RadioButton", "^$grub", "GRUB"],
+  ["*RadioButton", "^$syslinux", "syslinux/isolinux"],
+  ["*RadioButton", "^$none", _("None")],
+  ["Label", "lmb1", _("(You'll need to\nprovide some\nmeans of\nbooting)")],
 
 ["*CheckBox", "larchboot", _("Bootable using larchboot search")],
 
@@ -147,6 +157,7 @@ Layout = [
     ["HBOX", "hbh2", ["hsh2", "showlog"]],
      ["HSPACE", "hsh2"],
 
+
 # Project Settings Page
 ["+LAYOUT", "page_settings", "vb_ps"],
 ["VBOX", "vb_ps", ["settings_profile", "vs1", "options_advanced"]],
@@ -167,6 +178,7 @@ Layout = [
 ["+LAYOUT", "project", "hb1"],
 ["HBOX", "hb1", ["choose_project", "choose_project_combo", "new_project", "project_delete"]],
 
+
 # Installation Page
 ["+LAYOUT", "page_installation", "vb_pi"],
 ["VBOX", "vb_pi", ["edit_profile", "settings_advanced", "hl1", "hb4"]],
@@ -179,14 +191,9 @@ Layout = [
     ],
 
 ["+LAYOUT", "settings_advanced", "vb5"],
-["VBOX", "vb5", ["hbi1", "hb5", "hl2", "g3"]],
+["VBOX", "vb5", ["hbi1", "hb5"]],
   ["HBOX", "hbi1", ["mirrorlist", "use_local_mirror"]],
   ["HBOX", "hb5", ["cache", "cache_show", "cache_change"]],
-  ["HLINE", "hl2"],
-  ["GRID", "g3",
-        ["sync", "update"],
-        ["add", "remove"]
-    ],
 
 ["+LAYOUT", "mirrorlist", "hb2"],
 ["HBOX", "hb2", ["mirrorlist_change"]],
@@ -197,44 +204,72 @@ Layout = [
 ["HBOX", "hb4", ["hs1", "install"]],
  ["HSPACE", "hs1"],
 
+
+# Installation Tweaks Page
+["+LAYOUT", "page_tweaks", "vb_pt"],
+["VBOX", "vb_pt", ["g3", "vst1"]],
+  ["GRID", "g3",
+        ["sync", "update"],
+        ["add", "remove"]
+    ],
+  ["VSPACE", "vst1"],
+
+
 # Larchify Page
 ["+LAYOUT", "page_larchify", "vb_pl"],
-["VBOX", "vb_pl", ["larchify", "vbs1", "locales", "rcconf",
+["VBOX", "vb_pl", ["larchify", "vbs1", "hbl2",
         "vbs2", "larchify_advanced", "hbl1"]],
-["VSPACE", "vbs1"],
-["VSPACE", "vbs2"],
+  ["HBOX", "hbl2", ["locales", "hsl3", "rcconf"]],
+    ["HSPACE", "hsl3"],
+  ["VSPACE", "vbs1"],
+  ["VSPACE", "vbs2"],
 
-["+LAYOUT", "larchify_advanced", "vbl1"],
-["VBOX", "vbl1", ["initcpio", "overlay", "filebrowser", "ssh", "oldsquash"]],
+  ["+LAYOUT", "larchify_advanced", "hbl3"],
+  ["HBOX", "hbl3", ["vbl1", "hsl2", "vbl2"]],
+    ["VBOX", "vbl1", ["initcpio", "overlay", "filebrowser"]],
+    ["VBOX", "vbl2", ["ssh", "vsl1", "oldsquash"]],
+      ["VSPACE", "vsl1"],
+   ["HSPACE", "hsl2"],
 
 ["HBOX", "hbl1", ["hsl1", "build"]],
  ["HSPACE", "hsl1"],
 
+
 # Prepare Medium Page
 ["+LAYOUT", "page_medium", "vb_pm"],
-["VBOX", "vb_pm", ["mediumtype", "bootloader", "detection",
-        "hbm3", "vsm1", "hlm1", "hbm4"]],
-  ["VSPACE", "vsm1"],
+["VBOX", "vb_pm", ["hb_pm", "hbm3", "hlm1", "hbm4"]],
+  ["HBOX", "hb_pm", ["vbm4", "bootloader"]],
+    ["VBOX", "vbm4", ["mediumtype", "vsm1"]],
+    ["VSPACE", "vsm1"],
   ["HLINE", "hlm1"],
 
-["+LAYOUT", "mediumtype", "vbm1"],
-["VBOX", "vbm1", ["iso", "hbm11"]],
-  ["HBOX", "hbm11", ["partition", "framepart"]],
-  ["+LAYOUT", "framepart", "hbm1"],
-  ["HBOX", "hbm1", ["larchpart", "selectpart", "noformat"]],
+["+LAYOUT", "medium_iso", "vbm1"],
+["VBOX", "vbm1", ["vsmi2", "lmiso", "vsmi2"]],
+  ["VSPACE", "vsmi1"],
+  ["VSPACE", "vsmi2"],
 
-["+LAYOUT", "bootloader", "hbm21"],
-["HBOX", "hbm21", ["$grub", "$syslinux", "$none"]],
+["+LAYOUT", "medium_partition", "vbm2"],
+["VBOX", "vbm2", ["hbm1", "detection", "hbm5"]],
+  ["HBOX", "hbm1", ["lm2", "larchpart", "selectpart", "noformat"]],
+  ["HBOX", "hbm5", ["bootcd", "vlm1", "larchboot"]],
+    ["VLINE", "vlm1"],
 
-["+LAYOUT", "detection", "vbm3"],
-["VBOX", "vbm3", ["hbm2a", "hbm2b"]],
-  ["HBOX", "hbm2a", ["$device", "$uuid", "$label", "$nodevice"]],
-  ["HBOX", "hbm2b", ["lm1", "labelname", "changelabel"]],
+  ["+LAYOUT", "detection", "vbm3"],
+  ["VBOX", "vbm3", ["hbm2a", "hbm2b"]],
+    ["HBOX", "hbm2a", ["$device", "$uuid", "$label", "$nodevice"]],
+    ["HBOX", "hbm2b", ["lm1", "labelname", "changelabel"]],
+
+
+["+LAYOUT", "bootloader", "vbm21"],
+["VBOX", "vbm21", ["$grub", "$syslinux", "vsmb1", "hlmb1", "vsmb2", "$none", "lmb1"]],
+  ["HLINE", "hlmb1"],
+  ["VSPACE", "vsmb1"],
+  ["VSPACE", "vsmb2"],
 
 ["HBOX", "hbm3", ["bootlines", "grubtemplate", "syslinuxtemplate"]],
 
-["HBOX", "hbm4", ["bootcd", "vlm1", "larchboot", "make"]],
-  ["VLINE", "vlm1"],
+["HBOX", "hbm4", ["hsm1", "make"]],
+  ["HSPACE", "hsm1"],
 
 ]
 

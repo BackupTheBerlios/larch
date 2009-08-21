@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.16
+# 2009.08.18
 
 import os
 
@@ -277,7 +277,7 @@ class Medium:
         mp = config.working_dir + "/mnt"
         if not os.path.isdir(mp):
             os.mkdir(mp)
-        if not supershell("mount %s %s" % (device, mp)).ok:
+        if not command.mount(device, mp):
             config_error(_("Couldn't mount larch partition, %s") % device)
             return False
         supershell("rm -rf %s/larch" % mp)
@@ -290,7 +290,7 @@ class Medium:
 
         # Copy files and unmount partition
         supershell("cp -a %s/* %s" % (self.medium, mp))
-        supershell("umount %s" % mp)
+        command.unmount(mp)
 
         # Now set up bootloader in MBR
         if btype == "boot":
@@ -310,7 +310,7 @@ class Medium:
         mp = config.working_dir + "/mnt"
         if not os.path.isdir(mp):
             os.mkdir(mp)
-        if not supershell("mount %s %s" % (device, mp)).ok:
+        if not command.mount(device, mp):
             config_error(_("Couldn't mount larch partition, %s") % device)
             return False
         isodir0 = config.larch_build_dir + "/bootiso"
@@ -339,7 +339,7 @@ class Medium:
             run_error(_("Device has neither a /boot nor a /syslinux directory"))
             ok = False
 
-        supershell("umount %s" % mp)
+        command.unmount(mp)
         supershell("rm -rf %s" % isodir)
         return ok
 

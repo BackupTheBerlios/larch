@@ -1,15 +1,27 @@
 
-gui: tooltips
+gui
+---
+
+tooltips - a generally useful feature
+
+Separate out the larch-specific part into a separate module from the
+code which could be used by other applications.
+
+--------------------------------------------------------
 
 use of old system.sqf: I THINK only changing of the base installed system
 should invalidate this, but I should check carefully. It is not easy to
 detect all possible changes to the base system, but pacman operations
-should be no problem (I haven't implemented these yet). Maybe it'll be
-clearer when I've gone through the build script.
+should be no problem. Rather than deleting an existing system.sqf I think
+it would be better to set a flag triggering a warning - because the user
+might well wish to make the odd change to the installed system in order
+to improve or debug the larch scripts, while using a know non-up-to-date
+system.sqf.
 
+-------------------------------------------------------
 
-medium
-------
+medium page
+-----------
 
 iso burn to CD/DVD?
 open browser on cd-root(?) folder
@@ -27,17 +39,15 @@ Threading
 Could still be the odd hiccup here, but seems to be working well.
 
 
-Quitting
---------
+Quitting / Breaking
+-------------------
 
-If I do a premature break (quit) I need to check that all mounted stuff
+If I do a premature break (or quit) I need to check that all mounted stuff
 (including dev,proc,sys) gets unmounted. This might be eased if I keep a
 record of everything that I have mounted.
 
 
-Breaking
---------
-
+Breaking:
 As threads in python cannot be killed (they must be exited), it is a bit
 tricky to break a long command (e.g. install, squash) without killing the
 whole program.
@@ -45,7 +55,7 @@ I use exceptions to terminate 'supershell' commands and then terminate
 the program. It might be possible to adapt this a bit to interrupt a command
 in the worker thread, but dealing with the consequences of an interrupted
 command might be difficult in the case of the program not being terminated,
-so for the moment no other interruption than a terminal one is supported.
+so for the moment no other interruption than a terminal (fatal) one is supported.
 
 
 

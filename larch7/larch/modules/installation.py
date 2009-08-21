@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.17
+# 2009.08.21
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -78,7 +78,7 @@ class Installation:
 
         fhi = open(pc0)
         fho = open(config.working_dir + "/pacman.conf", "w")
-        fho.write(pacmanoptions(fhi.read()))
+        fho.write(self.pacmanoptions(fhi.read()))
         fhi.close()
 
         # Get the repositories from pacman.conf.larch
@@ -128,7 +128,8 @@ class Installation:
         working directory, the installation path or the cache directory
         changes. It might be easier to regenerate every time pacman is used.
         """
-        self.pacman_cmd = ("%s -r %s --config %s --noconfirm --noprogressbar" %
+#        self.pacman_cmd = ("%s -r %s --config %s --noconfirm --noprogressbar" %
+        self.pacman_cmd = ("%s -r %s --config %s --noconfirm" %
                 (config.pacman, config.get("install_path"),
                  config.working_dir + "/pacman.conf"))
         cache = config.get("pacman_cache")
@@ -275,24 +276,23 @@ class Installation:
         ok = supershell("%s %s %s" % (self.pacman_cmd, op, arg)).ok
 
         # (c) Remove bound mounts
-        command.unmount("%s/sys" % ipath)
-        command.unmount("%s/proc" % ipath)
+        command.unmount(("%s/sys" % ipath, "%s/proc" % ipath))
         return ok
 
 
-def pacmanoptions(text):
-    """A filter for pacman.conf to remove the repository info.
-    """
-    texto = ""
-    block = ""
-    for line in text.splitlines():
-        block += line + "\n"
-        if line.startswith("#["):
-            break
-        if line.startswith("[") and not line.startswith("[options]"):
-            break
-        if not line.strip():
-            texto += block
-            block = ""
-    return texto
+    def pacmanoptions(self, text):
+        """A filter for pacman.conf to remove the repository info.
+        """
+        texto = ""
+        block = ""
+        for line in text.splitlines():
+            block += line + "\n"
+            if line.startswith("#["):
+                break
+            if line.startswith("[") and not line.startswith("[options]"):
+                break
+            if not line.strip():
+                texto += block
+                block = ""
+        return texto
 

@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.18
+# 2009.08.21
 
 """Build a gui from a layout description.
 """
@@ -252,6 +252,9 @@ class Notebook(QtGui.QTabWidget):                           #qt
             self.x_mywidgets[tname] = tw                    #qt
 
             self.x_tabs.append([tname, tw])
+
+    def set(self, index=0):
+        self.setCurrentIndex(index)                         #qt
 
 class _NotebookPage(QtGui.QWidget):                         #qt
     def __init__(self):                                     #qt

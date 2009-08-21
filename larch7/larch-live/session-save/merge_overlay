@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# merge_overlay   - recreate 'mods' squashfs
+# merge_overlay   - rebuild the overlays (clearing the top layer)
 
 # Author: Michael Towers (larch42 at googlemail dot com)
 #
@@ -21,9 +21,8 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.12
+# 2009.08.21
 
-# Tries to rebuild mods.sqf on aufs, otherwise adds a new modsNN.sqf overlay
 
 # test if the script is started by root user. If not, exit
 if [ $UID -ne 0 ]; then
@@ -31,6 +30,7 @@ if [ $UID -ne 0 ]; then
 fi
 
 # Underlying system:        /.livesys/system
+# 'filter' layer:           /.livesys/filter
 # 'mods' layer:             /.livesys/mods
 # Overlay:                  /.livesys/overlay
 
@@ -42,9 +42,8 @@ domerge ()
     mkdir -p ${merge_union}
 
     echo "Mounting merge union"
-    # This is using a new feature of aufs, to show whiteouts.
-    layers="/.livesys/overlay=${ovl2mnt}:/.livesys/mods=${ovlmnt}"
-    mount -t ${utype} -o ro,shwh,${bropt}${layers} ${utype} ${merge_union}
+    layers="/.livesys/overlay=${ovlmnt}:/.livesys/mods=${sqfmnt}"
+    mount -t ${utype} -o ro,${bropt}${layers} ${utype} ${merge_union}
     if [ $? -ne 0 ]; then
         echo "** Couldn't mount merge union."
         return 1
@@ -57,11 +56,46 @@ domerge ()
     umount ${merge_union}
     rm -r ${merge_union}
 
-    [ ${res} -ne 0 ] && return 2
+    return ${res}
+}
 
-    echo "Renaming mods.tmp to mods.sqf_"
-    mv "${overlaypath}/mods.tmp" "${overlaypath}/mods.sqf_"
-    echo "merging finished"
+dofilter()
+{
+    # Make a directory for a new filter
+    filter_new=/.livesys/filter_new
+    rm -rf ${filter_new}
+    mkdir -p ${filter_new}
+
+    # Make a directory for a new union
+    filter_union=/.livesys/filter_union
+    rm -rf ${filter_union}
+    mkdir -p ${filter_union}
+
+    echo "Mounting filter union"
+    layers="/.livesys/filter_new=${ovlwmnt}:/.livesys/system=${sqfmnt}"
+    mount -t ${utype} -o ${bropt}${layers} ${utype} ${filter_union}
+    if [ $? -ne 0 ]; then
+        echo "** Couldn't mount filter union."
+        return 1
+    fi
+
+    newfilter ${filter_union}
+
+    # Discard filter union
+    umount ${filter_union}
+    rm -r ${filter_union}
+
+    mksquashfs ${filter_new} "${overlaypath}/filter.tmp"
+    res=$?
+
+    # Discard filter build directory
+    rm -r ${filter_new}
+
+    if [ ${res} -ne 0 ]; then
+        echo "ERROR: Couldn't create ${overlaypath}/filter.tmp"
+        return 1
+    fi
+    return 0
 }
 
 
@@ -74,10 +108,12 @@ newmods ()
     #   conflicting permissions on the mount point when I didn't use a single
     #   source for squashfs - for some reason the squashfs root was set to
     #   mode 0777.)
+
     # The other version was:
+
     ## root directories which are included in mods.sqf
     #includedirs=""
-    #for d in bin boot home lib mnt opt root sbin srv usr var; do
+    #for d in bin boot etc home lib mnt opt root sbin srv usr var; do
     #    if [ -d ${olaydir}/${d} ]; then
     #        includedirs="${includedirs} ${olaydir}/${d}"
     #    fi
@@ -92,7 +128,7 @@ newmods ()
     mkdir -p ${mods2}
     # root directories which are included in mods.sqf
     includedirs=""
-    for d in bin boot home lib mnt opt root sbin srv usr var; do
+    for d in bin boot etc home lib mnt opt root sbin srv usr var; do
         if [ -d ${olaydir}/${d} ]; then
             includedirs="${includedirs} ${d}"
             mkdir ${mods2}/${d}
@@ -108,32 +144,34 @@ newmods ()
         umount ${mods2}/${d}
     done
     rm -r ${mods2}
-    #---
+
     if [ ${res} -ne 0 ]; then
         echo "ERROR: Couldn't create ${overlaypath}/mods.tmp"
-        rm -f "${overlaypath}/mods.tmp"
         return 1
     fi
-
-    echo "Recreating top overlay to ${overlaypath}/overlay.tar.lzo_"
-    # Compress the overlay (with root dir 'overlay' retained)
-    tar -cf - -C /.livesys overlay/etc | lzop > ${overlaypath}/overlay.tar.lzo_
-    if [ $? -ne 0 ]; then
-        echo "ERROR: couldn't create ${overlaypath}/overlay.tar.lzo_"
-        rm -f ${overlaypath}/overlay.tar.lzo_
-        return 1
-    fi
+    return 0
 }
 
 
-doaddmod ()
+newfilter()
 {
-    ! newmods /.livesys/overlay && return 2
-    printf -v newmodfile "mods%02d.sqf" ${#msqfs[@]}
-    echo "Renaming mods.tmp to ${newmodfile}"
-    mv "${overlaypath}/mods.tmp" "${overlaypath}/${newmodfile}"
+    olaydir=$1
+    echo "Building new 'filter' overlay to ${overlaypath}/filter.tmp"
+    # 'Copy' existing filter
+    if [ -d cd /.livesys/filter ]; then
+        find . | while read n; do rm -rf "${olaydir}${n:1}"; done
+    fi
+    # Add relevant whiteouts from overlay
+    cd /.livesys/overlay
+    find . -name .wh.* | while read n; do
+            if [ "${n##*/}" = "${opq}" ]; then
+                d="${n%/*}"
+                rm -rf "${olaydir}${d:1}"
+            else
+                rm -rf "${olaydir}${n:1}"
+            fi
+        done
 }
-
 
 # The overlay device (where the archives will be saved)
 echo "Rebuild squashfs overlay"
@@ -144,23 +182,41 @@ else
     exit 1
 fi
 
-msqfs=( $( cd ${overlaypath}; echo mods*.sqf ) )
-
 utype="$( cat /.livesys/utype )"
-if [ "${utype}" = "aufs" ] && [ ${#msqfs[@]} -eq 1 ]; then
+if [ "${utype}" = "aufs" ]; then
     sqfmnt="rr"
-    ovlmnt="rr+wh"
-    ovl2mnt="ro+wh"
+    ovlmnt="ro"
+    ovlwmnt="rw"
     bropt="br:"
     opq=".wh..wh..opq"
-    whlink=".wh..wh.aufs .wh..wh.plink"
 
     # flush pseudo-links (which keep track of changed hard linked files)
     auplink / flush
-    domerge
-    r=$?
-    [ ${r} -ne 1 ] && exit ${r}
+
+elif [ "${utype}" = "unionfs" ]; then
+
+# It might well be that unionfs requires a writeable top layer, so the
+# present code would need modifying ...
+
+    sqfmnt="ro"
+    ovlmnt="ro"
+    ovlwmnt="rw"
+    bropt="dirs="
+    opq=".wh.__dir_opaque"
+
+else
+    echo "ERROR: Couldn't determine type of unification file-system"
+    exit 1
 fi
 
-doaddmod
+if domerge && dofilter; then
+    echo "Renaming mods.tmp to mods.sqf_"
+    mv "${overlaypath}/mods.tmp" "${overlaypath}/mods.sqf_"
+    echo "Renaming filter.tmp to ${newmodfile}"
+    mv "${overlaypath}/filter.tmp" "${overlaypath}/filter.sqf_"
+else
+    rm -f "${overlaypath}/mods.tmp"
+    rm -f "${overlaypath}/filter.tmp"
+    exit 1
+fi
 

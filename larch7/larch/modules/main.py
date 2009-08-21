@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.18
+# 2009.08.21
 
 """This is the main module of the actual larch code, which is started by
 the 'larch.py' script as a separate process.
@@ -55,11 +55,14 @@ from Queue import Queue
 import json
 
 import base
+from installation import Installation
 
 from projectpage import ProjectPage
 from installpage import InstallPage
 from buildpage import BuildPage
 from mediumpage import MediumPage
+from tweakpage import TweakPage
+
 
 def debug(text):
     sys.stderr.write("DEBUG: " + text.strip() + "\n")
@@ -96,7 +99,8 @@ class Command:
         self.blocking = False
 
         # Initialize gui modules
-        self.pages = [ProjectPage(), InstallPage(), BuildPage(), MediumPage()]
+        self.pages = [ProjectPage(), InstallPage(), BuildPage(),
+                MediumPage(), TweakPage()]
 
         # Connect up the signals and slots
         self.connections = {
@@ -258,16 +262,20 @@ class Command:
 
     def unmount(self, dst=None):
         if dst == None:
-            r = True
-            for m in list(self.mounts):
-                if not self.unmount(m):
-                    r = False
-            return r
+            mounts = list(self.mounts)
+        elif type(dst) in (list, tuple):
+            mounts = list(dst)
+        else:
+            mounts = [dst]
 
-        if supershell("umount %s" % dst).ok:
-            self.mounts.remove(dst)
-            return True
-        return False
+        r = True
+        for m in mounts:
+            if supershell("umount %s" % m).ok:
+                self.mounts.remove(m)
+            else:
+                r = False
+        return r
+
 
     def edit(self, fname, source=None, label=None, filter=None):
         if "/" in fname:
@@ -300,17 +308,15 @@ class Command:
 
     def chroot(self, cmd, mounts=[]):
         ip = config.get("install_path")
-        for m in mounts:
-            if ip != "/":
-                supershell("mount --bind /%s %s/%s" % (m, ip, m))
-
         if ip != "/":
+            for m in mounts:
+                self.mount(m, "%s/%s" % (ip, m), "--bind")
             cmd = "chroot %s %s" % (ip, cmd)
+
         s = supershell(cmd)
 
-        for m in mounts:
-            if ip != "/":
-                supershell("umount %s/%s" % (ip, m))
+        if ip != "/":
+            self.unmount(["%s/%s" % (ip, m) for m in mounts])
 
         if s.ok:
             if s.result:
@@ -471,7 +477,8 @@ def itstart():
         commqueue.put("X:%s" % line)
 
 
-re_progress = re.compile(r"X:-\[.*\](.* ([0-9]+)%)")
+re_mksquashfs = re.compile(r"X:-\[.*\](.* ([0-9]+)%)")
+re_pacman = re.compile(r"X:-.*\[([-#]+)\]\s+[0-9]+%")
 def ltstart():
     """A thread function for reading log lines from the log queue and
     passing them to the logger.
@@ -480,7 +487,7 @@ def ltstart():
     while True:
         line = logqueue.get()
         # Filter the output of mksquashfs
-        m = re_progress.match(line)
+        m = re_mksquashfs.match(line)
         if m:
             if not progress:
                 command.ui("log:logtext.append_and_scroll", "dummy\n")
@@ -492,6 +499,11 @@ def ltstart():
                 command.ui("log:logtext.undo")
                 line = "X:++++%s\n" % m.group(1)
         else:
+            m = re_pacman.match(line)
+            if m:
+                if '#' in m.group(1):
+                    command.ui("log:logtext.undo")
+
             progress = ""
         command.ui("log:logtext.append_and_scroll", line)
 
@@ -512,6 +524,8 @@ if __name__ == "__main__":
     guiprocess = Popen(guiexec, cwd=base_dir, stdin=PIPE, stdout=PIPE)
     gthread = simple_thread(gtstart, guiprocess)
 
+    __builtin__.installation = Installation()
+
     __builtin__.command = Command()
     __builtin__.config = base.LarchConfig(os.environ["HOME"])
 
@@ -520,6 +534,7 @@ if __name__ == "__main__":
     ithread = simple_thread(itstart)
 
     __builtin__.supershell = command.supershell
+
     command.run()
     mainloop(sys.stdin)
 

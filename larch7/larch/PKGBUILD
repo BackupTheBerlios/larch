@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.08.18
+# 2009.08.21
 pkgname=larch
-pkgver=7.0.17
+pkgver=7.0.22
 pkgrel=1
 
 # If I need the architecture, I can get it as ${CARCH}
@@ -17,10 +17,10 @@ build() {
   for d in buildscripts cd-root data docs i18n modules profiles run; do
     cp -dr ${startdir}/${d} ${pkgdir}/opt/larch
   done
-  
+
   cp -dr ${startdir}/etc ${pkgdir}
   cp ${startdir}/{larchicon.png,larch80.png} ${pkgdir}/opt/larch
-  
+
   mkdir -p ${pkgdir}/usr/share/pixmaps
   cp ${startdir}/larch.png ${pkgdir}/usr/share/pixmaps
   mkdir -p ${pkgdir}/usr/share/applications

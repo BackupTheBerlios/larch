@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.15
+# 2009.08.21
 
 import os
 
@@ -79,6 +79,7 @@ class ProjectPage:
                 self.projects.index(self.project))
         command.ui(":installation_path_show.set", self.installpath)
         command.ui(":notebook.setTabEnabled", 1, self.installpath != "/")
+        command.ui(":notebook.setTabEnabled", 4, self.installpath != "/")
 
 
     def switch_profile(self, index):

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.18
+# 2009.08.19
 
 import os, sys
 from glob import glob
@@ -140,7 +140,7 @@ class Builder:
         supershell("mv %s %s/larch" % (self.system_sqf, self.medium))
 
         # prepare overlay
-        command.log("#Generating larch overlays")
+        command.log("#Generating larch overlay")
         # Copy over the overlay from the selected profile
         if os.path.isdir("%s/rootoverlay" % self.profile):
             supershell("cp -rf %s/rootoverlay/* %s" % (self.profile, self.overlay))
@@ -187,19 +187,12 @@ class Builder:
         supershell("mkdir -p %s/boot" % self.overlay)
 
         command.log("#Squashing mods.sqf")
-        if not command.chroot('/sbin/mksquashfs "%s" "%s/larch/mods.sqf" -e etc'
+        if not command.chroot('/sbin/mksquashfs "%s" "%s/larch/mods.sqf"'
                 % (config.overlay_build_dir, config.medium_dir)):
             command.error("Warning", _("Squashing mods.sqf failed"))
             return False
         # remove execute attrib
         supershell("chmod oga-x %s/larch/mods.sqf" % self.medium)
-
-        overlayfile = "overlay.tar.lzo"
-        command.log("#Compressing " + overlayfile)
-        if not command.chroot('sh -c "tar -cf - -C %s/tmp overlay/etc | lzop > %s/larch/%s"'
-                % (config.larch_build_dir, config.medium_dir, overlayfile)):
-            command.error("Warning", _("Compressing %s failed") % overlayfile)
-            return False
 
         supershell("rm -rf %s" % self.overlay)
         # The medium boot directory needs to be kept outside of the medium
