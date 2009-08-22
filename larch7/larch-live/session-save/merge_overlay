@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.21
+# 2009.08.22
 
 
 # test if the script is started by root user. If not, exit
@@ -210,10 +210,7 @@ else
 fi
 
 if domerge && dofilter; then
-    echo "Renaming mods.tmp to mods.sqf_"
-    mv "${overlaypath}/mods.tmp" "${overlaypath}/mods.sqf_"
-    echo "Renaming filter.tmp to ${newmodfile}"
-    mv "${overlaypath}/filter.tmp" "${overlaypath}/filter.sqf_"
+    echo "Merge successful"
 else
     rm -f "${overlaypath}/mods.tmp"
     rm -f "${overlaypath}/filter.tmp"

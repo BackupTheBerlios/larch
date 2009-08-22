@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.21
+# 2009.08.22
 
 """This is the main module of the actual larch code, which is started by
 the 'larch.py' script as a separate process.
@@ -302,15 +302,14 @@ class Command:
 
     def browser(self, path):
         cmd = config.get("filebrowser").replace("%", path)
-        #?Popen(cmd, shell=True, stdout=open("/dev/null"), stderr=STDOUT)
-        Popen(cmd, shell=True)
+        Popen(cmd + " &", shell=True)
 
 
     def chroot(self, cmd, mounts=[]):
         ip = config.get("install_path")
         if ip != "/":
             for m in mounts:
-                self.mount(m, "%s/%s" % (ip, m), "--bind")
+                self.mount("/" + m, "%s/%s" % (ip, m), "--bind")
             cmd = "chroot %s %s" % (ip, cmd)
 
         s = supershell(cmd)
@@ -340,6 +339,27 @@ class Command:
 
     def error(self, etype, message, *args):
         self.sendui("_!_ " + json.dumps((etype, message) + args))
+
+
+    def check_platform(self, report=True):
+        arch = Popen(["cat", config.ipath(".ARCH")],
+                stdout=PIPE, stderr=PIPE).communicate()[0].strip()
+        if arch:
+            if arch != config.get("platform"):
+                if report:
+                    config_error(_("Platform error, installed system is %s")
+                            % arch)
+                return False
+        else:
+            if report:
+                config_error(_("No installed system found"))
+            return False
+        return True
+
+
+    def enable_tweaks(self):
+        self.ui(":notebook.enableTab", 4, (config.get("install_path") != "/"
+                and self.check_platform(report=False)))
 
 
     def NYI(self):

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.21
+# 2009.08.22
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -83,14 +83,11 @@ class Installation:
 
         # Get the repositories from pacman.conf.larch
         #  - first find a substitute for /etc/pacman.d/mirrorlist
-        mf = None
         f = config.working_dir + "/mirrorlist"
         if config.get("usemirrorlist") and os.path.isfile(f):
             mf = f
-        f = base_dir + "/mirrorlist"
-        if ((not os.path.isfile("/etc/pacman.d/mirrorlist")) and (not mf)
-                and os.path.isfile(f)):
-            mf = f
+        else:
+            mf = None
 
         # - then update the Server entries, if necessary
         fhi = open(pc1)
@@ -142,7 +139,6 @@ class Installation:
         set of packages, together with any additional ones listed in the
         file 'addedpacks' (in the profile).
         """
-
         installation_path = config.ipath()
 
         # Can't delete the whole directory because it might be a mount point
@@ -233,10 +229,15 @@ class Installation:
             if not (config.get("usemirrorlist") and os.path.isfile(mf)):
                 mf = "/etc/pacman.d/mirrorlist"
                 if not os.path.isfile(mf):
-                    mf = base_dir + "/data/mirrorlist.%s" % config.get("platform")
-            supershell("cp -f %s %s" % (mf,
-                    installation_path + "/etc/pacman.d/mirrorlist"))
+                    mf = None
+            if mf:
+                supershell("cp -f %s %s" % (mf,
+                        installation_path + "/etc/pacman.d/mirrorlist"))
 
+        # Make a note of the installation's architecture
+        supershell("echo '%s' > %s" % (config.get("platform"),
+                installation_path + "/.ARCH"))
+        command.enable_tweaks()
         return ok
 
 
@@ -245,13 +246,15 @@ class Installation:
         This is done using using 'pacman ... -Sy' together with
         an appropriate pacman.conf file.
         """
-        ok = self.x_pacman("-Sy")
+        ok = self.x_pacman("-Sy", mounts=False, check=False)
         if not ok:
             run_error(_("Couldn't synchronize pacman database (pacman -Sy)"))
         return ok
 
 
-    def x_pacman(self, op, arg="", mounts=True):
+    def x_pacman(self, op, arg="", mounts=True, check=True):
+        if check and not command.check_platform():
+            return False
         self.make_pacman_conf("local" if config.get("uselocalmirror") else "")
         self.make_pacman_command()
         if mounts:

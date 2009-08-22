@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.08.21
+# 2009.08.22
 
 Namespace = ":"
 
@@ -35,6 +35,8 @@ Widgets = [
   ["Button", "^profile_rename", _("Rename")],
   ["Button", "^profile_delete", _("Delete")],
 
+["Label", "lplat", _("Platform (processor architecture):")],
+["*ComboBox", "^platform"],
 
 ["OptionalFrame", "options_advanced", _("Advanced Options")],
   ["Frame", "project", _("Project")],
@@ -160,7 +162,7 @@ Layout = [
 
 # Project Settings Page
 ["+LAYOUT", "page_settings", "vb_ps"],
-["VBOX", "vb_ps", ["settings_profile", "vs1", "options_advanced"]],
+["VBOX", "vb_ps", ["settings_profile", "vs1", "hbplat", "options_advanced"]],
  ["VSPACE", "vs1"],
 
 ["+LAYOUT", "settings_profile", "g1"],
@@ -169,6 +171,9 @@ Layout = [
     ["new_profile",    "profile_browse",       "|",   "profile_delete"]
     ],
  ["VLINE", "vl1"],
+
+["HBOX", "hbplat", ["hsplat", "lplat", "platform"]],
+  ["HSPACE", "hsplat"],
 
 ["HBOX", "hb0", ["installation_path", "installation_path_show",
         "installation_path_change"]],

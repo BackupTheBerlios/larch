@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.17
+# 2009.08.22
 
 """This module handles the basic framework and configuration of the
 larch build system.
@@ -104,6 +104,13 @@ class LarchConfig:
             project = self.config.get("_", "project")
         else:
             project = project0
+        self.architecture = os.uname()[4]
+        if self.architecture == "i686":
+            self.platforms = ["i686"]
+        elif self.architecture == "x86_64":
+            self.platforms = ["x86_64", "i686"]
+        else:
+            fatal_error(_("Unknown platform: '%s'") % self.architecture)
         self.setproject(project)
 
 
@@ -132,10 +139,9 @@ class LarchConfig:
             self.set("profile", self.defaultprofile())
 
         if not self.get("platform"):
-        #TODO: Is this used?
             # Is cross-platform building possible? It is conceivable that
             # an i686 larch system could be built on an x86_64 platform.
-            self.set("platform", os.uname()[4])
+            self.set("platform", self.architecture)
 
 
     def get(self, item):

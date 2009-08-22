@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.21
+# 2009.08.22
 
 import os
 
@@ -31,6 +31,7 @@ class ProjectPage:
     """
     def connect(self):
         return [
+                (":platform*changed", self.switch_platform),
                 (":choose_profile_combo*changed", self.switch_profile),
                 (":profile_rename*clicked", self.get_new_profile_name),
                 (":profile_browse*clicked", self.new_profile),
@@ -73,13 +74,26 @@ class ProjectPage:
         self.projects.sort()
         self.project = config.project
 
+        i = config.platforms.index(config.get("platform"))
+        command.ui(":platform.set", config.platforms, i)
+
         command.ui(":choose_profile_combo.set", self.profiles,
                 self.profiles.index(self.profilename))
         command.ui(":choose_project_combo.set", self.projects,
                 self.projects.index(self.project))
         command.ui(":installation_path_show.set", self.installpath)
-        command.ui(":notebook.setTabEnabled", 1, self.installpath != "/")
-        command.ui(":notebook.setTabEnabled", 4, self.installpath != "/")
+        command.ui(":notebook.enableTab", 1, self.installpath != "/")
+        command.enable_tweaks()
+
+
+    def switch_platform(self, index):
+        """This has no effect on the display!
+        It is assumed that the display is already updated, or will be
+        updated later.
+        Invalidates the installation for another platform.
+        """
+        config.set("platform", config.platforms[index])
+        self.setup()
 
 
     def switch_profile(self, index):
