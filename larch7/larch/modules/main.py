@@ -253,7 +253,7 @@ class Command:
         self.sendui("/")
 
 
-    def mount(self, src, dst, opts):
+    def mount(self, src, dst, opts=""):
         if supershell("mount %s %s %s" % (opts, src, dst)).ok:
             self.mounts.append(dst)
             return True
