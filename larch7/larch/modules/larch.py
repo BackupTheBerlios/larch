@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.18
+# 2009.08.22
 
 """This is the initial module of the larch live-builder program. It should
 be started with su or sudo, but in such a way that the environment variable
@@ -51,6 +51,7 @@ def chid():
     the subprocess.
     """
     os.environ["HOME"] = userinfo[2]
+    os.environ["XAUTHORITY"]=userinfo[2] + "/.Xauthority"
     os.setgid(userinfo[1])
     os.setuid(userinfo[0])
 

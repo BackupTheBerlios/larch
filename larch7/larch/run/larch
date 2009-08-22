@@ -11,4 +11,17 @@ cd ${SCRIPTDIR}/../modules
 # might be better to byte compile.
 export PYTHONDONTWRITEBYTECODE=x
 
-python larch.py
+if [ ${UID} -eq 0 ]; then
+    cmd=""
+elif $( which gksu &>/dev/null ); then
+    cmd="gksu "
+elif $( which gksu &>/dev/null ); then
+    cmd="kdesu "
+else
+    echo "larch must be run with root privileges." 1>&2
+    echo "  Try installing gksu or kdesu." 1>&2
+    echo "  You could also try 'su -c ./larch' in a terminal." 1>&2
+    exit 1
+fi
+
+${cmd} python larch.py &>/dev/null &

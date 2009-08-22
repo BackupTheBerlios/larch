@@ -537,10 +537,10 @@ if __name__ == "__main__":
     commqueue = Queue()
     logqueue = Queue()
     # Various ui toolkits could be supported, but at the moment there
-    # is only ...
+    # is only support for pyqt
     if True:
         # In list form suitable for subprocess.Popen()
-        guiexec = ["%s/modules/guibuild.py" % base_dir]
+        guiexec = [base_dir + "/modules/pyqt/larchgui.py"]
     guiprocess = Popen(guiexec, cwd=base_dir, stdin=PIPE, stdout=PIPE)
     gthread = simple_thread(gtstart, guiprocess)
 

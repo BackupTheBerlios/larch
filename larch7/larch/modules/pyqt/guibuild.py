@@ -598,14 +598,18 @@ class GuiApp:
     """This class represents an application gui, possibly with more than
     one top level window, these being defined in layout files.
     """
-    def __init__(self):
+    def __init__(self, qtapp):
+        global app, guiapp
+        app = qtapp
+        guiapp = self
         self.windows = []
         self.connections = {}
         self.widgets = {}
 
 
-    def init(self, windowfiles):
-        dir = os.path.dirname(__file__)
+    def init(self, windowfiles, dir=None):
+        if not dir:
+            dir = os.path.dirname(__file__)
         for f in windowfiles:
             d = {}
             execfile("%s/%s" % (dir, f), globals(), d)
@@ -868,104 +872,6 @@ class Input(QtCore.QThread):                                #qt
             if not line:        # Is this at all possible?
                 return
             self.emit(self.lineReady, line)                 #qt
+#---------------------------
 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#TODO:
-# This is preliminary Test Code. It needs to be changed to something
-# more appropriate in the final version.
-
-# See if an update to PyQt4.5 allows me to set the options
-# Also see if I can add home and filesystem to the urls
-def specialFileDialog(caption, directory, label, urls):
-    dlg = QtGui.QFileDialog(None, caption, directory)       #qt
-    dlg.setFileMode(QtGui.QFileDialog.Directory)            #qt
-    urlsqt = [ QtCore.QUrl.fromLocalFile(u) for u in urls ] #qt
-    dlg.setSidebarUrls(urlsqt)                              #qt
-    dlg.setReadOnly(True)
-    #dlg.setOptions(dlg.DontUseNativeDialog | dlg.ShowDirsOnly)
-    #     | dlg.ReadOnly)                                   #qt
-    # add new name line instead of file type
-    dlg.setLabelText(dlg.FileType, label)
-
-    l = dlg.layout()
-#    lbl=QtGui.QLabel(label)                                 #qt
-#    l.itemAtPosition (3, 0).widget().hide()
-#    l.addWidget(lbl, 3, 0)
-    e = QtGui.QLineEdit()
-    l.itemAtPosition (3, 1).widget().hide()
-    l.addWidget(e, 3, 1)
-    if dlg.exec_():
-        path = dlg.selectedFiles()[0]
-        return((True, str(path).strip(), str(e.text()).strip()))
-    else:
-        return ((False, None, None))
-
-specials_table["specialFileDialog"] = specialFileDialog
-
-
-if __name__ == "__main__":
-    # Could get the gui files from sys.argv[1:]
-    app = QtGui.QApplication([])                            #qt
-
-    import gettext
-    lang = os.getenv("LANG")
-    if lang:
-        gettext.install('larch', 'i18n', unicode=1)
-
-    class Larch(GuiApp):
-        dummyargs = "[null, []]"
-        def __init__(self):
-            GuiApp.__init__(self)
-
-        def init(self):
-            GuiApp.init(self, ["gui.layout.py", "log.layout.py",
-                    "editor.layout.py", "partlist.layout.py"])
-            self.logwidget = self.widgets["log:logtext"]
-            self.widgets["log:log"].widget.trapclose = self.dohide
-            self.widgets[":larch"].widget.trapclose = self.doquit
-
-        def new_line(self, line):
-            text = str(line).strip()
-
-            #DEBUG
-            #sys.stderr.write(text+'\n')
-            #sys.stderr.flush()
-
-            if text.startswith("_!_"):
-                einfo = json.loads(text[3:])
-                if einfo[0] == "Warning":
-                    gui_warning(*einfo[1:])
-                else:
-                    gui_error(*einfo[1:])
-
-            elif text.startswith("!") or text.startswith("?"):
-                GuiApp.new_line(self, text)
-
-            elif text.startswith("/"):
-                app.quit()
-
-            else:
-                self.got(text.rstrip())
-
-        def got(self, line):
-            self.logwidget.append_and_scroll(line)
-
-        def dohide(self, *args):
-            self.send("^", "$$$hidelog$$$ " + Larch.dummyargs)
-            return True
-
-        def doquit(self, *args):
-            if confirmDialog(_("Do you really want to quit the program?")):
-                self.send("^", "$$$uiquit$$$ " + Larch.dummyargs)
-            return True
-
-    # We need a global GuiApp instance
-    guiapp = Larch()
-    guiapp.init()
-
-    ithread = Input(sys.stdin, guiapp.new_line)
-    ithread.start()
-
-    guiapp.show(":larch")
-    app.exec_()                                             #qt
 
