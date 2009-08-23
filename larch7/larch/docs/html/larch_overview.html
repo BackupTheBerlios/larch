@@ -21,9 +21,7 @@
 
 <br />
 
-<h1><big>larch</big>
-&ndash;
-a do-it-yourself live <em>Arch Linux</em> CD</h1>
+<h1><big>larch</big> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
 
 <img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch1.jpg"
   name="graphics1" align="right" hspace="10" vspace="10" />
@@ -35,49 +33,69 @@ a do-it-yourself live <em>Arch Linux</em> CD</h1>
 <blockquote>
 <h3>Warning</h3>
 
-<p><em>Before we get started I should point out that most of the scripts need to
-be run by the 'root' user. That is quite normal for an installer, but it is somewhat
-risky - a slight slip and all sorts of damage could be done. Ideally you would
-have a machine specially set aside for this sort of thing, i.e. one without any
+<p><em>Before we get started I should point out that <em>larch</em> must have
+root privileges in order to do its work, and that much of this work consists of
+deleting and overwriting files and even complete directories. If just one of these
+is wrong it might make quite a mess of your system. That is quite normal for an
+installer, but you will be using it on a system that is already configured and this
+is somewhat risky - a slight slip and all sorts of damage could be done. Ideally you
+would have a machine specially set aside for this sort of thing, i.e. one without any
 important data on it. <strong>You have been warned!</strong></em>
 </p>
 </blockquote>
 
-<h3><a name="larch_installation"></a>Installation of the <em>larch</em> build system</h3>
+<h3><a name="larch_installation"></a>Installation of the <em>larch</em> build 
+system</h3>
 
-<p>The <em>larch</em> package may be installed in the normal <em>Arch Linux</em> way using
-<em>pacman</em>. This method will only work on an <em>Arch</em> system, of course.
+<p>The <em>larch</em> package may be installed in the normal
+<em>Arch Linux</em> way using <em>pacman</em>. This method will only work on
+an <em>Arch</em> system, of course. The <em>larch</em> repository can be
+found at <a href="ftp://ftp.berlios.de/pub/larch/larch7/i686/"><strong>berlios</strong></a>.
 </p>
 
 <p>Alternatively, <em>larch</em> may be used without installing it.
-This should also work on non-<em>Arch Linux</em> systems. Download
-<a href="ftp://ftp.berlios.de/pub/larch/larch5.3/i686/larch-setup"><strong>larch-setup</strong></a>
-to an empty working directory and run it (it is a shell script). This will in
-turn download and unpack the current larch package, setting up symlinks so that
-the build scripts can be run from this working directory.
-If you don't put this new directory on your 'PATH', you may well
-need to add a path prefix when running it (e.g. './mklarch' if your current
-directory is the one containing the script).
+This should also work on non-<em>Arch Linux</em> systems. Download the latest
+<em>larch</em> package from the repository and unpack it somewhere convenient.
+To start <em>larch</em> you need to run the file 'opt/larch/run/larch'. If you have
+installed the package with <em>pacman</em>, 'opt/larch/run' should now be in
+your $PATH (at least after the next login), so just 'larch' should suffice to get it going.
 </p>
 
 <h3><a name="larch_using"></a>Using the <em>larch</em> build system</h3>
 
-<p>For building a live medium from a 'profile' you need, primarily, <strong>mklarch</strong>;
-for building from an existing installation (including rebuilding after using
-<strong>mklarch</strong>) <strong>larchify</strong>. <strong>mklarch</strong>
-uses <strong>inpacs</strong> to do the actual installation of the packages,
-and the functions for performing the live CD creation are in the file
-(larch/)<strong>buildlive</strong>.
+<h4><a name="larch_projects"></a>Projects</h4>
+<p>A <em>larch</em> project simply gathers together a few configuration options
+concerning the build environment. Examples are the location of the installation,
+pacman options, such as package repository locations, which profile to build
+with, which boot loader to use, and so on. These are all options which don't
+directly affect the design of the <em>live</em> system to be built. Most of the
+remaining configuration options do concern the design and are specified in the
+profile.
+</p>
+<p>All project information is kept in the simply structured configuration file
+'~/.config/larch/larch-config'.
+</p>
+<p>Unlike a normal system installation, that used by <em>larch</em> need not be
+a separate partition, it can be placed anywhere convenient.
+The default installation directory ('/home/larchbuild') should normally be acceptable
+(the building work is done in the '.larch' sub-directory), so long as there is enough
+free space on that partition. Note that lots of space is necessary, nearly 4GB for a
+700MB CD, for example.
 </p>
 
-<p>Unlike a normal installation, that used by <em>larch</em> need not be a separate
-partition, it can be placed anywhere convenient.
-The default installation directory ('/home/larchroot', variable 'INSTLDIR' in the scripts)
-should normally be acceptable (the building work is done in the '.larch' sub-directory).
-Note that lots of space is necessary in ${INSTLDIR}, nearly 4GB for a 700MB CD.
+<h4><a name="larch_profiles"></a>Profiles</h4>
+
+<p>A profile contains the information needed to build a particular flavour of
+<em>Arch Linux</em> - which packages to install, which locales, system
+configuration in '/etc/rc.conf', boot entries, and so on. There is also a folder
+'rootoverlay', into which any files can be put that the design needs but differ
+from those in a basic, fresh <em>Arch Linux</em> system.
+</p>
+<p>All profile information is kept in the corresponding folder in the directory
+'~/.config/larch/working_dir/MyProfiles'.
 </p>
 
-<h3><a name="running_mklarch"></a>Quick <strong>mklarch</strong> overview</h3>
+<h3><a name="larch_install"></a>System Installation overview</h3>
 
 <p>That first stage is very much like a normal <em>Arch</em> installation to a
 partition - which is another possibility with the <strong>inpacs</strong> script.
