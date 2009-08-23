@@ -1,0 +1,12 @@
+# preterminate hook, sourced from rc.shutdown
+#
+# 2009.08.23
+
+#
+# An alternative here would be to set HARDWARECLOCK='LIVE'
+# If that is done in rc.conf, --localtime will be read during booting
+# and nothing will be saved, so long as USEDIRECTISA is not 'yes'
+if [ -z "$SAVECLOCK" ]; then
+    # This will prevent the hardware clock from being set
+    HARDWARECLOCK='LIVE'
+fi

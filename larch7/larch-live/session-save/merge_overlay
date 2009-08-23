@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.22
+# 2009.08.23
 
 
 # test if the script is started by root user. If not, exit
@@ -43,7 +43,7 @@ domerge ()
 
     echo "Mounting merge union"
     layers="/.livesys/overlay=${ovlmnt}:/.livesys/mods=${sqfmnt}"
-    mount -t ${utype} -o ro,${bropt}${layers} ${utype} ${merge_union}
+    mount -n -t ${utype} -o ro,${bropt}${layers} ${utype} ${merge_union}
     if [ $? -ne 0 ]; then
         echo "** Couldn't mount merge union."
         return 1
@@ -53,7 +53,7 @@ domerge ()
     res=$?
 
     # Discard merge union
-    umount ${merge_union}
+    umount -n ${merge_union}
     rm -r ${merge_union}
 
     return ${res}
@@ -73,7 +73,7 @@ dofilter()
 
     echo "Mounting filter union"
     layers="/.livesys/filter_new=${ovlwmnt}:/.livesys/system=${sqfmnt}"
-    mount -t ${utype} -o ${bropt}${layers} ${utype} ${filter_union}
+    mount -n -t ${utype} -o ${bropt}${layers} ${utype} ${filter_union}
     if [ $? -ne 0 ]; then
         echo "** Couldn't mount filter union."
         return 1
@@ -82,7 +82,7 @@ dofilter()
     newfilter ${filter_union}
 
     # Discard filter union
-    umount ${filter_union}
+    umount -n ${filter_union}
     rm -r ${filter_union}
 
     mksquashfs ${filter_new} "${overlaypath}/filter.tmp"
@@ -132,7 +132,7 @@ newmods ()
         if [ -d ${olaydir}/${d} ]; then
             includedirs="${includedirs} ${d}"
             mkdir ${mods2}/${d}
-            mount --bind ${olaydir}/${d} ${mods2}/${d}
+            mount -n --bind ${olaydir}/${d} ${mods2}/${d}
         fi
     done
 
@@ -141,7 +141,7 @@ newmods ()
     mksquashfs ${mods2} "${overlaypath}/mods.tmp" -e ${vardirs}
     res=$?
     for d in ${includedirs}; do
-        umount ${mods2}/${d}
+        umount -n ${mods2}/${d}
     done
     rm -r ${mods2}
 
@@ -158,19 +158,28 @@ newfilter()
     olaydir=$1
     echo "Building new 'filter' overlay to ${overlaypath}/filter.tmp"
     # 'Copy' existing filter
-    if [ -d cd /.livesys/filter ]; then
-        find . | while read n; do rm -rf "${olaydir}${n:1}"; done
+    if [ -d /.livesys/filter ]; then
+        cd /.livesys/filter
+        find . -name .wh.\* | { cd "${olaydir}"
+            while read n; do
+                b="${n##*/}"
+                rm -rf "${n%/*}/${b:4}" &>/dev/null
+            done
+        }
     fi
     # Add relevant whiteouts from overlay
     cd /.livesys/overlay
-    find . -name .wh.* | while read n; do
-            if [ "${n##*/}" = "${opq}" ]; then
-                d="${n%/*}"
-                rm -rf "${olaydir}${d:1}"
+    find . -name .wh.\* | { cd "${olaydir}"
+        while read n; do
+            b="${n##*/}"
+            d="${n%/*}"
+            if [ "${b}" = "${opq}" ]; then
+                rm -rf "${d}"
             else
-                rm -rf "${olaydir}${n:1}"
+                rm -rf "${d}/${b:4}" &>/dev/null
             fi
         done
+    }
 }
 
 # The overlay device (where the archives will be saved)
@@ -185,7 +194,7 @@ fi
 utype="$( cat /.livesys/utype )"
 if [ "${utype}" = "aufs" ]; then
     sqfmnt="rr"
-    ovlmnt="ro"
+    ovlmnt="ro+wh"
     ovlwmnt="rw"
     bropt="br:"
     opq=".wh..wh..opq"

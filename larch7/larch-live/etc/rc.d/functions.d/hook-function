@@ -1,0 +1,9 @@
+# 'Hooks' are optional code snippets supplied in files in
+# directory /etc/rc.d/hooks.d. The single argument
+# is the hook's filename. If a hook doesn't exist
+# nothing happens ...
+hook() {
+  if [ -f /etc/rc.d/hooks.d/$1 ]; then
+    . /etc/rc.d/hooks.d/$1
+  fi
+}

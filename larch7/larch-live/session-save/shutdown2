@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.22
+# 2009.08.23
 
 
 # This function can be called before the proper shutdown, in order to
@@ -181,11 +181,11 @@ dosaving()
         if /opt/larch/session-save/merge_overlay ${overlaypath}; then
             echo "Renaming mods.tmp to mods.sqf_"
             mv "${overlaypath}/mods.tmp" "${overlaypath}/mods.sqf_"
-            echo "Renaming filter.tmp to ${newmodfile}"
+            echo "Renaming filter.tmp to filter.sqf_"
             mv "${overlaypath}/filter.tmp" "${overlaypath}/filter.sqf_"
             if [ -f "${overlaypath}/overlay.tar.lzo" ]; then
                 echo "Backing up overlay file, ${overlaypath}/overlay.tar.lzo"
-                mv ${overlaypath}/overlay.tar.lzo" ${overlaypath}/overlay.tar.lzo~"
+                mv "${overlaypath}/overlay.tar.lzo" "${overlaypath}/overlay.tar.lzo~"
             fi
             return 0
         fi
@@ -222,5 +222,5 @@ saveovl ()
         rm -f ${overlaypath}/overlay.tar.lzo_
         return 1
     fi
-    mv -b ${overlaypath}/overlay.tar.lzo_ ${overlaypath}/overlay.tar.lzo
+    mv -b "${overlaypath}/overlay.tar.lzo_" "${overlaypath}/overlay.tar.lzo"
 }

@@ -38,9 +38,9 @@ root privileges in order to do its work, and that much of this work consists of
 deleting and overwriting files and even complete directories. If just one of these
 is wrong it might make quite a mess of your system. That is quite normal for an
 installer, but you will be using it on a system that is already configured and this
-is somewhat risky - a slight slip and all sorts of damage could be done. Ideally you
-would have a machine specially set aside for this sort of thing, i.e. one without any
-important data on it. <strong>You have been warned!</strong></em>
+is somewhat risky - if you set up your configuration wrong (or if you or I made some
+other mistake ...), you might find you have destroyed some important data and/or
+your system doesn't work any more. But that's life - Share and Enjoy!</strong></em>
 </p>
 </blockquote>
 
@@ -97,52 +97,74 @@ from those in a basic, fresh <em>Arch Linux</em> system.
 
 <h3><a name="larch_install"></a>System Installation overview</h3>
 
-<p>That first stage is very much like a normal <em>Arch</em> installation to a
-partition - which is another possibility with the <strong>inpacs</strong> script.
-A couple of small tweaks are made to this base installation to make it more
-convenient for live CD/USB use: some glibc locales are generated (set by the file
-locale.gen in the profile) and, if <em>openssh</em> is installed, the initial
-ssh-keys are generated.
+<p>The <em>larch live</em> system will normally be built from a fresh
+(unmodified, unconfigured) <em>Arch</em> installation. The Installation stage
+handles the creation of this installation by downloading all the desired packages
+(if they are not already in the host's package cache) and installing them to the
+directory set by the project (the default is /home/larchbuild). The profile files
+'addedpacks' and to a lesser extent 'baseveto' determine which packages will
+be installed. The 'base' group of packages will always be installed automatically,
+unless there are entries in 'baseveto' to veto certain of these (this will have no
+effect if a vetoed package is required by one selected for installation). 'addedpacks'
+is simply a list of additional packages to install, along with any dependencies. Both
+these files are simply one package name per line, empty lines and lines starting with
+'#' being ignored.
 </p>
 
-<p>Before <strong>mklarch</strong> can be used a 'profile' for the live medium must
-be built. This is a folder containing configuration files determining which packages
-are installed, which glibc locales are installed, and generally which files should
-be customized. Further details are given in <a href="larch_profiles.html">'Profiles'</a>.
+<p>This raw installation will not normally be modified by <em>larch</em>, so it can
+be reused, or even carefully experimented with. However, note that any changes
+you make to this installation manually will not be reflected in the profile, so it might be
+difficult to reproduce what you have done at a later time, or to revert the changes.
+***+ Would it be useful to incorporate changes made via the Tweaks page into the
+profile? Offer it as an option? -***
+If you want to configure your system, then the raw installation is probably not the
+best place for it, consider rather using the 'rootoverlay' directory in the profile. All
+files in this directory will 'overwrite' (well, 'overlay', actually) corresponding files in
+the base installation, by placing them in a higher layer in the <em>aufs</em>
+mount in the <em>live</em> system. This makes it very easy to collect your own
+customizations in a way that can be applied quickly to a future build.
 </p>
-
-<p>A simple way to build an iso would then be:
-<pre style="margin-left: 80px;">./mklarch -p myprofile</pre>
-</p>
-
-<p>To build a live USB-stick using GRUB to boot and using the <em>pacman</em>
-databases as they exist on the build host (rather than the default of
-downloading the latest databases using 'pacman -Sy'):
-<pre style="margin-left: 80px;">./mklarch -p myprofile -y /var/lib/pacman -ug</pre>
-</p>
-
-<p>The build process can be stopped after the <em>Arch</em> system installation (before building
-the 'squashed' live system) by passing the '-a' option to <strong>mklarch</strong>.
-All the available options can be seen by running 'mklarch -h'.
-</p>
-
-<p>The rest of the build process is handled by the functions in
-<strong>buildlive</strong>, primarily <em>mklive</em>,
-which puts all the various components together into a CD image at
-'${INSTLDIR}/.larch/cd', then using the <em>build_iso</em> function
-to create the iso or (using the <strong>usbboot</strong> script) to prepare
-a bootable USB-stick.
-</p>
-
-<p>If you set up your configuration
-wrong (or if you or I made some other mistake ...), you might find
-you have destroyed some important data and/or your system doesn't
-work any more. But that's life - Share and Enjoy!
+<p>There are a couple of special configuration files which should not be
+customized in 'rootoverlay'. The main ones are /etc/rc.conf and those dealing with
+the locales. These are handled by <em>larch</em> in a special way and can be
+configured directly via the user interface.
 </p>
 
 <h3><a name="running_larchify"></a>Quick <em>larchify</em> overview</h3>
 
-<p><strong>larchify</strong> uses the functions in <strong>buildlive</strong> to
+<p>Once we have an <em>Arch Linux</em> installation and have specified our
+customizations in the profile, we can combine all this information into two
+squashfs archives and an <em>initramfs</em> (to allow the <em>live</em> system
+to boot). I call this step 'larchification'. The lowest layer in the <em>aufs</em>
+mount is the raw installation, which is compressed into a <em>squashfs</em>
+archive, 'system.sqf'. All the modifications specified in the profile, as well, as some
+common to all  <em>larch</em> systems are in the archive 'mods.sqf', which
+'overlays' the basic installation.
+</p>
+<p>In order to aid experimentation with profile tweaks which do not affect the
+underlying installation, it is possible to repeat the 'larchify' step without rebuilding
+the 'system.sqf' archive, which saves quite a bit of time.
+</p>
+
+<h3><a name="buildmedium"></a>Building a bootable medium</h3>
+
+<p>When the 'larchification' has been completed, we can choose how to configure
+the device onto which our <em>live</em> system is to be installed. Most of the
+options on the 'Medium' page should be fairly self explanatory. We have a choice
+of media (iso, for CD/DVD, or partitions in general, be they USB-sticks, hard disks
+or whatever). It is also possible to select a bootloader and tweak its configuration.
+</p>
+<p>It is possible to repeat the installation onto various media, changing the
+configuration, without needing to rerun the 'larchification' step. The constituent
+<em>larch</em> files remain unchanged.
+</p>
+
+
+<strong>TODO:</strong> The text below is not yet updated, and is NOT VALID
+for larch-7.<br />
+<br /><br />
+
+<strong>larchify</strong> uses the functions in <strong>buildlive</strong> to
 build a live medium from an existing <em>Arch Linux</em> installation. It can also be
 used to rebuild a (posibly altered) live medium from the installation arising
 from the use of <strong>mklarch</strong>. For example, after building an iso
