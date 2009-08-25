@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.22
+# 2009.08.25
 
 """This module handles the basic framework and configuration of the
 larch build system.
@@ -80,7 +80,7 @@ class LarchConfig:
             # If the host is not Arch, there will be no pacman.
             # (If there is some other program at "/usr/bin/pacman" that's
             # a real spanner in the works.)
-            self.pacman = base_dir + "/pacman"
+            self.pacman = base_dir + "/run/pacman"
             if not os.path.isfile(self.pacman):
                 fatal_error(_("No pacman executable found"))
 

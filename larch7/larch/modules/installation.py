@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.22
+# 2009.08.25
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -45,8 +45,10 @@ class Installation:
         system is generated (as specified in pacman.conf.larch); if the
         value is "local", a local mirror will be used for all repositories
         which it supplies. Otherwise entries specified by 'Include' will
-        be taken from the (project) config variable "mirror", if it is
-        specified - if it is not specified, the host must have a valid
+        use the specified mirrorlist unless it is '/etc/pacman.d/mirrorlist'
+        and 'usemirrorlist' is set. In that case the edited mirrorlist will
+        be used (just for building - it doesn't affect the live system itself).
+        If that is not the case the host must have a valid
         /etc/pacman.d/mirrorlist.
         The return value is a list of the names of the repositories which
         are included.
@@ -60,14 +62,8 @@ class Installation:
         platform = config.get("platform")
         if mirror == "local":
             localmirror = config.get("localmirror")
-        elif mirror == "final":
-            localmirror = None
         else:
-            localmirror = config.working_dir + "/mirrorlist"
-            if not os.path.isfile(localmirror):
-                localmirror = "/etc/pacman.d/mirrorlist"
-                if not os.path.isfile(localmirror):
-                    localmirror = (base_dir + "/mirrorlist")
+            localmirror = None
         repos = []
         pc0 = config.get("profile") + "/pacman.conf.options"
         if not os.path.isfile(pc0):
@@ -105,7 +101,7 @@ class Installation:
                         s = line.split("=", 1)[1].split("#")[0].strip()
                         if s == "/etc/pacman.d/mirrorlist":
                             if mf:
-                                line = "Server = %s\n" % mf
+                                line = "Include = %s\n" % mf
                             elif not os.path.isfile("/etc/pacman.d/mirrorlist"):
                                 config_error(_("No 'mirrorlist' file found"))
                                 break

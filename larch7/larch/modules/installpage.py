@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.21
+# 2009.08.25
 
 import os, shutil
 
@@ -82,7 +82,9 @@ class InstallPage:
         f = config.working_dir + "/mirrorlist"
         fi = "/etc/pacman.d/mirrorlist"
         if not os.path.isfile(fi):
-            fi = base_dir + "/mirrorlist"
+            # This file should only be necessary on non-Arch hosts -
+            #   it is supplied in the pacman-allin package
+            fi = base_dir + "/data/mirrorlist"
             if not os.path.isfile(fi):
                 config_error(_("No 'mirrorlist' file found"))
                 return
