@@ -1,8 +1,8 @@
 [Entry 0]
-Name=File Manager
-Comment=Manage files and folders
-Icon=xfce-filemanager
-Exec=thunar
+Name=Image Editor
+Comment=GIMP - editor for raster images
+Icon=gimp
+Exec=gimp
 Terminal=false
 StartupNotify=false
 

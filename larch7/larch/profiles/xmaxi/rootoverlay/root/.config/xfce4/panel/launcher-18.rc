@@ -1,8 +1,8 @@
 [Entry 0]
-Name=Quit
-Comment=Exit the current session
-Icon=gnome-logout
-Exec=larchquit.py xfce
+Name=Document Editor
+Comment=Edit your text documents
+Icon=main
+Exec=soffice -writer
 Terminal=false
 StartupNotify=true
 
