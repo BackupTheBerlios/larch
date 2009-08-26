@@ -22,21 +22,19 @@
 
 <br />
 
-<h1><big>larch</big>
-&ndash;
-a do-it-yourself live <em>Arch Linux</em> CD</h1>
+<h1><big>larch</big> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
 
 <img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch1.jpg"
   name="graphics1" align="right" hspace="10" vspace="10" />
 <br /><br />
 
-<h2>Structure of a <em>larch</em> live CD</h2>
+<h2>Structure of a <em>larch live</em> system</h2>
 
-<p>The vast majority of the code that runs in a live CD/USB system is exactly
-the same as in a normal system running from hard disk.
-The main differences arise through the live CD/USB system being based on
+<p>The vast majority of the code that runs in a <em>live</em> CD/USB system
+is exactly the same as in a normal system running from hard disk.
+The main differences arise through the <em>live</em> system being based on
 a read-only root file-system, so various adjustments are necessary to
-make the areas that must be writable appear to be so. I say 'appear to be'
+make the areas that must be writeable appear to be so. I say 'appear to be'
 because in general any changes will be lost when the system shuts down,
 the actual changes being made only in a RAM-based filesystem (but see
 <a href="larch_sessionsave.html">"Session saving"</a>).
@@ -44,48 +42,52 @@ the actual changes being made only in a RAM-based filesystem (but see
 
 <h3><a name="Squashfs_and_Unionfs"></a>squashfs and aufs</h3>
 
-<p>In <em>larch</em>, as in many other live CD/USB systems, the ability to (apparently)
-write to a read-only file-system is provided by <em>aufs</em> (originally
-derived from <em>unionfs</em>).
-The file-system is also compressed, using <em>squashfs</em>, so as to fit more data
-onto the storage device (normally about 2GB of uncompressed code and data
-can be squeezed onto a 700MB CDROM using this approach). A custom
-<em>Arch Linux</em> installation (you can choose which packages are installed) is
-compressed into a <em>squashfs</em> file-system in the file
-<strong>system.sqf</strong>, which is placed in the root directory of the boot device.
+<p>In <em>larch</em>, as in many other <em>live</em> systems, the
+ability to (apparently) write to a read-only file-system is provided by
+<em>aufs</em> (originally derived from <em>unionfs</em>).
+The file-system is also compressed, using <em>squashfs</em>, so as to fit
+more data onto the storage device. A custom <em>Arch Linux</em> installation
+(you can choose which packages are installed) is compressed into a
+<em>squashfs</em> file-system in the file <strong>system.sqf</strong>,
+which is placed in the 'larch' directory of the boot device.
 </p>
 
-<p>For use in a live CD/USB system a few changes must be made to some files in the
-installation. In <em>larch</em> this is (at first) not done directly, the installed
-system is left in a 'clean' state. Instead of that, an additional <em>union</em> layer
-is created, in the archive <strong>mods.sqf</strong>,
-containing all the modified files (except those in /etc, which are placed in the
-top, writable, <em>union</em> layer, which is saved in the <strong>overlay.ovl</strong> archive.
-The user is free to include (pretty well) any customizations (s)he wants in these
-overlay files. These files are also placed in the root directory of the boot device.
+<p>For use in a <em>live</em> system a few changes must be made to some files
+in the installation. In <em>larch</em> this is (at first) not done directly,
+the installed system is left in a 'clean' state. Instead of that, an additional
+<em>union</em> layer is created, in the archive <strong>mods.sqf</strong>,
+containing all the modified files. The user is free to include (pretty well)
+any customizations (s)he wants in this overlay file, which is also placed
+in the 'larch' directory of the boot device.
 </p>
 
-<p>These system archives are combined when the live CD/USB system
-boots. They are mounted as branches of a <em>union</em> file-system with
-the overlay above the 'standard' system, so that files in the overlay have
-priority over the original ones. The top layer of the <em>union</em> is a <em>tmpfs</em>
-writable layer (thus, effectively, making the whole system writable),
-into which the archive <strong>overlay.ovl</strong> is unpacked during booting.
-As the changes are only stored in RAM, they will, however, be lost when the system shuts
-down (unless using the <a href="larch_sessionsave.html">session saving</a> feature).
+<p>These system archives are combined when the <em>live</em> system
+boots. They are mounted as branches of a <em>union</em> (<em>aufs</em>)
+file-system with the overlay above the 'standard' system, so that files in
+the overlay have priority over the original ones. A further, <em>tmpfs</em>,
+layer is placed on top of these, which effectively makes the whole system
+writeable. As the changes are only stored in RAM, they will, however, be lost
+when the system shuts down (unless using the
+<a href="larch_sessionsave.html">session saving</a> feature).
 </p>
 
 <h3><a name="initramfs"></a><em>initramfs</em> and <em>mkinitcpio</em></h3>
 
 <p>It is, in general, not possible to boot directly into a live CD/USB system.
 Some form of 'initrd' or 'initramfs' is required, in order to find the boot
-device, get hold of the file-system and prepare it for running.
-Many modern <em>GNU/Linux</em> systems use initrd/initramfs (the former being now deprecated)
-as a matter of course, for loading the necessary kernel modules, and
-<em>Arch Linux</em> is no exception, a modular initramfs system (<em>mkinitcpio</em>)
-being the standard way to boot <em>Arch Linux</em>, and <em>larch</em> also takes
-advantage of it, although some additions need to be made to boot live CD/USB systems.
+device, prepare the union file-system and prepare it for running.
+Many modern <em>GNU/Linux</em> systems use initrd/initramfs (the former
+being now deprecated) as a matter of course, for loading the necessary kernel
+modules, and <em>Arch Linux</em> is no exception, a modular initramfs system
+(<em>mkinitcpio</em>) being the standard way to boot <em>Arch Linux</em>,
+and <em>larch</em> also takes advantage of it, although some additions need
+to be made to boot <em>live</em> systems.
 </p>
+
+
+***+ Awaiting new initscripts????
+-***
+
 
 <h3><a name="rc_files"></a>/etc/inittab, /etc/rc.sysinit and /etc/rc.shutdown</h3>
 
