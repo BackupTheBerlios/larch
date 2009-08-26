@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.08.23
+# 2009.08.26
 pkgname=larch-live
-pkgver=7.0.28
+pkgver=7.0.40
 pkgrel=1
 
 pkgdesc="larch: compulsory components for the live system"

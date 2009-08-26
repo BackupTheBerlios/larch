@@ -2,7 +2,7 @@
 #
 # larch-hosts - Add hostname to /etc/hosts file (in overlay)
 #
-#2009.08.14
+#2009.08.26
 
 
 # $1: path to system to be larchified ("" if running system)
@@ -18,7 +18,11 @@ if ! [ -f ${hosts} ]; then
 fi
 
 HOSTNAME="UNKNOWN"
-. ${OVERLAYDIR}/etc/rc.conf
+if [ -f ${OVERLAYDIR}/etc/rc.conf ]; then
+  . ${OVERLAYDIR}/etc/rc.conf
+else
+  . ${INSTLDIR}/etc/rc.conf
+fi
 
 lh="127.0.0.1       localhost.localdomain   localhost       "
 sed -i "s|^127\.0\.0\.1.*|${lh}${HOSTNAME}|" ${hosts}

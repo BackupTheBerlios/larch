@@ -1,7 +1,5 @@
-show_frame=1
-
 [Global]
-ShowFrame=true
+ShowFrame=false
 Rows=1
 
 [Applications]

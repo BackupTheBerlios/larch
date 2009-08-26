@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.23
+# 2009.08.26
 
 
 """
@@ -327,7 +327,7 @@ class Command:
 
 
     def edit(self, fname, source=None, label=None, filter=None):
-        if "/" in fname:
+        if fname[0] == "/":
             f = fname
         else:
             f = os.path.join(config.get("profile"), fname)
@@ -346,6 +346,9 @@ class Command:
             t = self.uiask("editor:text.get").encode("utf8")
             if t[-1] != "\n":
                 t += "\n"
+            d = os.path.dirname(f)
+            if not os.path.isdir(d):
+                os.makedirs(d)
             savefile(f, t)
 
 

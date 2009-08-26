@@ -2,23 +2,21 @@
 #
 # larch-initcpio - Generate initcpio (using chroot if necessary)
 #
-#2009.08.08
+#2009.08.26
 
 
 # $1: path to system to be larchified ("" if running system)
-# $2: path to profile directory
-# $3: path to temporary overlay directory (where the overlay is being built)
-# $4: unioning file system type, '_aufs' or '_unionfs'
+# $2: path to temporary overlay directory (where the overlay is being built)
+# $3: unioning file system type, '_aufs' or '_unionfs'
 
 INSTLDIR="$1"
-PROFILEDIR="$2"
-OVERLAYDIR="$3"
-UFS="$4"
+OVERLAYDIR="$2"
+UFS="$3"
 
 # Fix up larch mkinitcpio.conf for unionfs/aufs
 mcf0=${INSTLDIR}/etc/mkinitcpio.conf.larch0
-if [ -f ${PROFILE}/mkinitcpio.conf ]; then
-    mcf0=${PROFILE}/mkinitcpio.conf
+if [ -f ${OVERLAYDIR}/etc/mkinitcpio.conf.larch0 ]; then
+    mcf0=${OVERLAYDIR}/etc/mkinitcpio.conf.larch0
 fi
 sed "s|___aufs___|${UFS}|g" <${mcf0} >${INSTLDIR}/etc/mkinitcpio.conf.larch
 

@@ -54,12 +54,21 @@ found at <a href="ftp://ftp.berlios.de/pub/larch/larch7/i686/"><strong>berlios</
 </p>
 
 <p>Alternatively, <em>larch</em> may be used without installing it.
-This should also work on non-<em>Arch Linux</em> systems. Download the latest
-<em>larch</em> package from the repository and unpack it somewhere convenient.
+This should also work on non-<em>Arch Linux</em> systems (but see next paragraph).
+Download the latest <em>larch</em> package from the repository and unpack
+it somewhere convenient.
 To start <em>larch</em> you need to run the file 'opt/larch/run/larch'. If you have
 installed the package with <em>pacman</em>, 'opt/larch/run' should now be in
 your $PATH (at least after the next login), so just 'larch' should suffice to get it going.
 </p>
+
+<p>If you are not running <em>Arch Linux</em>, you will need to download
+the 'pacman-allin' package from the <em>larch</em> repository and unpack this
+to the same location as you unpack the 'larch' package to. This provides
+a pacman executable together with all the libraries it needs, the
+'repo-add' script, and a 'mirrorlist' file.
+</p>
+
 
 <h3><a name="larch_using"></a>Using the <em>larch</em> build system</h3>
 
@@ -192,37 +201,37 @@ kept to a minimum by means of a sort of bootstrapping - many of the build
 functions are carried out on the newly installed <em>Arch</em> system using
 <em>chroot</em>.
 For example, you do not need support for <em>squashfs</em> or <em>aufs</em> on
-the build system. <em>bash</em>, <em>mkfs.vfat</em>, <em>mkfs.ext2</em>,
+the build system. But <em>bash</em>, <em>mkfs.vfat</em>, <em>mkfs.ext2</em>,
 <em>blkid</em> and <em>sfdisk</em>
 ***+ ... -*** are assumed to be available (on <em>Arch</em> that is packages
 'bash', 'dosfstools', 'e2fsprogs' and 'util-linux-ng').
 </p>
 
+<h3><a name="pacman_conf"></a>'pacman.conf' and 'mirrorlist'</h3>
 
-
-
-<strong>TODO:</strong> The text below is not yet updated, and is NOT VALID
-for larch-7.<br />
-<br /><br />
-
-
-
-
-
-If you are not running <em>Arch Linux</em>,***+ getting pacman and mirrorlist ...
-will my old pacman-static work with architecture 'any' packages? -***
-***+ Actually, couldn't the larch packages be architecture 'any'???!!! -***
-
-
-will set up pacman using a special package
-available from the <em>larch</em> repository (pacman-pack.tar.gz), which contains
-a statically linked pacman binary, the 'repo-add' script and the necessary
-configuration files.
+<p>The main thing to be aware of is that the <em>larch</em> repository must
+be available for building the <em>live</em> system. To ease the incorporation
+of updates to the structure of the file 'pacman.conf' I am currently experimenting
+with a split version. The header part is extracted from the default pacman.conf
+(distributed with the 'larch' package) and the repository list is kept
+separately. Both parts can be edited separately, from the <em>larch</em> gui,
+and altered versions are then stored within the profile.
 </p>
 
-<h3><a name="pacman_conf"></a>'pacman.conf' for building and live system use</h3>
+<p>If there are 'Include' lines in repository list in 'pacman.conf', the
+corresponding 'mirrorlist' file must be present and suitably configured.
+By default the host's /etc/pacman.d/mirrorlist will be used, but it is also
+possible to use an edited version - which is not stored within the profile,
+but in <em>larch's</em> working directory.
+</p>
 
-<p>You also need an appropriate 'pacman.conf' file. ...
+<p>A special feature of <em>larch</em> is the ease of using a local package
+mirror during installation. The supplied path need not even be a complete
+mirror. During development work I have indeed just placed the appropriate
+****.db.tar.gz files there and relied on all the packages being taken from
+the host's cache. (The script 'repos.sh' supplied with larch in the 'run'
+directory can build these db files from the current state of the pacman
+sync database on the host.)
 </p>
 
 <h3><a name="Squashfs_and_Unionfs"></a>squashfs and aufs</h3>
@@ -231,9 +240,9 @@ configuration files.
 file-system in the file <strong>system.sqf</strong>. This is mounted as the
 lower layer of a <em>union</em> (<em>aufs</em>) file-system. On top of that
 there is a writeable <em>tmpfs</em> layer so that the file-system as a whole
-appears writeable. An 'overlay' archive (initially empty, or rather non-existent)
+appears writeable. An (initially empty, or rather non-existent) 'overlay' archive
 is copied into the writeable layer. As this top layer is compressed using
-<em>lzop</em>, this package must be installed in the target.
+<em>lzop</em>, the 'lzop' package must be installed in the target.
 Of course only the <em>tmpfs</em> top layer can actually be written to,
 and its contents disappear when the system reboots, so the writing is only
 temporary. This can be overcome to some extent by using the session-saving
@@ -260,16 +269,16 @@ deleted.
 way before entering the normal boot sequence. In <em>larch</em> the
 <em>initramfs</em> is built using the standard <em>Arch</em> 'mkinitcpio'
 system, for which special 'hooks' (essentially code plug-ins) have been
-developed to manage the requirements of a <em>larch</em> live system.
+developed to manage the requirements of a <em>larch live</em> system.
 </p>
 
 <h4><a name="aufs"></a>unionfs as an alternative to aufs</h4>
 
-<p>In principle, <em>unionfs</em> can be used instead of <em>aufs</em>,
+<p>***+ In principle, <em>unionfs</em> can be used instead of <em>aufs</em>,
 but as <em>aufs</em> is included in current <em>Arch Linux</em> kernels
 it is obviously the first choice. Indeed the current <em>larch</em> code
 probably won't work with <em>unionfs</em>, as it hasn't been tested - but
-the framework to support it is in place.
+the framework to support it is in place. -***
 </p>
 
 <h3><a name="Custom_packages"></a>Custom packages</h3>
@@ -335,9 +344,11 @@ the build process.
 </p>
 
 <p>In order to support building a <em>larch</em> system, certain packages outside
-the <em>Arch</em> base group must be installed in the system to be 'larchified':
-<pre style="margin-left: 80px;"><em>squashfs-tools</em>, <em>lzop</em>,
+the <em>Arch</em> base group must be installed in the system to be 'larchified'
+(the <em>larch</em> installer includes the first group automatically):
+<pre style="margin-left: 80px;"><em>squashfs-tools</em>, <em>aufs-util</em>, <em>lzop</em>,
 <em>larch-live</em>,
+
 <em>syslinux</em> (if using isolinux or syslinux),
 <em>cdrkit</em> (for building an iso),
 <em>eject</em> (to eject a CD at shutdown).

@@ -1,24 +1,24 @@
 for x in $(cat /proc/cmdline); do
-    [ "${x}" = "nox" ] && exit 1
+    [ "${x}" = "nox" ] && return 1
     [ "${x}" = "nodri" ] && nodri="yes"
 done
 if [ -z "$DISPLAY" ] && echo $(tty) | grep "tty1" &>/dev/null; then
     if [ "$nodri" = "yes" ]; then
-	sed 's|^#nodri||' </etc/X11/xorg.conf >/tmp/xorg.conf.$USER
+    sed 's|^#nodri||' </etc/X11/xorg.conf >/tmp/xorg.conf.$USER
         startx -- -config  /tmp/xorg.conf.$USER
     else
         startx
     fi
 
     # Maybe there should be some code here to handle a failed startx?
-    
+
     # The 'return' value is at /tmp/xlogout
     # If there is nothing there, switch user to 'newuser'
     # If there is also nothing there, login as root
     #    - if already root, fall through to terminal
-    
+
     if [ -f /tmp/xlogout ] || [ -f /tmp/newuser ]; then
-        logout    
+        logout
     elif [ ${UID} -ne 0 ]; then
         echo "root" >/tmp/newuser
         logout

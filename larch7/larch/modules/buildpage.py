@@ -21,11 +21,11 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.08
+# 2009.08.26
 
 from build import Builder
 import os
-#import sys
+
 
 class BuildPage:
     """This class manages the page dealing with larch system building.
@@ -62,18 +62,18 @@ class BuildPage:
         self.sshgen = on
 
     def locales(self):
-        command.edit("locales", os.path.join(base_dir, "data", "locales"))
+        command.edit("rootoverlay/etc/locale.gen",
+                config.ipath("etc/locale.gen"))
 
     def rcconf(self):
-        command.edit("rc.conf", os.path.join(config.get("install_path"),
-                "etc/rc.conf"))
+        command.edit("rootoverlay/etc/rc.conf", config.ipath("etc/rc.conf"))
 
     def initcpio(self):
-        command.edit("mkinitcpio.conf", os.path.join(config.get("install_path"),
-                "etc/mkinitcpio.conf.larch0"))
+        command.edit("rootoverlay/etc/mkinitcpio.conf.larch0",
+                config.ipath("etc/mkinitcpio.conf.larch0"))
 
     def overlay(self):
-        path = os.path.join(config.get("profile"), "rootoverlay")
+        path = config.get("profile") + "/rootoverlay"
         if not os.path.isdir(path):
             os.mkdir(path)
         command.browser(path)

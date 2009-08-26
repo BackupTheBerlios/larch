@@ -1,15 +1,8 @@
-# These are needed to build a live CD
-larch-live
-squashfs-tools
-lzop
-
+### These should probably be present
 syslinux
-
-aufs2-util
-
+cdrkit
 # In case necessary (depends on kernel)
 #aufs2
-
 # To eject a cd
 eject
 
@@ -17,35 +10,29 @@ eject
 ntfsprogs
 parted
 
-sudo
-
-lsof
-cdrkit
-dvd+rw-tools
-
-base-devel
-larch
-
 # generally useful tools which don't require X
-#mtools is required by syslinux
 openssh
+sshfs
 dosfstools
-ntfs-3g
 lynx
 mc
 unzip
 zip
+
+lsof
+dvd+rw-tools
+
+sudo
+
+base-devel
+larch
+
 alsa-lib
 alsa-oss
 alsa-utils
 cdparanoia
 cdrdao
 cups
-#cups-pdf
-gutenprint
-
-openntpd
-cpufrequtils
 
 # Xorg packages
 xorg-server
@@ -56,16 +43,14 @@ xorg-xinit
 xorg-input-drivers
 xorg-video-drivers
 
-xf86-input-synaptics
-gsynaptics
-
 # X apps
 luser
 localed
 xkmap
 gparted
 
-larchin
+# Not yet updated for larch-7
+#larchin
 
 firefox
 thunderbird
@@ -86,27 +71,36 @@ xfce4-mount-plugin
 xfce4-power-manager
 xfce4-sensors-plugin
 xfce4-xkb-plugin
+gstreamer0.10-good-plugins
 #xfburn
-gstreamer0.10-plugins
 gamin
-
-lxde
 
 #desktop-file-utils is required by thunar, etc.
 gimp
-xsane
 wicd
 
 geany
-meld
 
 ttf-dejavu
 
-#slim
-#slim-theme-dlarch
-
 gdm
 dlarch-theme-gdm
+
+#cups-pdf
+gutenprint
+
+openntpd
+cpufrequtils
+
+xf86-input-synaptics
+gsynaptics
+
+#slim
+#slim-theme-dlarch
+lxde
+
+xsane
+meld
 
 ttf-ms-fonts
 
@@ -117,7 +111,7 @@ lame
 flac
 vorbis-tools
 vlc
-totem-xine
+xine-ui
 asunder
 
 evince

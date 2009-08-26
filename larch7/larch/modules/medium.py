@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.18
+# 2009.08.26
 
 import os
 
@@ -216,6 +216,12 @@ class Medium:
         supershell("rm -rf %s/larch/copy" % self.medium)
         if os.path.isdir(self.profile + "/cd-root/larch/copy"):
             supershell("cp -r %s/cd-root/larch/copy %s/larch" %
+                    (self.profile, self.medium))
+
+        # Replace any existing larch/extra directory
+        supershell("rm -rf %s/larch/extra" % self.medium)
+        if os.path.isdir(self.profile + "/cd-root/larch/extra"):
+            supershell("cp -r %s/cd-root/larch/extra %s/larch" %
                     (self.profile, self.medium))
 
         # To boot in 'search' mode the file larch/larchboot must be present

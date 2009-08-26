@@ -3,7 +3,7 @@
 # system.
 # ${INSTALL} is the path to the installed system root directory.
 
-rm "${INSTALL}/root/Desktop/Install Arch Linux.desktop"
+rm -f "${INSTALL}/root/Desktop/Install Arch Linux.desktop"
 
 if [ -f ${INSTALL}/etc/rc.local.orig ]; then
     mv ${INSTALL}/etc/rc.local.orig ${INSTALL}/etc/rc.local
@@ -11,6 +11,8 @@ fi
 if [ -f ${INSTALL}/etc/rc.local.shutdown.orig ]; then
     mv ${INSTALL}/etc/rc.local.shutdown.orig ${INSTALL}/etc/rc.local.shutdown
 fi
+
+sed "/^DAEMONS=/ s|!gdm|gdm|" -i ${INSTALL}/etc/rc.conf
 
 # start gdm from rc.conf
 sed -i '/^DAEMONS=/ s|!gdm|@gdm|' ${INSTALL}/etc/rc.conf
@@ -31,6 +33,8 @@ done
 ### installed to disk from it, please let me know!
 ### Maybe it would be better just to provide a special live quit desktop
 ### icon which can be removed on installation, like the installation icon.
+
+defaultquit='<builtin name="Quit" cmd="Quit" icon="gnome-logout"/>'
 
 replacequit ()
 {

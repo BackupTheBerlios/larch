@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.19
+# 2009.08.26
 
 import os, sys
 from glob import glob
@@ -84,21 +84,6 @@ class Builder:
         if not self.system_check():
             return False
 
-        command.log("#Generating glibc locales")
-        command.script("larch-locales '%s' '%s' '%s'" % (self.installation0,
-                self.profile, self.overlay))
-
-        if sshgen:
-            # ssh initialisation - done here so that it doesn't need to
-            # be done when the live system boots
-            command.log("#Generating ssh keys to overlay")
-            sshdir = config.overlay_build_dir + "/etc/ssh"
-            supershell("mkdir -p %s" % config.ipath(sshdir))
-            for k, f in [("rsa1", "ssh_host_key"), ("rsa", "ssh_host_rsa_key"),
-                    ("dsa", "ssh_host_dsa_key")]:
-                command.chroot('ssh-keygen -t %s -N "" -f %s/%s >/dev/null'
-                        % (k, sshdir, f), ["dev"])
-
         command.log("#Beginning to build larch medium files")
         # Clear out the directory
         supershell("rm -rf %s && mkdir -p %s/{boot,larch}" %
@@ -110,13 +95,6 @@ class Builder:
         # Remember file name (to ease update handling)
         supershell('echo "%s" > %s/larch/kernelname'
                 % (self.kname, self.medium))
-
-        command.log("#Generating larch initcpio")
-        command.script("larch-initcpio '%s' '%s' '%s' '%s'" %
-                (self.installation0, self.profile, self.overlay, self.ufs))
-        # Move initcpio to medium directory
-        supershell("mv %s/boot/larchnew.img %s/boot/larch.img" %
-                (self.installation0, self.medium))
 
         # if no saved system.sqf, squash the Arch installation at self.installation_dir
         if not os.path.isfile(self.system_sqf):
@@ -155,13 +133,27 @@ class Builder:
             supershell("cp %s/etc/inittab %s/etc" % (it0, inittab))
         supershell('sed -i "s|/etc/rc.shutdown|/etc/rc.larch.shutdown|" %s' % inittab)
 
-        # Handle /etc/rc.conf
-        if os.path.isfile("%s/rc.conf" % self.profile):
-            # If it exists take it from the profile
-            supershell("cp -f %s/rc.conf %s/etc" % (self.profile, self.overlay))
-        else:
-            # Otherwise from the installation
-            supershell("cp -f %s/etc/rc.conf %s/etc" % (self.installation0, self.overlay))
+        command.log("#Generating larch initcpio")
+        command.script("larch-initcpio '%s' '%s' '%s'" %
+                (self.installation0, self.overlay, self.ufs))
+        # Move initcpio to medium directory
+        supershell("mv %s/boot/larchnew.img %s/boot/larch.img" %
+                (self.installation0, self.medium))
+
+        command.log("#Generating glibc locales")
+        command.script("larch-locales '%s' '%s'" % (self.installation0,
+                self.overlay))
+
+        if sshgen:
+            # ssh initialisation - done here so that it doesn't need to
+            # be done when the live system boots
+            command.log("#Generating ssh keys to overlay")
+            sshdir = config.overlay_build_dir + "/etc/ssh"
+            supershell("mkdir -p %s" % config.ipath(sshdir))
+            for k, f in [("rsa1", "ssh_host_key"), ("rsa", "ssh_host_rsa_key"),
+                    ("dsa", "ssh_host_dsa_key")]:
+                command.chroot('ssh-keygen -t %s -N "" -f %s/%s >/dev/null'
+                        % (k, sshdir, f), ["dev"])
 
         # Ensure the hostname is in /etc/hosts
         command.script("larch-hosts %s %s" % (self.installation0, self.overlay))

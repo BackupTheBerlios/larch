@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.21
+# 2009.08.26
 
 import os
 
@@ -179,7 +179,8 @@ class MediumPage:
         f0 = os.path.join(self.profile, "cd-root/isolinux0/isolinux.cfg")
         if not os.path.isfile(f0):
             f0 = os.path.join(base_dir, "cd-root/isolinux0/isolinux.cfg")
-        command.edit(mld + "/menu.lst", f0, label=_("Editing syslinux/isolinux template"))
+        command.edit(mld + "/isolinux.cfg", f0,
+                label=_("Editing syslinux/isolinux template"))
 
 
     def changelabel(self):
