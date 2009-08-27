@@ -84,61 +84,76 @@ and <em>larch</em> also takes advantage of it, although some additions need
 to be made to boot <em>live</em> systems.
 </p>
 
+<p><em>larch</em> adds several hooks to the <em>Arch Linux mkinitcpio</em>
+system (they are in the 'larch-live' package). The first, 'larch1' is
+concerned with finding the boot device. It can select a device on the basis
+of UUID, partition label, partition name ('/dev/sdb1', etc.) or else it can
+search all available devices for the file '/larch/larchboot'. A simple
+validity check is made by testing the existence of the '/larch/system.sqf'
+archive.
+</p>
 
-***+ Awaiting new initscripts????
--***
+<p>The second hook comes in two flavours - one for <em>aufs</em> and one
+for <em>unionfs</em> - it just sets some variables according to which
+unioning file-system is being used ***+ (at the moment only <em>aufs</em>
+is properly supported) -***
+</p>
+
+<p>The third hook, 'larch3', performs the actual preparation of the
+<em>larch</em> root file-system, combining the system and overlay archives
+with a <em>tmpfs</em> upper layer in a union and carrying out various
+other initializations.
+</p>
+
+<p>In order to generate the special <em>initramfs</em> a customized
+'/etc/mkinitcpio.conf' is used, prepared during the build process from the
+template '/etc/mkinitcpio.conf.larch0' and saved as
+'/etc/mkinitcpio.conf.larch'. If you want to customize this, you need to
+edit '/etc/mkinitcpio.conf.larch0' in 'rootoverlay' in the profile (the
+gui has a button for this).
+</p>
+
+<p>There is also a customized <em>mkinitcpio</em> preset in '/etc/mkinitcpio.d',
+also working with a template - 'larch.preset0' is used to produce 'larch.preset'
+during the build operation. In addition this preset replaces the standard
+preset belonging to the kernel, so that subsequent kernel updates (etc.)
+will regenerate a correct <em>initramfs</em> for the <em>larch</em> system.
+If you want to revert to the normal <em>Arch Linux mkinitcpio</em> behaviour
+(for example, if you are installing the system) you will need to replace
+the preset by the original, which gets saved with '.larchsave' appended.
+</p>
 
 
-<h3><a name="rc_files"></a>/etc/inittab, /etc/rc.sysinit and /etc/rc.shutdown</h3>
+<h3><a name="rc_files"></a>/etc/rc.sysinit and /etc/rc.shutdown</h3>
 
 <p>The initial boot script and the shutdown script must be customized for use
-in a larch live environment. There are numerous ways of achieving that and
-<em>larch</em> has tried out several. In version 5.3.2 a method was introduced which
-involves replacing the original /etc/rc.sysinit and /etc/rc.shutdown scripts
-by modified versions which are fully equivalent to the official scripts but
-split off certain parts into functions which can be overridden when used in a
-<em>larch</em> live system. The 'larch-live' package provides the files
-/etc/larch-sysinit and /etc/larch-shutdown which provide the new versions
-of these functions for live use.
-<p>The need to overwrite certain system files is a bit messy, and means that
-the initscripts package should not be updated in the live system, but I
-hope the official package will sometime itself contain suitable versions of the
-'/etc/rc.sysinit' and '/etc/rc.shutdown' files which separate out the
-relevant functions so that larch doesn't need to overwrite them.
-</p>
-<p>Although it is not strictly necessary (because the substituted files are
-fully equivalent to the official ones), larch saves the originals as
-'/etc/rc.sysinit.larchsave' and '/etc/rc.shutdown.larchsave', so that these
-can be restored on installation by <em>larchin</em> (this might avoid later
-confusion).
+in a <em>larch live</em> environment. This is achieved by using hooks in the
+standard /etc/rc.sysinit and /etc/rc.shutdown scripts.
+***+ What are the script names? Where are they? -***
+During startup the main tweaks are to the content of /etc/mtab and /etc/fstab.
+During shutdown we probably want to disable writing to the hardware clock, but
+the main addition is the session saving code. If booting from CD/DVD we will
+want to eject this just before shutting down.
 </p>
 
-<p>It is possible to use a customized version of '/etc/inittab', by
-putting the new version in the <em>profile</em> (in 'rootoverlay') - for
-example one could customize the handling of the first terminal, e.g. to
-allow automatic login.
-The original <em>inittab</em> is saved as '/etc/inittab.larchsave',
-so that it can be restored if the system is installed using <em>larchin</em>.
+<h3><a name="fstab"></a>/etc/fstab</h3>
+
+<p>If the file '/etc/fstab.larch' exists this will be used as a persistent
+'/etc/fstab', being copied there during the boot process (in the 'larch3'
+hook in the initramfs system). Otherwise a very minimal '/etc/fstab' will
+be generated at each boot. It includes entries for any existing swap
+partitions, but these are commented out unless the 'swap' boot parameter
+is specified (the default <em>larch</em> behaviour is to mount nothing
+automatically).
 </p>
 
-<p>One addition in the <em>larch</em> version of the initscripts is the
-automatic generation of a new '/etc/fstab' (using the script
-<strong>gen_fstab</strong>, which
-bases the result on the devices which are detected in the system). Otherwise
-it behaves much the same as the version in
-a normal <em>Arch Linux</em> system. However, the remount of the root-filessystem and
-file-system checks have been left out as they are not relevant in a live-CD
-environment. No partitions are mounted and, by default, swap is not enabled.
-The reason is primarily that for use as an installation CD, it is better not
-to have any partitions mounted, because it is quite likely that the partitions
-will be edited in preparation for the installation. Passing boot parameter
-'swap' will enable swap if there is a suitable partition (or it can be done
-manually using 'swapon -a').
-</p>
-
-<p>'/etc/rc.shutdown' is adapted by
-adding code to deal with session-saving (writing changes back to the boot medium)
-and to eject the live-CD. Unlike in the normal version, the hardware clock is not reset.
+<p>The 'x10d_fstab' script in the 'larch-live' package allows the very basic
+/etc/fstab generated by the initramfs system ('larch3' hook) to be extended
+automatically, but '/etc/fstab' will only be changed if '/etc/fstab.larch'
+doesn't exist.
+This script adds entries for the partitions it detects, and also mount points
+in '/mnt' for them. The entries are such that the partitions are not mounted
+automatically.
 </p>
 
 <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
@@ -148,7 +163,7 @@ and to eject the live-CD. Unlike in the normal version, the hardware clock is no
 
       <td><a href="larch_docindex.html">Table of Contents</a></td>
 
-      <td><a href="larch_fstab.html">Next: /etc/fstab</a></td>
+      <td><a href="larch_sessionsave.html">Next: Session saving</a></td>
     </tr>
   </tbody>
 </table>

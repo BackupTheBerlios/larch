@@ -31,40 +31,46 @@
 
 <h2>Saving a session back to the boot device (or even somewhere else)</h2>
 
-<p>An easy way to create a customized live-USB-stick is to start from an
+<p>An easy way to create a customized <em>live</em> is to start from an
 existing one, make whatever changes you like, and then save the result back to
-the USB-stick.
+the boot device. Of course, for this you need a writeable boot device, e.g.
+a USB-stick.
 </p>
 
-<h3><a name="overlays"></a>Overlay archives, <strong>overlay.ovl</strong> and
-<strong>mods.sqf</strong></h3>
+<h3><a name="overlays"></a>Overlay archives</strong></h3>
 
-<p>In <em>larch</em> the <em>overlay</em> file-system (in the
-<em>compressed</em> file 'overlay.ovl') can be rebuilt
-from the state of the live system when it shuts down.
-This is handled primarily by the script <strong>/opt/larch-live/session-save/saveovl</strong>, which is
-called from the customized shutdown function.
-If the medium is writable and contains a file 'larch/save', the user is offered the possibility of
-rewriting the overlay archive, thus saving the current state.
+<p>In <em>larch</em> the uppermost layer in the union file-system is in
+<em>tmpfs</em> and can (optionally) be saved at shutdown to the boot medium.
+It is <em>compressed</em> using <em>tar</em> and <em>lzop</em> to the file
+'overlay.tar.lzo'. When the system next boots this file will then be
+unpacked into the initially empty top layer.
 </p>
 
-<p>The main overlay archive (<strong>overlay.ovl</strong>) is unpacked into memory
-at boot and repacked when saving the session at shutdown. When this archive grows
-too large it will reduce the amount of available memory, perhaps to an unacceptable extent.
-It will also lengthen boot and shutdown times. To counter this, it is possible to merge the
-overlay archive into the middle <em>union</em> layer in <strong>mods.sqf</strong> (which is
-normally not copied to memory), thus restoring the rapid load and save times
-for <strong>overlay.ovl</strong>, and maximizing the available memory. I call this process
-'overlay merging', and it is offered as a shutdown option.
-It takes longer to execute than a normal session save, but from larch version 5.2
-a new <em>aufs</em> option allows the merging to be done quicker than it was
-previously and without significant extra memory requirements. In this version
-a separate <em>aufs</em> union of the two overlay layers is mounted in which
-the whiteouts are visible. This union can then be squashed directly, without
-requiring the new, merged overlay to be rebuilt in memory. As it is a feature
-of <em>aufs</em>, overlay merging is no longer supported for <em>unionfs</em>
-(note that <em>unionfs</em> is at present not actively supported in <em>larch</em>
-anyway).
+<p>This is handled primarily by the 'shutdown2' script, supplied in the
+'larch-live' package. It is called from a hook function in 'etc/rc.shutdown'.
+If the medium is writeable and contains a file 'larch/save', the user is
+offered the possibility of saving this overlay archive, thus saving the
+current state.
+</p>
+
+<p>When this archive grows too large it will reduce the amount of available
+memory, perhaps to an unacceptable extent.
+It will also lengthen boot and shutdown times.
+To counter this, it is possible to merge the
+overlay archive with the middle (<em>squashfs</em>) <em>union</em> layer,
+<strong>mods.sqf</strong> (which is normally not copied to memory),
+thus restoring the rapid load and save times for <strong>overlay.tar.lzo</strong>,
+and maximizing the available memory. I call this process
+'overlay merging', and it is offered as a shutdown option. The script
+'merge_overlay' (in the 'larch-live' package) provides this facility.
+It takes longer to execute than a normal session save, so it should probably
+not be used for every session saving operation, but just when the top overlay
+gets too big. Note that use of the overlay merging feature creates an
+additional layer in the <em>union</em>, 'filter.sqf'. This contains only
+'whiteout' files to cover up overwritten data in the underlying 'system.sqf'.
+Unlike in previous <em>larch</em> versions the 'mods.sqf' archive contains
+no 'whiteouts'. It is hoped that this new structure will cure the
+problems experienced in these earlier versions.
 </p>
 
 <h3><a name="var_files"></a>Special places in /var</h3>
@@ -79,22 +85,25 @@ up another location using 'CacheDir' in /etc/pacman.conf'. Also the log files
 
 <h3><a name="upd_packages"></a>Updating packages</h3>
 
-<p>It should be possible to include package addition and removal in the list
-of customizations undertaken using this method, but there are some limitations. Apart from
-size considerations (the top level overlay is unpacked into memory at boot), there is also
-a limitation connected with the kernel. Essentially, the kernel and its modules may not
-be updated. <strong>If you do this, you may well make a mess of your system</strong>.
-In other words, be very careful with 'pacman -Su' - only upgrade selected packages.
+<p>It is possible to perform package addition and removal in the <em>live</em>
+system, but one should be aware that packages in the base system are not actually
+replaced, just (effectively) hidden, so that the space usage might become a
+consideration. Also the handling of kernel updates must be handled in a special
+way, because it is stored outside the root file-system, on the boot medium
+and needs a separate mechanism to save it at shutdown. It should be fairly
+transparent to the user, but under certain circumstances it might be necessary
+to bear this in mind.
 </p>
-<p>The reason for this is that the kernel is not contained within the
-squashed file-system, but is held separately on the boot medium, while its modules
-are contained in the squashed system and also in the initramfs. Updating these is not
-impossible (if booting from a writable medium), but <em>pacman</em> cannot do it and
-it is not straightforward (e.g. using a CD to boot to a USB-stick on a computer not
-supporting USB boot would additionally need a new CD). A complete rebuild of the live
-system might be a better approach. And using 'larchify' it should even be possible to
-perform such a rebuild from within the running live system.
+
+<p>At some point, after extensive updating, it might be desirable to completely
+rebuild the system, so that also 'system.sqf' is recreated. This will require
+quite a bit of space, but should otherwise pose no great problems
+***+ except that it is not yet implemented -***.
 </p>
+
+
+**** NEEDS UPDATING
+
 
 <h3><a name="de-Act"></a>Activating and deactivating the session-saving feature</h3>
 
