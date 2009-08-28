@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.08.26
+# 2009.08.28
 pkgname=larch-live
-pkgver=7.0.40
+pkgver=7.0.41
 pkgrel=1
 
 pkgdesc="larch: compulsory components for the live system"
@@ -12,8 +12,8 @@ license=('GPL')
 
 build() {
   mkdir -p ${startdir}/pkg/opt/larch
-  mkdir -p ${startdir}/pkg/usr/bin
-  cp -d ${startdir}/run/* ${startdir}/pkg/usr/bin
+  mkdir -p ${startdir}/pkg/usr/sbin
+  cp -d ${startdir}/run/* ${startdir}/pkg/usr/sbin
   cp -dr ${startdir}/session-save ${startdir}/pkg/opt/larch
   cp -dr ${startdir}/etc ${startdir}/pkg
   cp -dr ${startdir}/lib ${startdir}/pkg

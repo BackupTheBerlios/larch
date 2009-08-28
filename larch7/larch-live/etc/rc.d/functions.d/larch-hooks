@@ -1,7 +1,44 @@
-# poweroff hook, sourced from rc.shutdown
-#
-# 2009.08.23
+# larch handlers for rc. script hooks
+# 2009.08.28
 
+
+sysinit_premount_larch() {
+    # Rebuild /etc/mtab
+    grep "^aufs */ " /proc/mounts               >/etc/mtab.new
+    grep "^unionfs */ " /proc/mounts            >>/etc/mtab.new
+    grep "^tmpfs */.livesys " /proc/mounts      >>/etc/mtab.new
+    if [ -d /.livesys/medium/larch ]; then
+        grep " /.livesys/medium " /proc/mounts  >>/etc/mtab.new
+    fi
+    grep -v "^rootfs " /etc/mtab                >>/etc/mtab.new
+    mv /etc/mtab.new /etc/mtab
+
+    # Add disk partitions to /etc/fstab
+    x10d_fstab
+}
+add_hook sysinit_premount sysint_premount_larch
+
+
+shutdown_postkillall_larch() {
+    if ! [ -f /.livesys/saveclock ]; then
+        # This will prevent the hardware clock from being set
+        HARDWARECLOCK='LIVE'
+    fi
+}
+add_hook shutdown_postkillall shutdown_postkillall_larch
+
+
+shutdown_poweroff_larch() {
+    # larch session saving
+    dosessionsave
+
+    # Eject CD/DVD
+    doeject
+}
+add_hook shutdown_poweroff shutdown_poweroff_larch
+
+#--------------------------------------
+# Functions for session saving
 
 dosessionsave ()
 {
@@ -44,9 +81,3 @@ doeject ()
     # This shouldn't be needed, but better safe than sorry?
     sync
 }
-
-# larch session saving
-dosessionsave
-
-# Eject CD/DVD
-doeject

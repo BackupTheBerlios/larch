@@ -3,17 +3,5 @@
 # /etc/rc.local: Local multi-user startup script.
 #
 
-###LARCH+
-
-# Add disk partitions to /etc/fstab (larch live system only)
-x10d_fstab
-
-# Set up automatically logged in user (larch live system only)
-if [ -f /.livesys/autologin ]; then
-    cp /.livesys/autologin /tmp/newuser
-fi
-
-###LARCH-
-
 # Restore saved sound volume, etc.
 alsactl restore

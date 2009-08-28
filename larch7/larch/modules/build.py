@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.26
+# 2009.08.28
 
 import os, sys
 from glob import glob
@@ -122,6 +122,9 @@ class Builder:
         # Copy over the overlay from the selected profile
         if os.path.isdir("%s/rootoverlay" % self.profile):
             supershell("cp -rf %s/rootoverlay/* %s" % (self.profile, self.overlay))
+
+###+ This code can be changed or omitted when the rc. script hooks have
+###  established themselves firmly.
         # Prepare inittab
         inittab = self.overlay + "/etc/inittab"
         itsave = inittab + ".larchsave"
@@ -131,7 +134,9 @@ class Builder:
             supershell("cp %s %s" % (it0, itsave))
         if not os.path.isfile(inittab):
             supershell("cp %s/etc/inittab %s/etc" % (it0, inittab))
+        supershell('sed -i "s|/etc/rc.sysinit|/etc/rc.larch.sysinit|" %s' % inittab)
         supershell('sed -i "s|/etc/rc.shutdown|/etc/rc.larch.shutdown|" %s' % inittab)
+###-
 
         command.log("#Generating larch initcpio")
         command.script("larch-initcpio '%s' '%s' '%s'" %
@@ -157,17 +162,6 @@ class Builder:
 
         # Ensure the hostname is in /etc/hosts
         command.script("larch-hosts %s %s" % (self.installation0, self.overlay))
-
-        # Adjust /etc/rc.local for larch
-        f = self.overlay + "/etc/rc.local"
-        supershell('sed "0,/^###START/ d" <%s/data/rc.larch.local >%s.new'
-                % (base_dir, f))
-        if os.path.isfile(f):
-            fi = f
-        else:
-            fi = self.installation0 + "/etc/rc.local"
-        supershell("cat %s >>%s.new" % (fi, f))
-        supershell("mv %s.new %s && chmod 0755 %s" % (f, f, f))
 
         # Handle /mnt
         supershell("mkdir -p %s/mnt" % self.overlay)

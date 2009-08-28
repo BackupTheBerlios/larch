@@ -1,0 +1,7 @@
+sysinit_end_larch_autolgin() {
+    # Set up automatically logged in user (larch live system only)
+    if [ -f /.livesys/autologin ]; then
+        cp /.livesys/autologin /tmp/newuser
+    fi
+}
+add_hook sysinit_end sysint_end_larch_autologin
