@@ -21,10 +21,11 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.16
+# 2009.08.28
 
 # Passing '-n' as command-line option will just report on the
 # changes that would be made, nothing will be written to /etc/fstab.
+# Otherwise if /etc/fstab.larch exists the script will do nothing at all.
 
 # Get a list of partitions which could, potentially be mounted.
 # Return the device basename, a tag: '+' for removable or '-' for not,
@@ -71,6 +72,8 @@ MNT=/mnt
 
 if [ "$1" = "-n" ]; then
     DST=""
+elif [ -f /etc/fstab.larch ]; then
+    exit
 else
     DST=">>/etc/fstab"
     if [ -n "$( df | grep " ${MNT}" )" ]; then

@@ -22,8 +22,7 @@
 </table>
 
 <br />
-
-<h1><big>larch</big> &ndash; a do-it-yourself live <em>Arch Linux</em> CD</h1>
+<h1><big>larch</big> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
 
 <img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch1.jpg"
   name="graphics1" align="right" hspace="10" vspace="10" />
@@ -101,10 +100,6 @@ quite a bit of space, but should otherwise pose no great problems
 ***+ except that it is not yet implemented -***.
 </p>
 
-
-**** NEEDS UPDATING
-
-
 <h3><a name="de-Act"></a>Activating and deactivating the session-saving feature</h3>
 
 <p>As mentioned above, for this feature to be available, there must be a file with
@@ -116,33 +111,27 @@ the name 'save' in the boot medium's 'larch' directory.
 <p>Some aspects of the session saving can be customized by writing scripts to
 override the default behaviour. These scripts are (in general) kept on the boot
 medium, in the 'larch' directory. As these are shell scripts and their use requires
-some knowledge of the inner workings of the <em>larch</em> live system, it will
+some knowledge of the inner workings of the <em>larch live </em>system, it will
 almost certainly be necessary to read the existing <em>larch</em> scripts where the
 custom scripts are 'sourced' if you want to
-write your own scripts to change the behaviour of the <em>larch</em> live system.
+write your own scripts to change the behaviour of the <em>live</em> system in
+this respect. All these scripts are found in the 'larch-live' package.
 </p>
 <ul>
-  <li><strong>session-save</strong>
-    <p>Used in <strong>/opt/larch-live/session-save/saveovl</strong>. This script can be
-    used to customize the creation of the new overlay archive, e.g. by
-    specifying a new location. The default is 'overlay.ovl' on the boot medium.
+  <li><strong>session-save0</strong>
+    <p>Used in <strong>session-save/shutdown2</strong> (in function 'checkse').
+    This script can be used to customize the creation of the new overlay
+    archive, e.g. by specifying a new location. The default is
+    'overlay.tar.lzo' on the boot medium.
     </p>
   </li>
   <li><strong>save-menu</strong>
-    <p>Used in <strong>/opt/larch-live/session-save/saveovl</strong>. This script can be
-    used to further customize the creation of the new overlay archive, e.g. by
-    providing an alternative session save menu. Note that if the
-    <strong>session-save</strong> script specified an alternative device path
-    for saving the overlay, this script will be sought in the 'larch' directory
-    on that path.
-    </p>
-  </li>
-  <li><strong>merge-adjust</strong>
-    <p>Used in <strong>/opt/larch-live/session-save/merge_overlay</strong>. This script can be
-    used to further customize aspects of the overlay merging process. Note that if the
-    <strong>session-save</strong> script specified an alternative device path
-    for saving the overlay, this script will be sought in the 'larch' directory
-    on that path.
+    <p>Used in <strong>session-save/shutdown2</strong> (in function
+    'session-save'). This script can be used to further customize the creation
+    of the new overlay archive, e.g. by providing an alternative session save
+    menu. Note that if the <strong>session-save0</strong> script specified
+    an alternative device path for saving the overlay, this script will be
+    sought in the 'larch' directory on that path.
     </p>
   </li>
   <li><strong>boot-init</strong>

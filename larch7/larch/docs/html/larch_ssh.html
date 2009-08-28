@@ -22,7 +22,7 @@
 </table>
 
 <br />
-<h1><big>larch</big> &ndash; a do-it-yourself live <em>Arch Linux</em> CD</h1>
+<h1><big>larch</big> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
 
 <img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch1.jpg"
   name="graphics1" align="right" hspace="10" vspace="10" />
@@ -33,9 +33,9 @@
 
 <p>One feature I wanted in my live system was the ability to
 access and control it remotely via <em>ssh</em>. <em>ssh</em> is
-generally very useful, but here it also gives my installation CD a rare
-advantage over most others - using it I can install <em>Arch Linux</em>
-to a computer which has no keyboard or monitor. Insert the CD, boot up
+generally very useful, but in the case of a <em>live</em> CD (etc.) it
+allows operations to be carried out on a remote computer, even one
+without keyboard or monitor. Insert the CD, boot up
 the computer (assuming it is configured to boot from CD), and log in
 via the network using another computer. Isn't <em>Linux</em> great!
 </p>
@@ -45,16 +45,15 @@ tweaked so that - in the right environment - it would. Firstly, there
 must be a network connection which gets set up automatically -
 the easiest is probably <em>DHCP</em> (so long as
 you can then find the address of the live system),
-but by tweaking <strong>rc.conf</strong> (via <strong>rcconfx</strong>
-in the <em>profile</em> or by using the session saving feature)
-a static address is also easy to set up.
+but by tweaking <strong>rc.conf</strong> in the <em>profile</em> (or by
+using the session saving feature) a static address is also easy to set up.
 Secondly you must provide the live system with your public key, so
 that you are allowed access (using public key authentication), or else
 set a password for the <em>larch</em> root user (probably easiest using the
 session saving feature).
 </p>
 
-<h4>id_rsa.pub & authorized_keys</h4>
+<h4>id_rsa.pub and authorized_keys</h4>
 
 <p><strong>id_rsa.pub</strong>
 is a public key, and it can be used to allow the user (on the remote machine)
@@ -68,14 +67,15 @@ password) can log in via <em>ssh</em>
 </p>
 
 <p>To generate this key for your user (assuming you don't already
-have one, in <strong>~/.ssh</strong>):
+have one, in <strong>~/.ssh</strong>) do something like:
 </p>
 
 <pre style="margin-left: 80px;">ssh-keygen -t rsa</pre>
 
 <p>Use the default destination file and empty passphrase
 (normally you wouldn't do that,
-but I think it is appropriate in this case).
+but I think it is appropriate in this case). See the <em>ssh</em> man-page
+for more information.
 </p>
 
 <p>In order to enable <em>ssh</em> to the root account on the live
@@ -83,15 +83,15 @@ system, the contents of this file (a single text line) must be placed in
 the <em>larch</em> system's <strong>/root/.ssh/authorized_keys</strong> file.
 This file will probably not yet
 exist, so the 'id_rsa.pub' can be simply copied to it.
-If doing this before building the live-CD, copy the file to this
-position in the 'overlay' directory in the <em>profile</em>, being
-careful to get ownerships (root:root) and permissions (644) correct.
+If doing this before building the <em>live</em> system, copy the file to this
+position in the 'rootoverlay' directory in the <em>profile</em>, being
+careful to get the permissions (644) correct.
 To do this in a running <em>larch</em> system, copy the file to this location -
 session saving will then preserve it.
 </p>
 
 <p>If you don't need <em>sshd</em> on the live system, you can
-remove it from the daemons in <strong>rc.conf</strong>.</p>
+remove it from the daemons in <strong>rc.conf</strong>.
 </p>
 
 <h4>/etc/hosts.allow</h4>
@@ -127,15 +127,14 @@ and
 <strong>/etc/ssh/ssh_host_key.pub</strong>
 are normally (in a hard-disk based system) generated on the first run of
 <strong>/etc/rc.d/sshd</strong>, i.e. during the first boot after a new
-installation. This only needs to be done once. However in a live-CD system
-changes are generally lost when the system shuts down, so this would need
-to be done at every boot, which takes a while, so I prefer to pregenerate them.
-At present this is
-done during the first phase of the live-CD build (the <em>Arch Linux</em>
-installation phase). What this means is that all live-CDs generated from
-this base will have the same ssh host keys. If security is important to
-you, these should be regenerated, e.g. for the running <em>larch</em> system
-as follows:
+installation. This only needs to be done once. However in a <em>live</em>
+system changes are generally lost when the system shuts down, so this would
+need to be done at every boot, which takes a while, so I prefer to
+pregenerate them.
+The <em>larch</em> gui offers a checkbox to enable this pregeneration on
+the 'larchify' page.
+To regenerate these manually (while running the <em>live</em>
+system) you can do the following:
 </p>
 
 <pre style="margin-left: 80px;">
@@ -147,31 +146,13 @@ rm /etc/ssh/ssh_host_*
 
 <p>
 If you have set up 'X11 Forwarding' (see below), you can run X11 applications on the
-live system from your remote system. This is very neat! Before <em>xorg</em> reached
-version 7 there were complications due to the location of its <em>xauth</em>
-program, but since that version this is at the <em>ssh</em>
-default position, <strong>/usr/bin/xauth</strong>, so all should now be well.
+<em>live</em> system from your remote system. This is very neat!
 </p>
-
-<p>
-Bear in mind that this will only work if you use the -Y option to <em>ssh</em>,
-or set up its configuration file properly.
-</p>
-
-[
-<p style="margin-left: 40px;">
-If, for some reason you are not using Xorg7(+), you may need to set the <em>xauth</em>
-path in <strong>/etc/ssh/sshd_config</strong>
-and/or <strong>/etc/ssh/ssh_config</strong> (or set a <em>symlink</em> from <strong>/usr/bin/xauth</strong> to <strong>/usr/X11R6/bin/xauth</strong>):
-</p>
-
-<pre style="margin-left: 80px;">XAuthLocation /usr/X11R6/bin/xauth</pre>
-]
 
 <h4>/etc/ssh/sshd_config</h4>
 
 <p>This file is changed to allow X applications to run on the
-live system but display on another:
+<em>live</em> system but display on another:
 </p>
 
 <pre style="margin-left: 80px;">X11Forwarding yes</pre>
