@@ -1,37 +1,11 @@
-NOTHING has been updated for larch-7, and the changes are DRAMATIC!
+Larch
 
-
-larch - scripts for building a highly customizable Arch Linux live CD/DVD
-      - or USB-stick
-      - also suitable for installing Arch Linux to a hard disk
-
-Author: Michael Towers (gradgrind at online dot de)
+Author: Michael Towers (larch42 at googlemail dot com)
 Licence: GPL (see COPYING, LICENCE)
 
+The documentation is in the html subdirectory, please read it.
 
-I got my initial inspiration from the "Linux Live scripts" by
-
-Tomas M. <http://www.linux-live.org>
-
-BUT the larch scripts now bear essentially no resemblance to those,
-so don't blame Tomas!
-Thanks are, nevertheless, due to him for his great work, which helped me
-get started.
-
-The main documentation is in the html subdirectory, please read it.
-
-The key components are:
-
-    inpacs  - Install a fresh Arch system (with customizable package
-           selection), to a convenient (possibly temporary) location.
-
-    mklarch - Uses 'inpacs' to build an Arch installation in a convenient
-           directory, which it then makes into a live CD, adding
-           modifications (in an overlay) to suit it for use as a live
-           system and for customization.
-
-    larchify - Build a larch live system from an existing Arch Linux
-           installation (including from one made by 'mklarch').
+To start the program run the 'larch' script in the 'run' directory.
 
 Logos are derived from the Arch Linux logos, and are released under a
 Creative Commons Licence, see 'http://www.archlinux.org/art'.

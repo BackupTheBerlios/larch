@@ -4,9 +4,6 @@ gui
 
 tooltips - a generally useful feature
 
-Separate out the larch-specific part into a separate module from the
-code which could be used by other applications.
-
 --------------------------------------------------------
 
 use of old system.sqf: I THINK only changing of the base installed system
@@ -44,7 +41,7 @@ Quitting / Breaking
 
 If I do a premature break (or quit) I need to check that all mounted stuff
 (including dev,proc,sys) gets unmounted. This might be eased if I keep a
-record of everything that I have mounted.
+record of everything that I have mounted. (Done)
 
 
 Breaking:
