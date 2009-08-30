@@ -2,9 +2,9 @@
 
 pkgname=dlarch-theme-gdm
 pkgver=1.2
-pkgrel=1
+pkgrel=2
 pkgdesc="Archlinux/larch greeter theme for the GNOME login manager"
-arch=(i686 x86_64)
+arch=(any)
 url="http://larch.berlios.de/"
 license=('GPL')
 depends=('gdm')

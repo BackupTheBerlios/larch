@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.03.25
+# 2009.08.30
 
 from subprocess import Popen, PIPE, STDOUT
 
@@ -38,8 +38,9 @@ class Backend:
         self.error = None
         self.outputmethod = None
 
-        assert (self.xcall("init") == ""), (
-                "Couldn't initialize installation system")
+#TODO: Maybe this should be done outside of __init__
+        if (self.xcall("init") != ""):
+            fatal_error(_("Couldn't initialize installation system"))
 
 
 # I am not using this at the moment, I just thought it might be useful.

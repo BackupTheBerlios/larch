@@ -41,6 +41,7 @@ import crypt, random
 
 import dialogs
 from threadcom import ThreadMessaging
+from backend import Backend
 
 
 class installClass(Backend, ThreadMessaging):
@@ -129,7 +130,7 @@ class installClass(Backend, ThreadMessaging):
             value = fh.read()
             fh.close()
         else:
-            assert not trap, _("Configuration item not found: %s") % item)
+            assert not trap, (_("Configuration item not found: %s") % item)
             value = None
         return value
 
