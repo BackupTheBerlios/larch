@@ -1,5 +1,5 @@
 # larch handlers for rc. script hooks
-# 2009.08.28
+# 2009.08.30
 
 
 sysinit_premount_larch() {
@@ -16,7 +16,7 @@ sysinit_premount_larch() {
     # Add disk partitions to /etc/fstab
     x10d_fstab
 }
-add_hook sysinit_premount sysint_premount_larch
+add_hook sysinit_premount sysinit_premount_larch
 
 
 shutdown_postkillall_larch() {

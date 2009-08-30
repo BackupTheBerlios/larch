@@ -4,4 +4,4 @@ sysinit_end_larch_autolgin() {
         cp /.livesys/autologin /tmp/newuser
     fi
 }
-add_hook sysinit_end sysint_end_larch_autologin
+add_hook sysinit_end sysinit_end_larch_autologin

@@ -1,13 +1,13 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.08.28
+# 2009.08.30
 pkgname=larch-live
-pkgver=7.0.41
+pkgver=7.0.43
 pkgrel=1
 
 pkgdesc="larch: compulsory components for the live system"
 url="http://larch.berlios.de"
 depends=()
-arch=(i686 x86_64)
+arch=(any)
 license=('GPL')
 
 build() {

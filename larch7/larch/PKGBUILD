@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.08.28
+# 2009.08.30
 pkgname=larch
-pkgver=7.0.41
+pkgver=7.0.43
 pkgrel=1
 
 # If I need the architecture, I can get it as ${CARCH}
@@ -9,7 +9,7 @@ pkgrel=1
 pkgdesc="Design your own 'live' Archlinux CDs and USB-sticks (etc.)"
 url="http://larch.berlios.de"
 depends=(pyqt)
-arch=(i686 x86_64)
+arch=(any)
 license=('GPL')
 
 build() {

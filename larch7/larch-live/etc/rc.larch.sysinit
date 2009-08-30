@@ -3,14 +3,17 @@
 # rc.larch.sysinit
 
 # This replaces rc.sysinit in inittab
-# 2009.08.28
+# 2009.08.30
 
 # Create sysinit script dynamically from normal rc.sysinit.
 # (until such as a time as the needed hooks are included in rc.sysinit upstream)
 
-grep "^run_hook()" /etc/rc.d/functions &>/dev/null && exec /etc/rc.sysinit
-
-. /etc/000hook-function
+if grep "^run_hook()" /etc/rc.d/functions &>/dev/null; then
+    sed -i "s|^\.|#.|" /etc/rc.d/functions.d/000addhooks
+    exec /etc/rc.sysinit
+else
+    sed -i "s|^#\.|.|" /etc/rc.d/functions.d/000addhooks
+fi
 
 # Build a modified version of rc.shutdown dynamically
 newfile=/.livesys/sysinit
