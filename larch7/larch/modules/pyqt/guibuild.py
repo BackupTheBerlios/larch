@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.22
+# 2009.08.30
 
 """Build a gui from a layout description.
 """
@@ -752,6 +752,15 @@ class WidgetTree:
             else:
                 gui_error(_("Unknown node type: %s") % ptype)
                 # fatal
+
+
+        # Handle tooltips
+        tooltips = info.get("Tooltips", [])
+        # This is a list of [widget, text] pairs
+        for w, t in tooltips:
+            widget = self.getwidget(w)
+            if widget:
+                widget.setToolTip(t)
 
 
         # Handle attributes

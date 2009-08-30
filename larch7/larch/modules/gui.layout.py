@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.08.22
+# 2009.08.30
 
 Namespace = ":"
 
@@ -135,6 +135,68 @@ Widgets = [
 
 ["*Button", "^bootcd", _("Create boot iso")],
 ["Button", "^make", _("Create larch medium")],
+
+]
+
+
+################# Tooltips
+Tooltips = [
+["showlog", _("This button toogles the visibility of the log viewer")],
+["choose_profile_combo", _("Choose a profile from those already in your larch working folder")],
+["profile_browse", _("Fetch a profile from the file-system")],
+["profile_rename", _("Rename the current profile")],
+["profile_delete", _("Delete the current profile")],
+["platform", _("Which processor architecture?")],
+["choose_project_combo", _("Choose a project from those already defined")],
+["new_project", _("Create a new project")],
+["project_delete", _("Delete the current project")],
+["installation_path_show", _("The root directory of the Arch installation to larchify")],
+["installation_path_change", _("Change the root directory of the Arch installation")],
+["addedpacks", _("Edit the list of packages to be installed")],
+["baseveto", _("Edit the list of base packages NOT to install")],
+["pacmanconf", _("Edit pacman.conf options - not the repositories")],
+["repos", _("Edit the repository entries for pacman.conf")],
+["mirrorlist", _("Enables use of the mirrorlist file saved in the working directory, for installation only")],
+["mirrorlist_change", _("Edit mirrorlist in working directory")],
+["use_local_mirror", _("Allows a specific (e.g. local) mirror to be used just for the installation")],
+["local_mirror", _("The url of the installation mirror")],
+["local_mirror_change", _("Change the installation mirror path")],
+["cache_show", _("The path to the (host's) package cache")],
+["cache_change", _("Change the package cache path")],
+["install", _("This will start the installation to the set path")],
+["sync", _("Synchronize the pacman db on the target (pacman -Sy)")],
+["update", _("Update / Add a package from a package file using pacman -U")],
+["add", _("Add one or more packages (space separated) using pacman -S")],
+["remove", _("Remove one or more packages (space separated) using pacman -Rs")],
+["locales", _("Edit the /etc/locale.gen file to select supported glibc locales")],
+["rcconf", _("Edit the /etc/rc.conf file to configure the live system")],
+["initcpio", _("Edit the configuration file for generating the initramfs via mkinitcpio")],
+["overlay", _("Open a file browser on the profile's 'rootoverlay'")],
+["filebrowser", _("Allows you to change the file browser opened by larch")],
+["ssh", _("Enables pre-generation of ssh keys")],
+["oldsquash", _("Reuse existing system.sqf, to save time if the base system hasn't changed")],
+["build", _("Build the main components of the larch system")],
+["mediumtype", _("You can choose installation to iso (for CD/DVD) or a partition (e.g. USB-stick)")],
+["larchpart", _("The partition to which the larch system is to be installed")],
+["selectpart", _("Select the partition to receive the larch system")],
+["noformat", _("Copy the data to the partition without formatting first (not the normal procedure)")],
+["detection", _("Choose how the boot scripts determine where to look for the larch system")],
+["$uuid", _("Use the partition's UUID to find it")],
+["$label", _("Use the partition's label to find it")],
+["$device", _("Use the partition name (/dev/sdb1, etc.)")],
+["$nodevice", _("Test all CD/DVD devices and partitions until the file larch/larchboot is found")],
+["labelname", _("The label that the partition will be given")],
+["changelabel", _("Change the label")],
+["bootloader", _("You can choose between GRUB and syslinux/isolinux as bootloader")],
+["$grub", _("Use GRUB as bootloader")],
+["$syslinux", _("Use syslinux (partition) or isolinux (CD/DVD) as bootloader")],
+["$none", _("Don't install a bootloader")],
+["larchboot", _("Create the file larch/larchboot")],
+["bootlines", _("Edit the file determining the boot entries")],
+["grubtemplate", _("Edit grub template")],
+["syslinuxtemplate", _("Edit syslinux/isolinux template")],
+["bootcd", _("Create a small boot iso for this system (for machines that can't boot from USB)")],
+["make", _("Create the larch iso or set up the chosen partition")],
 
 ]
 
