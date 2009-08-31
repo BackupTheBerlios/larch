@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.26
+# 2009.08.31
 
 import os
 
@@ -37,11 +37,7 @@ class MediumPage:
                 (":bootlines*clicked", self.edit_bootlines),
                 (":grubtemplate*clicked", self.edit_grubtemplate),
                 (":syslinuxtemplate*clicked", self.edit_syslinuxtemplate),
-
                 (":mediumtype*changed", self.partition_toggled),
-
-
-
                 (":$nodevice*toggled", self.search_toggled),
                 (":$uuid*toggled", self.uuid_toggled),
                 (":$label*toggled", self.label_toggled),

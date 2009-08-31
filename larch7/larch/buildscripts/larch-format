@@ -2,7 +2,7 @@
 #
 # larch-format - Format a partition for a larch live system
 #
-#2009.08.15
+#2009.08.31
 
 
 # $1: name of partition to be formatted (e.g. /dev/sdb2)
@@ -17,14 +17,14 @@ dev=${DEVICE:0:8}
 part=${DEVICE:8}
 
 if [ "${FSTYPE}" = "vfat" ]; then
-    sfdisk ${dev} -N${part} <<EOF
-,,0e,*
+    sfdisk --no-reread ${dev} -N${part} <<EOF
+,,0c,*
 EOF
 
     dd if=/dev/zero of=${DEVICE} bs=512 count=1
 
 else
-    sfdisk ${dev} -N${part} <<EOF
+    sfdisk --no-reread ${dev} -N${part} <<EOF
 ,,L,*
 EOF
 

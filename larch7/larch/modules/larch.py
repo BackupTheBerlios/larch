@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.26
+# 2009.08.31
 
 
 """
@@ -469,7 +469,7 @@ def mainloop():
                 arglst = json.loads(args)
                 slots = command.connections.get(sig)
                 if slots:
-                    if sig[0] == "$":
+                    if ":$" in ":" + sig:
                         # Unblockable slots called from the main loop
                         for s in slots:
                             s(*arglst[1])
