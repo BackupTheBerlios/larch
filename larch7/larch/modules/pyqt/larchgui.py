@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.22
+# 2009.09.01
 
 import sys
 from PyQt4 import QtGui, QtCore
@@ -88,10 +88,10 @@ if __name__ == "__main__":
 
             if text.startswith("_!_"):
                 einfo = json.loads(text[3:])
-                if einfo[0] == "Warning":
-                    gui_warning(*einfo[1:])
-                else:
+                if einfo[0]:
                     gui_error(*einfo[1:])
+                else:
+                    gui_warning(*einfo[1:])
 
             elif text.startswith("!") or text.startswith("?"):
                 GuiApp.new_line(self, text)

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.25
+# 2009.09.01
 
 import os, shutil
 
@@ -52,13 +52,13 @@ class InstallPage:
         """Set up the installation page widget.
         """
         self.profile = config.get("profile")
-        command.ui(":cache_show.set", config.get("pacman_cache"))
+        ui.command(":cache_show.set", config.get("pacman_cache"))
 
         ulm = (config.get("uselocalmirror") != "")
-        command.ui(":mirrorlist.enable", config.get("usemirrorlist") != "")
-        command.ui(":mirrorlist.frameEnable", not ulm)
-        command.ui(":use_local_mirror.enable", ulm)
-        command.ui(":local_mirror.set", config.get("localmirror"))
+        ui.command(":mirrorlist.enable", config.get("usemirrorlist") != "")
+        ui.command(":mirrorlist.frameEnable", not ulm)
+        ui.command(":use_local_mirror.enable", ulm)
+        ui.command(":local_mirror.set", config.get("localmirror"))
 
 
     def edit_addedpacks(self):
@@ -97,28 +97,28 @@ class InstallPage:
 
     def toggle_local_mirror(self, on):
         config.set("uselocalmirror", "yes" if on else "")
-        command.ui(":mirrorlist.frameEnable", not on)
+        ui.command(":mirrorlist.frameEnable", not on)
 
 
     def new_local_mirror_path(self):
         # Is anything more necessary? Do I need to test the path?
         # Would a directory browser be better?
-        ok, path = command.uiask("textLineDialog",
+        ok, path = ui.ask("textLineDialog",
                 _("Enter new local mirror path:"),
                 None, config.get("localmirror"))
         if ok:
             path = path.strip().rstrip("/")
             config.set("localmirror", path)
-            command.ui(":local_mirror.set", path)
+            ui.command(":local_mirror.set", path)
 
 
     def new_cache_path(self):
         # Is anything more necessary? Do I need to test the path?
         # Would a directory browser be better?
-        ok, path = command.uiask("textLineDialog",
+        ok, path = ui.ask("textLineDialog",
                 _("Enter new package cache path:"),
                 None, config.get("pacman_cache"))
         if ok:
             path = path.strip().rstrip("/")
             config.set("pacman_cache", path)
-            command.ui(":cache_show.set", path)
+            ui.command(":cache_show.set", path)

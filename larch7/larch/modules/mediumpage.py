@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.31
+# 2009.09.02
 
 import os
 
@@ -38,7 +38,7 @@ class MediumPage:
                 (":grubtemplate*clicked", self.edit_grubtemplate),
                 (":syslinuxtemplate*clicked", self.edit_syslinuxtemplate),
                 (":mediumtype*changed", self.partition_toggled),
-                (":$nodevice*toggled", self.search_toggled),
+                (":$search*toggled", self.search_toggled),
                 (":$uuid*toggled", self.uuid_toggled),
                 (":$label*toggled", self.label_toggled),
                 (":$device*toggled", self.device_toggled),
@@ -63,24 +63,24 @@ class MediumPage:
         self.profile = config.get("profile")
 
         part = 1 if config.get("medium_iso") == "" else 0
-        command.ui(":mediumtype.set", part)
+        ui.command(":mediumtype.set", part)
         self.partition_toggled(part)
 
         btldr = config.get("medium_btldr")
 
-        command.ui(":$%s.set" % btldr, True)
+        ui.command(":$%s.set" % btldr, True)
 
         search = config.get("medium_search")
-        command.ui(":$%s.set" % search, True)
-        command.ui(":larchboot.set", search == "nodevice")
+        ui.command(":$%s.set" % search, True)
+        ui.command(":larchboot.set", search == "search")
 
-        command.ui(":labelname.set", config.get("medium_label"))
-        command.ui(":larchpart.set")
+        ui.command(":labelname.set", config.get("medium_label"))
+        ui.command(":larchpart.set")
 
 
     def search_toggled(self, on):
-        command.ui(":larchboot.set", on)
-        _medium_search("nodevice", on)
+        ui.command(":larchboot.set", on)
+        _medium_search("search", on)
 
     def uuid_toggled(self, on):
         _medium_search("uuid", on)
@@ -132,19 +132,19 @@ class MediumPage:
                 # Keep a tuple (partition, size in MiB)
                 self.partlist.append((fields[0], fields[3]))
 
-        command.ui("parts:list.set", ["%-12s %12s %s" % (p, s, "MiB" if s else "")
+        ui.command("parts:list.set", ["%-12s %12s %s" % (p, s, "MiB" if s else "")
                 for p, s in self.partlist])
-        command.ui("parts:choice.set")
-        if command.uiask("parts:parts.showmodal"):
-            t = command.uiask("parts:choice.get").encode("utf8")
-            command.ui(":larchpart.set", t)
+        ui.command("parts:choice.set")
+        if ui.ask("parts:parts.showmodal"):
+            t = ui.ask("parts:choice.get").encode("utf8")
+            ui.command(":larchpart.set", t)
 
 
     def part_selected(self, i):
         if i <= 0:
-            command.ui("parts:choice.set")
+            ui.command("parts:choice.set")
         else:
-            command.ui("parts:choice.set", self.partlist[i][0])
+            ui.command("parts:choice.set", self.partlist[i][0])
 
 
     def edit_bootlines(self):
@@ -180,13 +180,13 @@ class MediumPage:
 
 
     def changelabel(self):
-        ok, text = command.uiask("textLineDialog",
+        ok, text = ui.ask("textLineDialog",
                 _("Enter new label for the boot medium:"),
                 None, config.get("medium_label"))
         if ok:
             text = text.strip().replace(" ", "_")
             config.set("medium_label", text)
-            command.ui(":labelname.set", text)
+            ui.command(":labelname.set", text)
 
 
     def makedevice(self):
@@ -207,7 +207,7 @@ class MediumPage:
             format = False
             larchboot = True
         else:
-            device = command.uiask(":larchpart.get")
+            device = ui.ask(":larchpart.get")
             if not device:
                 config_error(_("No partition selected for larch"))
                 return False
@@ -215,14 +215,14 @@ class MediumPage:
             label = config.get("medium_label")
 
             partsel = config.get("medium_search")
-            # "nodevice" / "uuid" / "label" / "device"
-            if partsel == "nodevice":
+            # "search" / "uuid" / "label" / "device"
+            if partsel == "search":
                 partsel = ""
             elif partsel == "device":
                 partsel = "partition"
 
-            format = not command.uiask(":noformat.active")
-            larchboot = command.uiask(":larchboot.active")
+            format = not ui.ask(":noformat.active")
+            larchboot = ui.ask(":larchboot.active")
 
         self.mediumbuilder.make(btype, device, label, partsel,
                 format, larchboot)
@@ -232,7 +232,7 @@ class MediumPage:
 
 
     def makebootiso(self):
-        device = command.uiask(":larchpart.get")
+        device = ui.ask(":larchpart.get")
         if not device:
             config_error(_("The partition containing the larch live system"
                     "\nmust be specifed."))

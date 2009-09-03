@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.28
+# 2009.09.02
 
 import os, sys
 from glob import glob
@@ -55,7 +55,7 @@ class Builder:
 
     def build(self, sshgen, useoldsqf):
         self.installation0 = self.installation_dir if self.installation_dir != "/" else ""
-        if not (self.installation0 or command.uiask("confirmDialog", _(
+        if not (self.installation0 or ui.confirmDialog(_(
                     "Building a larch live medium from the running system is\n"
                     "an error prone process. Changes to the running system\n"
                     "made while running this function may be only partially\n"
@@ -221,13 +221,13 @@ class Builder:
                     "using CD/DVD media\n")
 
         if warn:
-            cont = command.uiask("confirmDialog", _("WARNING:\n%s"
+            cont = ui.confirmDialog(_("WARNING:\n%s"
                     "\n    Continue building?") % warn)
         else:
             cont = True
 
         if fail:
-            command.uiask("infoDialog", _("ERROR:\n%s") % fail)
+            ui.infoDialog(_("ERROR:\n%s") % fail)
             return False
 
         return cont
@@ -297,7 +297,7 @@ class Builder:
                     else:
                         command.log("#Couldn't determine guilty packages")
 
-                    if not command.uiask("confirmDialog", _("WARNING:\n"
+                    if not ui.confirmDialog(_("WARNING:\n"
                             "  You seem to have installed a package containing modules\n"
                             "which aren't compatible with your kernel (see log).\n"
                             "Please check that this won't cause problems.\n"

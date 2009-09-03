@@ -12,16 +12,23 @@ cd ${SCRIPTDIR}/../modules
 export PYTHONDONTWRITEBYTECODE=x
 
 if [ ${UID} -eq 0 ]; then
-    cmd=""
-elif $( which gksu &>/dev/null ); then
-    cmd="gksu "
-elif $( which gksu &>/dev/null ); then
-    cmd="kdesu "
+    exec python larch.py "$@"
 else
-    echo "larch must be run with root privileges." 1>&2
-    echo "  Try installing gksu or kdesu." 1>&2
-    echo "  You could also try 'su -c ./larch' in a terminal." 1>&2
-    exit 1
+    if [ "$1" != "-c" ] && [ "$1" != "-f" ]; then
+        if $( which gksu &>/dev/null ); then
+            exec gksu -- python larch.py "$@"
+        elif $( which kdesu &>/dev/null ); then
+            exec kdesu -- python larch.py "$@"
+        fi
+    else
+        echo "larch must be run with root privileges." 1>&2
+        echo "You could try 'su -c \"./larch <options>\"'" 1>&2
+        echo " ... but double-quotes in the command must be escaped."  1>&2
+        exit 1
+    fi
 fi
 
-${cmd} python larch.py &>/dev/null &
+echo "larch must be run with root privileges." 1>&2
+echo "  Try installing gksu or kdesu." 1>&2
+echo "  You could also try 'su -c ./larch' in a terminal." 1>&2
+exit 1

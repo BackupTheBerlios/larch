@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.26
+# 2009.09.01
 
 from build import Builder
 import os
@@ -51,11 +51,11 @@ class BuildPage:
         """Set up the build page widget.
         """
         self.oldsqf = self.builder.oldsqf_available()
-        command.ui(":oldsquash.enable", self.oldsqf)
+        ui.command(":oldsquash.enable", self.oldsqf)
         ssh = self.builder.ssh_available()
         self.sshgen = ssh and self.sshgen
-        command.ui(":ssh.set", self.sshgen)
-        command.ui(":ssh.enable", ssh)
+        ui.command(":ssh.set", self.sshgen)
+        ui.command(":ssh.enable", ssh)
 
 
     def sshtoggle(self, on):
@@ -79,7 +79,7 @@ class BuildPage:
         command.browser(path)
 
     def filebrowser(self):
-        ok, new = command.uiask("textLineDialog",
+        ok, new = ui.ask("textLineDialog",
                 _("Enter new command to open file browser (use '%' as directory argument)"),
                 None, config.get("filebrowser"))
         if ok:
@@ -88,4 +88,4 @@ class BuildPage:
 
     def build(self):
         self.builder.build(self.sshgen,
-                command.uiask(":oldsquash.active") if self.oldsqf else False)
+                ui.ask(":oldsquash.active") if self.oldsqf else False)

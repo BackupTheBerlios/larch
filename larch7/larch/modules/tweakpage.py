@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.21
+# 2009.09.01
 
 import os, shutil
 
@@ -49,7 +49,7 @@ class TweakPage:
 
 
     def doupdate(self):
-        f = command.uiask("fileDialog", _("Package to add/update"),
+        f = ui.ask("fileDialog", _("Package to add/update"),
                 None, "pacman -U", False, False,
                 (_("Packages"), "*.pkg.tar.gz"))
         if f:
@@ -58,7 +58,7 @@ class TweakPage:
 
 
     def doadd(self):
-        ok, plist = command.uiask("textLineDialog",
+        ok, plist = ui.ask("textLineDialog",
                 _("Enter the names of packages to install -"
                 "\n  separated by spaces:"),
                 "pacman -S")
@@ -68,7 +68,7 @@ class TweakPage:
 
 
     def doremove(self):
-        ok, plist = command.uiask("textLineDialog",
+        ok, plist = ui.ask("textLineDialog",
                 _("Enter the names of packages to remove -"
                 "\n  separated by spaces:"),
                 "pacman -Rs")

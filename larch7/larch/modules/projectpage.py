@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.22
+# 2009.09.02
 
 import os
 
@@ -40,6 +40,9 @@ class ProjectPage:
                 (":choose_project_combo*changed", self.switch_project),
                 (":new_project*clicked", self.get_new_project_name),
                 (":project_delete*clicked", self.delete_project),
+                ("$*new_project_name*$", self.new_project_name),
+                ("$*rename_profile*$", self.rename_profile),
+                ("$*make_new_profile*$", self.make_new_profile),
             ]
 
     def __init__(self):
@@ -57,32 +60,37 @@ class ProjectPage:
         Also the currently selected project name is needed - config.project.
         """
         self.installpath = config.get("install_path")
-        self.profiles = os.listdir(config.profile_dir)
+        self.profiles = config.profiles()
         self.profile = config.get("profile")
         pdn = os.path.dirname(self.profile)
         self.profilename = os.path.basename(self.profile)
         if pdn != config.profile_dir:
-            larch_error(_("Profile directory mismatch: '%s' vs. '%s'") %
+            config_error(_("Profile directory mismatch: '%s' vs. '%s'") %
                     (pdn, config.profile_dir))
-            self.profile = config.defaultprofile()
+            self.profile = None
+            config.defaultprofile()
+            self.profilename = os.path.basename(self.profile)
+            config.set("profile", self.profile)
         elif self.profilename not in self.profiles:
-            #config_error(_("Profile '%s' doesn't exist") % self.profile)
+            config_error(_("Profile '%s' doesn't exist") % self.profile)
+            self.profile = None
+        if not self.profile:
             self.profile = config.defaultprofile()
             self.profilename = os.path.basename(self.profile)
-        config.set("profile", self.profile)
+            config.set("profile", self.profile)
         self.projects = config.getsections()
         self.projects.sort()
         self.project = config.project
 
         i = config.platforms.index(config.get("platform"))
-        command.ui(":platform.set", config.platforms, i)
+        ui.command(":platform.set", config.platforms, i)
 
-        command.ui(":choose_profile_combo.set", self.profiles,
+        ui.command(":choose_profile_combo.set", self.profiles,
                 self.profiles.index(self.profilename))
-        command.ui(":choose_project_combo.set", self.projects,
+        ui.command(":choose_project_combo.set", self.projects,
                 self.projects.index(self.project))
-        command.ui(":installation_path_show.set", self.installpath)
-        command.ui(":notebook.enableTab", 1, self.installpath != "/")
+        ui.command(":installation_path_show.set", self.installpath)
+        ui.command(":notebook.enableTab", 1, self.installpath != "/")
         command.enable_tweaks()
 
 
@@ -107,16 +115,20 @@ class ProjectPage:
 
 
     def new_profile(self):
-        ok, source, name = command.uiask("specialFileDialog",
+        ok, source, name = ui.ask("specialFileDialog",
                 _("Select profile source folder and enter new name"),
                 config.profile_dir, _("New name:"),
                 (config.profile_dir, base_dir + "/profiles",
                 config.current_dir, config.home_dir))
         if ok:
-            profile = config.copyprofile(name, source)
-            if profile:
-                config.set("profile", profile)
-                self.setup()
+            self.make_new_profile(source, name)
+
+
+    def make_new_profile(self, source, name):
+        profile = config.copyprofile(name, source)
+        if profile:
+            config.set("profile", profile)
+            self.setup()
 
 
 #TODO: There's a problem when renaming a profile that is used by another
@@ -124,19 +136,31 @@ class ProjectPage:
 # When a project's profile doesn't exist it gets set to the default one,
 # which is copied over if necessary.
     def get_new_profile_name(self):
-        ok, new = command.uiask("textLineDialog",
+        ok, new = ui.ask("textLineDialog",
                 _("Enter new name for current profile:"),
                 None, self.profilename)
         if ok:
-            config.renameprofile(new)
+            self.rename_profile(new)
+
+
+    def rename_profile(self, name):
+        if config.renameprofile(name):
             self.setup()
 
 
-    def delete_profile(self):
-        if command.uiask("confirmDialog",
-                _("Do you really want to delete profile '%s'?") % self.profile):
-            config.deleteprofile(self.profile)
-            self.setup()
+    def delete_profile(self, name=None):
+        if name:
+            p = os.path.join(config.profile_dir, name)
+            if p == self.profile:
+                name = None
+        else:
+            p = self.profile
+
+        if ui.confirmDialog(_("Do you really want to delete profile '%s'?")
+                % os.path.basename(p)):
+            config.deleteprofile(p)
+            if not name:
+                self.setup()
 
 
     def get_new_installation_path(self):
@@ -144,7 +168,7 @@ class ProjectPage:
         # I don't think so, the installation code does that.
         # If the path is "/", the installation page should be inhibited,
         # but that is handled by 'setup'.
-        ok, path = command.uiask("textLineDialog",
+        ok, path = ui.ask("textLineDialog",
                 _("WARNING: Double check your path -\n"
                 "  If you make a mistake here it could destroy your system!"
                 "\n\nEnter new installation path:"),
@@ -161,19 +185,33 @@ class ProjectPage:
 
 
     def get_new_project_name(self):
-        ok, new = command.uiask("textLineDialog",
+        ok, new = ui.ask("textLineDialog",
                 _("Enter name for new project:"),
                 None, self.project)
         if ok:
-            config.setproject(new)
+            self.new_project_name(new)
+
+
+    def new_project_name(self, name):
+        if name in self.projects:
+            config_error(_("Project '%s' already exists.") % name)
+        else:
+            config.setproject(name)
             self.setup()
 
 
-    def delete_project(self):
+    def delete_project(self, name=None):
         if len(self.projects) < 2:
-            command.uiask("infoDialog",
-                    _("Can't delete the only existing project."))
-        elif command.uiask("confirmDialog",
-                _("Do you really want to delete project '%s'?") % self.project):
-            config.deleteproject(self.project)
-            self.setup()
+            config_error(_("Can't delete the only existing project."))
+            return
+        if name:
+            p = name
+            if name == self.project:
+                name = None
+        else:
+            p = self.project
+        if ui.confirmDialog(_("Do you really want to delete project '%s'?")
+                % p):
+            config.deleteproject(p)
+            if not name:
+                self.setup()

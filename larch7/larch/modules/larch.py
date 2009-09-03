@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.31
+# 2009.09.01
 
 
 """
@@ -53,7 +53,7 @@ construction) is handled by the imported modules and run in a separate
 thread.
 """
 
-import os, sys, traceback, re, pwd
+import os, sys, traceback, re, pwd, signal
 
 import __builtin__
 __builtin__.base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -66,6 +66,7 @@ from Queue import Queue
 import json
 
 import base
+import logging
 from installation import Installation
 
 from projectpage import ProjectPage
@@ -80,6 +81,7 @@ def errout(text, quit=0):
     sys.stderr.flush()
     if quit:
         sys.exit(quit)
+__builtin__.errout = errout
 
 def debug(text):
     errout("DEBUG: " + text.strip() + "\n")
@@ -120,9 +122,6 @@ class Command:
         self.ostream = tosuper
         self.ready = threading.Event()
         self.ready.set()
-        self.ui_answer_event = threading.Event()
-        self.ui_answer_event.set()
-        self.ui_answer = None
 
         # These are used by 'supershell'
         self.ok = None
@@ -142,10 +141,10 @@ class Command:
 
         # Connect up the signals and slots
         self.connections = {
-                "$$$uiquit$$$": [self._uiquit],
+                "$$$uiquit$$$": [self.uiquit],
                 "$$$hidelog$$$": [self._activatehidelog],
                 "$showlog*toggled$": [self._showlog],
-                ":notebook*changed": [self._pageswitch],
+                ":notebook*changed": [self.pageswitch],
                 "$$$clearlog$$$": [self._clearlog],
             }
         for p in self.pages:
@@ -161,52 +160,8 @@ class Command:
         self.pages[0].setup()
 
 
-    def _pageswitch(self, index):
+    def pageswitch(self, index):
         self.pages[index].setup()
-
-
-    def ui(self, cmd, *args):
-        """Send a command to the user interface.
-        To be used in the worker thread.
-        The command is of the form 'widget.method', 'args' is the
-        list of arguments. The argument list is encoded as json for
-        transmission.
-        """
-        c = "!" + cmd
-        if args:
-            c += " " + json.dumps(args)
-        self.sendui(c)
-
-
-    def uiask(self, cmd, *args):
-        """Send a request for information to the user interface.
-        To be used in the worker thread.
-        The command is of the form 'widget.method', 'args' is the
-        list of arguments. The argument list is encoded as json for
-        transmission.
-        Then wait for the answer and return it as result.
-        """
-        c = "?" + cmd
-        if args:
-            c += " " + json.dumps(args)
-        if not self.ui_answer_event.is_set():
-            fatal_error(_("ui not ready for enquiry:\n") + c)
-        self.ui_answer = None
-        self.ui_answer_event.clear()
-        self.sendui(c)
-        self.ui_answer_event.wait()
-        return self.ui_answer
-
-
-    def sendui(self, line):
-        """Send a text line to the user interface process.
-        To be used in the worker thread.
-        """
-        try:
-            guiprocess.stdin.write("%s\n" % line)
-        except:
-            sys.stderr.write("ui dead (%s)\n" % line)
-            sys.stderr.flush()
 
 
     def log(self, line):
@@ -234,7 +189,7 @@ class Command:
 
 
     def worker_run(self, slots, *args):
-        self.ui(":larch.busy", ":notebook", True)
+        ui.command(":larch.busy", ":notebook", True)
         try:
             for s in slots:
                 s(*args)
@@ -244,7 +199,7 @@ class Command:
                 fatal_error("".join(traceback.format_exception(typ, val, tb)))
 
         self.blocking = False
-        self.ui(":larch.busy", ":notebook", False)
+        ui.command(":larch.busy", ":notebook", False)
 
 
     def supershell(self, cmd, cmdtype=">"):
@@ -264,20 +219,27 @@ class Command:
 
     def _activatehidelog(self):
         # This is not called from the worker thread, but I think it's ok
-        self.ui(":showlog.set", False)
+        ui.command(":showlog.set", False)
 
 
     def _showlog(self, on):
         # This is not called from the worker thread, but I think it's ok
-        self.ui("log:log.setVisible", on)
+        logger.setVisible(on)
 
 
     def _clearlog(self):
         # This is not called from the worker thread, but I think it's ok
-        self.ui("log:logtext.set")
+        logger.clear()
 
 
-    def _uiquit(self):
+    def sigint(self, num, frame):
+        """CONSOLE MODE ONLY: A handler for SIGINT. Tidy up properly and quit.
+        First kill potential running supershell process, then terminate
+        logger, and then, finally, terminate the ui process.
+        """
+        self.uiquit()
+
+    def uiquit(self):
         # This is not called from the worker thread, so it mustn't block.
         self.qthread = simple_thread(self._quit_run)
 
@@ -299,7 +261,7 @@ class Command:
 
         # Tell the user interface to exit, which will in turn cause the
         # thread reading its output to terminate (see function 'gtstart').
-        self.sendui("/")
+        ui.sendui("/")
 
 
     def mount(self, src, dst, opts=""):
@@ -339,11 +301,11 @@ class Command:
                 source = readfile(source, filter)
         if not label:
             label = _("Editing '%s'") % fname
-        self.ui("editor:label.set", label)
-        self.ui("editor:text.set", readfile(f) if os.path.isfile(f)
+        ui.command("editor:label.set", label)
+        ui.command("editor:text.set", readfile(f) if os.path.isfile(f)
                 else source)
-        if self.uiask("editor:editor.showmodal"):
-            t = self.uiask("editor:text.get").encode("utf8")
+        if ui.ask("editor:editor.showmodal"):
+            t = ui.ask("editor:text.get").encode("utf8")
             if t[-1] != "\n":
                 t += "\n"
             d = os.path.dirname(f)
@@ -385,14 +347,6 @@ class Command:
             return "SCRIPT ERROR: (%s)\n" % cmd + "".join(s.result)
 
 
-    def info(self, message):
-        self.uiask("infoDialog", message)
-
-
-    def error(self, etype, message, *args):
-        self.sendui("_!_ " + json.dumps((etype, message) + args))
-
-
     def check_platform(self, report=True):
         arch = Popen(["cat", config.ipath(".ARCH")],
                 stdout=PIPE, stderr=PIPE).communicate()[0].strip()
@@ -410,12 +364,12 @@ class Command:
 
 
     def enable_tweaks(self):
-        self.ui(":notebook.enableTab", 4, (config.get("install_path") != "/"
+        ui.command(":notebook.enableTab", 4, (config.get("install_path") != "/"
                 and self.check_platform(report=False)))
 
 
     def NYI(self):
-        self.uiask("infoDialog", _("Function not yet implemented"))
+        ui.ask("infoDialog", _("Function not yet implemented"))
 
 
 def readfile(f, filter=None):
@@ -431,22 +385,22 @@ def savefile(f, d):
 
 
 def config_error(text):
-    command.error("Warning", text, _("CONFIG ERROR"))
+    ui.error(text, _("CONFIG ERROR"))
 __builtin__.config_error = config_error
 
 def run_error(text):
-    command.error("Warning", text, _("BUILD ERROR"))
+    ui.error(text, _("BUILD ERROR"))
 __builtin__.run_error = run_error
 
 def fatal_error(text):
-    command.error("Fatal", text)
+    ui.error(text, fatal=True)
 __builtin__.fatal_error = fatal_error
 
 #---------------------------
 # Catch all unhandled errors.
 def errorTrap(type, value, tb):
     etext = "".join(traceback.format_exception(type, value, tb))
-    command.error("Fatal", etext, _("This error could not be handled"))
+    ui.error(etext, _("This error could not be handled"), fatal=True)
 
 sys.excepthook = errorTrap
 #---------------------------
@@ -479,10 +433,10 @@ def mainloop():
 
             elif text[0] == "@":
                 # The response to an enquiry
-                if command.ui_answer_event.is_set():
+                if ui.answer_event.is_set():
                     fatal_error(_("Unexpected response from ui:\n") + text)
-                command.ui_answer = json.loads(text[1:])
-                command.ui_answer_event.set()
+                ui.answer = json.loads(text[1:])
+                ui.answer_event.set()
 
             elif text[0] == "/":
                 # Occurs when the ui process has exited
@@ -537,16 +491,6 @@ def substart(process, flag):
     commqueue.put("%s/%d\n" % (flag, process.returncode))
 
 
-def itstart():
-    """A thread function for reading input from stdin line
-    by line. The lines are placed in the communication queue.
-    """
-    while True:
-        line = sys.stdin.readline()
-        # Pass on the output of the process
-        commqueue.put("X:%s" % line)
-
-
 re_mksquashfs = re.compile(r"X:-\[.*\](.* ([0-9]+)%)")
 re_pacman = re.compile(r"X:-.*\[([-#]+)\]\s+[0-9]+%")
 def ltstart():
@@ -558,27 +502,28 @@ def ltstart():
         line = logqueue.get()
         if line.startswith("L:/"):
             # Quit logging
+            logger.quit()
             break
         # Filter the output of mksquashfs
         m = re_mksquashfs.match(line)
         if m:
             if not progress:
-                command.ui("log:logtext.append_and_scroll", "dummy\n")
+                logger.addLine("dummy\n")
             percent = m.group(2)
             if progress == percent:
                 continue
             else:
                 progress = percent
-                command.ui("log:logtext.undo")
+                logger.undo()
                 line = "X:++++%s\n" % m.group(1)
         else:
             m = re_pacman.match(line)
             if m:
                 if '#' in m.group(1):
-                    command.ui("log:logtext.undo")
+                    logger.undo()
 
             progress = ""
-        command.ui("log:logtext.append_and_scroll", line)
+        logger.addLine(line)
 
 
 def tidyquit():
@@ -587,6 +532,7 @@ def tidyquit():
 
 
 if __name__ == "__main__":
+
     if os.getuid() == 0:
         # Start backend process (supershell)
         superprocess = Popen([base_dir + "/modules/backend.py"],
@@ -605,12 +551,20 @@ if __name__ == "__main__":
     logqueue = Queue()
 
     # Various ui toolkits could be supported, but at the moment there
-    # is only support for pyqt
-    if True:
-        # In list form suitable for subprocess.Popen()
-        guiexec = [base_dir + "/modules/pyqt/larchgui.py"]
-    guiprocess = Popen(guiexec, cwd=base_dir, stdin=PIPE, stdout=PIPE)
-    gthread = simple_thread(substart, guiprocess, "G:")
+    # is only support for pyqt (apart from the console)
+    if (len(sys.argv) > 1) and (sys.argv[1] in ("-c", "-f")):
+        from console import Ui, Logger
+        guiexec = None
+    else:
+        from gui import Ui, Logger
+        if (len(sys.argv) == 1) or (sys.argv[1] == "-pyqt"):
+            guiexec = [base_dir + "/modules/pyqt/larchgui.py"]
+        else:
+            errout(_("ERROR: Unsupported option - '%s'\n") % sys.argv[1])
+            sys.exit(1)
+
+    __builtin__.ui = Ui(commqueue, "G:", guiexec)
+    logger = Logger()
 
     __builtin__.installation = Installation()
 
@@ -625,6 +579,8 @@ if __name__ == "__main__":
         xthread = simple_thread(substart, superprocess, "X:")
 
     __builtin__.supershell = command.supershell
+
+    signal.signal(signal.SIGINT, command.sigint)
 
     command.run()
     mainloop()

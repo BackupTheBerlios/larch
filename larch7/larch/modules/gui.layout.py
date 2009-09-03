@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.08.30
+# 2009.09.02
 
 Namespace = ":"
 
@@ -61,7 +61,7 @@ Widgets = [
   ["*OptionalFrame", "^mirrorlist", _("Use project mirrorlist")],
   ["Button", "^mirrorlist_change", _("Edit project mirrorlist")],
 
-  ["*OptionalFrame", "^use_local_mirror", _("Use local mirror for installation")],
+  ["*OptionalFrame", "^use_local_mirror", _("Use special mirror for installation")],
     ["Label", "l1", _("URL:")],
     ["*LineEdit", "local_mirror"],
     ["Button", "^local_mirror_change", _("Change")],
@@ -115,7 +115,7 @@ Widgets = [
   ["*RadioButton", "^$uuid", "UUID"],
   ["*RadioButton", "^$label", "LABEL"],
   ["*RadioButton", "^$device", _("Partition")],
-  ["*RadioButton", "^$nodevice", "Search (for larchboot)"],
+  ["*RadioButton", "^$search", "Search (for larchboot)"],
 
   ["Label", "lm1", _("Medium label:")],
   ["*LineEdit", "labelname"],
@@ -184,7 +184,7 @@ Tooltips = [
 ["$uuid", _("Use the partition's UUID to find it")],
 ["$label", _("Use the partition's label to find it")],
 ["$device", _("Use the partition name (/dev/sdb1, etc.)")],
-["$nodevice", _("Test all CD/DVD devices and partitions until the file larch/larchboot is found")],
+["$search", _("Test all CD/DVD devices and partitions until the file larch/larchboot is found")],
 ["labelname", _("The label that the partition will be given")],
 ["changelabel", _("Change the label")],
 ["bootloader", _("You can choose between GRUB and syslinux/isolinux as bootloader")],
@@ -323,7 +323,7 @@ Layout = [
 
   ["+LAYOUT", "detection", "vbm3"],
   ["VBOX", "vbm3", ["hbm2a", "hbm2b"]],
-    ["HBOX", "hbm2a", ["$device", "$uuid", "$label", "$nodevice"]],
+    ["HBOX", "hbm2a", ["$device", "$uuid", "$label", "$search"]],
     ["HBOX", "hbm2b", ["lm1", "labelname", "changelabel"]],
 
 

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.25
+# 2009.09.02
 
 """This module handles the basic framework and configuration of the
 larch build system.
@@ -47,7 +47,7 @@ defaults = {    "install_path"  : "/home/larchbuild",
                 "filebrowser"   : "xdg-open %",
                 "medium_iso"    : "yes",    # "yes" / ""
                 "medium_btldr"  : "grub",   # "grub" / "syslinux" / "none"
-                "medium_search" : "nodevice", # "nodevice" / "uuid" / "label" / "device"
+                "medium_search" : "search", # "search" / "uuid" / "label" / "device"
                 "medium_label"  : "LARCH-7",
     }
 
@@ -174,8 +174,12 @@ class LarchConfig:
             self.config.write(configfile)
 
 
+    def profiles(self):
+        return os.listdir(self.profile_dir)
+
+
     def defaultprofile(self):
-        dprofile = os.path.join(self.profile_dir, "default")
+        dprofile = self.profile_dir + "/default"
         if not os.path.isdir(dprofile):
             self.copyprofile()
         return dprofile
@@ -205,8 +209,8 @@ class LarchConfig:
         return ppath
 
 
-    #def setprofile(self, name):
-    #    self.set("profile", os.path.join(self.profile_dir, name))
+    def setprofile(self, name):
+        self.set("profile", os.path.join(self.profile_dir, name))
 
 
     def renameprofile(self, newname):
@@ -222,8 +226,10 @@ class LarchConfig:
 
     def deleteprofile(self, path):
         shutil.rmtree(path)
+        if path == self.get("profile"):
+            self.set("profile", self.defaultprofile())
 
 
     def deleteproject(self, name):
-        if self.config.remove_section(name):
+        if self.config.remove_section(name) and name == self.project:
             self.setproject(self.getsections()[0])
