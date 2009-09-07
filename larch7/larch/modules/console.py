@@ -21,7 +21,12 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.02
+# 2009.09.07
+
+
+# This is actually pretty f.u. - the whole signal / threading bit doesn't seem
+# to be functional, it is too complicated, and untidy.
+
 
 """Implement a command line driven user interface for larch.
 """
@@ -41,73 +46,27 @@ class Ui:
     def __init__(self, commqueue, flag, guiexec):
         self.queue = commqueue
         self.flag = flag
-        self.autocontinue = False
+        self.autocontinue = ("x" in sys.argv[1])
 
-        # The (console) input handling
-        self.inqueue = Queue()
-        self.ithread = threading.Thread(target=self.inputthread_start)
-        self.ithread.start()
-
-        # A thread for running the commands
-        self.guiprocess = None
-        self.gthread = threading.Thread(target=self.commandthread_start,
-                args=(sys.argv[1:],))
-        self.gthread.start()
+        # Associate command names with functions (aliases are allowed)
+        self.functions = {}
+        for assoc in function_list:
+            for n in assoc[1:]:
+                self.functions[n] = assoc[0]
 
 
-# Input handling .................
-    def inputthread_start(self):
-        """A thread function for reading input from stdin line by line.
-        The lines are placed in a queue.
-        """
-        while True:
-            line = sys.stdin.readline()
-            self.inqueue.put(line)
+    def go(self):
+        logger.init()
+        logger.setVisible("l" not in sys.argv[1])
 
-    def inflush(self):
-        r = ""
         try:
-            while True:
-                r += self.inqueue.get_nowait()
+            r = self.do(" ".join(sys.argv[2:]))
         except:
-            return r
+            r = 1
 
-    def ingetline(self, prompt=None):
-        if prompt != None:
-            out(prompt)
-        self.inqueue.get()
-
-# End of the input handling .................
-
-
-    def commandthread_start(self, arglist):
-        """A thread function for reading commands from a command list.
-        The commands are passed to the 'do' method.
-        """
-        cmd = []
-        lines = []
-        if arglist[0] == "-f":
-            # Get commands from file
-            if len(arglist) > 2:
-                errout(_("WARNING: Superfluous arguments ignored -\n"))
-                errout(" ... " + " ".join(arglist[2:]))
-            fh = open(arglist[1])
-            for line in fh:
-                line = line.strip()
-                if line.startswith("#"):
-                    continue
-                lines.append(line)
-            fh.close()
-
-        else:
-            # Get commands from command line
-            lines = arglist[1:]
-
-        for cmd in lines:
-            r = self.do(cmd):
-            if r != 0:
-                break
+        self.sendsig("$$$uiquit$$$")
         self.queue.put("%s/%d\n" % (self.flag, r))
+        return
 
 
     def infoDialog(self, message, title=None):
@@ -118,7 +77,7 @@ class Ui:
         if self.autocontinue:
             return True
         else:
-            self.ingetline(_("Press <Enter> to continue"))
+            raw_input(_("Press <Enter> to continue"))
             return True
 
 
@@ -130,7 +89,7 @@ class Ui:
         if self.autocontinue:
             return True
         else:
-            l = self.ingetline("%s (y) | %s (n) ? " % (_("Yes"), _("No")))
+            l = raw_input("%s (y) | %s (n) ? " % (_("Yes"), _("No")))
             return (l.strip()[0] in "yY")
 
 
@@ -145,57 +104,78 @@ class Ui:
 
 
     def sendsig(self, sig, *args):
-        self.queue.put("%s^%s %s" % (self.flag, self.name, json.dumps([None, args])))
+        self.queue.put("%s^%s %s" % (self.flag, sig, json.dumps([None, args])))
+
+
+    def sendsigB(self, *args):
+        self.block = threading.Event()
+        gthread = threading.Thread(target=self.sendsigT, args=args)
+        gthread.start()
+        assert False
+
+    def sendsigT(self, sig, *args):
+        self.sendsig(sig, *args)
+        self.block.wait()
+        self.sendsig("$$$uiquit$$$")
+        self.queue.put("%s/%d\n" % (self.flag, r))
 
 
     def respond(self, result):
         self.queue.put("%s@%s\n" % (self.flag, json.dumps(result)))
 
 
+    def do(self, cmdline):
+        cmda = cmdline.split()
+        fn = self.functions.get(cmda[0])
+        if fn:
+            fn(*cmda[1:])
+            return 0
+        else:
+            self.error(_("Unknown command: %s") % cmda[0])
 
 
-
-????
+    # The gui interface functions are not used here
     def command(self, cmd, *args):
-        pass
+        return
 
     def ask(self, cmd, *args):
-        pass
+        return None
+
+    def sendui(self, line):
+        return
+
+    def completed(self):
+        self.block.set()
 
 
+#-----------------------------------------------------------
+# Main Actions
 
+def x_install():
+    ui.sendsigB(":install*clicked")
 
-set_platform (at most 32/64, and only on 64)
-set_bootloader
-set_medium_detection
+def x_larchify(opts=""):
+    """opts: string containing 's' to generate sshkeys, 'r' to use oldsquash
+    """
+    ui.sendsigB("*larchify*", "s" in opts, "r" in opts)
 
-set_bootlarch (* binary)
-set_partition_format (* binary)
-set_use_build_mirror (* binary)
-set_use_project_mirrorlist (* binary)
+def x_create_iso():
+    """Create an iso of the live system
+    """
+    ui.sendsigB("*makelive*", True, "", False, True)
+    # + iso? + partition + format? + larchboot?
 
-# Then there are the places where a name, a path or other line of text
-# needs to be supplied.
-set_ipath
-set_buildmirror
-set_pacman_cache
-set_label
-pacman_sy
-pacman_s
-pacman_u
-pacman_r
+def x_write_partition(part, opts=""):
+    """Write the live system to the given partition.
+    opts: string containing 'n' to suppress formatting, 'l' to force larchboot
+    """
+    ui.sendsigB("*makelive*", False, part, 'n' not in opts, 'l' in opts)
+    # + iso? + partition + format? + larchboot?
 
-# Actions
-install
-larchify (+ sshkeys + oldsquash)
-create_iso
-write_partition (+ partition)
-create_bootiso
+def x_create_bootiso(part):
+    ui.sendsigB("*bootiso*", part)
+#-----------------------------------------------------------
 
-show_partitions
-
-# How to set ui.autocontinue?
-# What about using old system.sqf and ssh-keys? These are not in the project memory.
 
 def infoline(item, value):
     out("  %-25s %s\n" % (item, value))
@@ -231,9 +211,10 @@ def show_example_profiles():
     for p in os.listdir(base_dir + "/profiles"):
         out("    %s\n" % p)
 
-
-
-
+def show_partitions():
+    out(_("Available Partitions:\n"))
+    for p in command.get_partitions():
+        out(p + "\n")
 
 
 def set_project(name):
@@ -241,7 +222,7 @@ def set_project(name):
         i = config.getsections().index(name)
         ui.sendsig(":choose_project_combo*changed", i)
     except:
-        error(_("Unknown project name: '%s'") % name)
+        ui.error(_("Unknown project name: '%s'") % name)
 
 def new_project(name):
     ui.sendsig("$*new_project_name*$", name)
@@ -250,7 +231,7 @@ def del_project(name):
     if name in config.getsections():
         ui.sendsig(":project_delete*clicked", name)
     else:
-        error(_("Unknown project name: '%s'") % name)
+        ui.error(_("Unknown project name: '%s'") % name)
 
 
 def set_profile(name):
@@ -258,7 +239,7 @@ def set_profile(name):
         i = config.profiles().index(name)
         ui.sendsig(":choose_profile_combo*changed", i)
     except:
-        error(_("Unknown profile name: '%s'") % name)
+        ui.error(_("Unknown profile name: '%s'") % name)
 
 def rename_profile(name):
     ui.sendsig("$*rename_profile*$", name)
@@ -270,16 +251,115 @@ def del_profile(name):
     if name in config.profiles():
         ui.sendsig(":profile_delete*clicked", name)
     else:
-        error(_("Unknown profile name: '%s'") % name)
+        ui.error(_("Unknown profile name: '%s'") % name)
 
 
+def set_ipath(path):
+    ui.sendsig("$*set_ipath*$", path)
+
+
+def set_platform(arch):
+    try:
+        i = config.platforms.index(arch)
+        ui.sendsig(":platform*changed", i)
+    except:
+        ui.error(_("Available platforms: %s") % repr(config.platforms))
+
+
+def set_buildmirror(path):
+    ui.sendsig("$*set_build_mirror*$", path)
+
+
+def set_pacman_cache(path):
+    ui.sendsig("$*set_pacman_cache*$", path)
+
+
+def use_build_mirror(on):
+    ui.sendsig(":use_local_mirror*toggled", on[0] in "yY")
+
+
+def use_project_mirrorlist(on):
+    ui.sendsig(":mirrorlist*toggled", on[0] in "yY")
+
+
+def set_bootloader(bl):
+    bl = bl.lower()
+    if bl == "isolinux":
+        bl = "syslinux"
+    elif bl in ("grub", "syslinux", "none"):
+        ui.sendsig(":$%s*toggled" % bl, True)
+    else:
+        ui.error(_("Invalid bootloader: %s") % bl)
+
+
+def set_medium_detection(mdet):
+    mdet = mdet.lower()
+    if mdet in ("search", "uuid", "label", "device"):
+        ui.sendsig(":$%s*toggled" % mdet, True)
+
+
+def set_label(label):
+    ui.sendsig("$*new_label*$", label)
+
+
+def pacman_s(*args):
+    ui.sendsig("$*pacmanS*$", " ".join(args))
+
+
+def pacman_r(*args):
+    ui.sendsig("$*pacmanR*$", " ".join(args))
+
+
+def pacman_u(filepath):
+    ui.sendsig("$*pacmanU*$", filepath)
+
+
+def pacman_sy(filepath):
+    ui.sendsig(":sync*clicked")
+
+
+function_list = (
+    [x_install, "install", "i"],
+    [x_larchify, "larchify", "l"],
+    [x_create_iso, "create_iso", "ci"],
+    [x_write_partition, "create_part", "cp"],
+    [x_create_bootiso, "create_bootiso", "cb"],
+    [show_project_info, "show_project_info", "i?"],
+    [show_projects, "show_projects", "P?"],
+    [show_profiles, "show_profiles", "p?"],
+    [show_example_profiles, "show_example_profiles", "e?"],
+    [show_partitions, "show_partitions", "d?"],
+    [set_project, "set_project", "P:"],
+    [new_project, "new_project", "P+"],
+    [del_project, "del_project", "P-"],
+    [set_profile, "set_profile", "p:"],
+    [rename_profile, "rename_profile", "p!"],
+    [new_profile, "new_profile", "p+"],
+    [del_profile, "del_profile", "p-"],
+    [set_ipath, "set_ipath", "ip:"],
+    [set_platform, "set_platform", "arch:"],
+    [set_buildmirror, "set_buildmirror", "m:"],
+    [set_pacman_cache, "set_pacman_cache", "cache:"],
+    [use_build_mirror, "use_build_mirror", "um:"],
+    [use_project_mirrorlist, "use_project_mirrorlist", "upm:"],
+    [set_bootloader, "set_bootloader", "bl:"],
+    [set_medium_detection, "set_medium_detection", "md:"],
+    [set_label, "set_label", "lab:"],
+    [pacman_s, "pacman_s", "ps:"],
+    [pacman_r, "pacman_r", "pr:"],
+    [pacman_u, "pacman_u", "pu:"],
+    [pacman_sy, "pacman_sy", "psy"],
+)
 
 
 class Logger:
     def __init__(self):
-        self._openfile()
         self.visible = True
         self.buffered = None
+
+    def init(self):
+        self._openfile()
+
 
     def _openfile(self):
         self.logfile = open(config.working_dir + "/larch.log", "w")
@@ -311,6 +391,8 @@ class Logger:
             sys.stdout.flush()
 
     def quit(self):
+        if self.buffered != None:
+            self.logfile.write(self.buffered)
         self.logfile.close()
         if self.visible:
             sys.stdout.write("\n**** Done ****\n")

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.01
+# 2009.09.03
 
 import os, shutil
 
@@ -41,6 +41,8 @@ class InstallPage:
                 (":local_mirror_change*clicked", self.new_local_mirror_path),
                 (":cache_change*clicked", self.new_cache_path),
                 (":install*clicked", installation.install),
+                ("$*set_build_mirror*$", self.set_build_mirror),
+                ("$*set_pacman_cache*$", self.set_pacman_cache),
             ]
 
 
@@ -107,9 +109,13 @@ class InstallPage:
                 _("Enter new local mirror path:"),
                 None, config.get("localmirror"))
         if ok:
-            path = path.strip().rstrip("/")
-            config.set("localmirror", path)
-            ui.command(":local_mirror.set", path)
+            self.set_build_mirror(path)
+
+
+    def set_build_mirror(self, path):
+        path = path.strip().rstrip("/")
+        config.set("localmirror", path)
+        ui.command(":local_mirror.set", path)
 
 
     def new_cache_path(self):
@@ -119,6 +125,10 @@ class InstallPage:
                 _("Enter new package cache path:"),
                 None, config.get("pacman_cache"))
         if ok:
+            self.set_pacman_cache(path)
+
+
+    def set_pacman_cache(self, path):
             path = path.strip().rstrip("/")
             config.set("pacman_cache", path)
             ui.command(":cache_show.set", path)

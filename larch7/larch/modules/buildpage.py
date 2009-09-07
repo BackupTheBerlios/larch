@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.01
+# 2009.09.07
 
 from build import Builder
 import os
@@ -39,6 +39,7 @@ class BuildPage:
                 (":initcpio*clicked", self.initcpio),
                 (":overlay*clicked", self.overlay),
                 (":filebrowser*clicked", self.filebrowser),
+                ("*larchify*", self.larchify),
             ]
 
 
@@ -87,5 +88,10 @@ class BuildPage:
 
 
     def build(self):
-        self.builder.build(self.sshgen,
-                ui.ask(":oldsquash.active") if self.oldsqf else False)
+        self.larchify(self.sshgen, ui.ask(":oldsquash.active"))
+
+
+    def larchify(self, sshkeys, oldsquash):
+        self.builder.build(self.builder.ssh_available() and sshkeys,
+                self.oldsqf and oldsquash)
+

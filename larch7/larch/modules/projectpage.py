@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.02
+# 2009.09.03
 
 import os
 
@@ -43,6 +43,7 @@ class ProjectPage:
                 ("$*new_project_name*$", self.new_project_name),
                 ("$*rename_profile*$", self.rename_profile),
                 ("$*make_new_profile*$", self.make_new_profile),
+                ("$*set_ipath*$", self.set_ipath),
             ]
 
     def __init__(self):
@@ -59,7 +60,6 @@ class ProjectPage:
         It needs the list of available projects - config.getsections().
         Also the currently selected project name is needed - config.project.
         """
-        self.installpath = config.get("install_path")
         self.profiles = config.profiles()
         self.profile = config.get("profile")
         pdn = os.path.dirname(self.profile)
@@ -89,8 +89,9 @@ class ProjectPage:
                 self.profiles.index(self.profilename))
         ui.command(":choose_project_combo.set", self.projects,
                 self.projects.index(self.project))
-        ui.command(":installation_path_show.set", self.installpath)
-        ui.command(":notebook.enableTab", 1, self.installpath != "/")
+        installpath = config.get("install_path")
+        ui.command(":installation_path_show.set", installpath)
+        ui.command(":notebook.enableTab", 1, installpath != "/")
         command.enable_tweaks()
 
 
@@ -172,11 +173,14 @@ class ProjectPage:
                 _("WARNING: Double check your path -\n"
                 "  If you make a mistake here it could destroy your system!"
                 "\n\nEnter new installation path:"),
-                None, self.installpath)
+                None, config.get("install_path"))
         if ok:
-            self.installpath = "/" + path.strip().strip("/")
-            config.set("install_path", self.installpath)
-            self.setup()
+            self.set_ipath(path)
+
+
+    def set_ipath(self, path):
+        config.set("install_path", "/" + path.strip().strip("/"))
+        self.setup()
 
 
     def switch_project(self, index):

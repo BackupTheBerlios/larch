@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.02
+# 2009.09.07
 
 import os
 
@@ -50,6 +50,9 @@ class MediumPage:
                 ("$parts:list*changed$", self.part_selected),
                 (":make*clicked", self.makedevice),
                 (":bootcd*clicked", self.makebootiso),
+                ("$*new_label*$", self.new_label),
+                ("*makelive*", self.makelive),
+                ("*bootiso*", self.bootiso),
             ]
 
 
@@ -108,32 +111,10 @@ class MediumPage:
 
 
     def selectpart(self):
-        # Present a list of available partitions (maybe only unmounted ones?)
-        # First get a list of mounted devices
-        mounteds = []
-        fh = open("/etc/mtab")
-        for l in fh:
-            dev = l.split()[0]
-            if dev.startswith("/dev/sd"):
-                mounteds.append(dev)
-        fh.close()
-        # Get a list of partitions
-        self.partlist = [(_("None"), "")]
-        for line in supershell("sfdisk -uM -l").result:
-            if line.startswith("/dev/sd"):
-                fields = line.replace("*", "").replace(" - ", " ? ")
-                fields = fields.replace("+", "").replace("-", "").split()
-                #debug("F5 '%s'" % fields[5])
-                if fields[5] in ["0", "5", "82"]:
-                    #debug("No")
-                    continue        # ignore uninteresting partitions
-                if fields[0] in mounteds:
-                    continue        # ignore mounted patitions
-                # Keep a tuple (partition, size in MiB)
-                self.partlist.append((fields[0], fields[3]))
-
-        ui.command("parts:list.set", ["%-12s %12s %s" % (p, s, "MiB" if s else "")
-                for p, s in self.partlist])
+        # Present a list of available partitions (only unmounted ones
+        # are included)
+        self.partlist = [_("None")] + command.get_partitions()
+        ui.command("parts:list.set", self.partlist)
         ui.command("parts:choice.set")
         if ui.ask("parts:parts.showmodal"):
             t = ui.ask("parts:choice.get").encode("utf8")
@@ -144,7 +125,7 @@ class MediumPage:
         if i <= 0:
             ui.command("parts:choice.set")
         else:
-            ui.command("parts:choice.set", self.partlist[i][0])
+            ui.command("parts:choice.set", self.partlist[i].split()[0])
 
 
     def edit_bootlines(self):
@@ -184,14 +165,23 @@ class MediumPage:
                 _("Enter new label for the boot medium:"),
                 None, config.get("medium_label"))
         if ok:
-            text = text.strip().replace(" ", "_")
-            config.set("medium_label", text)
-            ui.command(":labelname.set", text)
+            self.new_label(text)
+
+
+    def new_label(self, text):
+        text = text.strip().replace(" ", "_")
+        config.set("medium_label", text)
+        ui.command(":labelname.set", text)
 
 
     def makedevice(self):
-        iso = config.get("medium_iso") != ""
+        self.makelive(config.get("medium_iso") != "",
+                ui.ask(":larchpart.get"),
+                not ui.ask(":noformat.active"),
+                ui.ask(":larchboot.active"))
 
+
+    def makelive(self, iso, device, format, larchboot):
         btype = config.get("medium_btldr")  # "grub" / "syslinux" / "none"
         if btype == "grub":
             btype = "boot"
@@ -207,7 +197,6 @@ class MediumPage:
             format = False
             larchboot = True
         else:
-            device = ui.ask(":larchpart.get")
             if not device:
                 config_error(_("No partition selected for larch"))
                 return False
@@ -221,9 +210,6 @@ class MediumPage:
             elif partsel == "device":
                 partsel = "partition"
 
-            format = not ui.ask(":noformat.active")
-            larchboot = ui.ask(":larchboot.active")
-
         self.mediumbuilder.make(btype, device, label, partsel,
                 format, larchboot)
         # btype is "boot" (grub), "syslinux", "isolinux" or "" (no bootloader)
@@ -236,6 +222,10 @@ class MediumPage:
         if not device:
             config_error(_("The partition containing the larch live system"
                     "\nmust be specifed."))
+        self.bootiso(device)
+
+
+    def bootiso(self, device):
         self.mediumbuilder.mkbootiso(device)
 
 

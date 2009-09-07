@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.01
+# 2009.09.07
 
 
 """
@@ -158,6 +158,7 @@ class Command:
     def run(self):
         # Start on the project page
         self.pages[0].setup()
+        ui.go()
 
 
     def pageswitch(self, index):
@@ -199,7 +200,7 @@ class Command:
                 fatal_error("".join(traceback.format_exception(typ, val, tb)))
 
         self.blocking = False
-        ui.command(":larch.busy", ":notebook", False)
+        ui.completed()
 
 
     def supershell(self, cmd, cmdtype=">"):
@@ -256,6 +257,7 @@ class Command:
 
         # Tell the logger to quit
         logqueue.put("L:/\n")
+
         # Wait until logger process has terminated
         lthread.join()
 
@@ -368,6 +370,35 @@ class Command:
                 and self.check_platform(report=False)))
 
 
+    def get_partitions(self):
+        """Get a list of available partitions (only unmounted ones
+        are included).
+        """
+        # First get a list of mounted devices
+        mounteds = []
+        fh = open("/etc/mtab")
+        for l in fh:
+            dev = l.split()[0]
+            if dev.startswith("/dev/sd"):
+                mounteds.append(dev)
+        fh.close()
+        # Get a list of partitions
+        partlist = []
+        for line in supershell("sfdisk -uM -l").result:
+            if line.startswith("/dev/sd"):
+                fields = line.replace("*", "").replace(" - ", " ? ")
+                fields = fields.replace("+", "").replace("-", "").split()
+                #debug("F5 '%s'" % fields[5])
+                if fields[5] in ["0", "5", "82"]:
+                    #debug("No")
+                    continue        # ignore uninteresting partitions
+                if fields[0] in mounteds:
+                    continue        # ignore mounted patitions
+                # Keep a tuple (partition, size in MiB)
+                partlist.append("%-12s %12s MiB" % (fields[0], fields[3]))
+        return partlist
+
+
     def NYI(self):
         ui.ask("infoDialog", _("Function not yet implemented"))
 
@@ -410,6 +441,7 @@ sys.excepthook = errorTrap
 def mainloop():
     """Loop to read input and act on it.
     """
+    global exitcode
     while True:
         # We may have to wait for a worker thread to finish, hence the
         # following repeated test for the end of a thread after a breakin.
@@ -441,6 +473,7 @@ def mainloop():
             elif text[0] == "/":
                 # Occurs when the ui process has exited
                 ut = simple_thread(tidyquit)
+                exitcode = int(text[1:])
 
             elif text[0] == "_":
                 # Initiated by 'tidyquit()', we should be ready to quit.
@@ -552,7 +585,7 @@ if __name__ == "__main__":
 
     # Various ui toolkits could be supported, but at the moment there
     # is only support for pyqt (apart from the console)
-    if (len(sys.argv) > 1) and (sys.argv[1] in ("-c", "-f")):
+    if (len(sys.argv) > 1) and (sys.argv[1].startswith("-c")):
         from console import Ui, Logger
         guiexec = None
     else:
@@ -564,7 +597,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
     __builtin__.ui = Ui(commqueue, "G:", guiexec)
-    logger = Logger()
+    __builtin__.logger = Logger()
 
     __builtin__.installation = Installation()
 
@@ -585,4 +618,4 @@ if __name__ == "__main__":
     command.run()
     mainloop()
 
-
+    sys.exit(exitcode)

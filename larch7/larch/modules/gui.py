@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.01
+# 2009.09.07
 
 import json
 import threading
@@ -39,6 +39,10 @@ class Ui:
         self.guiprocess = Popen(guiexec, cwd=base_dir, stdin=PIPE, stdout=PIPE)
         self.gthread = threading.Thread(target=self.substart)
         self.gthread.start()
+
+
+    def go(self):
+        return
 
 
     def substart(self):
@@ -112,6 +116,8 @@ class Ui:
         self.sendui("_!_ " + json.dumps((fatal, message, title)))
 
 
+    def completed(self):
+        self.command(":larch.busy", ":notebook", False)
 
 
 
