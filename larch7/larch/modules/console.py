@@ -386,7 +386,7 @@ class Logger:
     def undo(self):
         self.buffered = None
         if self.visible:
-            sys.stdout.write("\r" + " "*120 + "\r")
+            sys.stdout.write("\r" + " "*80 + "\r")
             sys.stdout.flush()
 
     def quit(self):

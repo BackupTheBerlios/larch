@@ -51,8 +51,7 @@ class BuildPage:
     def setup(self):
         """Set up the build page widget.
         """
-        self.oldsqf = self.builder.oldsqf_available()
-        ui.command(":oldsquash.enable", self.oldsqf)
+        ui.command(":oldsquash.enable", self.builder.oldsqf_available())
         ssh = self.builder.ssh_available()
         self.sshgen = ssh and self.sshgen
         ui.command(":ssh.set", self.sshgen)
@@ -93,5 +92,5 @@ class BuildPage:
 
     def larchify(self, sshkeys, oldsquash):
         self.builder.build(self.builder.ssh_available() and sshkeys,
-                self.oldsqf and oldsquash)
+                self.builder.oldsqf_available() and oldsquash)
 
