@@ -303,19 +303,19 @@ def set_label(label):
 
 
 def pacman_s(*args):
-    ui.sendsig("$*pacmanS*$", " ".join(args))
+    ui.sendsigB("&*pacmanS*&", " ".join(args))
 
 
 def pacman_r(*args):
-    ui.sendsig("$*pacmanR*$", " ".join(args))
+    ui.sendsigB("&*pacmanR*&", " ".join(args))
 
 
 def pacman_u(filepath):
-    ui.sendsig("$*pacmanU*$", filepath)
+    ui.sendsigB("&*pacmanU*&", filepath)
 
 
-def pacman_sy(filepath):
-    ui.sendsig(":sync*clicked")
+def pacman_sy():
+    ui.sendsigB(":&sync*clicked")
 
 
 function_list = (

@@ -75,10 +75,10 @@ Widgets = [
 
 # Installation Tweaks Page
 ["Frame", "pacmanops", _("Package Management")],
-  ["Button", "^sync", _("Synchronize db")],
-  ["Button", "^update", _("Update / Add package    [-U]")],
-  ["Button", "^add", _("Add package(s)    [-S]")],
-  ["Button", "^remove", _("Remove package(s)    [-Rs]")],
+  ["Button", "^&sync", _("Synchronize db")],
+  ["Button", "^&update", _("Update / Add package    [-U]")],
+  ["Button", "^&add", _("Add package(s)    [-S]")],
+  ["Button", "^&remove", _("Remove package(s)    [-Rs]")],
 
 
 # Larchify Page
@@ -164,10 +164,10 @@ Tooltips = [
 ["cache_show", _("The path to the (host's) package cache")],
 ["cache_change", _("Change the package cache path")],
 ["&install", _("This will start the installation to the set path")],
-["sync", _("Synchronize the pacman db on the target (pacman -Sy)")],
-["update", _("Update / Add a package from a package file using pacman -U")],
-["add", _("Add one or more packages (space separated) using pacman -S")],
-["remove", _("Remove one or more packages (space separated) using pacman -Rs")],
+["&sync", _("Synchronize the pacman db on the target (pacman -Sy)")],
+["&update", _("Update / Add a package from a package file using pacman -U")],
+["&add", _("Add one or more packages (space separated) using pacman -S")],
+["&remove", _("Remove one or more packages (space separated) using pacman -Rs")],
 ["locales", _("Edit the /etc/locale.gen file to select supported glibc locales")],
 ["rcconf", _("Edit the /etc/rc.conf file to configure the live system")],
 ["initcpio", _("Edit the configuration file for generating the initramfs via mkinitcpio")],
@@ -276,8 +276,8 @@ Layout = [
 ["+LAYOUT", "page_tweaks", "vb_pt"],
 ["VBOX", "vb_pt", ["g3", "vst1"]],
   ["GRID", "g3",
-        ["sync", "update"],
-        ["add", "remove"]
+        ["&sync", "&update"],
+        ["&add", "&remove"]
     ],
   ["VSPACE", "vst1"],
 

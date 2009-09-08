@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.07
+# 2009.09.08
 
 import os, shutil
 
@@ -31,13 +31,13 @@ class TweakPage:
     """
     def connect(self):
         return [
-                (":sync*clicked", installation.update_db),
-                (":update*clicked", self.doupdate),
-                (":add*clicked", self.doadd),
-                (":remove*clicked", self.doremove),
-                ("$*pacmanU*$", self.pacmanU),
-                ("$*pacmanS*$", self.pacmanS),
-                ("$*pacmanR*$", self.pacmanR),
+                (":&sync*clicked", installation.update_db),
+                (":&update*clicked", self.doupdate),
+                (":&add*clicked", self.doadd),
+                (":&remove*clicked", self.doremove),
+                ("&*pacmanU*&", self.pacmanU),
+                ("&*pacmanS*&", self.pacmanS),
+                ("&*pacmanR*&", self.pacmanR),
             ]
 
 
