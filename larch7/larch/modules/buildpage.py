@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.07
+# 2009.09.08
 
 from build import Builder
 import os
@@ -32,14 +32,14 @@ class BuildPage:
     """
     def connect(self):
         return [
-                (":build*clicked", self.build),
+                (":&build*clicked", self.build),
                 (":ssh*toggled", self.sshtoggle),
                 (":locales*clicked", self.locales),
                 (":rcconf*clicked", self.rcconf),
                 (":initcpio*clicked", self.initcpio),
                 (":overlay*clicked", self.overlay),
                 (":filebrowser*clicked", self.filebrowser),
-                ("*larchify*", self.larchify),
+                ("&larchify&", self.larchify),
             ]
 
 

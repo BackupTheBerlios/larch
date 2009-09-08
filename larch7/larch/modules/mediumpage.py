@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.07
+# 2009.09.08
 
 import os
 
@@ -48,11 +48,11 @@ class MediumPage:
                 (":selectpart*clicked", self.selectpart),
                 (":changelabel*clicked", self.changelabel),
                 ("$parts:list*changed$", self.part_selected),
-                (":make*clicked", self.makedevice),
-                (":bootcd*clicked", self.makebootiso),
+                (":&make*clicked", self.makedevice),
+                (":&bootcd*clicked", self.makebootiso),
                 ("$*new_label*$", self.new_label),
-                ("*makelive*", self.makelive),
-                ("*bootiso*", self.bootiso),
+                ("&makelive&", self.makelive),
+                ("&bootiso&", self.bootiso),
             ]
 
 

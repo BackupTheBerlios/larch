@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.07
+# 2009.09.08
 
 
 # This is actually pretty f.u. - the whole signal / threading bit doesn't seem
@@ -31,7 +31,7 @@
 """Implement a command line driven user interface for larch.
 """
 
-import sys, os
+import sys, os, traceback
 import json
 import threading
 from Queue import Queue
@@ -59,14 +59,29 @@ class Ui:
         logger.init()
         logger.setVisible("l" not in sys.argv[1])
 
+        self.block = threading.Event()
+        self.gthread = threading.Thread(target=self.t_run, args=sys.argv[2:])
+        self.gthread.start()
+
+
+    def t_run(self, *arglist):
         try:
-            r = self.do(" ".join(sys.argv[2:]))
+            for cmd in arglist:
+                self.queue.join()
+                r = self.do(cmd)
+                if r != 0:
+                    break
         except:
             r = 1
-
         self.sendsig("$$$uiquit$$$")
         self.queue.put("%s/%d\n" % (self.flag, r))
         return
+
+
+    def sendsigB(self, sig, *args):
+        self.block.clear()
+        self.sendsig(sig, *args)
+        self.block.wait()
 
 
     def infoDialog(self, message, title=None):
@@ -107,19 +122,6 @@ class Ui:
         self.queue.put("%s^%s %s" % (self.flag, sig, json.dumps([None, args])))
 
 
-    def sendsigB(self, *args):
-        self.block = threading.Event()
-        gthread = threading.Thread(target=self.sendsigT, args=args)
-        gthread.start()
-        assert False
-
-    def sendsigT(self, sig, *args):
-        self.sendsig(sig, *args)
-        self.block.wait()
-        self.sendsig("$$$uiquit$$$")
-        self.queue.put("%s/%d\n" % (self.flag, r))
-
-
     def respond(self, result):
         self.queue.put("%s@%s\n" % (self.flag, json.dumps(result)))
 
@@ -152,28 +154,28 @@ class Ui:
 # Main Actions
 
 def x_install():
-    ui.sendsigB(":install*clicked")
+    ui.sendsigB(":&install*clicked")
 
 def x_larchify(opts=""):
     """opts: string containing 's' to generate sshkeys, 'r' to use oldsquash
     """
-    ui.sendsigB("*larchify*", "s" in opts, "r" in opts)
+    ui.sendsigB("&larchify&", "s" in opts, "r" in opts)
 
 def x_create_iso():
     """Create an iso of the live system
     """
-    ui.sendsigB("*makelive*", True, "", False, True)
+    ui.sendsigB("&makelive&", True, "", False, True)
     # + iso? + partition + format? + larchboot?
 
 def x_write_partition(part, opts=""):
     """Write the live system to the given partition.
     opts: string containing 'n' to suppress formatting, 'l' to force larchboot
     """
-    ui.sendsigB("*makelive*", False, part, 'n' not in opts, 'l' in opts)
+    ui.sendsigB("&makelive&", False, part, 'n' not in opts, 'l' in opts)
     # + iso? + partition + format? + larchboot?
 
 def x_create_bootiso(part):
-    ui.sendsigB("*bootiso*", part)
+    ui.sendsigB("&bootiso&", part)
 #-----------------------------------------------------------
 
 
@@ -360,7 +362,6 @@ class Logger:
     def init(self):
         self._openfile()
 
-
     def _openfile(self):
         self.logfile = open(config.working_dir + "/larch.log", "w")
 
@@ -376,7 +377,7 @@ class Logger:
 
     def addLine(self, line):
         if self.buffered != None:
-            self.logfile.write(self.buffered)
+            self.logfile.write(self.buffered + "\n")
             if self.visible:
                 sys.stdout.write("\n")
         self.buffered = line

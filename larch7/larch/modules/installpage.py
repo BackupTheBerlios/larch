@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.03
+# 2009.09.08
 
 import os, shutil
 
@@ -40,7 +40,7 @@ class InstallPage:
                 (":use_local_mirror*toggled", self.toggle_local_mirror),
                 (":local_mirror_change*clicked", self.new_local_mirror_path),
                 (":cache_change*clicked", self.new_cache_path),
-                (":install*clicked", installation.install),
+                (":&install*clicked", installation.install),
                 ("$*set_build_mirror*$", self.set_build_mirror),
                 ("$*set_pacman_cache*$", self.set_pacman_cache),
             ]

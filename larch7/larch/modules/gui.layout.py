@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.09.02
+# 2009.09.08
 
 Namespace = ":"
 
@@ -70,7 +70,7 @@ Widgets = [
   ["*LineEdit", "cache_show"],
   ["Button", "^cache_change", _("Change")],
 
-["Button", "^install", _("Install")],
+["Button", "^&install", _("Install")],
 
 
 # Installation Tweaks Page
@@ -93,7 +93,7 @@ Widgets = [
   ["*CheckBox", "^ssh", _("Generate ssh keys")],
   ["*CheckBox", "oldsquash", _("Reuse existing system.sqf")],
 
-["Button", "^build", _("Larchify")],
+["Button", "^&build", _("Larchify")],
 
 
 # Prepare Medium Page
@@ -133,8 +133,8 @@ Widgets = [
 ["Button", "^grubtemplate", _("Edit grub template")],
 ["Button", "^syslinuxtemplate", _("Edit syslinux/isolinux template")],
 
-["*Button", "^bootcd", _("Create boot iso")],
-["Button", "^make", _("Create larch medium")],
+["*Button", "^&bootcd", _("Create boot iso")],
+["Button", "^&make", _("Create larch medium")],
 
 ]
 

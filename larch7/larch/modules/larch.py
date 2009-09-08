@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.07
+# 2009.09.08
 
 
 """
@@ -446,7 +446,6 @@ def mainloop():
         # We may have to wait for a worker thread to finish, hence the
         # following repeated test for the end of a thread after a breakin.
         line = commqueue.get()
-
         source, text = line.split(":", 1)
         if source == "G":
             if text[0] == "^":
@@ -455,13 +454,18 @@ def mainloop():
                 arglst = json.loads(args)
                 slots = command.connections.get(sig)
                 if slots:
-                    if ":$" in ":" + sig:
-                        # Unblockable slots called from the main loop
+                    if ":&" in ":" + sig:
+                        # Such slots must be run by a background thread
+                        # Only one at a time is permitted
+                        if command.blocking:
+                            run_error(_("Received unexpected signal: '%s'")
+                                    % line.strip())
+                        else:
+                            command.worker(slots, *arglst[1])
+                    else:
+                        # Normal slots are run directly - they must be quick
                         for s in slots:
                             s(*arglst[1])
-                    elif not command.blocking:
-                        # Slots called from a separate thread, blockable
-                        command.worker(slots, *arglst[1])
 
             elif text[0] == "@":
                 # The response to an enquiry
@@ -493,12 +497,20 @@ def mainloop():
                 command.result.append(text[1:])
             elif text[0] == "/":
                 # Occurs when the backend process has exited
+                #try:
+                #    while True:
+                #        # To unblock threads waiting for the queue
+                #        commqueue.task_done()
+                # except:
+                #    pass
                 return
 
             command.log(line.strip())
 
         else:
-            command.fatal(_("Main process received illegal message"), line)
+            fatal_error(_("Main process received illegal message:\n") + line)
+
+        commqueue.task_done()
 
 #---------------------------
 
