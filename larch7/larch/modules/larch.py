@@ -43,6 +43,11 @@ The graphical user interface is also run as a separate process and the
 communication also runs via pipes to the subprocess's stdio channels.
 Data is passed as json objects.
 
+The command-line user interface runs in the same process but a separate
+thread is used to dispatch the commands - several commands can be passed
+on the command line. The dispatcher waits for one command to complete
+before sending the next, so the behaviour should be 'as expected'.
+
 A thread is used to read input from the root process and another
 thread is used to read input from the user interface. Both these threads
 place the lines they receive in a queue which is read by the main thread.
@@ -200,7 +205,7 @@ class Command:
                 fatal_error("".join(traceback.format_exception(typ, val, tb)))
 
         self.blocking = False
-        ui.completed()
+        ui.completed(self.breakin == 0)
 
 
     def supershell(self, cmd, cmdtype=">"):

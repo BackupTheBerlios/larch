@@ -24,10 +24,6 @@
 # 2009.09.08
 
 
-# This is actually pretty f.u. - the whole signal / threading bit doesn't seem
-# to be functional, it is too complicated, and untidy.
-
-
 """Implement a command line driven user interface for larch.
 """
 
@@ -82,6 +78,7 @@ class Ui:
         self.block.clear()
         self.sendsig(sig, *args)
         self.block.wait()
+        assert self.ok
 
 
     def infoDialog(self, message, title=None):
@@ -146,7 +143,8 @@ class Ui:
     def sendui(self, line):
         return
 
-    def completed(self):
+    def completed(self, ok):
+        self.ok = ok
         self.block.set()
 
 

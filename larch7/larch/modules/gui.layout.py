@@ -163,7 +163,7 @@ Tooltips = [
 ["local_mirror_change", _("Change the installation mirror path")],
 ["cache_show", _("The path to the (host's) package cache")],
 ["cache_change", _("Change the package cache path")],
-["install", _("This will start the installation to the set path")],
+["&install", _("This will start the installation to the set path")],
 ["sync", _("Synchronize the pacman db on the target (pacman -Sy)")],
 ["update", _("Update / Add a package from a package file using pacman -U")],
 ["add", _("Add one or more packages (space separated) using pacman -S")],
@@ -175,7 +175,7 @@ Tooltips = [
 ["filebrowser", _("Allows you to change the file browser opened by larch")],
 ["ssh", _("Enables pre-generation of ssh keys")],
 ["oldsquash", _("Reuse existing system.sqf, to save time if the base system hasn't changed")],
-["build", _("Build the main components of the larch system")],
+["&build", _("Build the main components of the larch system")],
 ["mediumtype", _("You can choose installation to iso (for CD/DVD) or a partition (e.g. USB-stick)")],
 ["larchpart", _("The partition to which the larch system is to be installed")],
 ["selectpart", _("Select the partition to receive the larch system")],
@@ -195,8 +195,8 @@ Tooltips = [
 ["bootlines", _("Edit the file determining the boot entries")],
 ["grubtemplate", _("Edit grub template")],
 ["syslinuxtemplate", _("Edit syslinux/isolinux template")],
-["bootcd", _("Create a small boot iso for this system (for machines that can't boot from USB)")],
-["make", _("Create the larch iso or set up the chosen partition")],
+["&bootcd", _("Create a small boot iso for this system (for machines that can't boot from USB)")],
+["&make", _("Create the larch iso or set up the chosen partition")],
 
 ]
 
@@ -268,7 +268,7 @@ Layout = [
 ["+LAYOUT", "use_local_mirror", "hb6"],
 ["HBOX", "hb6", ["l1", "local_mirror", "local_mirror_change"]],
 
-["HBOX", "hb4", ["hs1", "install"]],
+["HBOX", "hb4", ["hs1", "&install"]],
  ["HSPACE", "hs1"],
 
 
@@ -298,7 +298,7 @@ Layout = [
       ["VSPACE", "vsl1"],
    ["HSPACE", "hsl2"],
 
-["HBOX", "hbl1", ["hsl1", "build"]],
+["HBOX", "hbl1", ["hsl1", "&build"]],
  ["HSPACE", "hsl1"],
 
 
@@ -318,7 +318,7 @@ Layout = [
 ["+LAYOUT", "medium_partition", "vbm2"],
 ["VBOX", "vbm2", ["hbm1", "detection", "hbm5"]],
   ["HBOX", "hbm1", ["lm2", "larchpart", "selectpart", "noformat"]],
-  ["HBOX", "hbm5", ["bootcd", "vlm1", "larchboot"]],
+  ["HBOX", "hbm5", ["&bootcd", "vlm1", "larchboot"]],
     ["VLINE", "vlm1"],
 
   ["+LAYOUT", "detection", "vbm3"],
@@ -335,7 +335,7 @@ Layout = [
 
 ["HBOX", "hbm3", ["bootlines", "grubtemplate", "syslinuxtemplate"]],
 
-["HBOX", "hbm4", ["hsm1", "make"]],
+["HBOX", "hbm4", ["hsm1", "&make"]],
   ["HSPACE", "hsm1"],
 
 ]

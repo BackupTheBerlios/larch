@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.23
+# 2009.09.08
 
 """This module handles the running of shell code as root. All of the actual
 larch system building work is done via this interface, as the main process
@@ -139,6 +139,14 @@ def errout(text, quit=0):
 if __name__ == "__main__":
     if os.getuid() != 0:
         errout("You won't have much fun unless you run this as root!\n\n", 1)
+
+    # This seems to be necessary in command-line mode to stop ctrl-C having
+    # a direct effect in this process.
+    import signal
+    def sigint(num, frame):
+        #errout("BACKEND: sigint")
+        return
+    signal.signal(signal.SIGINT, sigint)
 
     commqueue = Queue()
     larchroot()
