@@ -34,9 +34,9 @@ class MediumPage:
 
     def connect(self):
         return [
-                (":bootlines*clicked", self.edit_bootlines),
-                (":grubtemplate*clicked", self.edit_grubtemplate),
-                (":syslinuxtemplate*clicked", self.edit_syslinuxtemplate),
+                (":&bootlines*clicked", self.edit_bootlines),
+                (":&grubtemplate*clicked", self.edit_grubtemplate),
+                (":&syslinuxtemplate*clicked", self.edit_syslinuxtemplate),
                 (":mediumtype*changed", self.partition_toggled),
                 (":$search*toggled", self.search_toggled),
                 (":$uuid*toggled", self.uuid_toggled),
@@ -45,8 +45,8 @@ class MediumPage:
                 (":$grub*toggled", self.grub_toggled),
                 (":$syslinux*toggled", self.syslinux_toggled),
                 (":$none*toggled", self.none_toggled),
-                (":selectpart*clicked", self.selectpart),
-                (":changelabel*clicked", self.changelabel),
+                (":&selectpart*clicked", self.selectpart),
+                (":&changelabel*clicked", self.changelabel),
                 ("$parts:list*changed$", self.part_selected),
                 (":&make*clicked", self.makedevice),
                 (":&bootcd*clicked", self.makebootiso),

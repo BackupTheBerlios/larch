@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.08
+# 2009.09.10
 
 import os, shutil
 
@@ -31,15 +31,15 @@ class InstallPage:
     """
     def connect(self):
         return [
-                (":addedpacks*clicked", self.edit_addedpacks),
-                (":baseveto*clicked", self.edit_baseveto),
-                (":pacmanconf*clicked", self.edit_pacmanconf),
-                (":repos*clicked", self.edit_repos),
-                (":mirrorlist_change*clicked", self.edit_mirrorlist),
+                (":&addedpacks*clicked", self.edit_addedpacks),
+                (":&baseveto*clicked", self.edit_baseveto),
+                (":&pacmanconf*clicked", self.edit_pacmanconf),
+                (":&repos*clicked", self.edit_repos),
+                (":&mirrorlist_change*clicked", self.edit_mirrorlist),
                 (":mirrorlist*toggled", self.toggle_mirrorlist),
                 (":use_local_mirror*toggled", self.toggle_local_mirror),
-                (":local_mirror_change*clicked", self.new_local_mirror_path),
-                (":cache_change*clicked", self.new_cache_path),
+                (":&local_mirror_change*clicked", self.new_local_mirror_path),
+                (":&cache_change*clicked", self.new_cache_path),
                 (":&install*clicked", installation.install),
                 ("$*set_build_mirror*$", self.set_build_mirror),
                 ("$*set_pacman_cache*$", self.set_pacman_cache),

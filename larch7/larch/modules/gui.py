@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.08
+# 2009.09.10
 
 import json
 import threading
@@ -62,7 +62,6 @@ class Ui:
 
     def command(self, cmd, *args):
         """Send a command to the user interface.
-        To be used in the worker thread.
         The command is of the form 'widget.method', 'args' is the
         list of arguments. The argument list is encoded as json for
         transmission.
@@ -75,7 +74,7 @@ class Ui:
 
     def ask(self, cmd, *args):
         """Send a request for information to the user interface.
-        To be used in the worker thread.
+        To be used in the worker thread (only '&'-signals!).
         The command is of the form 'widget.method', 'args' is the
         list of arguments. The argument list is encoded as json for
         transmission.
@@ -95,7 +94,6 @@ class Ui:
 
     def sendui(self, line):
         """Send a text line to the user interface process.
-        To be used in the worker thread.
         """
         try:
             self.guiprocess.stdin.write("%s\n" % line)

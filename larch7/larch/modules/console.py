@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.08
+# 2009.09.10
 
 
 """Implement a command line driven user interface for larch.
@@ -229,7 +229,7 @@ def new_project(name):
 
 def del_project(name):
     if name in config.getsections():
-        ui.sendsig(":project_delete*clicked", name)
+        ui.sendsigB(":&project_delete*clicked", name)
     else:
         ui.error(_("Unknown project name: '%s'") % name)
 
@@ -249,7 +249,7 @@ def new_profile(path, name=None):
 
 def del_profile(name):
     if name in config.profiles():
-        ui.sendsig(":profile_delete*clicked", name)
+        ui.sendsigB(":&profile_delete*clicked", name)
     else:
         ui.error(_("Unknown profile name: '%s'") % name)
 

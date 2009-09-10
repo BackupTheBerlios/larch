@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.03
+# 2009.09.10
 
 import os
 
@@ -33,13 +33,13 @@ class ProjectPage:
         return [
                 (":platform*changed", self.switch_platform),
                 (":choose_profile_combo*changed", self.switch_profile),
-                (":profile_rename*clicked", self.get_new_profile_name),
-                (":profile_browse*clicked", self.new_profile),
-                (":profile_delete*clicked", self.delete_profile),
-                (":installation_path_change*clicked", self.get_new_installation_path),
+                (":&profile_rename*clicked", self.get_new_profile_name),
+                (":&profile_browse*clicked", self.new_profile),
+                (":&profile_delete*clicked", self.delete_profile),
+                (":&installation_path_change*clicked", self.get_new_installation_path),
                 (":choose_project_combo*changed", self.switch_project),
-                (":new_project*clicked", self.get_new_project_name),
-                (":project_delete*clicked", self.delete_project),
+                (":&new_project*clicked", self.get_new_project_name),
+                (":&project_delete*clicked", self.delete_project),
                 ("$*new_project_name*$", self.new_project_name),
                 ("$*rename_profile*$", self.rename_profile),
                 ("$*make_new_profile*$", self.make_new_profile),
@@ -179,7 +179,24 @@ class ProjectPage:
 
 
     def set_ipath(self, path):
-        config.set("install_path", "/" + path.strip().strip("/"))
+        ip = "/" + path.strip().strip("/")
+        if (ip != "/") and os.path.isdir("/"):
+            ok = 0
+            nok = []
+            for f in os.listdir(ip):
+                if f in ("bin", "boot", "dev", "etc", "home", "lib", "media",
+                        "mnt", "opt", "proc", "root", "sbin", "srv", "sys",
+                        "tmp", "usr", "var", ".larch", ".ARCH"):
+                    ok += 1
+                else:
+                    ok -= 1
+            if ok < 0:
+                if not ui.confirmDialog(_("Your selected installation path"
+                        "(%s) contains unexpected items:\n %s\n"
+                        "\nIs that really ok?") %
+                        (ip, " ".join(nok))):
+                    return
+        config.set("install_path", ip)
         self.setup()
 
 
