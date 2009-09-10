@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.08
+# 2009.09.10
 
 
 """
@@ -607,7 +607,7 @@ if __name__ == "__main__":
         guiexec = None
     else:
         from gui import Ui, Logger
-        if (len(sys.argv) == 1) or (sys.argv[1] == "-pyqt"):
+        if (len(sys.argv) == 1) or (sys.argv[1] == "--pyqt"):
             guiexec = [base_dir + "/modules/pyqt/larchgui.py"]
         else:
             errout(_("ERROR: Unsupported option - '%s'\n") % sys.argv[1])

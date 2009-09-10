@@ -190,6 +190,7 @@ class ProjectPage:
                     ok += 1
                 else:
                     ok -= 1
+                    nok.append(f)
             if ok < 0:
                 if not ui.confirmDialog(_("Your selected installation path"
                         "(%s) contains unexpected items:\n %s\n"

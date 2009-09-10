@@ -1,14 +1,15 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
 # 2009.09.10
 pkgname=larch
-pkgver=7.0.52
+pkgver=7.0.53
 pkgrel=1
 
 # If I need the architecture, I can get it as ${CARCH}
 
 pkgdesc="Design your own 'live' Archlinux CDs and USB-sticks (etc.)"
 url="http://larch.berlios.de"
-depends=(pyqt)
+depends=(python)
+optdepends=('pyqt: for nice graphical interface')
 arch=(any)
 license=('GPL')
 

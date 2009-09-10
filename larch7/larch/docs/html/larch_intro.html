@@ -30,7 +30,12 @@
 <h2>Introduction</h2>
 
 <p><em>larch</em> is a collection of scripts designed around the creation and
-use of <em>live</em> CD/DVD/USB-stick versions of <em>Arch Linux</em>.
+use of <em>live</em> CD/DVD/USB-stick versions of <em>Arch Linux</em>. New in
+version 7 is a graphical user interface (using <em>pyqt</em>), which hopefully
+presents the main options in a clear way. A command-line interface is still available
+for people who don't want to use the gui or don't want to install <em>pyqt</em>.
+You must have <em>python</em> installed as this is
+now the primary language in <em>larch</em>. 
 </p>
 
 <p>One design aim was easy customization, so that even relatively inexperienced
@@ -39,7 +44,15 @@ packages they wanted and with their own personal configurations. The resulting
 medium should also be usable for installation purposes, so that one has a customized
 <em>Arch Linux</em> installation/rescue medium. As the content can be
 chosen freely, a comfortable working environment is possible - in contrast to
-the rather Spartan standard <em>Arch</em> installation CD.
+the rather Spartan standard <em>Arch</em> installation CD. However, note that it is
+also possible, using the officially supported <em>archiso</em>, to produce a
+customized <em>Arch Linux</em> installation/rescue medium (see the
+correwsponding <em>Arch</em> wiki page). The approach taken by the two projects
+is somewhat different so do have a look at both. Note that at the latest since
+version 7, <em>larch</em> makes no pretence of a 'KISS' approach. The code is,
+I'm afraid, rather complicated. The resulting <em>live</em> system should,
+however, be very close to a normal non-<em>live Arch Linux</em> system (as
+far as the <em>squashfs + aufs</em> basis allows).
 </p>
 
 <p><em>larch</em> also offers a flexible approach to building your <em>live</em>
@@ -56,7 +69,7 @@ tidying it up a bit first ...).
 occupied will be significantly less than in the 'raw' state, normally about a third of
 the original. As a result of this design, it is not possible to write directly to the
 system - which would seem to be quite a drawback, though in some situations it
-can even be an advantage. The use of <em>aufs</em> (a 'unification' file-ystem,
+can even be an advantage. The use of <em>aufs</em> (a 'unification' file-system,
 originally based on <em>unionfs</em>) allows the resulting system to appear
 writeable in spite of its actual read-only nature, by using a writeable 'overlay' in
 <em>tmpfs</em> (a memory-based file-system).
@@ -93,8 +106,10 @@ ready-configured <em>Arch Linux</em> system.
 <em>larch</em> scripts, so that they can be used on other <em>GNU/Linux</em>
 systems - you shouldn't need an <em>Arch Linux</em> installation in order
 to build a <em>larch live</em> medium, the few dependencies should be satisfied
-on pretty well any <em>GNU/Linux</em> system (and a static version of
-<em>pacman</em> can be downloaded). In other words,
+on pretty well any <em>GNU/Linux</em> system - apart from <em>pacman</em>, the
+<em>Arch Linux</em> package manager (a compressed archive containing the
+binary, together with its library dependencies should be available from the
+<em>larch</em> site). In other words,
 it should not be difficult to generate your own customized <em>larch</em>
 CD on pretty well any <em>GNU/Linux</em> system.
 But I must admit that this feature hasn't been tested much.
