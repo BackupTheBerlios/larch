@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.08
+# 2009.09.11
 
 import os, shutil
 
@@ -59,8 +59,8 @@ class TweakPage:
             self.pacmanU(f)
 
 
-    def pacmanU(self, f):
-        if not installation.x_pacman("-U", f):
+    def pacmanU(self, flist):
+        if not installation.x_pacman("-U", flist):
             run_error(_("Error during package update."))
 
 

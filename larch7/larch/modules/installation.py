@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.25
+# 2009.09.11
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -189,7 +189,7 @@ class Installation:
                 packages.append(l[1])
 
         # Add necessary packages
-        for p in ["larch-live", "squashfs-tools", "aufs2-util", "lzop"]:
+        for p in ["larch-live", "squashfs-tools", "aufs2", "aufs2-util", "lzop"]:
             if p not in packages:
                 packages.append(p)
 

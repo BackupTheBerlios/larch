@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.02
+# 2009.09.11
 
 import os, sys
 from glob import glob
@@ -190,6 +190,7 @@ class Builder:
         command.log("#Testing for necessary packages and kernel modules")
         fail = ""
         warn = ""
+        nplist = ["larch-live", "squashfs-tools", "lzop"]
 
         mdep = config.ipath("lib/modules/%s/modules.dep" % self.kversion)
         if Popen(["grep", "/squashfs.ko", mdep], stdout=PIPE, stderr=STDOUT).wait() != 0:
@@ -197,6 +198,7 @@ class Builder:
 
         if Popen(["grep", "/aufs.ko", mdep], stdout=PIPE, stderr=STDOUT).wait() == 0:
             self.ufs='_aufs'
+            nplist.append("aufs2-util")
 
         elif Popen(["grep", "/unionfs.ko", mdep], stdout=PIPE, stderr=STDOUT).wait() == 0:
             self.ufs='_unionfs'
@@ -204,7 +206,7 @@ class Builder:
         else:
             fail += _("No aufs or unionfs module found\n")
 
-        for p in ["larch-live", "squashfs-tools", "aufs2-util", "lzop"]:
+        for p in nplist:
             if not self.haspack(p):
                 fail += _("Package '%s' is needed by larch systems\n") % p
 

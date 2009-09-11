@@ -234,6 +234,10 @@ directory can build these db files from the current state of the pacman
 sync database on the host.)
 </p>
 
+<p>The path entered for this build mirror can contain the variables "*platform*"
+and "*repo*", these being substituted automatically by <em>larch</em>.
+</p>
+
 <h3><a name="Squashfs_and_Unionfs"></a>squashfs and aufs</h3>
 
 <p>The system to be <em>larchified</em> is made into a <em>squashed</em>
@@ -345,7 +349,7 @@ the build process.
 <p>In order to support building a <em>larch</em> system, certain packages outside
 the <em>Arch</em> base group must be installed in the system to be 'larchified'
 (the <em>larch</em> installer includes the first group automatically):
-<pre style="margin-left: 80px;"><em>squashfs-tools</em>, <em>aufs-util</em>, <em>lzop</em>,
+<pre style="margin-left: 80px;"><em>squashfs-tools</em>, <em>aufs2</em>, <em>aufs2-util</em>, <em>lzop</em>,
 <em>larch-live</em>,
 
 <em>syslinux</em> (if using isolinux or syslinux),
