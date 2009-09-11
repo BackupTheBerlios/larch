@@ -55,24 +55,122 @@ short form it could be entered thus:
 
 <h3><a name="command-list"></a>The complete list of commands</h3>
 
-<pre style="margin-left: 80px;">
-***+ I should probably use a table here -***
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Alias</th>
+    <th>Arguments</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>show_project_info</td>
+    <td>i?</td>
+    <td></td>
+    <td>Output the main stored configuration information</td>
+  </tr>
+  <tr>
+    <td>show_projects</td>
+    <td>P?</td>
+    <td></td>
+    <td>List the configured projects</td>
+  </tr>
+  <tr>
+    <td>show_profiles</td>
+    <td>p?</td>
+    <td></td>
+    <td>List the configured profiles</td>
+  </tr>
+  <tr>
+    <td>show_example_profiles</td>
+    <td>e?</td>
+    <td></td>
+    <td>List the example profiles supplied with <em>larch</em></td>
+  </tr>
+  <tr>
+    <td>show_partitions</td>
+    <td>d?</td>
+    <td></td>
+    <td>List the partitions to which the <em>live</em> system might be installed</td>
+  </tr>
+  <tr><td colspan="4" />
+  </tr>
+  <tr>
+    <td>install</td>
+    <td>i</td>
+    <td></td>
+    <td>Run the installation step</td>
+  </tr>
+  <tr>
+    <td>larchify</td>
+    <td>l</td>
+    <td>"[s][r]"</td>
+    <td>Prepare the <em>live</em> system (<em>squash</em> the system,
+    prepare the overlay, initramfs, etc.)</td>
+  </tr>
+  <tr>
+    <td>create_iso</td>
+    <td>ci</td>
+    <td></td>
+    <td>Build an <em>iso</em> image for burning to CD/DVD</td>
+  </tr>
+  <tr>
+    <td>write_partition</td>
+    <td>cp</td>
+    <td>device "[n][l]"</td>
+    <td>Write the <em>larch</em> system to a partition</td>
+  </tr>
+  <tr>
+    <td>create_bootiso</td>
+    <td>cb</td>
+    <td></td>
+    <td>Make a boot <em>iso</em> image for computers that can't boot from USB devices</td>
+  </tr>
+  <tr><td colspan="4" />
+  </tr>
+  <tr>
+    <td>set_project</td>
+    <td>P:</td>
+    <td>name</td>
+    <td>Select one of the already configured projects</td>
+  </tr>
+  <tr>
+    <td>new_project</td>
+    <td>P+</td>
+    <td>name</td>
+    <td>Start a new project</td>
+  </tr>
+  <tr>
+    <td>del_project</td>
+    <td>P-</td>
+    <td>name</td>
+    <td>Remove a project</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
 
-
-"show_project_info", "i?"       Output the main stored configuration information
-    [show_projects, "show_projects", "P?"],
-    [show_profiles, "show_profiles", "p?"],
-    [show_example_profiles, "show_example_profiles", "e?"],
-    [show_partitions, "show_partitions", "d?"],
-
-"install", "i"                      Run the installation step
-    [x_larchify, "larchify", "l"],
-    [x_create_iso, "create_iso", "ci"],
-    [x_write_partition, "create_part", "cp"],
-    [x_create_bootiso, "create_bootiso", "cb"],
-    [set_project, "set_project", "P:"],
-    [new_project, "new_project", "P+"],
-    [del_project, "del_project", "P-"],
+</table>
     [set_profile, "set_profile", "p:"],
     [rename_profile, "rename_profile", "p!"],
     [new_profile, "new_profile", "p+"],
@@ -90,6 +188,39 @@ short form it could be entered thus:
     [pacman_r, "pacman_r", "pr:"],
     [pacman_u, "pacman_u", "pu:"],
     [pacman_sy, "pacman_sy", "psy"],
+
+<h4><a name="arguments"></a>Arguments</h4>
+
+<p>Arguments listed in square brackets are optional. When single letters are listed
+as optional arguments and more than one of these is specified they may not be
+separated by spaces (e.g. to specify option "s" and option "r" I must pass "sr" as the
+argument).
+</p>
+
+<pre style="margin-left: 20px;">
+larchify:
+                [ s: don't generate sshkeys ]
+                [ r: use old system.sqf ]
+    Example: larch -c 'larchify sr'
+
+write_partition:
+                device (e.g. /dev/sdb1)
+                [ n: don't format the partition ]
+                [ l: with larchboot file even if not using 'search' discovery method ]
+    Example: larch -c 'cp /dev/sdb1 l'
+
+set_project:
+                name
+    Example: larch -c 'P: project1'
+
+new_project:
+                name
+    Example: larch -c 'P+ MyNewProject'
+
+del_project:
+                name
+    Example: larch -c 'P- MyOldProject'
+
 
 </pre>
 

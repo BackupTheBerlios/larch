@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.10
+# 2009.09.11
 
 
 """Implement a command line driven user interface for larch.
@@ -157,7 +157,7 @@ def x_install():
 def x_larchify(opts=""):
     """opts: string containing 's' to generate sshkeys, 'r' to use oldsquash
     """
-    ui.sendsigB("&larchify&", "s" in opts, "r" in opts)
+    ui.sendsigB("&larchify&", "s" not in opts, "r" in opts)
 
 def x_create_iso():
     """Create an iso of the live system
