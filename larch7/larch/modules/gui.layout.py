@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.09.10
+# 2009.09.12
 
 Namespace = ":"
 
@@ -13,6 +13,9 @@ Widgets = [
         (_("Live Arch Linux Construction Kit"), "titleformat")]],
 
 ["*ToggleButton", "showlog", _("View Log")],
+["Button", "^&docs", _("Help")],
+["*Button", "^&cancel", _("Cancel")],
+["Button", "^&quit", _("Quit")],
 
 
 # Main widget
@@ -86,7 +89,7 @@ Widgets = [
 ["Button", "^&locales", _("Edit supported locales")],
 ["Button", "^&rcconf", _("Edit Arch configuration file (/etc/rc.conf)")],
 
-["OptionalFrame", "larchify_advanced", _("Advanced Options")],
+["*OptionalFrame", "larchify_advanced", _("Advanced Options")],
   ["Button", "^&initcpio", _("Edit mkinitcpio.conf")],
   ["Button", "^overlay", _("Edit overlay (open in file browser)")],
   ["Button", "^&filebrowser", _("(Configure file browser command)")],
@@ -141,7 +144,10 @@ Widgets = [
 
 ################# Tooltips
 Tooltips = [
+["&cancel", _("Stop the current action")],
+["&quit", _("Stop current action and quit the program")],
 ["showlog", _("This button toogles the visibility of the log viewer")],
+["&docs", _("Open the larch docs in a browser")],
 ["choose_profile_combo", _("Choose a profile from those already in your larch working folder")],
 ["&profile_browse", _("Fetch a profile from the file-system")],
 ["&profile_rename", _("Rename the current profile")],
@@ -218,7 +224,7 @@ Layout = [
   ["VBOX", "vbh", ["hbh1", "hbh2"]],
     ["HBOX", "hbh1", ["header", "hsh1"]],
      ["HSPACE", "hsh1"],
-    ["HBOX", "hbh2", ["hsh2", "showlog"]],
+    ["HBOX", "hbh2", ["showlog", "&docs", "hsh2", "&cancel", "&quit"]],
      ["HSPACE", "hsh2"],
 
 

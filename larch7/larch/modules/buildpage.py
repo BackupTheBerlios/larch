@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.10
+# 2009.09.12
 
 from build import Builder
 import os
@@ -56,6 +56,8 @@ class BuildPage:
         self.sshgen = ssh and self.sshgen
         ui.command(":ssh.set", self.sshgen)
         ui.command(":ssh.enable", ssh)
+        # A hack to overcome a bug (?) in (py)qt
+        ui.command(":larchify_advanced.enable_hack")
 
 
     def sshtoggle(self, on):

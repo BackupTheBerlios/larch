@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.10
+# 2009.09.12
 
 
 """
@@ -147,8 +147,11 @@ class Command:
         # Connect up the signals and slots
         self.connections = {
                 "$$$uiquit$$$": [self.uiquit],
+                ":&quit*clicked": [self.uiquit],
+                ":&cancel*clicked": [self.NYI],
                 "$$$hidelog$$$": [self._activatehidelog],
                 "$showlog*toggled$": [self._showlog],
+                ":&docs*clicked": [self._showdocs],
                 ":notebook*changed": [self.pageswitch],
                 "$$$clearlog$$$": [self._clearlog],
             }
@@ -236,6 +239,10 @@ class Command:
     def _clearlog(self):
         # This is not called from the worker thread, but I think it's ok
         logger.clear()
+
+
+    def _showdocs(self):
+        Popen("xdg-open %s/docs/html/index.html &" % base_dir, shell=True)
 
 
     def sigint(self, num, frame):
@@ -542,37 +549,55 @@ def substart(process, flag):
 
 
 re_mksquashfs = re.compile(r"X:-\[.*\](.* ([0-9]+)%)")
-re_pacman = re.compile(r"X:-.*\[([-#]+)\]\s+[0-9]+%")
+#re_pacman = re.compile(r"X:-.*\[([-#]+)\]\s+[0-9]+%")
+re_pacman = re.compile(r"X:-.+:..:")
 def ltstart():
     """A thread function for reading log lines from the log queue and
     passing them to the logger.
     """
     progress = ""
+    download = 0
     while True:
         line = logqueue.get()
         if line.startswith("L:/"):
             # Quit logging
             logger.quit()
             break
-        # Filter the output of mksquashfs
-        m = re_mksquashfs.match(line)
-        if m:
-            if not progress:
-                logger.addLine("dummy\n")
-            percent = m.group(2)
-            if progress == percent:
-                continue
-            else:
-                progress = percent
-                logger.undo()
-                line = "X:++++%s\n" % m.group(1)
-        else:
-            m = re_pacman.match(line)
-            if m:
-                if '#' in m.group(1):
-                    logger.undo()
 
-            progress = ""
+        if line.startswith("X:-<<<"):
+            # The first line of a download operation
+            # This only works if a suitable download script is in place ...
+            download = 1
+
+        elif download:
+            if re_pacman.match(line):
+                line = line[3:]
+                linfo = line.split()
+                percent = linfo[0]
+                size = linfo[1]
+                if download > 1:
+                    logger.undo()
+                download = 2
+                line = "X:++++ %3s %s   %s\n" % (percent, "%", size)
+            elif download == 2:
+                download = 0
+            else:
+                continue
+
+        else:
+            # Filter the output of mksquashfs
+            m = re_mksquashfs.match(line)
+            if m:
+                percent = m.group(2)
+                if progress == percent:
+                    continue
+                else:
+                    if progress:
+                        logger.undo()
+                    progress = percent
+                    line = "X:++++%s\n" % m.group(1)
+            else:
+                progress = ""
         logger.addLine(line)
 
 
