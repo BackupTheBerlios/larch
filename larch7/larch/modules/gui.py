@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.10
+# 2009.09.13
 
 import json
 import threading
@@ -114,7 +114,13 @@ class Ui:
         self.sendui("_!_ " + json.dumps((fatal, message, title)))
 
 
+    def busy(self):
+        self.command(":larch.busy", ":notebook", True)
+        self.command(":cancel.enable", True)
+
+
     def completed(self, ok):
+        self.command(":cancel.enable", False)
         self.command(":larch.busy", ":notebook", False)
 
 

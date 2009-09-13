@@ -166,6 +166,7 @@ class Command:
     def run(self):
         # Start on the project page
         self.pages[0].setup()
+        ui.command(":cancel.enable", False)
         ui.go()
 
 
@@ -198,7 +199,7 @@ class Command:
 
 
     def worker_run(self, slots, *args):
-        ui.command(":larch.busy", ":notebook", True)
+        ui.busy()
         try:
             for s in slots:
                 s(*args)

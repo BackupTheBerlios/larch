@@ -143,6 +143,9 @@ class Ui:
     def sendui(self, line):
         return
 
+    def busy(self):
+        return
+
     def completed(self, ok):
         self.ok = ok
         self.block.set()

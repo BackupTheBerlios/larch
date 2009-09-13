@@ -1,18 +1,3 @@
-
-
---------------------------------------------------------
-
-use of old system.sqf: I THINK only changing of the base installed system
-should invalidate this, but I should check carefully. It is not easy to
-detect all possible changes to the base system, but pacman operations
-should be no problem. Rather than deleting an existing system.sqf I think
-it would be better to set a flag triggering a warning - because the user
-might well wish to make the odd change to the installed system in order
-to improve or debug the larch scripts, while using a know non-up-to-date
-system.sqf.
-
--------------------------------------------------------
-
 medium page
 -----------
 
@@ -26,29 +11,26 @@ need at least /dev bind-mounted.
 Only ext2 and vfat are supported for larch partitions.
 
 
-Threading
----------
+Quitting / Cancelling
+---------------------
 
-Could still be the odd hiccup here, but seems to be working well.
-
-
-Quitting / Breaking
--------------------
-
-If I do a premature break (or quit) I need to check that all mounted stuff
-(including dev,proc,sys) gets unmounted. This might be eased if I keep a
-record of everything that I have mounted. (Done)
+If I cancel an operation (Cancel or Quit) I need to check that all mounted
+stuff (including dev,proc,sys) gets unmounted. This might be eased if I keep
+a record of everything that I have mounted. (Done)
 
 
-Breaking:
+Cancelling:
 As threads in python cannot be killed (they must be exited), it is a bit
 tricky to break a long command (e.g. install, squash) without killing the
 whole program.
-I use exceptions to terminate 'supershell' commands and then terminate
-the program. It might be possible to adapt this a bit to interrupt a command
-in the worker thread, but dealing with the consequences of an interrupted
-command might be difficult in the case of the program not being terminated,
-so for the moment no other interruption than a terminal (fatal) one is supported.
+I use exceptions to terminate 'supershell' commands, but I'm not sure that
+the interrupted commands won't have adverse effects on their callers. I've
+tried cancelling the installation stage a couple of times and it seemed to be
+successful, but further tests are necessary.
+
+The Quit command uses the same principle, but goes on to kill the logger,
+the gui and the backend. Interrupted commands should not be a problem in this
+case.
 
 
 
