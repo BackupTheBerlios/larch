@@ -148,7 +148,7 @@ class Command:
         self.connections = {
                 "$$$uiquit$$$": [self.uiquit],
                 ":quit*clicked": [self.uiquit],
-                ":cancel*clicked": [self.NYI],
+                ":cancel*clicked": [self.cancel],
                 "$$$hidelog$$$": [self._activatehidelog],
                 "$showlog*toggled$": [self._showlog],
                 ":docs*clicked": [self._showdocs],
@@ -252,11 +252,19 @@ class Command:
         """
         self.uiquit()
 
-    def uiquit(self):
-        # This is not called from the worker thread, so it mustn't block.
-        self.qthread = simple_thread(self._quit_run)
 
-    def _quit_run(self):
+    def uiquit(self):
+        self.cancel(True)
+
+
+    def cancel(self, terminate=False):
+# This is a bit experimental - I'm not sure the worker threads will handle
+# the break-ins sensibly.
+        # This is not called from the worker thread, so it mustn't block.
+        self.qthread = simple_thread(self._quit_run, terminate)
+
+
+    def _quit_run(self, terminate):
         # Signal to the worker thread that a break is requested
         self.breakin = 1
         # Kill any running supershell process
@@ -267,15 +275,19 @@ class Command:
             self.pthread.join()
         self.breakin = 0
 
-        # Tell the logger to quit
-        logqueue.put("L:/\n")
+        if terminate:
+            # Tell the logger to quit
+            logqueue.put("L:/\n")
 
-        # Wait until logger process has terminated
-        lthread.join()
+            # Wait until logger process has terminated
+            lthread.join()
 
-        # Tell the user interface to exit, which will in turn cause the
-        # thread reading its output to terminate (see function 'gtstart').
-        ui.sendui("/")
+            # Tell the user interface to exit, which will in turn cause the
+            # thread reading its output to terminate (see function 'gtstart').
+            ui.sendui("/")
+
+        else:
+            command.unmount()
 
 
     def mount(self, src, dst, opts=""):

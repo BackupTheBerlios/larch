@@ -123,6 +123,8 @@ class Installation:
         working directory, the installation path or the cache directory
         changes. It might be easier to regenerate every time pacman is used.
         """
+# At present the --noprogressbar option to pacman doesn't do anything because
+# pacman only outputs progress info to a terminal, not to a pipe.
 #        self.pacman_cmd = ("%s -r %s --config %s --noconfirm --noprogressbar" %
         self.pacman_cmd = ("%s -r %s --config %s --noconfirm" %
                 (config.pacman, config.get("install_path"),
@@ -132,7 +134,7 @@ class Installation:
             self.pacman_cmd += " --cachedir %s" % cache
 
 
-    def install(self, progress):
+    def install(self):
         """Clear the chosen installation directory and install the base
         set of packages, together with any additional ones listed in the
         file 'addedpacks' (in the profile).
@@ -281,7 +283,7 @@ class Installation:
         return ok
 
 
-    def pacmanoptions(self, text, xfer):
+    def pacmanoptions(self, text, xfer=False):
         """A filter for pacman.conf to remove the repository info.
         It also, optionally adds a transfer command line.
         """
