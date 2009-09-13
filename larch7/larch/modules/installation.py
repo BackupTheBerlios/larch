@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.11
+# 2009.09.13
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -29,6 +29,7 @@ for larchifying the running system) this module will not be used.
 """
 
 import os, filecmp
+from subprocess import call, PIPE, STDOUT
 
 class Installation:
     def __init__(self):
@@ -74,7 +75,8 @@ class Installation:
 
         fhi = open(pc0)
         fho = open(config.working_dir + "/pacman.conf", "w")
-        fho.write(self.pacmanoptions(fhi.read()))
+        fho.write(self.pacmanoptions(fhi.read(),
+                (config.get("dl_progress") != "") and (mirror != "final")))
         fhi.close()
 
         # Get the repositories from pacman.conf.larch
@@ -130,7 +132,7 @@ class Installation:
             self.pacman_cmd += " --cachedir %s" % cache
 
 
-    def install(self):
+    def install(self, progress):
         """Clear the chosen installation directory and install the base
         set of packages, together with any additional ones listed in the
         file 'addedpacks' (in the profile).
@@ -279,8 +281,9 @@ class Installation:
         return ok
 
 
-    def pacmanoptions(self, text):
+    def pacmanoptions(self, text, xfer):
         """A filter for pacman.conf to remove the repository info.
+        It also, optionally adds a transfer command line.
         """
         texto = ""
         block = ""
@@ -290,8 +293,16 @@ class Installation:
                 break
             if line.startswith("[") and not line.startswith("[options]"):
                 break
-            if not line.strip():
+            line = line.strip()
+            if line:
+                if line.startswith("XferCommand"):
+                    xfer = False
+            else:
                 texto += block
                 block = ""
+
+        if xfer and (call(["which", "curl"], stdout=PIPE, stderr=STDOUT) == 0):
+            texto += ("XferCommand = %s/buildscripts/pacman-dl %s\n\n"
+                    % (base_dir, "%u %o"))
         return texto
 

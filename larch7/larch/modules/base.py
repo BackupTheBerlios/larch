@@ -44,6 +44,7 @@ defaults = {    "install_path"  : "/home/larchbuild",
                 "uselocalmirror" : "",
                 "localmirror"   : "",
                 "usemirrorlist" : "",
+                "dl_progress"   : "",
                 "filebrowser"   : "xdg-open %",
                 "medium_iso"    : "yes",    # "yes" / ""
                 "medium_btldr"  : "grub",   # "grub" / "syslinux" / "none"

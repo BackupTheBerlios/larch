@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.11
+# 2009.09.13
 
 
 """Implement a command line driven user interface for larch.
@@ -282,6 +282,10 @@ def use_project_mirrorlist(on):
     ui.sendsig(":mirrorlist*toggled", on[0] in "yY")
 
 
+def log_dl_progress(on):
+    ui.sendsig(":dlprogress*toggled", on[0] in "yY")
+
+
 def set_bootloader(bl):
     bl = bl.lower()
     if bl == "isolinux":
@@ -342,6 +346,7 @@ function_list = (
     [set_pacman_cache, "set_pacman_cache", "cache:"],
     [use_build_mirror, "use_build_mirror", "um:"],
     [use_project_mirrorlist, "use_project_mirrorlist", "upm:"],
+    [log_dl_progress, "log_dl_progress", "lp:"],
     [set_bootloader, "set_bootloader", "bl:"],
     [set_medium_detection, "set_medium_detection", "md:"],
     [set_label, "set_label", "lab:"],

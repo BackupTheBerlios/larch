@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.10
+# 2009.09.13
 
 import os
 
@@ -91,8 +91,7 @@ class ProjectPage:
                 self.projects.index(self.project))
         installpath = config.get("install_path")
         ui.command(":installation_path_show.set", installpath)
-        ui.command(":notebook.enableTab", 1, installpath != "/")
-        command.enable_tweaks()
+        command.enable_install()
 
 
     def switch_platform(self, index):

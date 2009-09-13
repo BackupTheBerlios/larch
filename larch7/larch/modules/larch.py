@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.12
+# 2009.09.13
 
 
 """
@@ -147,11 +147,11 @@ class Command:
         # Connect up the signals and slots
         self.connections = {
                 "$$$uiquit$$$": [self.uiquit],
-                ":&quit*clicked": [self.uiquit],
-                ":&cancel*clicked": [self.NYI],
+                ":quit*clicked": [self.uiquit],
+                ":cancel*clicked": [self.NYI],
                 "$$$hidelog$$$": [self._activatehidelog],
                 "$showlog*toggled$": [self._showlog],
-                ":&docs*clicked": [self._showdocs],
+                ":docs*clicked": [self._showdocs],
                 ":notebook*changed": [self.pageswitch],
                 "$$$clearlog$$$": [self._clearlog],
             }
@@ -377,9 +377,12 @@ class Command:
         return True
 
 
-    def enable_tweaks(self):
-        ui.command(":notebook.enableTab", 4, (config.get("install_path") != "/"
-                and self.check_platform(report=False)))
+    def enable_install(self):
+        withinstall = (config.get("install_path") != "/")
+        ui.command(":notebook.enableTab", 1, withinstall)
+        ui.command(":notebook.enableTab", 4, withinstall)
+        ui.command(":pacmanops.enable", withinstall
+                and self.check_platform(report=False))
 
 
     def get_partitions(self):

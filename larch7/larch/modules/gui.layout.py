@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.09.12
+# 2009.09.13
 
 Namespace = ":"
 
@@ -13,9 +13,9 @@ Widgets = [
         (_("Live Arch Linux Construction Kit"), "titleformat")]],
 
 ["*ToggleButton", "showlog", _("View Log")],
-["Button", "^&docs", _("Help")],
-["*Button", "^&cancel", _("Cancel")],
-["Button", "^&quit", _("Quit")],
+["Button", "^docs", _("Help")],
+["*Button", "^cancel", _("Cancel")],
+["Button", "^quit", _("Quit")],
 
 
 # Main widget
@@ -77,12 +77,13 @@ Widgets = [
 
 
 # Installation Tweaks Page
-["Frame", "pacmanops", _("Package Management")],
+["*Frame", "pacmanops", _("Package Management")],
   ["Button", "^&sync", _("Synchronize db")],
   ["Button", "^&update", _("Update / Add package    [-U]")],
   ["Button", "^&add", _("Add package(s)    [-S]")],
   ["Button", "^&remove", _("Remove package(s)    [-Rs]")],
 
+["*CheckBox", "^dlprogress", _("Show download progress (in log) - needs 'curl'")],
 
 # Larchify Page
 ["Label", "larchify", _("The system to be compressed must be installed and ready.")],
@@ -144,10 +145,10 @@ Widgets = [
 
 ################# Tooltips
 Tooltips = [
-["&cancel", _("Stop the current action")],
-["&quit", _("Stop current action and quit the program")],
+["cancel", _("Stop the current action")],
+["quit", _("Stop current action and quit the program")],
 ["showlog", _("This button toogles the visibility of the log viewer")],
-["&docs", _("Open the larch docs in a browser")],
+["docs", _("Open the larch docs in a browser")],
 ["choose_profile_combo", _("Choose a profile from those already in your larch working folder")],
 ["&profile_browse", _("Fetch a profile from the file-system")],
 ["&profile_rename", _("Rename the current profile")],
@@ -174,6 +175,7 @@ Tooltips = [
 ["&update", _("Update / Add a package from a package file using pacman -U")],
 ["&add", _("Add one or more packages (space separated) using pacman -S")],
 ["&remove", _("Remove one or more packages (space separated) using pacman -Rs")],
+["dlprogress", _("Checking here should allow the log to display download progress by using a special download script")],
 ["&locales", _("Edit the /etc/locale.gen file to select supported glibc locales")],
 ["&rcconf", _("Edit the /etc/rc.conf file to configure the live system")],
 ["&initcpio", _("Edit the configuration file for generating the initramfs via mkinitcpio")],
@@ -224,7 +226,7 @@ Layout = [
   ["VBOX", "vbh", ["hbh1", "hbh2"]],
     ["HBOX", "hbh1", ["header", "hsh1"]],
      ["HSPACE", "hsh1"],
-    ["HBOX", "hbh2", ["showlog", "&docs", "hsh2", "&cancel", "&quit"]],
+    ["HBOX", "hbh2", ["showlog", "docs", "hsh2", "cancel", "quit"]],
      ["HSPACE", "hsh2"],
 
 
@@ -280,7 +282,9 @@ Layout = [
 
 # Installation Tweaks Page
 ["+LAYOUT", "page_tweaks", "vb_pt"],
-["VBOX", "vb_pt", ["g3", "vst1"]],
+["VBOX", "vb_pt", ["pacmanops", "vst1", "dlprogress"]],
+
+["+LAYOUT", "pacmanops", "g3"],
   ["GRID", "g3",
         ["&sync", "&update"],
         ["&add", "&remove"]

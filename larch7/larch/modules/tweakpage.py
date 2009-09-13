@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.11
+# 2009.09.13
 
 import os, shutil
 
@@ -38,6 +38,7 @@ class TweakPage:
                 ("&*pacmanU*&", self.pacmanU),
                 ("&*pacmanS*&", self.pacmanS),
                 ("&*pacmanR*&", self.pacmanR),
+                (":dlprogress*toggled", self.dlprogress),
             ]
 
 
@@ -46,9 +47,10 @@ class TweakPage:
 
 
     def setup(self):
-        """Set up the weak page widget.
+        """Set up the tweak page widget.
         """
         self.profile = config.get("profile")
+        ui.command(":dlprogress.set", config.get("dl_progress") != "")
 
 
     def doupdate(self):
@@ -90,3 +92,7 @@ class TweakPage:
     def pacmanR(self, plist):
         if plist and not installation.x_pacman("-Rs", plist):
             run_error(_("Error during package removal."))
+
+
+    def dlprogress(self, on):
+        config.set("dl_progress", "yes" if on else "")
