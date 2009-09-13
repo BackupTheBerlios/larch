@@ -346,7 +346,6 @@ function_list = (
     [set_pacman_cache, "set_pacman_cache", "cache:"],
     [use_build_mirror, "use_build_mirror", "um:"],
     [use_project_mirrorlist, "use_project_mirrorlist", "upm:"],
-    [log_dl_progress, "log_dl_progress", "lp:"],
     [set_bootloader, "set_bootloader", "bl:"],
     [set_medium_detection, "set_medium_detection", "md:"],
     [set_label, "set_label", "lab:"],
@@ -354,6 +353,7 @@ function_list = (
     [pacman_r, "pacman_r", "pr:"],
     [pacman_u, "pacman_u", "pu:"],
     [pacman_sy, "pacman_sy", "psy"],
+    [log_dl_progress, "log_dl_progress", "lp:"],
 )
 
 
