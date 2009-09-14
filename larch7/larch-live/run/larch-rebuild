@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# larch-rebuild   - rebuild the live system (to system.sqf only)
+# larch-rebuild   - rebuild the live system (by merging in the overlays)
 
 # Author: Michael Towers (larch42 at googlemail dot com)
 #
@@ -21,11 +21,16 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.13
+# 2009.09.14
 
-#TODO: So far this only rebuilds system.sqf and mods.sqf - what about the
-# rest of the medium? ...
+# This script doesn't produce a complete merged live system, it just
+# rebuilds system.sqf and mods.sqf so that basically the whole system is
+# in system.sqf, a tiny bit (/boot and /mnt) in mods.sqf. filter.sqf
+# and overlay.tar.lzo are then not (initially) needed.
 
+# $1 - the path to the folder where system.sqf and mods.sqf are to be placed
+
+APP=$( basename $0 )
 # test if the script is started by root user. If not, exit
 if [ $UID -ne 0 ]; then
     echo "Only root can run ${APP}"; exit 1
@@ -85,7 +90,7 @@ domerge ()
 newsys ()
 {
     union=$1
-    echo "Building new 'system.sqf' in ${sqfpath}"
+    echo "Building new 'system.sqf'"
 
     # root directories which are ignored in system.sqf
     ignoredirs="boot dev mnt media proc sys tmp .livesys .larch"
@@ -98,7 +103,7 @@ newsys ()
     fi
     chmod oga-x "${sqfpath}/system.sqf"
 
-    echo "Building new 'mods.sqf' in ${sqfpath}"
+    echo "Building new 'mods.sqf'"
     # mods.sqf just has the boot and mnt directories
     ignoredirs=""
     for f in $( ls -A ${union} ); do
@@ -117,49 +122,51 @@ newsys ()
 }
 
 
-# The device (path) where the archives will be saved
-echo "Rebuild squashfs archives"
-if [ -d "$1" ]; then
-    sqfpath="$1"
+rebuild()
+{
+    utype="$( cat /.livesys/utype )"
+    if [ "${utype}" = "aufs" ]; then
+        sqfmnt="rr"
+        sqfomnt="rr+wh"
+        ovlmnt="ro+wh"
+        ovlwmnt="rw"
+        bropt="br:"
+        opq=".wh..wh..opq"
+
+    elif [ "${utype}" = "unionfs" ]; then
+
+    # It might well be that unionfs requires a writeable top layer, so the
+    # present code would need modifying ...
+
+        sqfmnt="ro"
+        sqfomnt="ro"
+        ovlmnt="ro"
+        ovlwmnt="rw"
+        bropt="dirs="
+        opq=".wh.__dir_opaque"
+
+    else
+        echo "ERROR: Couldn't determine type of unification file-system"
+        return 1
+    fi
+
+    if domerge; then
+        echo "Merge successful"
+    else
+        rm -f "${sqfpath}/system.sqf"
+        rm -f "${sqfpath}/mods.sqf"
+        return 1
+    fi
+}
+
+
+# The folder (path) where the archives will be saved
+sqfpath="$1"
+
+if [ -d "${sqfpath}" ]; then
+    echo "Rebuild squashfs archives to ${sqfpath}"
+    rebuild
 else
-    echo "ERROR: invalid directory ($1)"
+    echo "ERROR: invalid directory (${sqfpath})"
     exit 1
 fi
-
-utype="$( cat /.livesys/utype )"
-if [ "${utype}" = "aufs" ]; then
-    sqfmnt="rr"
-    sqfomnt="rr+wh"
-    ovlmnt="ro+wh"
-    ovlwmnt="rw"
-    bropt="br:"
-    opq=".wh..wh..opq"
-
-    # flush pseudo-links (which keep track of changed hard linked files)
-    auplink / flush
-
-elif [ "${utype}" = "unionfs" ]; then
-
-# It might well be that unionfs requires a writeable top layer, so the
-# present code would need modifying ...
-
-    sqfmnt="ro"
-    sqfomnt="ro"
-    ovlmnt="ro"
-    ovlwmnt="rw"
-    bropt="dirs="
-    opq=".wh.__dir_opaque"
-
-else
-    echo "ERROR: Couldn't determine type of unification file-system"
-    exit 1
-fi
-
-if domerge; then
-    echo "Merge successful"
-else
-    rm -f "${sqfpath}/system.sqf"
-    rm -f "${sqfpath}/mods.sqf"
-    exit 1
-fi
-
