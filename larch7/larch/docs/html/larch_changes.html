@@ -60,8 +60,7 @@ extent of the changes means that it will probably take a while until the bugs ge
 ironed out and everything works. I am calling the present state
 <strong>alpha</strong>, while the documentation is not finished and a few
 implementation details are still under review. I will call it <em>beta</em> and
-give it release numbers starting with 7.1 when most of that is cleared up and when
-there is also a command line interface. -***
+give it release numbers starting with 7.1 when most of that is cleared up. -***
 </p>
 
 <ul>
@@ -88,10 +87,8 @@ there is also a command line interface. -***
    build - so long as sufficient storage space is available.
    </li>
    <li>I have tried to minimize the extent to which the underlying <em>Arch</em>
-   system must be modified to work as a <em>live</em> system. ***+ I am hoping
-   for further improvements, but some of these require small patches to some
-   some <em>Arch</em> system files, so I have to wait and see if these get
-   accepted. -***
+   system must be modified to work as a <em>live</em> system. The introduction
+   of 'hooks' in the <em>Arch</em> initscripts should ease the situation quite a bit.
    </li>
    <li>Many changes to the handling of configuration files, see the relevant sections.
    </li>
@@ -113,7 +110,12 @@ there is also a command line interface. -***
    correspond to those in the profile's 'addedpacks' file), but it could be useful
    for experimentation and quick fixes.
    </li>
- 
+   <li>The 'larch-rebuild' script allows the overlays to be merged back into the base
+   ('system.sqf') archive. This would allow a <em>live</em> system which had become
+   bloated with overlay files to be 'rejuvenated'. It itself is not a complete solution
+   because it only rebuilds 'system.sqf' and 'mods.sqf', it can't replace the old system,
+   but it can form the basis of such a scheme.
+   </li>
 </ul>
    
  <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">

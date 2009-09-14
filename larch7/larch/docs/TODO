@@ -1,3 +1,20 @@
+Fix create-iso script for larch-7.
+
+Check larch2hdd is still functional.
+
+Document larch-rebuild and perhaps add code to larch3 hook to make it
+possible to replace the system at boot time (maybe a pointer to the
+source medium for the update could be stored on the boot medium).
+
+
+xdg-open is used to show the documentation (from the gui). Maybe the
+show-docs command should be configurable (like the file-browser is)?
+
+Make a script to build a 64-bit repo?
+
+Test kernel update.
+
+
 medium page
 -----------
 
@@ -10,27 +27,6 @@ need at least /dev bind-mounted.
 
 Only ext2 and vfat are supported for larch partitions.
 
-
-Quitting / Cancelling
----------------------
-
-If I cancel an operation (Cancel or Quit) I need to check that all mounted
-stuff (including dev,proc,sys) gets unmounted. This might be eased if I keep
-a record of everything that I have mounted. (Done)
-
-
-Cancelling:
-As threads in python cannot be killed (they must be exited), it is a bit
-tricky to break a long command (e.g. install, squash) without killing the
-whole program.
-I use exceptions to terminate 'supershell' commands, but I'm not sure that
-the interrupted commands won't have adverse effects on their callers. I've
-tried cancelling the installation stage a couple of times and it seemed to be
-successful, but further tests are necessary.
-
-The Quit command uses the same principle, but goes on to kill the logger,
-the gui and the backend. Interrupted commands should not be a problem in this
-case.
 
 
 
@@ -54,3 +50,26 @@ For what it's worth, choosing python as the implementation language to
 (largely) replace bash makes internationalization relatively easy. Of course
 a simple internationalized command line python program would have been
 possible, too.
+
+
+Quitting / Cancelling
+---------------------
+
+If I cancel an operation (Cancel or Quit) I need to check that all mounted
+stuff (including dev,proc,sys) gets unmounted. Ta asiist here, a record is
+kept of everything that I have mounted.
+
+
+Cancelling:
+As threads in python cannot be killed (they must be exited), it is a bit
+tricky to break a long command (e.g. install, squash) without killing the
+whole program.
+I use exceptions to terminate 'supershell' commands, but I'm not sure that
+the interrupted commands won't have adverse effects on their callers. I've
+tried cancelling the installation stage a couple of times and it seemed to be
+successful, but further tests are necessary.
+
+The Quit command uses the same principle, but goes on to kill the logger,
+the gui and the backend. Interrupted commands should not be a problem in this
+case.
+
