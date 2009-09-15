@@ -2,9 +2,6 @@ locale handling on larchify /?
 
 Documentation for new initramfs features (LABEL/UUID booting?)
 
-Documentation for new overlay (modsNN.sqf) saving option. Also merging
-of overlays into new system.sqf.
-
 Initramfs generation and kernel kernel updating:
  The 'normal' mechanism is used, via 'mkinitcpio -p kernel26${KERNEL_NAME}'
 so if a custom kernel is used (KERNEL_NAME!=""), some adjustment will
@@ -15,11 +12,8 @@ kernel26.preset.larchsave. But remember when installing with larchin, the
 first choice of file should be kernel26.preset.pacsave (?) before
 kernel26.preset.larchsave.
 
-Dynamic generation of larch version of /etc/rc.shutdown, using sed to
-modify standard version - thus hopefully avoiding need to constantly
-update larch to match initscripts changes. Possibly put this customizing
-script in /etc/inittab as a replacement for /etc/rc.shutdown, but it
-could be generated at any time from booting onwards.
+Removal of dynamic initscript modifications (called from /etc/inittab)
+can be removed when new initscripts package (with hooks) is released.
 
 Gather together and document clearly all the bits of standard Arch that
 larch tweaks, so that larchbuild, larchin and other users can manage
@@ -46,16 +40,9 @@ BUT also try to get new design a bit further. It seems quite a bit cleaner
 and should be more interactive (uses a separate thread for interfacing
 to the installation routines).
 
-glade is not perfect (LOTS of bugs), but using it would reduce the amount
-of gui code and make the program more accessible to others.
-Another possibility might be a web interface using some javascript widget
-library or other (e.g. yui). Of course there is no rad designer for these,
-but they might be easier to use than gtk/qt.
+Of course I would probably use a similar interface to larch now, using
+pipes to communicate with a pyqt gui.
 
-In any case trying to get a gui interface which is control-element
-orientated and not toolkit orientated might be a useful step, so that
-any front-end which can implement or emulate the required control-elements
-could be plugged in.
 
 long-term
 .........

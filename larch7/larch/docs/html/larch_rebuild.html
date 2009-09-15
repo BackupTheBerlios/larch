@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+<head>
+  <meta content="text/html;charset=UTF-8" http-equiv="Content-Type" />
+  <title>larch session saving</title>
+  <meta content="gradgrind" name="author" />
+</head>
+
+<body>
+
+<table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td><a href="larch_sessionsave.html">Previous: Session saving</a></td>
+
+      <td><a href="larch_docindex.html">Table of Contents</a></td>
+
+      <td><a href="larch_ssh.html">Next: ssh access</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<br />
+<h1><big>larch</big> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
+
+<img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch1.jpg"
+  name="graphics1" align="right" hspace="10" vspace="10" />
+<br /><br />
+
+<h2>Recompressing the whole system</h2>
+
+<p>The <em>larch-live</em> package provides the 'larch-rebuild' script, which
+regenerates the system archives 'system.sqf' and 'mods.sqf' from the state of the
+system at the last session save (i.e. from the files on the boot medium). All the
+changes which have been gathered in the overlay archive are merged into the new
+'system.sqf', thus (potentially) reducing the space requirements considerably. The
+directory for the storage of these new archives must be passed as argument to the
+script.
+</p>
+
+<p>No further handling of these new archives is provided with  <em>larch</em>
+at present, for the simple reason that it is difficult to find a general solution to the
+question of what to do with them. They cannot just replace the archives on the
+boot medium because these are required to keep the <em>live</em> system running.
+So some temporary storage is needed for them, and it is quite conceivable that there
+is not enough space on the medium (as that might well be the reason for wanting
+to recompress the system in the first place).
+</p>
+
+<p>Thus some details of how to implement this rebuild feature are currently left to
+the creativity of the user. I would, however suggest that the medium file 'larch/boot-init'
+(see <a href="larch_sessionsave.html#boot-init">boot-init</a>) might be a useful place
+to perform the replacement of the archives. You would just have to write a script
+using 'larch-rebuild' to save the new archives somewhere, and write this 'boot-init'
+script to replace the old ones with the new ones, remembering to also delete any
+sqf files ending in '_' and '~' and the 'overlay.tar.lzo' archive.
+</p>
+
+<table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td><a href="larch_sessionsave.html">Previous: Session saving</a></td>
+
+      <td><a href="larch_docindex.html">Table of Contents</a></td>
+
+      <td><a href="larch_ssh.html">Next: ssh access</a></td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

@@ -1,14 +1,12 @@
 Check larch2hdd is still functional.
 
-Document larch-rebuild and perhaps add code to larch3 hook to make it
-possible to replace the system at boot time (maybe a pointer to the
-source medium for the update could be stored on the boot medium).
-
-
 xdg-open is used to show the documentation (from the gui). Maybe the
 show-docs command should be configurable (like the file-browser is)?
 
-Make a script to build a 64-bit repo?
+Make a script to build a 64-bit repo? At present all packages are 'any'
+architecture, so there would be no need for a separate repo. Actually,
+pacman-allin should be in the repo, too, and that would be architecture
+dependent.
 
 Test kernel update.
 
