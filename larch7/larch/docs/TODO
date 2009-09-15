@@ -1,5 +1,3 @@
-Fix create-iso script for larch-7.
-
 Check larch2hdd is still functional.
 
 Document larch-rebuild and perhaps add code to larch3 hook to make it
