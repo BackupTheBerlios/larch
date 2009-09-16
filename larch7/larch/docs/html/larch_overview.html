@@ -175,6 +175,15 @@ of media (iso, for CD/DVD, or partitions in general, be they USB-sticks, hard di
 or whatever). It is also possible to select a bootloader and tweak its configuration.
 </p>
 
+<p>When the <em>live</em> system is installed to a partition (e.g. USB-stick) it is
+possible to choose how the boot partition will be recognized. So long as
+<em>larch</em> also installs a bootloader, it can also add the appropriate entries
+to the bootloader configuration file automatically. The options available are via UUID,
+partition label, partition name (e.g. '/dev/sdb1'), or by searching for a partition
+containing the file 'larch/larchboot'. See also
+<a href="larch_running.html#bootparm">'Boot parameters'</a>.
+</p>
+
 <p>It is possible to repeat the installation onto various media, changing the
 configuration, without needing to rerun the 'larchification' step. The constituent
 <em>larch</em> files remain unchanged.
@@ -184,10 +193,9 @@ configuration, without needing to rerun the 'larchification' step. The constitue
 
 <p>Older computers may not be able to boot from USB devices, so the possibility
 of generating a small <em>boot iso</em> is provided. This can be burned to CD
-and can be used to boot your <em>larch</em> system on a USB-stick.
-</p>
-
-<p>This can also be done retrospectively using the <strong>usb2bootiso</strong> script.
+and can be used to boot your <em>larch</em> system on a USB-stick. As this
+function uses the system on the USB-stick, this needs to be plugged in (not
+mounted!) and selected in the 'Partition' entry.
 </p>
 
 <h3><a name="Minimal_build_system_requirements"></a>Minimal build system requirements</h3>

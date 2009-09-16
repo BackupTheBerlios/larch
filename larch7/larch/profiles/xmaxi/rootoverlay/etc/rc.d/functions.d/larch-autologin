@@ -1,4 +1,4 @@
-sysinit_end_larch_autolgin() {
+sysinit_end_larch_autologin() {
     # Set up automatically logged in user (larch live system only)
     if [ -f /.livesys/autologin ]; then
         cp /.livesys/autologin /tmp/newuser

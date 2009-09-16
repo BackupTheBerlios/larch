@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.10
+# 2009.09.16
 
 import os, shutil
 
@@ -109,7 +109,11 @@ class InstallPage:
                 _("Enter new local mirror path:"),
                 None, config.get("localmirror"))
         if ok:
-            self.set_build_mirror(path)
+            if "://" in path:
+                self.set_build_mirror(path)
+            else:
+                config_error(_("You must specify a URL, with protocol,"
+                        " e.g. 'file:///a/b/c'"))
 
 
     def set_build_mirror(self, path):

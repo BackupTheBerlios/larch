@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.02
+# 2009.09.16
 
 """This module handles the basic framework and configuration of the
 larch build system.
@@ -46,6 +46,7 @@ defaults = {    "install_path"  : "/home/larchbuild",
                 "usemirrorlist" : "",
                 "dl_progress"   : "",
                 "filebrowser"   : "xdg-open %",
+                "html_reader"   : "xdg-open %",
                 "medium_iso"    : "yes",    # "yes" / ""
                 "medium_btldr"  : "grub",   # "grub" / "syslinux" / "none"
                 "medium_search" : "search", # "search" / "uuid" / "label" / "device"

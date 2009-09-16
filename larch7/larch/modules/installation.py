@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.13
+# 2009.09.16
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -237,7 +237,7 @@ class Installation:
         # Make a note of the installation's architecture
         supershell("echo '%s' > %s" % (config.get("platform"),
                 installation_path + "/.ARCH"))
-        command.enable_tweaks()
+        command.enable_install()
         return ok
 
 

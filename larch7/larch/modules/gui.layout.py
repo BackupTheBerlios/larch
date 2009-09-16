@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.09.13
+# 2009.09.16
 
 Namespace = ":"
 
@@ -93,7 +93,6 @@ Widgets = [
 ["*OptionalFrame", "larchify_advanced", _("Advanced Options")],
   ["Button", "^&initcpio", _("Edit mkinitcpio.conf")],
   ["Button", "^overlay", _("Edit overlay (open in file browser)")],
-  ["Button", "^&filebrowser", _("(Configure file browser command)")],
   ["*CheckBox", "^ssh", _("Generate ssh keys")],
   ["*CheckBox", "oldsquash", _("Reuse existing system.sqf")],
 
@@ -180,7 +179,6 @@ Tooltips = [
 ["&rcconf", _("Edit the /etc/rc.conf file to configure the live system")],
 ["&initcpio", _("Edit the configuration file for generating the initramfs via mkinitcpio")],
 ["overlay", _("Open a file browser on the profile's 'rootoverlay'")],
-["&filebrowser", _("Allows you to change the file browser opened by larch")],
 ["ssh", _("Enables pre-generation of ssh keys")],
 ["oldsquash", _("Reuse existing system.sqf, to save time if the base system hasn't changed")],
 ["&build", _("Build the main components of the larch system")],
@@ -303,7 +301,7 @@ Layout = [
 
   ["+LAYOUT", "larchify_advanced", "hbl3"],
   ["HBOX", "hbl3", ["vbl1", "hsl2", "vbl2"]],
-    ["VBOX", "vbl1", ["&initcpio", "overlay", "&filebrowser"]],
+    ["VBOX", "vbl1", ["&initcpio", "overlay"]],
     ["VBOX", "vbl2", ["ssh", "vsl1", "oldsquash"]],
       ["VSPACE", "vsl1"],
    ["HSPACE", "hsl2"],

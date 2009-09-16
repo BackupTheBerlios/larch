@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.12
+# 2009.09.16
 
 from build import Builder
 import os
@@ -38,7 +38,6 @@ class BuildPage:
                 (":&rcconf*clicked", self.rcconf),
                 (":&initcpio*clicked", self.initcpio),
                 (":overlay*clicked", self.overlay),
-                (":&filebrowser*clicked", self.filebrowser),
                 ("&larchify&", self.larchify),
             ]
 
@@ -79,14 +78,6 @@ class BuildPage:
         if not os.path.isdir(path):
             os.mkdir(path)
         command.browser(path)
-
-    def filebrowser(self):
-        ok, new = ui.ask("textLineDialog",
-                _("Enter new command to open file browser (use '%' as directory argument)"),
-                None, config.get("filebrowser"))
-        if ok:
-            config.set("filebrowser", new)
-
 
     def build(self):
         self.larchify(self.sshgen, ui.ask(":oldsquash.active"))

@@ -21,11 +21,12 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.13
+# 2009.09.16
 
 import json
 import threading
 from subprocess import Popen, PIPE
+import locale
 
 class Ui:
     def __init__(self, commqueue, flag, guiexec):
@@ -126,7 +127,12 @@ class Ui:
 
 
 class Logger:
-
+    def __init__(self):
+#TODO: This is experimental - it is intended to work around problems arising
+#      when the system encoding is not utf8.
+        self.encoding = locale.getdefaultlocale()[1]
+        if self.encoding == "UTF8":
+            self.encoding = None
 
     def setVisible(self, on):
         ui.command("log:log.setVisible", on)
@@ -135,6 +141,10 @@ class Logger:
         ui.command("log:logtext.set")
 
     def addLine(self, line):
+#TODO: This is experimental - it is intended to work around problems arising
+#      when the system encoding is not utf8.
+        if self.encoding:
+            line = line.decode(self.encoding, "replace").encode("UTF8")
         ui.command("log:logtext.append_and_scroll", line)
 
     def undo(self):

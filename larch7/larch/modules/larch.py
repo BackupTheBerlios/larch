@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.13
+# 2009.09.16
 
 
 """
@@ -65,7 +65,7 @@ __builtin__.base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__
 sys.path.append("%s/modules" % base_dir)
 script_dir = "%s/buildscripts" % base_dir
 
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, call, PIPE, STDOUT
 import threading, traceback
 from Queue import Queue
 import json
@@ -243,7 +243,27 @@ class Command:
 
 
     def _showdocs(self):
-        Popen("xdg-open %s/docs/html/index.html &" % base_dir, shell=True)
+        self._browse("html_reader", base_dir + "/docs/html/index.html")
+
+
+    def _browse(self, btype, path):
+        simple_thread(self._browse_set, btype, path)
+
+
+    def _browse_set(self, btype, path):
+        appcall = config.get(btype)
+        while (call(["which", appcall.split()[0]],
+                stdout=PIPE, stderr=STDOUT) != 0):
+            ok, new = ui.ask("textLineDialog",
+                    _("Enter '%s' application ('%%' for path argument):") % btype,
+                    None, appcall)
+            if ok:
+                appcall = new
+                config.set(btype, appcall)
+            else:
+                return
+
+        Popen(appcall.replace("%", path) + " &", shell=True)
 
 
     def sigint(self, num, frame):
@@ -342,8 +362,7 @@ class Command:
 
 
     def browser(self, path):
-        cmd = config.get("filebrowser").replace("%", path)
-        Popen(cmd + " &", shell=True)
+        self._browse("filebrowser", path)
 
 
     def chroot(self, cmd, mounts=[]):
@@ -594,7 +613,7 @@ def ltstart():
                 if download > 1:
                     logger.undo()
                 download = 2
-                line = "X:++++ %3s %s   %s\n" % (percent, "%", size)
+                line = "X:++++ %3s %%   %s\n" % (percent, size)
             elif download == 2:
                 download = 0
             else:

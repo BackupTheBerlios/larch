@@ -1,8 +1,5 @@
 Check larch2hdd is still functional.
 
-xdg-open is used to show the documentation (from the gui). Maybe the
-show-docs command should be configurable (like the file-browser is)?
-
 Make a script to build a 64-bit repo? At present all packages are 'any'
 architecture, so there would be no need for a separate repo. Actually,
 pacman-allin should be in the repo, too, and that would be architecture
