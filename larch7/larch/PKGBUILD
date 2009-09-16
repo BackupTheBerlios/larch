@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.09.15
+# 2009.09.16
 pkgname=larch
-pkgver=7.0.56
+pkgver=7.0.57
 pkgrel=1
 
 # If I need the architecture, I can get it as ${CARCH}

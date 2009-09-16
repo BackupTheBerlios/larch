@@ -255,7 +255,7 @@ class Command:
         while (call(["which", appcall.split()[0]],
                 stdout=PIPE, stderr=STDOUT) != 0):
             ok, new = ui.ask("textLineDialog",
-                    _("Enter '%s' application ('%%' for path argument):") % btype,
+                    _("Enter '%s' application ('$' for path argument):") % btype,
                     None, appcall)
             if ok:
                 appcall = new
@@ -263,7 +263,7 @@ class Command:
             else:
                 return
 
-        Popen(appcall.replace("%", path) + " &", shell=True)
+        Popen(appcall.replace("$", path) + " &", shell=True)
 
 
     def sigint(self, num, frame):

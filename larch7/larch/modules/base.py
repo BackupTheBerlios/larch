@@ -45,8 +45,8 @@ defaults = {    "install_path"  : "/home/larchbuild",
                 "localmirror"   : "",
                 "usemirrorlist" : "",
                 "dl_progress"   : "",
-                "filebrowser"   : "xdg-open %",
-                "html_reader"   : "xdg-open %",
+                "filebrowser"   : "xdgx-open $",
+                "html_reader"   : "xdg-open $",
                 "medium_iso"    : "yes",    # "yes" / ""
                 "medium_btldr"  : "grub",   # "grub" / "syslinux" / "none"
                 "medium_search" : "search", # "search" / "uuid" / "label" / "device"

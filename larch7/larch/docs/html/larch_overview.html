@@ -335,30 +335,16 @@ Thanks to <em>pacman</em> you don't need to sort out dependencies,
 these should all be included automatically.
 </p>
 
-<h3><a name="existingSystem"></a>Making a live CD from an existing <em>Arch</em>
-installation</h3>
-
-<p>By setting the installation path to an existing <em>Arch</em> installation,
-a live medium can be made from it, by skipping to the larchify page.
-The installation must already be mounted, including any sub-mounts
-(e.g. /home on another partition). The main mount must be with
-options 'exec,dev', because most of the building is done via a <em>chroot</em>
-to the installation. This is probably not a good idea if the installation
-contains a lot of data - consider how big the result will be ...
-</p>
-
-<p>Also the currently running (<em>Arch</em> only!) system can be
-<em>larchified</em>, by setting the installation path to '/'.
-This is, however, not recommended. Building from a running system can easily
-result in data corruption because the file-system might well change during
-the build process.
-</p>
-
 <p>In order to support building a <em>larch</em> system, certain packages outside
 the <em>Arch</em> base group must be installed in the system to be 'larchified'
 (the <em>larch</em> installer includes the first group automatically):
-<pre style="margin-left: 80px;"><em>squashfs-tools</em>, <em>aufs2</em>, <em>aufs2-util</em>, <em>lzop</em>,
-<em>larch-live</em>,
+
+<pre style="margin-left: 80px;"><em>squashfs-tools</em>, <em>lzop</em>, <em>larch-live</em>,
+
+<em>aufs2</em>, <em>aufs2-util</em> (unless using the untested <em>unionfs</em> these <strong>must</strong>
+                be present, except that the <em>aufs</em> module might be
+                provided with the kernel, in which case you only
+                need <em>aufs2-util</em>),
 
 <em>syslinux</em> (if using isolinux or syslinux),
 <em>cdrkit</em> (for building an iso),
@@ -371,6 +357,26 @@ For the hard-disk installer - <em>larchin</em>, <em>python</em>, <em>pygtk</em>,
 for this documentation, and for the capability of doing complete
 rebuilds - <em>larch</em>
 </pre>
+</p>
+
+<h3><a name="existingSystem"></a>Making a live CD from an existing <em>Arch</em>
+installation</h3>
+
+<p>By setting the installation path to an existing <em>Arch</em> installation,
+a live medium can be made from it, by skipping to the larchify page.
+The installation must already be mounted, including any sub-mounts
+(e.g. /home on another partition). The main mount must be with
+options 'exec,dev', because most of the building is done via a <em>chroot</em>
+to the installation. This approach to <em>live</em> system generation is probably
+not a good idea if the installation contains a lot of data - consider how big the
+result will be ...
+</p>
+
+<p>Also the currently running (<em>Arch</em> only!) system can be
+<em>larchified</em>, by setting the installation path to '/'.
+This is, however, not recommended. Building from a running system can easily
+result in data corruption because the file-system might well change during
+the build process.
 </p>
 
 <p>Note that some things in '/var' will not be included in the 'live' system.

@@ -193,7 +193,7 @@ class Installation:
                 packages.append(l[1])
 
         # Add necessary packages
-        for p in ["larch-live", "squashfs-tools", "aufs2", "aufs2-util", "lzop"]:
+        for p in ["larch-live", "squashfs-tools", "lzop"]:
             if p not in packages:
                 packages.append(p)
 

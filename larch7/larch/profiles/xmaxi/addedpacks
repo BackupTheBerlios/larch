@@ -2,7 +2,8 @@
 syslinux
 cdrkit
 # In case necessary (depends on kernel)
-#aufs2
+aufs2
+aufs2-util
 # To eject a cd
 eject
 
