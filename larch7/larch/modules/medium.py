@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.26
+# 2009.09.16
 
 import os
 
@@ -371,7 +371,7 @@ def _mkiso(parms, iso="mylivecd.iso", source=None):
             ' -publisher "designed by gradgrind, licence: GPL"'
             ' -A "larch_7"'
             ' -o "%s" "%s"') % (parms, path, source)):
-        command.info(_("Your larch iso, %s, was successfully created") % path)
+        ui.infoDialog(_("Your larch iso, %s, was successfully created") % path)
         return True
     else:
         run_error("iso build failed")
