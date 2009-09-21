@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.13
+# 2009.09.21
 
 
 """Implement a command line driven user interface for larch.
@@ -62,6 +62,7 @@ class Ui:
 
     def t_run(self, *arglist):
         try:
+            r = 1
             for cmd in arglist:
                 self.queue.join()
                 r = self.do(cmd)
@@ -71,6 +72,7 @@ class Ui:
             r = 1
         self.sendsig("$$$uiquit$$$")
         self.queue.put("%s/%d\n" % (self.flag, r))
+        usage()
         return
 
 

@@ -5,35 +5,250 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-08-04 22:10+CEST\n"
+"POT-Creation-Date: 2009-09-21 15:23+CEST\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: ENCODING\n"
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: modules/base.py:73
+#: modules/base.py:87
 msgid "No pacman executable found"
 msgstr ""
 
-#: modules/base.py:123
+#: modules/base.py:115
+msgid "Unknown platform: '%s'"
+msgstr ""
+
+#: modules/base.py:154
 msgid ""
 "Unknown configuration option: %s\n"
 msgstr ""
 
-#: modules/base.py:169
+#: modules/base.py:204
 msgid "No name for new profile"
 msgstr ""
 
-#: modules/base.py:173
+#: modules/base.py:208
 msgid "Profile '%s' already exists"
 msgstr ""
 
-#: modules/base.py:187
+#: modules/base.py:222
 msgid "Profile '%s' exists already."
+msgstr ""
+
+#: modules/build.py:58
+msgid ""
+"Building a larch live medium from the running system is\n"
+"an error prone process. Changes to the running system\n"
+"made while running this function may be only partially\n"
+"incorporated into the compressed system images.\n"
+"\n"
+"Do you wish to continue?"
+msgstr ""
+
+#: modules/build.py:112
+msgid "Squashing system.sqf failed"
+msgstr ""
+
+#: modules/build.py:178
+msgid "Squashing mods.sqf failed"
+msgstr ""
+
+#: modules/build.py:197
+msgid ""
+"No squashfs module found\n"
+msgstr ""
+
+#: modules/build.py:207
+msgid ""
+"No aufs or unionfs module found\n"
+msgstr ""
+
+#: modules/build.py:211
+msgid ""
+"Package '%s' is needed by larch systems\n"
+msgstr ""
+
+#: modules/build.py:214
+msgid ""
+"Without package 'syslinux' you will not be able\n"
+"to create syslinux or isolinux booting media\n"
+msgstr ""
+
+#: modules/build.py:218
+msgid ""
+"Without package 'cdrkit' (or 'cdrtools') you will\n"
+"not be able to create CD/DVD media\n"
+msgstr ""
+
+#: modules/build.py:222
+msgid ""
+"Without package 'eject' you will have problems\n"
+"using CD/DVD media\n"
+msgstr ""
+
+#: modules/build.py:226
+msgid ""
+"WARNING:\n"
+"%s\n"
+"    Continue building?"
+msgstr ""
+
+#: modules/build.py:232
+msgid ""
+"ERROR:\n"
+"%s"
+msgstr ""
+
+#: modules/build.py:259
+msgid ""
+"Problem running %s:\n"
+"  %s"
+msgstr ""
+
+#: modules/build.py:264
+msgid ""
+"More than one kernel found:\n"
+"  %s"
+msgstr ""
+
+#: modules/build.py:268
+msgid "No kernel found"
+msgstr ""
+
+#: modules/build.py:276
+msgid "More than one set of kernel modules in %s"
+msgstr ""
+
+#: modules/build.py:302
+msgid ""
+"WARNING:\n"
+"  You seem to have installed a package containing modules\n"
+"which aren't compatible with your kernel (see log).\n"
+"Please check that this won't cause problems.\n"
+"Maybe you need the corresponding package for your kernel?\n"
+"\n"
+"    Continue building?"
+msgstr ""
+
+#: modules/build.py:311
+msgid "Couldn't find kernel modules"
+msgstr ""
+
+#: modules/console.py:88 modules/pyqt/guibuild.py:206
+msgid "Information"
+msgstr ""
+
+#: modules/console.py:94
+msgid "Press <Enter> to continue"
+msgstr ""
+
+#: modules/console.py:100 modules/pyqt/guibuild.py:198
+msgid "Confirmation"
+msgstr ""
+
+#: modules/console.py:106 modules/console.py:189
+msgid "Yes"
+msgstr ""
+
+#: modules/console.py:106 modules/console.py:190
+msgid "No"
+msgstr ""
+
+#: modules/console.py:114
+msgid "ERROR"
+msgstr ""
+
+#: modules/console.py:135
+msgid "Unknown command: %s"
+msgstr ""
+
+#: modules/console.py:191
+msgid "Project Name:"
+msgstr ""
+
+#: modules/console.py:192
+msgid "Profile:"
+msgstr ""
+
+#: modules/console.py:193 modules/gui.layout.py:51
+msgid "Installation Path:"
+msgstr ""
+
+#: modules/console.py:194
+msgid "Working Directory:"
+msgstr ""
+
+#: modules/console.py:195
+msgid "Platform:"
+msgstr ""
+
+#: modules/console.py:196
+msgid "Installation Mirror:"
+msgstr ""
+
+#: modules/console.py:197
+msgid "--- use mirror:"
+msgstr ""
+
+#: modules/console.py:198
+msgid "Use Project Mirrorlist:"
+msgstr ""
+
+#: modules/console.py:199
+msgid "Bootloader:"
+msgstr ""
+
+#: modules/console.py:200
+msgid "Medium Detection:"
+msgstr ""
+
+#: modules/console.py:201
+msgid "Medium Label:"
+msgstr ""
+
+#: modules/console.py:202 modules/gui.layout.py:72
+msgid "Package Cache:"
+msgstr ""
+
+#: modules/console.py:205
+msgid ""
+"Projects:\n"
+msgstr ""
+
+#: modules/console.py:210
+msgid ""
+"Profiles (in %s):\n"
+msgstr ""
+
+#: modules/console.py:215
+msgid ""
+"Example Profiles (in %s):\n"
+msgstr ""
+
+#: modules/console.py:220
+msgid ""
+"Available Partitions:\n"
+msgstr ""
+
+#: modules/console.py:230 modules/console.py:239
+msgid "Unknown project name: '%s'"
+msgstr ""
+
+#: modules/console.py:247 modules/console.py:259
+msgid "Unknown profile name: '%s'"
+msgstr ""
+
+#: modules/console.py:271
+msgid "Available platforms: %s"
+msgstr ""
+
+#: modules/console.py:301
+msgid "Invalid bootloader: %s"
 msgstr ""
 
 #: modules/editor.layout.py:10
@@ -48,232 +263,612 @@ msgstr ""
 msgid "View Log"
 msgstr ""
 
-#: modules/gui.layout.py:20
-msgid "Project Settings"
+#: modules/gui.layout.py:16
+msgid "Help"
 msgstr ""
 
-#: modules/gui.layout.py:21
-msgid "Installation"
+#: modules/gui.layout.py:17
+msgid "Cancel"
 msgstr ""
 
-#: modules/gui.layout.py:22
-msgid "Larchify"
+#: modules/gui.layout.py:18
+msgid "Quit"
 msgstr ""
 
 #: modules/gui.layout.py:23
+msgid "Project Settings"
+msgstr ""
+
+#: modules/gui.layout.py:24
+msgid "Installation"
+msgstr ""
+
+#: modules/gui.layout.py:25 modules/gui.layout.py:99
+msgid "Larchify"
+msgstr ""
+
+#: modules/gui.layout.py:26
 msgid "Prepare Medium"
 msgstr ""
 
-#: modules/gui.layout.py:29
-msgid "Profile"
-msgstr ""
-
-#: modules/gui.layout.py:30
-msgid "Choose Existing Profile:"
-msgstr ""
-
-#: modules/gui.layout.py:31
-msgid "New Profile:"
+#: modules/gui.layout.py:27
+msgid "Installation Tweaks"
 msgstr ""
 
 #: modules/gui.layout.py:33
-msgid "Browse for Profile"
+msgid "Profile"
 msgstr ""
 
 #: modules/gui.layout.py:34
+msgid "Choose Existing Profile:"
+msgstr ""
+
+#: modules/gui.layout.py:35
+msgid "New Profile:"
+msgstr ""
+
+#: modules/gui.layout.py:37
+msgid "Browse for Profile"
+msgstr ""
+
+#: modules/gui.layout.py:38
 msgid "Rename"
 msgstr ""
 
-#: modules/gui.layout.py:35 modules/gui.layout.py:43
+#: modules/gui.layout.py:39 modules/gui.layout.py:49
 msgid "Delete"
 msgstr ""
 
-#: modules/gui.layout.py:38 modules/gui.layout.py:57
+#: modules/gui.layout.py:41
+msgid "Platform (processor architecture):"
+msgstr ""
+
+#: modules/gui.layout.py:44 modules/gui.layout.py:63 modules/gui.layout.py:93
 msgid "Advanced Options"
 msgstr ""
 
-#: modules/gui.layout.py:39
+#: modules/gui.layout.py:45
 msgid "Project"
 msgstr ""
 
-#: modules/gui.layout.py:40
+#: modules/gui.layout.py:46
 msgid "Choose Existing Project:"
 msgstr ""
 
-#: modules/gui.layout.py:42
+#: modules/gui.layout.py:48
 msgid "New Project"
 msgstr ""
 
-#: modules/gui.layout.py:45
-msgid "Installation Path:"
-msgstr ""
-
-#: modules/gui.layout.py:47 modules/gui.layout.py:64 modules/gui.layout.py:68
+#: modules/gui.layout.py:53 modules/gui.layout.py:70 modules/gui.layout.py:74
+#: modules/gui.layout.py:125
 msgid "Change"
 msgstr ""
 
-#: modules/gui.layout.py:51
+#: modules/gui.layout.py:57
 msgid "Edit Profile"
 msgstr ""
 
-#: modules/gui.layout.py:52
+#: modules/gui.layout.py:58
 msgid "Edit 'addedpacks'"
 msgstr ""
 
-#: modules/gui.layout.py:53
+#: modules/gui.layout.py:59
 msgid "Edit 'baseveto'"
 msgstr ""
 
-#: modules/gui.layout.py:54
+#: modules/gui.layout.py:60
 msgid "Edit pacman.conf options"
 msgstr ""
 
-#: modules/gui.layout.py:55
+#: modules/gui.layout.py:61
 msgid "Edit pacman.conf repositories"
 msgstr ""
 
-#: modules/gui.layout.py:58
-msgid "Use project mirrorlist for installation"
+#: modules/gui.layout.py:64
+msgid "Use project mirrorlist"
 msgstr ""
 
-#: modules/gui.layout.py:59
+#: modules/gui.layout.py:65
 msgid "Edit project mirrorlist"
 msgstr ""
 
-#: modules/gui.layout.py:61
-msgid "Use local mirror for installation"
+#: modules/gui.layout.py:67
+msgid "Use special mirror for installation"
 msgstr ""
 
-#: modules/gui.layout.py:62
+#: modules/gui.layout.py:68
 msgid "URL:"
 msgstr ""
 
-#: modules/gui.layout.py:66
-msgid "Package Cache:"
-msgstr ""
-
-#: modules/gui.layout.py:70
-msgid "Synchronize db"
-msgstr ""
-
-#: modules/gui.layout.py:71
-msgid "Update / Add package    [-U]"
-msgstr ""
-
-#: modules/gui.layout.py:72 modules/gui.layout.py:73
-msgid "Add package(s)    [-S]"
-msgstr ""
-
-#: modules/gui.layout.py:75
+#: modules/gui.layout.py:76
 msgid "Install"
 msgstr ""
 
-#: modules/guibuild.py:167
-msgid "Unknown Dialog button: %s"
+#: modules/gui.layout.py:80
+msgid "Package Management"
 msgstr ""
 
-#: modules/guibuild.py:184
-msgid "Enter the value here:"
+#: modules/gui.layout.py:81
+msgid "Synchronize db"
 msgstr ""
 
-#: modules/guibuild.py:186
-msgid "Enter Information"
+#: modules/gui.layout.py:82
+msgid "Update / Add package    [-U]"
 msgstr ""
 
-#: modules/guibuild.py:198
-msgid "Confirmation"
+#: modules/gui.layout.py:83
+msgid "Add package(s)    [-S]"
 msgstr ""
 
-#: modules/guibuild.py:206
-msgid "Information"
+#: modules/gui.layout.py:84
+msgid "Remove package(s)    [-Rs]"
 msgstr ""
 
-#: modules/guibuild.py:455
-msgid "Signal '%s' is not defined for '%s'."
+#: modules/gui.layout.py:86
+msgid "Show download progress (in log) - needs 'curl'"
 msgstr ""
 
-#: modules/guibuild.py:464
-msgid "Signal '%s' is defined more than once."
+#: modules/gui.layout.py:89
+msgid "The system to be compressed must be installed and ready."
 msgstr ""
 
-#: modules/guibuild.py:479
-msgid "Signal '%s' couldn't be connected."
+#: modules/gui.layout.py:90
+msgid "Edit supported locales"
 msgstr ""
 
-#: modules/guibuild.py:510
-msgid "Attempted to define widget '%s' twice."
+#: modules/gui.layout.py:91
+msgid "Edit Arch configuration file (/etc/rc.conf)"
 msgstr ""
 
-#: modules/guibuild.py:642
-msgid "Unknown node type: %s"
+#: modules/gui.layout.py:94
+msgid "Edit mkinitcpio.conf"
 msgstr ""
 
-#: modules/guibuild.py:681
-msgid "Unknown widget: %s"
+#: modules/gui.layout.py:95
+msgid "Edit overlay (open in file browser)"
 msgstr ""
 
-#: modules/guibuild.py:689
-msgid "Error"
+#: modules/gui.layout.py:96
+msgid "Generate ssh keys"
 msgstr ""
 
-#: modules/guibuild.py:695
-msgid "Warning"
+#: modules/gui.layout.py:97
+msgid "Reuse existing system.sqf"
 msgstr ""
 
-#: modules/guibuild.py:703
-msgid "This error could not be handled."
+#: modules/gui.layout.py:106
+msgid "Partition (disk / USB-stick)"
 msgstr ""
 
-#: modules/guibuild.py:847
-msgid "Do you really want to quit the program?"
+#: modules/gui.layout.py:110
+msgid "There are no options specific to iso media."
 msgstr ""
 
-#: modules/installation.py:139
-msgid "Couldn't synchronize pacman database (pacman -Sy)"
+#: modules/gui.layout.py:112
+msgid "Partition:"
 msgstr ""
 
-#: modules/installation.py:162
+#: modules/gui.layout.py:114
+msgid "Choose"
+msgstr ""
+
+#: modules/gui.layout.py:115
+msgid "Don't format"
+msgstr ""
+
+#: modules/gui.layout.py:117
+msgid "Medium Detection"
+msgstr ""
+
+#: modules/gui.layout.py:120
+msgid "Partition"
+msgstr ""
+
+#: modules/gui.layout.py:123
+msgid "Medium label:"
+msgstr ""
+
+#: modules/gui.layout.py:127
+msgid "Bootloader"
+msgstr ""
+
+#: modules/gui.layout.py:130 modules/mediumpage.py:116
+msgid "None"
+msgstr ""
+
+#: modules/gui.layout.py:131
+msgid ""
+"(You'll need to\n"
+"provide some\n"
+"means of\n"
+"booting)"
+msgstr ""
+
+#: modules/gui.layout.py:133
+msgid "Bootable using larchboot search"
+msgstr ""
+
+#: modules/gui.layout.py:135
+msgid "Edit boot entries"
+msgstr ""
+
+#: modules/gui.layout.py:136 modules/gui.layout.py:202
+msgid "Edit grub template"
+msgstr ""
+
+#: modules/gui.layout.py:137 modules/gui.layout.py:203
+msgid "Edit syslinux/isolinux template"
+msgstr ""
+
+#: modules/gui.layout.py:139
+msgid "Create boot iso"
+msgstr ""
+
+#: modules/gui.layout.py:140
+msgid "Create larch medium"
+msgstr ""
+
+#: modules/gui.layout.py:147
+msgid "Stop the current action"
+msgstr ""
+
+#: modules/gui.layout.py:148
+msgid "Stop current action and quit the program"
+msgstr ""
+
+#: modules/gui.layout.py:149
+msgid "This button toogles the visibility of the log viewer"
+msgstr ""
+
+#: modules/gui.layout.py:150
+msgid "Open the larch docs in a browser"
+msgstr ""
+
+#: modules/gui.layout.py:151
+msgid "Choose a profile from those already in your larch working folder"
+msgstr ""
+
+#: modules/gui.layout.py:152
+msgid "Fetch a profile from the file-system"
+msgstr ""
+
+#: modules/gui.layout.py:153
+msgid "Rename the current profile"
+msgstr ""
+
+#: modules/gui.layout.py:154
+msgid "Delete the current profile"
+msgstr ""
+
+#: modules/gui.layout.py:155
+msgid "Which processor architecture?"
+msgstr ""
+
+#: modules/gui.layout.py:156
+msgid "Choose a project from those already defined"
+msgstr ""
+
+#: modules/gui.layout.py:157
+msgid "Create a new project"
+msgstr ""
+
+#: modules/gui.layout.py:158
+msgid "Delete the current project"
+msgstr ""
+
+#: modules/gui.layout.py:159
+msgid "The root directory of the Arch installation to larchify"
+msgstr ""
+
+#: modules/gui.layout.py:160
+msgid "Change the root directory of the Arch installation"
+msgstr ""
+
+#: modules/gui.layout.py:161
+msgid "Edit the list of packages to be installed"
+msgstr ""
+
+#: modules/gui.layout.py:162
+msgid "Edit the list of base packages NOT to install"
+msgstr ""
+
+#: modules/gui.layout.py:163
+msgid "Edit pacman.conf options - not the repositories"
+msgstr ""
+
+#: modules/gui.layout.py:164
+msgid "Edit the repository entries for pacman.conf"
+msgstr ""
+
+#: modules/gui.layout.py:165
+msgid "Enables use of the mirrorlist file saved in the working directory, for installation only"
+msgstr ""
+
+#: modules/gui.layout.py:166
+msgid "Edit mirrorlist in working directory"
+msgstr ""
+
+#: modules/gui.layout.py:167
+msgid "Allows a specific (e.g. local) mirror to be used just for the installation"
+msgstr ""
+
+#: modules/gui.layout.py:168
+msgid "The url of the installation mirror"
+msgstr ""
+
+#: modules/gui.layout.py:169
+msgid "Change the installation mirror path"
+msgstr ""
+
+#: modules/gui.layout.py:170
+msgid "The path to the (host's) package cache"
+msgstr ""
+
+#: modules/gui.layout.py:171
+msgid "Change the package cache path"
+msgstr ""
+
+#: modules/gui.layout.py:172
+msgid "This will start the installation to the set path"
+msgstr ""
+
+#: modules/gui.layout.py:173
+msgid "Synchronize the pacman db on the target (pacman -Sy)"
+msgstr ""
+
+#: modules/gui.layout.py:174
+msgid "Update / Add a package from a package file using pacman -U"
+msgstr ""
+
+#: modules/gui.layout.py:175
+msgid "Add one or more packages (space separated) using pacman -S"
+msgstr ""
+
+#: modules/gui.layout.py:176
+msgid "Remove one or more packages (space separated) using pacman -Rs"
+msgstr ""
+
+#: modules/gui.layout.py:177
+msgid "Checking here should allow the log to display download progress by using a special download script"
+msgstr ""
+
+#: modules/gui.layout.py:178
+msgid "Edit the /etc/locale.gen file to select supported glibc locales"
+msgstr ""
+
+#: modules/gui.layout.py:179
+msgid "Edit the /etc/rc.conf file to configure the live system"
+msgstr ""
+
+#: modules/gui.layout.py:180
+msgid "Edit the configuration file for generating the initramfs via mkinitcpio"
+msgstr ""
+
+#: modules/gui.layout.py:181
+msgid "Open a file browser on the profile's 'rootoverlay'"
+msgstr ""
+
+#: modules/gui.layout.py:182
+msgid "Enables pre-generation of ssh keys"
+msgstr ""
+
+#: modules/gui.layout.py:183
+msgid "Reuse existing system.sqf, to save time if the base system hasn't changed"
+msgstr ""
+
+#: modules/gui.layout.py:184
+msgid "Build the main components of the larch system"
+msgstr ""
+
+#: modules/gui.layout.py:185
+msgid "You can choose installation to iso (for CD/DVD) or a partition (e.g. USB-stick)"
+msgstr ""
+
+#: modules/gui.layout.py:186
+msgid "The partition to which the larch system is to be installed"
+msgstr ""
+
+#: modules/gui.layout.py:187
+msgid "Select the partition to receive the larch system"
+msgstr ""
+
+#: modules/gui.layout.py:188
+msgid "Copy the data to the partition without formatting first (not the normal procedure)"
+msgstr ""
+
+#: modules/gui.layout.py:189
+msgid "Choose how the boot scripts determine where to look for the larch system"
+msgstr ""
+
+#: modules/gui.layout.py:190
+msgid "Use the partition's UUID to find it"
+msgstr ""
+
+#: modules/gui.layout.py:191
+msgid "Use the partition's label to find it"
+msgstr ""
+
+#: modules/gui.layout.py:192
+msgid "Use the partition name (/dev/sdb1, etc.)"
+msgstr ""
+
+#: modules/gui.layout.py:193
+msgid "Test all CD/DVD devices and partitions until the file larch/larchboot is found"
+msgstr ""
+
+#: modules/gui.layout.py:194
+msgid "The label that the partition will be given"
+msgstr ""
+
+#: modules/gui.layout.py:195
+msgid "Change the label"
+msgstr ""
+
+#: modules/gui.layout.py:196
+msgid "You can choose between GRUB and syslinux/isolinux as bootloader"
+msgstr ""
+
+#: modules/gui.layout.py:197
+msgid "Use GRUB as bootloader"
+msgstr ""
+
+#: modules/gui.layout.py:198
+msgid "Use syslinux (partition) or isolinux (CD/DVD) as bootloader"
+msgstr ""
+
+#: modules/gui.layout.py:199
+msgid "Don't install a bootloader"
+msgstr ""
+
+#: modules/gui.layout.py:200
+msgid "Create the file larch/larchboot"
+msgstr ""
+
+#: modules/gui.layout.py:201
+msgid "Edit the file determining the boot entries"
+msgstr ""
+
+#: modules/gui.layout.py:204
+msgid "Create a small boot iso for this system (for machines that can't boot from USB)"
+msgstr ""
+
+#: modules/gui.layout.py:205
+msgid "Create the larch iso or set up the chosen partition"
+msgstr ""
+
+#: modules/gui.py:88
+msgid ""
+"ui not ready for enquiry:\n"
+msgstr ""
+
+#: modules/installation.py:108 modules/installpage.py:91
+msgid "No 'mirrorlist' file found"
+msgstr ""
+
+#: modules/installation.py:154
 msgid "Couldn't write to the installation path (%s)."
 msgstr ""
 
-#: modules/installation.py:166
+#: modules/installation.py:158
 msgid "The installation path (%s) is mounted 'nodev'."
 msgstr ""
 
-#: modules/installation.py:174
+#: modules/installation.py:166
 msgid "The installation path (%s) is mounted 'noexec'."
 msgstr ""
 
-#: modules/installation.py:225
+#: modules/installation.py:211
 msgid "Package installation failed"
 msgstr ""
 
-#: modules/installpage.py:83
+#: modules/installation.py:245
+msgid "Couldn't synchronize pacman database (pacman -Sy)"
+msgstr ""
+
+#: modules/installpage.py:75
 msgid "Editing pacman.conf options only"
 msgstr ""
 
-#: modules/installpage.py:89
+#: modules/installpage.py:81
 msgid "Editing pacman.conf repositories only"
 msgstr ""
 
-#: modules/installpage.py:103
-msgid "Editing '%s'"
-msgstr ""
-
-#: modules/installpage.py:132
+#: modules/installpage.py:93
 msgid "Editing mirrorlist: Uncomment ONE entry"
 msgstr ""
 
-#: modules/installpage.py:147
+#: modules/installpage.py:109
 msgid "Enter new local mirror path:"
 msgstr ""
 
-#: modules/installpage.py:159
+#: modules/installpage.py:115
+msgid "You must specify a URL, with protocol, e.g. 'file:///a/b/c'"
+msgstr ""
+
+#: modules/installpage.py:129
 msgid "Enter new package cache path:"
 msgstr ""
 
-#: modules/installpage.py:186
+#: modules/larch.py:258
+msgid "Enter '%s' application ('$' for path argument):"
+msgstr ""
+
+#: modules/larch.py:350
+msgid "Editing '%s'"
+msgstr ""
+
+#: modules/larch.py:402
+msgid "Platform error, installed system is %s"
+msgstr ""
+
+#: modules/larch.py:407
+msgid "No installed system found"
+msgstr ""
+
+#: modules/larch.py:450
 msgid "Function not yet implemented"
+msgstr ""
+
+#: modules/larch.py:466
+msgid "CONFIG ERROR"
+msgstr ""
+
+#: modules/larch.py:470
+msgid "BUILD ERROR"
+msgstr ""
+
+#: modules/larch.py:481
+msgid "This error could not be handled"
+msgstr ""
+
+#: modules/larch.py:508
+msgid "Received unexpected signal: '%s'"
+msgstr ""
+
+#: modules/larch.py:520
+msgid ""
+"Unexpected response from ui:\n"
+msgstr ""
+
+#: modules/larch.py:535
+msgid ""
+"Unexpected message from ui:\n"
+msgstr ""
+
+#: modules/larch.py:540
+msgid "Unexpected end of 'supershell' process."
+msgstr ""
+
+#: modules/larch.py:558
+msgid ""
+"Main process received illegal message:\n"
+msgstr ""
+
+#: modules/larch.py:645
+msgid ""
+"   Please see '%s/%s'\n"
+"   for usage information.\n"
+msgstr ""
+
+#: modules/larch.py:658
+msgid ""
+"You need to run larch as root!\n"
+"  - otherwise the build instructions cannot be carried out.\n"
+msgstr ""
+
+#: modules/larch.py:679
+msgid ""
+"ERROR: Unsupported option - '%s'\n"
+msgstr ""
+
+#: modules/larch.py:680
+msgid ""
+"Start without arguments or with '--pyqt' to start pyqt gui.\n"
+msgstr ""
+
+#: modules/larch.py:681
+msgid ""
+"The command line interface is started with '-c':\n"
 msgstr ""
 
 #: modules/log.layout.py:10
@@ -288,67 +883,219 @@ msgstr ""
 msgid "Hide"
 msgstr ""
 
-#: modules/main.py:152
-msgid "ui not ready for enquiry"
+#: modules/medium.py:82
+msgid "Can't boot to label - no label supplied"
 msgstr ""
 
-#: modules/main.py:278
-msgid "CONFIG ERROR"
+#: modules/medium.py:208
+msgid "Couldn't format %s"
 msgstr ""
 
-#: modules/main.py:289
-msgid "This error could not be handled"
+#: modules/medium.py:265
+msgid "GRUB is at present only supported on extN"
 msgstr ""
 
-#: modules/main.py:332
-msgid "Unexpected response from ui"
+#: modules/medium.py:271
+msgid "syslinux is only supported on vfat"
 msgstr ""
 
-#: modules/main.py:347
-msgid "Unexpected message from ui"
+#: modules/medium.py:287 modules/medium.py:320
+msgid "Couldn't mount larch partition, %s"
 msgstr ""
 
-#: modules/main.py:352
-msgid "Unexpected end of 'supershell' process."
+#: modules/medium.py:341
+msgid "'syslinux' must be installed."
 msgstr ""
 
-#: modules/main.py:361
-msgid "Main process received illegal command"
+#: modules/medium.py:345
+msgid "Device has neither a /boot nor a /syslinux directory"
 msgstr ""
 
-#: modules/projectpage.py:64
+#: modules/medium.py:359
+msgid ""
+"%s not found -\n"
+"   'syslinux' must be installed on live system"
+msgstr ""
+
+#: modules/medium.py:374
+msgid "Your larch iso, %s, was successfully created"
+msgstr ""
+
+#: modules/mediumpage.py:137
+msgid "Editing larch boot entries"
+msgstr ""
+
+#: modules/mediumpage.py:148
+msgid "Editing grub template"
+msgstr ""
+
+#: modules/mediumpage.py:160
+msgid "Editing syslinux/isolinux template"
+msgstr ""
+
+#: modules/mediumpage.py:165
+msgid "Enter new label for the boot medium:"
+msgstr ""
+
+#: modules/mediumpage.py:201
+msgid "No partition selected for larch"
+msgstr ""
+
+#: modules/mediumpage.py:223
+msgid ""
+"The partition containing the larch live system\n"
+"must be specifed."
+msgstr ""
+
+#: modules/partlist.layout.py:7
+msgid "Choose Partition"
+msgstr ""
+
+#: modules/partlist.layout.py:9
+msgid ""
+"BE CAREFUL - if you select the wrong\n"
+"   partition you might well destroy your system!\n"
+"\n"
+"Select the partition to receive the larch system:"
+msgstr ""
+
+#: modules/projectpage.py:68
 msgid "Profile directory mismatch: '%s' vs. '%s'"
 msgstr ""
 
-#: modules/projectpage.py:96
+#: modules/projectpage.py:75
+msgid "Profile '%s' doesn't exist"
+msgstr ""
+
+#: modules/projectpage.py:119
 msgid "Select profile source folder and enter new name"
 msgstr ""
 
-#: modules/projectpage.py:97
+#: modules/projectpage.py:120
 msgid "New name:"
 msgstr ""
 
-#: modules/projectpage.py:113
+#: modules/projectpage.py:140
 msgid "Enter new name for current profile:"
 msgstr ""
 
-#: modules/projectpage.py:122
+#: modules/projectpage.py:159
 msgid "Do you really want to delete profile '%s'?"
 msgstr ""
 
-#: modules/projectpage.py:133
-msgid "Enter new installation path:"
+#: modules/projectpage.py:172
+msgid ""
+"WARNING: Double check your path -\n"
+"  If you make a mistake here it could destroy your system!\n"
+"\n"
+"Enter new installation path:"
 msgstr ""
 
-#: modules/projectpage.py:151
+#: modules/projectpage.py:194
+msgid ""
+"Your selected installation path(%s) contains unexpected items:\n"
+" %s\n"
+"\n"
+"Is that really ok?"
+msgstr ""
+
+#: modules/projectpage.py:210
 msgid "Enter name for new project:"
 msgstr ""
 
-#: modules/projectpage.py:161
+#: modules/projectpage.py:218
+msgid "Project '%s' already exists."
+msgstr ""
+
+#: modules/projectpage.py:226
 msgid "Can't delete the only existing project."
 msgstr ""
 
-#: modules/projectpage.py:163
+#: modules/projectpage.py:234
 msgid "Do you really want to delete project '%s'?"
+msgstr ""
+
+#: modules/pyqt/guibuild.py:167
+msgid "Unknown Dialog button: %s"
+msgstr ""
+
+#: modules/pyqt/guibuild.py:184
+msgid "Enter the value here:"
+msgstr ""
+
+#: modules/pyqt/guibuild.py:186
+msgid "Enter Information"
+msgstr ""
+
+#: modules/pyqt/guibuild.py:565
+msgid "Signal '%s' is not defined for '%s'."
+msgstr ""
+
+#: modules/pyqt/guibuild.py:574
+msgid "Signal '%s' is defined more than once."
+msgstr ""
+
+#: modules/pyqt/guibuild.py:589
+msgid "Signal '%s' couldn't be connected."
+msgstr ""
+
+#: modules/pyqt/guibuild.py:626
+msgid "Attempted to define widget '%s' twice."
+msgstr ""
+
+#: modules/pyqt/guibuild.py:758
+msgid "Unknown node type: %s"
+msgstr ""
+
+#: modules/pyqt/guibuild.py:806
+msgid "Unknown widget: %s"
+msgstr ""
+
+#: modules/pyqt/guibuild.py:814
+msgid "Error"
+msgstr ""
+
+#: modules/pyqt/guibuild.py:820
+msgid "Warning"
+msgstr ""
+
+#: modules/pyqt/guibuild.py:828
+msgid "This error could not be handled."
+msgstr ""
+
+#: modules/pyqt/larchgui.py:113
+msgid "Do you really want to quit the program?"
+msgstr ""
+
+#: modules/tweakpage.py:57
+msgid "Package to add/update"
+msgstr ""
+
+#: modules/tweakpage.py:59
+msgid "Packages"
+msgstr ""
+
+#: modules/tweakpage.py:66
+msgid "Error during package update."
+msgstr ""
+
+#: modules/tweakpage.py:71
+msgid ""
+"Enter the names of packages to install -\n"
+"  separated by spaces:"
+msgstr ""
+
+#: modules/tweakpage.py:80
+msgid "Error during package installation."
+msgstr ""
+
+#: modules/tweakpage.py:85
+msgid ""
+"Enter the names of packages to remove -\n"
+"  separated by spaces:"
+msgstr ""
+
+#: modules/tweakpage.py:94
+msgid "Error during package removal."
 msgstr ""
 

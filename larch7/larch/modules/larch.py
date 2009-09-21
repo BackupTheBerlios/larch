@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.16
+# 2009.09.21
 
 
 """
@@ -641,6 +641,12 @@ def tidyquit():
     commqueue.put("G:_\n")
 
 
+def usage():
+    errout(_("   Please see '%s/%s'\n   for usage information.\n")
+                % (base_dir, "docs/html/larch_console.html"))
+__builtin__.usage = usage
+
+
 if __name__ == "__main__":
 
     if os.getuid() == 0:
@@ -671,6 +677,9 @@ if __name__ == "__main__":
             guiexec = [base_dir + "/modules/pyqt/larchgui.py"]
         else:
             errout(_("ERROR: Unsupported option - '%s'\n") % sys.argv[1])
+            errout(_("Start without arguments or with '--pyqt' to start pyqt gui.\n"))
+            errout(_("The command line interface is started with '-c':\n"))
+            usage()
             sys.exit(1)
 
     __builtin__.ui = Ui(commqueue, "G:", guiexec)

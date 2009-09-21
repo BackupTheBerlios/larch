@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.16
+# 2009.09.17
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -192,10 +192,8 @@ class Installation:
             if l and (l[0] == "base") and (l[1] not in veto_packages):
                 packages.append(l[1])
 
-        # Add necessary packages
-        for p in ["larch-live", "squashfs-tools", "lzop"]:
-            if p not in packages:
-                packages.append(p)
+        # The larch-live package and dependencies must be installed
+        packages.append("larch-live")
 
         # Add additional packages and groups, from 'addedpacks' file.
         addedpacks_file = config.get("profile") + "/addedpacks"
@@ -206,10 +204,6 @@ class Installation:
                     and (line not in packages)):
                 packages.append(line)
         fh.close()
-
-        # Do I want to be able to install custom packages with pacman -U?
-        # It shouldn't be difficult, but it would probably be better to
-        # make a local custom repository and include that in 'addedpacks'.
 
         # Now do the actual installation.
         ok = self.pacmancall("-S", " ".join(packages))

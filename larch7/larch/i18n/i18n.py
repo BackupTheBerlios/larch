@@ -71,7 +71,7 @@ print "Generating internationalization for language '%s'\n" % lang
 print "    If you wanted a different language run 'i18n.py <language>'"
 print "    For example 'i18n.py fr'\n"
 
-dirs = ["modules"]
+dirs = ["modules", "modules/pyqt"]
 allpy = [os.path.join(d, "*.py") for d in dirs]
 call(["pygettext.py", "-p", "i18n", "-o", "larch.pot"] + allpy)
 

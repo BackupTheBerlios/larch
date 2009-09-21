@@ -1,14 +1,14 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.09.13
+# 2009.09.17
 pkgname=larch-live
-pkgver=7.0.44
+pkgver=7.0.45
 pkgrel=1
 
 pkgdesc="larch: compulsory components for the live system"
 url="http://larch.berlios.de"
-depends=()
+depends=("squashfs-tools" "lzop")
 arch=(any)
-license=('GPL')
+license=("GPL")
 
 build() {
   mkdir -p ${startdir}/pkg/opt/larch

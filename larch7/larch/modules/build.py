@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.11
+# 2009.09.17
 
 import os, sys
 from glob import glob
@@ -190,7 +190,7 @@ class Builder:
         command.log("#Testing for necessary packages and kernel modules")
         fail = ""
         warn = ""
-        nplist = ["larch-live", "squashfs-tools", "lzop"]
+        nplist = ["larch-live"]
 
         mdep = config.ipath("lib/modules/%s/modules.dep" % self.kversion)
         if Popen(["grep", "/squashfs.ko", mdep], stdout=PIPE, stderr=STDOUT).wait() != 0:
