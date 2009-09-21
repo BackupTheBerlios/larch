@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: larch 7\n"
-"POT-Creation-Date: 2009-09-21 15:23+CEST\n"
+"POT-Creation-Date: 2009-09-21 20:52+CEST\n"
 "PO-Revision-Date: 2009-08-04 22:10+CEST\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -21,7 +21,7 @@ msgstr "Ausführbare Datei 'pacman' nicht gefunden"
 
 #: modules/base.py:115
 msgid "Unknown platform: '%s'"
-msgstr "Unbekannte Prozessor-Typ: '%s'"
+msgstr "Unbekannte Prozessor-Klasse: '%s'"
 
 #: modules/base.py:154
 msgid "Unknown configuration option: %s\n"
@@ -80,18 +80,24 @@ msgid ""
 "Without package 'syslinux' you will not be able\n"
 "to create syslinux or isolinux booting media\n"
 msgstr ""
+"Das Paket 'syslinux' ist für die Herstellung\n"
+"syslinux und isolinux Boot-Medien notwendig\n"
 
 #: modules/build.py:218
 msgid ""
 "Without package 'cdrkit' (or 'cdrtools') you will\n"
 "not be able to create CD/DVD media\n"
 msgstr ""
+"Das Paket 'cdrkit' (oder 'cdrtools') ist für die\n"
+"Herstellung CD/DVD-Medien notwendig\n"
 
 #: modules/build.py:222
 msgid ""
 "Without package 'eject' you will have problems\n"
 "using CD/DVD media\n"
 msgstr ""
+"Das Paket 'eject' ist beim Einsatz CD/DVD-Boot-Medien\n"
+"sehr sinnvoll\n"
 
 #: modules/build.py:226
 msgid ""
@@ -99,32 +105,41 @@ msgid ""
 "%s\n"
 "    Continue building?"
 msgstr ""
+"WARNUNG:\n"
+"%s\n"
+"    Verfahren fortsetzen?"
 
 #: modules/build.py:232
 msgid ""
 "ERROR:\n"
 "%s"
 msgstr ""
+"FEHLER:\n"
+"%s"
 
 #: modules/build.py:259
 msgid ""
 "Problem running %s:\n"
 "  %s"
 msgstr ""
+"Problem beim Ausführen von %s:\n"
+"  %s"
 
 #: modules/build.py:264
 msgid ""
 "More than one kernel found:\n"
 "  %s"
 msgstr ""
+"Mehr als ein Kernel gefunden:\n"
+"  %s"
 
 #: modules/build.py:268
 msgid "No kernel found"
-msgstr ""
+msgstr "Kein Kernel gefunden"
 
 #: modules/build.py:276
 msgid "More than one set of kernel modules in %s"
-msgstr ""
+msgstr "Module von mehr als einem Kernel in %s gefunden"
 
 #: modules/build.py:302
 msgid ""
@@ -136,14 +151,23 @@ msgid ""
 "\n"
 "    Continue building?"
 msgstr ""
+"WARNUNG:\n"
+"  Es ist anscheinend ein Paket installiert worden, das Kernel-Module\n"
+"enthält, die mit dem installierten Kernel nicht kompatibel sind\n"
+"(siehe Protokoll).\n"
+"Bitte überprüfen, ob dadurch Probleme entstehen.\n"
+"Vielleicht müsste das entsprechende Paket für den vorhandenen Kernel\n"
+"installiert werden?\n"
+"\n"
+"    Verfahren fortsetzen?"
 
 #: modules/build.py:311
 msgid "Couldn't find kernel modules"
-msgstr ""
+msgstr "Kernel-Module nicht gefunden"
 
 #: modules/console.py:88 modules/pyqt/guibuild.py:206
 msgid "Information"
-msgstr ""
+msgstr "Information"
 
 #: modules/console.py:94
 msgid "Press <Enter> to continue"
@@ -167,7 +191,7 @@ msgstr "FEHLER"
 
 #: modules/console.py:135
 msgid "Unknown command: %s"
-msgstr ""
+msgstr "Unbekannter Befehl: %s"
 
 #: modules/console.py:191
 msgid "Project Name:"
@@ -175,31 +199,31 @@ msgstr "ProjektName"
 
 #: modules/console.py:192
 msgid "Profile:"
-msgstr ""
+msgstr "Profil:"
 
 #: modules/console.py:193 modules/gui.layout.py:51
 msgid "Installation Path:"
-msgstr ""
+msgstr "Installationspfad:"
 
 #: modules/console.py:194
 msgid "Working Directory:"
-msgstr ""
+msgstr "Arbeitsverzeichnis:"
 
 #: modules/console.py:195
 msgid "Platform:"
-msgstr ""
+msgstr "Prozessor-Klasse:"
 
 #: modules/console.py:196
 msgid "Installation Mirror:"
-msgstr ""
+msgstr "Paketspiegel für die Installation:"
 
 #: modules/console.py:197
 msgid "--- use mirror:"
-msgstr ""
+msgstr "--- Spiegel verwenden:"
 
 #: modules/console.py:198
 msgid "Use Project Mirrorlist:"
-msgstr ""
+msgstr "Projekt-Spiegelliste verwenden:"
 
 #: modules/console.py:199
 msgid "Bootloader:"
@@ -243,7 +267,7 @@ msgstr "Unbekannter Profilname: %s"
 
 #: modules/console.py:271
 msgid "Available platforms: %s"
-msgstr "Mögliche Prozessortypen: %s"
+msgstr "Mögliche Prozessorklassen: %s"
 
 #: modules/console.py:301
 msgid "Invalid bootloader: %s"
@@ -251,11 +275,11 @@ msgstr "Ungültiger 'bootloader': %s"
 
 #: modules/editor.layout.py:10
 msgid "Editor"
-msgstr ""
+msgstr "Editor"
 
 #: modules/gui.layout.py:13
 msgid "Live Arch Linux Construction Kit"
-msgstr ""
+msgstr "Live-Arch-Linux-Baukasten"
 
 #: modules/gui.layout.py:15
 msgid "View Log"
@@ -279,11 +303,11 @@ msgstr "Projekteinstellungen"
 
 #: modules/gui.layout.py:24
 msgid "Installation"
-msgstr ""
+msgstr "Installation"
 
 #: modules/gui.layout.py:25 modules/gui.layout.py:99
 msgid "Larchify"
-msgstr ""
+msgstr "Verlarchifizieren"
 
 #: modules/gui.layout.py:26
 msgid "Prepare Medium"
@@ -291,7 +315,7 @@ msgstr "Medium Vorbereiten"
 
 #: modules/gui.layout.py:27
 msgid "Installation Tweaks"
-msgstr ""
+msgstr "Installation-Feinkontrolle"
 
 #: modules/gui.layout.py:33
 msgid "Profile"
@@ -299,7 +323,7 @@ msgstr "Profil"
 
 #: modules/gui.layout.py:34
 msgid "Choose Existing Profile:"
-msgstr "VOrhandenes Profil Wählen"
+msgstr "Vorhandenes Profil Wählen"
 
 #: modules/gui.layout.py:35
 msgid "New Profile:"
@@ -319,7 +343,7 @@ msgstr "Löschen"
 
 #: modules/gui.layout.py:41
 msgid "Platform (processor architecture):"
-msgstr ""
+msgstr "Prozessor-Klasse"
 
 #: modules/gui.layout.py:44 modules/gui.layout.py:63 modules/gui.layout.py:93
 msgid "Advanced Options"
@@ -327,108 +351,110 @@ msgstr "Optionen für Fortgeschrittene"
 
 #: modules/gui.layout.py:45
 msgid "Project"
-msgstr ""
+msgstr "Projekt"
 
 #: modules/gui.layout.py:46
 msgid "Choose Existing Project:"
-msgstr ""
+msgstr "Vorhandenes Projekt Wählen:"
 
 #: modules/gui.layout.py:48
 msgid "New Project"
-msgstr ""
+msgstr "Neues Projekt"
 
 #: modules/gui.layout.py:53 modules/gui.layout.py:70 modules/gui.layout.py:74
 #: modules/gui.layout.py:125
 msgid "Change"
-msgstr ""
+msgstr "Ändern"
 
 #: modules/gui.layout.py:57
 msgid "Edit Profile"
-msgstr ""
+msgstr "Profil editieren"
 
 #: modules/gui.layout.py:58
 msgid "Edit 'addedpacks'"
-msgstr ""
+msgstr "'addedpacks' editieren"
 
 #: modules/gui.layout.py:59
 msgid "Edit 'baseveto'"
-msgstr ""
+msgstr "'baseveto' editieren"
 
 #: modules/gui.layout.py:60
 msgid "Edit pacman.conf options"
-msgstr ""
+msgstr "pacman.conf-Optionen editieren"
 
 #: modules/gui.layout.py:61
 msgid "Edit pacman.conf repositories"
-msgstr ""
+msgstr "pacman.conf-Quellen editieren"
 
 #: modules/gui.layout.py:64
 msgid "Use project mirrorlist"
-msgstr ""
+msgstr "Projekt-Spiegelliste verwenden"
 
 #: modules/gui.layout.py:65
 msgid "Edit project mirrorlist"
-msgstr ""
+msgstr "Projekt-Spiegelliste editieren"
 
 #: modules/gui.layout.py:67
 msgid "Use special mirror for installation"
-msgstr ""
+msgstr "Installation-Spiegel verwenden"
 
 #: modules/gui.layout.py:68
 msgid "URL:"
-msgstr ""
+msgstr "URL:"
 
 #: modules/gui.layout.py:76
 msgid "Install"
-msgstr ""
+msgstr "Installieren"
 
 #: modules/gui.layout.py:80
 msgid "Package Management"
-msgstr ""
+msgstr "Paketverwaltung"
 
 #: modules/gui.layout.py:81
 msgid "Synchronize db"
-msgstr ""
+msgstr "Paket-Datenbank synchronisieren"
 
 #: modules/gui.layout.py:82
 msgid "Update / Add package    [-U]"
-msgstr ""
+msgstr "Paket aktualisieren/installieren  [-U]"
 
 #: modules/gui.layout.py:83
 msgid "Add package(s)    [-S]"
-msgstr ""
+msgstr "Paket(e) installieren  [-S]"
 
 #: modules/gui.layout.py:84
 msgid "Remove package(s)    [-Rs]"
-msgstr ""
+msgstr "Paket(e) entferenen  [-Rs]"
 
 #: modules/gui.layout.py:86
 msgid "Show download progress (in log) - needs 'curl'"
 msgstr ""
+"Fortschritt beim Herunterladen (im Protokoll) anzeigen - 'curl' notwendig"
 
 #: modules/gui.layout.py:89
 msgid "The system to be compressed must be installed and ready."
-msgstr ""
+msgstr "Das System zum Komprimieren muss schon installiert und fertig sein."
 
 #: modules/gui.layout.py:90
 msgid "Edit supported locales"
-msgstr ""
+msgstr "Unterstützte Lokale editieren"
 
 #: modules/gui.layout.py:91
 msgid "Edit Arch configuration file (/etc/rc.conf)"
-msgstr ""
+msgstr "Arch-Konfigurationsdatei (/etc/rc.conf) editieren"
 
 #: modules/gui.layout.py:94
 msgid "Edit mkinitcpio.conf"
-msgstr ""
+msgstr "mkinitcpio.conf editieren"
 
 #: modules/gui.layout.py:95
 msgid "Edit overlay (open in file browser)"
 msgstr ""
+"'Overlay' (~Überlagerungsverzeichnis) editieren (im Datei-Browser öffnen)"
 
 #: modules/gui.layout.py:96
 msgid "Generate ssh keys"
-msgstr ""
+msgstr "ssh-Schlüssel erzeugen"
 
 #: modules/gui.layout.py:97
 msgid "Reuse existing system.sqf"
@@ -440,7 +466,7 @@ msgstr ""
 
 #: modules/gui.layout.py:110
 msgid "There are no options specific to iso media."
-msgstr ""
+msgstr "Es gibt keine Optionen ausschließlich für iso-Medien"
 
 #: modules/gui.layout.py:112
 msgid "Partition:"
@@ -472,7 +498,7 @@ msgstr ""
 
 #: modules/gui.layout.py:130 modules/mediumpage.py:116
 msgid "None"
-msgstr ""
+msgstr "Keine"
 
 #: modules/gui.layout.py:131
 msgid ""
@@ -481,26 +507,30 @@ msgid ""
 "means of\n"
 "booting)"
 msgstr ""
+"(Die Bootfähigkeit\n"
+"muss anderweitig\n"
+"sichergestellt\n"
+"werden)"
 
 #: modules/gui.layout.py:133
 msgid "Bootable using larchboot search"
-msgstr ""
+msgstr "Boot über 'larchboot'-Suche"
 
 #: modules/gui.layout.py:135
 msgid "Edit boot entries"
-msgstr ""
+msgstr "Boot-Optionen editieren"
 
 #: modules/gui.layout.py:136 modules/gui.layout.py:202
 msgid "Edit grub template"
-msgstr ""
+msgstr "'grub'-Schablone editieren"
 
 #: modules/gui.layout.py:137 modules/gui.layout.py:203
 msgid "Edit syslinux/isolinux template"
-msgstr ""
+msgstr "'syslinux'/'isolinux'-SChablone editieren"
 
 #: modules/gui.layout.py:139
 msgid "Create boot iso"
-msgstr ""
+msgstr "Boot-iso erzeugen"
 
 #: modules/gui.layout.py:140
 msgid "Create larch medium"
@@ -508,114 +538,117 @@ msgstr "Medium Vorbereiten"
 
 #: modules/gui.layout.py:147
 msgid "Stop the current action"
-msgstr ""
+msgstr "Aktuellen Vorgang anhalten"
 
 #: modules/gui.layout.py:148
 msgid "Stop current action and quit the program"
-msgstr ""
+msgstr "Aktuellen Vorgang anhalten und Anwendung schließen"
 
 #: modules/gui.layout.py:149
-msgid "This button toogles the visibility of the log viewer"
-msgstr ""
+msgid "This button toggles the visibility of the log viewer"
+msgstr "Dieser Knopf schaltet die Sichtbarkeit der Protokoll-Anzeige um"
 
 #: modules/gui.layout.py:150
 msgid "Open the larch docs in a browser"
-msgstr ""
+msgstr "Die larch-Dokumentation im Browser öffnen"
 
 #: modules/gui.layout.py:151
 msgid "Choose a profile from those already in your larch working folder"
-msgstr ""
+msgstr "Ein Profil von den im Arbeitsverzeichnis schon vorhandenen wählen"
 
 #: modules/gui.layout.py:152
 msgid "Fetch a profile from the file-system"
-msgstr ""
+msgstr "Ein Profil vom Datei-System holen"
 
 #: modules/gui.layout.py:153
 msgid "Rename the current profile"
-msgstr ""
+msgstr "Aktuelles Profil umbenennen"
 
 #: modules/gui.layout.py:154
 msgid "Delete the current profile"
-msgstr ""
+msgstr "Aktuelles Profil löschen"
 
 #: modules/gui.layout.py:155
 msgid "Which processor architecture?"
-msgstr ""
+msgstr "Welche Prozessor-Klasse?"
 
 #: modules/gui.layout.py:156
 msgid "Choose a project from those already defined"
-msgstr ""
+msgstr "Ein Projekt von den schon definierten wählen"
 
 #: modules/gui.layout.py:157
 msgid "Create a new project"
-msgstr ""
+msgstr "Ein neues Projekt erzeugen"
 
 #: modules/gui.layout.py:158
 msgid "Delete the current project"
-msgstr ""
+msgstr "Aktuelles Projekt löschen"
 
 #: modules/gui.layout.py:159
 msgid "The root directory of the Arch installation to larchify"
-msgstr ""
+msgstr "Das Root-Verzeichnis der zu verlarchifizierenden Arch-Installation"
 
 #: modules/gui.layout.py:160
 msgid "Change the root directory of the Arch installation"
-msgstr ""
+msgstr "Das Root-Verzeichnis der Arch-Installation ändern"
 
 #: modules/gui.layout.py:161
 msgid "Edit the list of packages to be installed"
-msgstr ""
+msgstr "Zu installierende Pakete ändern"
 
 #: modules/gui.layout.py:162
 msgid "Edit the list of base packages NOT to install"
-msgstr ""
+msgstr "Zu blockierende 'base'-Pakete ändern"
 
 #: modules/gui.layout.py:163
 msgid "Edit pacman.conf options - not the repositories"
-msgstr ""
+msgstr "pacman.conf-Optionen editieren - nicht die Quellen"
 
 #: modules/gui.layout.py:164
 msgid "Edit the repository entries for pacman.conf"
-msgstr ""
+msgstr "pacman.conf-Quellen editieren"
 
 #: modules/gui.layout.py:165
 msgid ""
 "Enables use of the mirrorlist file saved in the working directory, for "
 "installation only"
 msgstr ""
+"Aktiviert die 'mirrorlist'-Datei im Arbeitsverzeichnis, nur für "
+"die Installation"
 
 #: modules/gui.layout.py:166
 msgid "Edit mirrorlist in working directory"
-msgstr ""
+msgstr "'mirrorlist'-Datei im Arbeitsverzeichnis editieren"
 
 #: modules/gui.layout.py:167
 msgid ""
 "Allows a specific (e.g. local) mirror to be used just for the installation"
 msgstr ""
+"Ermöglicht die Verwendung einer besonderen Paket-Quelle für die Installation allein"
 
 #: modules/gui.layout.py:168
 msgid "The url of the installation mirror"
-msgstr ""
+msgstr "URL der Paket-Quelle für die Installation"
 
 #: modules/gui.layout.py:169
 msgid "Change the installation mirror path"
-msgstr ""
+msgstr "Installationsquelle ändern"
 
 #: modules/gui.layout.py:170
 msgid "The path to the (host's) package cache"
-msgstr ""
+msgstr "Paketencache-Pfad (im 'Host'-Dateisystem)"
 
 #: modules/gui.layout.py:171
 msgid "Change the package cache path"
-msgstr ""
+msgstr "Paketencache-Pfad ändern"
 
 #: modules/gui.layout.py:172
 msgid "This will start the installation to the set path"
-msgstr ""
+msgstr "Zum Starten der Installation zum eingestellen Pfad"
 
 #: modules/gui.layout.py:173
 msgid "Synchronize the pacman db on the target (pacman -Sy)"
-msgstr ""
+msgstr "Paketen-Datenbank (Zielsystem) synchronisieren (pacman -Sy)"
 
 #: modules/gui.layout.py:174
 msgid "Update / Add a package from a package file using pacman -U"
