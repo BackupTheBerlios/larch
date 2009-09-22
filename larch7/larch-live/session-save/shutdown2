@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.28
+# 2009.09.22
 
 
 # This function can be called before the proper shutdown, in order to
@@ -138,7 +138,7 @@ dosaving()
     # Check whether initramfs and/or kernel have been updated, and
     # write to medium if necessary.
     if [ -f /boot/larchnew.img ]; then
-        if ! mount -o remount,rw /.livesys/medium; then
+        if ! mount -n -o remount,rw /.livesys/medium; then
             echo "ERROR: New initramfs - couldn't mount boot device rw"
             return 1
         fi
@@ -147,19 +147,21 @@ dosaving()
         else
             sdir=/.livesys/medium/boot
         fi
+        mount -n -o remount,rw /
         mv /boot/larchnew.img ${sdir}/larch.img
         vmlinuz="$( cat /.livesys/medium/larch/kernelname )"
         [ -f /boot/${vmlinuz} ] && mv /boot/${vmlinuz} ${sdir}/larch.kernel
-        mount -o remount,ro /.livesys/medium
+        mount -n -o remount,ro /.livesys/medium
+        mount -n -o remount,ro /
     fi
 
     if cat /proc/mounts | \
             grep "^${savedev} ${savemount} " &>/dev/null; then
-        mount -o remount,rw ${savemount}
-        unmount="mount  -o remount,ro ${savemount}"
+        mount -n -o remount,rw ${savemount}
+        unmount="mount -n -o remount,ro ${savemount}"
     else
-        mount ${savedev} ${savemount}
-        unmount="umount  ${savemount}"
+        mount -n ${savedev} ${savemount}
+        unmount="umount -n ${savemount}"
     fi
 
     # Save autologin user

@@ -1,5 +1,5 @@
 # GUI description for larch main window
-# 2009.09.16
+# 2009.09.21
 
 Namespace = ":"
 
@@ -146,7 +146,7 @@ Widgets = [
 Tooltips = [
 ["cancel", _("Stop the current action")],
 ["quit", _("Stop current action and quit the program")],
-["showlog", _("This button toogles the visibility of the log viewer")],
+["showlog", _("This button toggles the visibility of the log viewer")],
 ["docs", _("Open the larch docs in a browser")],
 ["choose_profile_combo", _("Choose a profile from those already in your larch working folder")],
 ["&profile_browse", _("Fetch a profile from the file-system")],

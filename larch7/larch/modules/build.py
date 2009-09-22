@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.17
+# 2009.09.22
 
 import os, sys
 from glob import glob
@@ -139,11 +139,8 @@ class Builder:
 ###-
 
         command.log("#Generating larch initcpio")
-        command.script("larch-initcpio '%s' '%s' '%s'" %
-                (self.installation0, self.overlay, self.ufs))
-        # Move initcpio to medium directory
-        supershell("mv %s/boot/larchnew.img %s/boot/larch.img" %
-                (self.installation0, self.medium))
+        if not self.gen_initramfs():
+            return False
 
         command.log("#Generating glibc locales")
         command.script("larch-locales '%s' '%s'" % (self.installation0,
@@ -314,3 +311,43 @@ class Builder:
         command.log("#Kernel: %s   -   version: %s" % (self.kname, self.kversion))
         command.chroot("depmod %s" % self.kversion)
         return True
+
+
+    def gen_initramfs(self):
+        # Fix up larch mkinitcpio.conf for unionfs/aufs
+        conf = self.overlay + "/etc/mkinitcpio.conf.larch"
+        if os.path.isfile(conf + "0"):
+            conf0 = conf + "0"
+        else:
+            conf0 = self.installation0 + "/etc/mkinitcpio.conf.larch0"
+        supershell('sed "s|___aufs___|%s|g" <%s >%s' % (self.ufs, conf0, conf))
+
+        presets = [os.path.basename(f) for f in glob(
+                self.installation0 + "/etc/mkinitcpio.d/kernel26*.preset")]
+        if len(presets) != 1:
+            run_error(_("Couldn't find usable %s") %
+                    self.installation0 + "/etc/mkinitcpio.d/kernel26*.preset")
+            return False
+
+        # Save original preset file (unless a '*.larchsave' is already present)
+        idir = self.installation0 + "/etc/mkinitcpio.d"
+        oldir = self.overlay + "/etc/mkinitcpio.d"
+        if not os.path.isfile("%s/%s.larchsave" % (idir, presets[0])):
+            supershell("mkdir -p %s" % oldir)
+            supershell("cp %s/%s %s/%s.larchsave" %
+                    (idir, presets[0], oldir, presets[0]))
+
+        # Adjust larch.preset file for custom kernels
+        supershell('sed "s|___|%s|" <%s/larch.preset0 >%s/larch.preset' %
+                (presets[0].rsplit(".", 1)[0], idir, oldir))
+
+        # Replace 'normal' preset in overlay
+        supershell("cp %s/larch.preset %s/%s" % (oldir, oldir, presets[0]))
+
+        # Generate initramfs
+        return command.chroot("mkinitcpio -k %s -c %s -g %s" %
+                (self.kversion,
+                 config.overlay_build_dir + "/etc/mkinitcpio.conf.larch",
+                 config.medium_dir + "/boot/larch.img"))
+
+

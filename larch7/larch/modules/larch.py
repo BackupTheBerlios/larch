@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.21
+# 2009.09.22
 
 
 """
@@ -366,7 +366,7 @@ class Command:
 
 
     def chroot(self, cmd, mounts=[]):
-        ip = config.get("install_path")
+        ip = config.ipath()
         if ip != "/":
             for m in mounts:
                 self.mount("/" + m, "%s/%s" % (ip, m), "--bind")

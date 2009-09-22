@@ -526,7 +526,7 @@ msgstr "'grub'-Schablone editieren"
 
 #: modules/gui.layout.py:137 modules/gui.layout.py:203
 msgid "Edit syslinux/isolinux template"
-msgstr "'syslinux'/'isolinux'-SChablone editieren"
+msgstr "'syslinux'/'isolinux'-Schablone editieren"
 
 #: modules/gui.layout.py:139
 msgid "Create boot iso"
