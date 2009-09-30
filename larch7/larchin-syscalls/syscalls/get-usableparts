@@ -22,11 +22,11 @@ blkid -c /dev/null -s TYPE | sed -r s'|:.*=| |' |  tr -d \" | \
         fi
         part=${dev:5}
         echo -n "${part}"
-        bdev=${part:0:3}
-        if [ $( cat /sys/block/${bdev}/removable 2>/dev/null ) -ne 0 ]; then
+        if [ $( cat /sys/block/${part:0:3}/removable 2>/dev/null ) -ne 0 ]; then
             echo -n " + "
         else
             echo -n " - "
         fi
         echo "${type}"
     done
+exit 0

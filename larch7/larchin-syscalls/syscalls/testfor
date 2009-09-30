@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# testfor
+
+# Test for the existence of the application $1 on the target
+
+which "$1"

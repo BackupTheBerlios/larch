@@ -1,12 +1,12 @@
 # Maintainer: Michael Towers <gradgrind[at]online[dot]de>
-# 2009.08.24
+# 2009.09.22
 pkgname=larchin
-pkgver=6.1.2
-pkgrel=2
+pkgver=7.0.0
+pkgrel=1
 
 pkgdesc="Arch hard disk installer with gui for larch live media"
 url="http://larch.berlios.de"
-depends=('pygtk' 'larchin-syscalls')
+depends=('pyqt' 'larchin-syscalls')
 arch=(any)
 license=('GPL')
 install=${pkgname}.install

@@ -2,7 +2,8 @@
 
 # get-mounts
 
-# Get all mounted devices - so that each line starts with the device
-# Here managed by returning the contents of /etc/mtab
+# Get all mounted devices - so that each line contains a mounted device
+# Here managed by reading the contents of /etc/mtab
 
-cat /etc/mtab
+cat /etc/mtab | grep "^/dev/[sh]d" | cut -d' ' -f1
+exit 0
