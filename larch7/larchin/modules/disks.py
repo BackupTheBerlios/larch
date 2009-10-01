@@ -92,7 +92,6 @@ class Stage:
         count = 0
         while True:
             ld = backend.xlist("get-devices")
-            debug(repr(ld))
             # Note that if one of these has mounted partitions it will not be
             # available for automatic partitioning, and should thus not be
             # included in the list used for automatic installation
@@ -101,19 +100,17 @@ class Stage:
             for line in ld[1]:
                 # In virtualbox with a fresh virtual disk, we can get this:
                 # "Error: /dev/sda: unrecognised disk label:"
-                em = line.split(":")
-                if ((em[0].strip() == "Error") and (em[2].strip() ==
-                        "unrecognised disk label")):
+                if ("Error:" in line) and ("unrecognised" in line):
                     if count < 0:
                         # Don't offer formatting on second round
                         continue
-                    dev = em[1].strip()
+                    dev = line.split(":")[0]
                     if ui.confirmDialog(_("Error scanning devices:\n %s\n"
                             "Your disk (%s) seems to be empty and unformatted. "
                             "Shall I prepare it for use (create an msdos "
                             "partition table on it)?")
                             % (line, dev)):
-                        if xlist("make-parttable %s" % dev)[0]:
+                        if backend.xlist("make-parttable %s" % dev)[0]:
                             count += 1
                         else:
                             run_error(_("Couldn't create partition table on %s" % dev))

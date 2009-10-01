@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.08.28
+# 2009.10.01
 
 # Passing '-n' as command-line option will just report on the
 # changes that would be made, nothing will be written to /etc/fstab.
@@ -46,10 +46,10 @@ usables ()
                 continue
             fi
             part=${dev:5}
-            echo -n "${part}"
             bdev=${part:0:3}
             # skip loop devices
             [ "${bdev}" = "loo" ] && continue
+            echo -n "${part}"
             if [ $( cat /sys/block/${bdev}/removable 2>/dev/null ) -ne 0 ]; then
                 echo -n " + "
             else

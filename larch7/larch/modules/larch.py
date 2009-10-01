@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.22
+# 2009.09.24
 
 
 """
@@ -71,7 +71,6 @@ from Queue import Queue
 import json
 
 import base
-import logging
 from installation import Installation
 
 from projectpage import ProjectPage
