@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.29
+# 2009.10.02
 
 """Build a gui from a layout description.
 """
@@ -523,9 +523,9 @@ class CheckList(QtGui.QWidget):                             #qt
         self.blockSignals(False)                            #qt
 
 
-class TextEdit(QtGui.QTextEdit):
-    def __init__(self, ro=""):                              #qt
-        QtGui.QTextEdit.__init__(self)
+class TextEdit(QtGui.QTextEdit):                            #qt
+    def __init__(self, ro=""):
+        QtGui.QTextEdit.__init__(self)                      #qt
         if ro:
             self.setReadOnly(True)                          #qt
 
@@ -541,6 +541,14 @@ class TextEdit(QtGui.QTextEdit):
 
     def undo(self):
         QtGui.QTextEdit.undo(self)                          #qt
+
+
+class HtmlView(QtGui.QTextBrowser):                         #qt
+    def __init__(self):
+        QtGui.QTextBrowser.__init__(self)                   #qt
+
+    def set(self, content):
+        self.setHtml(content)                               #qt
 
 
 # Layout classes
@@ -921,6 +929,7 @@ widget_table = {
     "ListChoice": ListChoice,
     "LineEdit": LineEdit,
     "TextEdit": TextEdit,
+    "HtmlView": HtmlView,
 }
 
 specials_table = {

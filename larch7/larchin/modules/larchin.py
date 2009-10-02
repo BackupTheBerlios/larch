@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.29
+# 2009.10.02
 
 
 """
@@ -106,8 +106,11 @@ class Command:
                 ":quit*clicked": [self.uiquit],
                 ":cancel*clicked": [self.cancel],
                 "log:log_hide*clicked": [self._activatehidelog],
+                "$$$hidelog$$$": [self._activatehidelog],
                 ":showlog*toggled": [self._showlog],
-                ":docs*clicked": [self._showdocs],
+                "doc:hide*clicked": [self._activatehidedocs],
+                "$$$hidedoc$$$": [self._activatehidedocs],
+                ":docs*toggled": [self._showdocs],
                 "log:log_clear*clicked": [self._clearlog],
                 ":forward*clicked": [self.next],
             }
@@ -134,6 +137,7 @@ class Command:
         ui.command(":stack.set", index)
         self.current_page_index = index
         self.pages[index].init()
+        ui.command("doc:content.set", self.pages[index].getHelp())
 
 
     def runsignal(self, sig, *args):
@@ -186,9 +190,12 @@ class Command:
         logger.clear()
 
 
-#TODO
-    def _showdocs(self):
-        self._browse("html_reader", base_dir + "/docs/html/index.html")
+    def _activatehidedocs(self):
+        ui.command(":docs.set", False)
+
+
+    def _showdocs(self, on):
+        ui.command("doc:help.setVisible", on)
 
 
     def _browse(self, btype, path):
@@ -329,7 +336,7 @@ def mainloop():
         elif line[0] == "^":
             # signal, call slots
             sig, args = line[1:].split(None, 1)
-            debug("SIG: %s || %s" % (sig, args))
+            debug("SIG: " + line)
             command.runsignal(sig, *json.loads(args)[1])
 
         elif line[0] == "@":

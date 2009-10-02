@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.29
+# 2009.10.02
 
 
 doc = _("""
@@ -63,6 +63,9 @@ class Stage:
                 (":nopart*toggled", self.nopart_toggle),
             ]
 
+    def select_page(self):
+        command.pageswitch(self.page_index)
+
     def __init__(self, index):
         self.page_index = index
         self.device_index = 0
@@ -82,10 +85,6 @@ class Stage:
         else:
             self.gparted = None
         ui.command(":guipart.enable", self.gparted != None)
-
-
-    def select_page(self):
-        command.pageswitch(self.page_index)
 
 
     def init(self):

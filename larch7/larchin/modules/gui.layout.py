@@ -13,7 +13,7 @@ Widgets = [
         (_("Installer"), "titleformat")]],
 
 ["*ToggleButton", "^showlog", _("View Log")],
-["Button", "^docs", _("Help")],
+["*ToggleButton", "^docs", _("Help")],
 ["*Button", "^cancel", _("Cancel")],
 ["Button", "^quit", _("Quit")],
 

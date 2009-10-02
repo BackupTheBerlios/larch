@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.27
+# 2009.10.02
 
 import sys
 from PyQt4 import QtGui, QtCore
@@ -44,10 +44,12 @@ if __name__ == "__main__":
             GuiApp.__init__(self, app)
 
         def init(self):
-            GuiApp.init(self, ["gui.layout.py", "log.layout.py",],
+            GuiApp.init(self, ["gui.layout.py", "log.layout.py",
+                    "doc.layout.py",],
                     __file__.rsplit("/", 2)[0])
             self.logwidget = self.widgets["log:logtext"]
-            self.widgets["log:log"].widget.trapclose = self.dohide
+            self.widgets["log:log"].widget.trapclose = self.dohidelog
+            self.widgets["doc:help"].widget.trapclose = self.dohidedoc
             self.widgets[":larchin"].widget.trapclose = self.doquit
 
         def new_line(self, line):
@@ -76,8 +78,12 @@ if __name__ == "__main__":
         def got(self, line):
             self.logwidget.append_and_scroll(line)
 
-        def dohide(self, *args):
+        def dohidelog(self, *args):
             self.send("^", "$$$hidelog$$$ " + Larchin.dummyargs)
+            return True
+
+        def dohidedoc(self, *args):
+            self.send("^", "$$$hidedoc$$$ " + Larchin.dummyargs)
             return True
 
         def doquit(self, *args):
