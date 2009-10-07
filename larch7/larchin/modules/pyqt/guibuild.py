@@ -22,14 +22,14 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.02
+# 2009.10.03
 
 """Build a gui from a layout description.
 """
 
 import os, sys, traceback
 from PyQt4 import QtGui, QtCore
-import re, json
+import json
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
 #TODO
@@ -42,42 +42,6 @@ import re, json
 def debug(text):
     sys.stderr.write("GUI: %s\n" % text)
     sys.stderr.flush()
-
-
-def _TEXT(item):
-    """A function to add formatting markup to a string, if the item is a
-    list. If it is a string it is returned as is.
-
-    The markup must be supplied in the dictionary '_stringformats'.
-    At present this function fails 'gracefully', using no formatting
-    if the given format is not defined and a dummy text if not enough
-    texts are supplied.
-    """
-    def subf(mo):
-        i = int(mo.group(1))
-        if i > len(subs):
-            return "***Not Defined***"
-        else:
-            return subs[i - 1]
-
-    if isinstance(item, str) or isinstance(item, unicode):
-        return item
-
-    # Need to do %-substitution
-    format = item[0]
-    rex = re.compile(r"%(\d)")
-    subs = []
-    for a in item[1:]:
-        if isinstance(a, tuple):
-            f = _stringformats.get(a[1])
-            if f:
-                text = f % a[0]
-            else:
-                text = a[0]
-        else:
-            text = a
-        subs.append(text)
-    return rex.sub(subf, format)
 
 
 # Widget classes
@@ -268,7 +232,7 @@ class Notebook(QtGui.QTabWidget):                           #qt
         for tab in args:
             tname = tab[0]
             tw = _Page()                                    #qt
-            self.addTab(tw, _TEXT(tab[1]))                  #qt
+            self.addTab(tw, (tab[1]))                       #qt
             tw.name = tname                                 #qt
             self.x_mywidgets[tname] = tw                    #qt
 
@@ -286,8 +250,10 @@ class _Page(QtGui.QWidget):                                 #qt
 
 
 class Frame(QtGui.QGroupBox):                               #qt
-    def __init__(self, text=""):
-        QtGui.QGroupBox.__init__(self, _TEXT(text))         #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
+        QtGui.QGroupBox.__init__(self, text)                #qt
 
     def enable(self, on):
         self.setEnabled(on)                                 #qt
@@ -316,11 +282,16 @@ class OptionalFrame(Frame):                                 #qt
 
 
 class Label(QtGui.QLabel):                                  #qt
-    def __init__(self, text=""):
-        QtGui.QLabel.__init__(self, _TEXT(text))            #qt
+    def __init__(self, text="", format=None):
+        QtGui.QLabel.__init__(self)                         #qt
+        self.format = format
+        if text:
+            self.set(text)
 
     def set(self, text):
-            self.setText(text)                              #qt
+        if self.format:
+            text = self.format.replace("$", text)
+        self.setText(text)                                  #qt
 
     def x_set_align(self, pos):
         if pos == "center":
@@ -335,8 +306,10 @@ class Button(QtGui.QPushButton):                            #qt
     s_signals = {
             "clicked": "clicked()"                          #qt
         }
-    def __init__(self, text=""):
-        QtGui.QPushButton.__init__(self, _TEXT(text))       #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
+        QtGui.QPushButton.__init__(self, text)              #qt
 
     def enable(self, on):
         self.setEnabled(on)                                 #qt
@@ -347,8 +320,10 @@ class ToggleButton(QtGui.QPushButton):                      #qt
     s_signals = {
             "toggled": "toggled(bool)"                      #qt
         }
-    def __init__(self, text=""):
-        QtGui.QPushButton.__init__(self, _TEXT(text))       #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
+        QtGui.QPushButton.__init__(self, text)              #qt
         self.setCheckable(True)                             #qt
 
     def set(self, on):
@@ -362,8 +337,10 @@ class CheckBox(QtGui.QCheckBox):                            #qt
     s_signals = {
             "toggled": "stateChanged(int)"                  #qt
         }
-    def __init__(self, text=""):
-        QtGui.QCheckBox.__init__(self, _TEXT(text))         #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
+        QtGui.QCheckBox.__init__(self, text)                #qt
 
     def set(self, on):
         self.setCheckState(2 if on else 0)                  #qt
@@ -385,8 +362,10 @@ class RadioButton(QtGui.QRadioButton):                      #qt
     s_signals = {
             "toggled": "toggled(bool)"                      #qt
         }
-    def __init__(self, text=""):
-        QtGui.QPushButton.__init__(self, _TEXT(text))       #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
+        QtGui.QPushButton.__init__(self, text)              #qt
 
     def set(self, on):
         self.setChecked(on)                                 #qt
@@ -486,10 +465,15 @@ class LineEdit(QtGui.QLineEdit):                            #qt
             "enter": "returnPressed()",                     #qt
             "changed": "textEdited(const QString &)"        #qt
         }
-    def __init__(self, text=""):
-        QtGui.QLineEdit.__init__(self, _TEXT(text))         #qt
+    def __init__(self, text="", format=None):
+        self.format = format
+        QtGui.QLineEdit.__init__(self)                      #qt
+        if text:
+            self.set(text)
 
     def set(self, text=""):
+        if self.format:
+            text = format.replace("$", text)
         self.setText(text)                                  #qt
 
     def get(self):
@@ -500,11 +484,13 @@ class LineEdit(QtGui.QLineEdit):                            #qt
 
 
 class CheckList(QtGui.QWidget):                             #qt
-    def __init__(self, text=""):                            #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
         QtGui.QWidget.__init__(self)                        #qt
         l = QtGui.QVBoxLayout(self)                         #qt
         if text:                                            #qt
-            l.addWidget(QtGui.QLabel(_TEXT(text)))          #qt
+            l.addWidget(QtGui.QLabel(text))                 #qt
         self.widget = QtGui.QListWidget()                   #qt
         l.addWidget(self.widget)                            #qt
 
@@ -768,8 +754,6 @@ class WidgetTree:
     """This class represents one top level window.
     """
     def __init__(self, info):
-        global _stringformats
-        _stringformats = info.get("StringFormats", {})
         self.namespace = info.get("Namespace", "")
 
         # Create all widgets

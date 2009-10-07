@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.02
+# 2009.10.07
 
 
 doc = _("""
@@ -61,10 +61,12 @@ class Stage:
                 (":guipart*toggled", self.guipart_toggle),
                 (":cfdisk*toggled", self.cfdisk_toggle),
                 (":nopart*toggled", self.nopart_toggle),
+                (":keep1*toggled", self.keep1_toggle),
             ]
 
     def select_page(self):
-        command.pageswitch(self.page_index)
+        command.pageswitch(self.page_index,
+                _("Disk information and selection"))
 
     def __init__(self, index):
         self.page_index = index
@@ -166,7 +168,9 @@ class Stage:
         ui.command(":ntfs-shrink.enable", self.ntfs1)
 
         # If device has mounted partition(s), it is not autopartitionable
-        noauto = (self.devices[index][0] == '-')
+#TODO: remove next and uncomment following
+        noauto = False
+        #noauto = (self.devices[index][0] == '-')
 
         size = self.devices[index][2]
         if size.endswith("GB"):
@@ -177,15 +181,24 @@ class Stage:
         ui.command(":auto.enable", not noauto)
         if (self.method == "auto") and noauto:
             ui.command(":nopart.set", True)
-        ui.command(":keep1.enable", (self.method == "auto") and not noauto)
+        self.setkeep1(self.ntfs1 and
+                (self.method == "auto") and not noauto)
 
 
     def auto_toggle(self, on):
         if on:
             self.method = "auto"
-            ui.command(":keep1.enable", self.ntfs1)
+            self.setkeep1(self.ntfs1)
         else:
-            ui.command(":keep1.enable", False)
+            self.setkeep1(False)
+
+    def keep1_toggle(self, on):
+        self.keep1 = on
+
+    def setkeep1(self, on):
+        ui.command(":keep1.set", on)
+        ui.command(":keep1.enable", on)
+        self.keep1_toggle(on)
 
     def guipart_toggle(self, on):
         if on:
@@ -202,7 +215,7 @@ class Stage:
 
     def ok(self):
         if self.method == "auto":
-            command.runsignal("&auto-partition&", self.device)
+            command.runsignal("&auto-partition&", self.device, self.keep1)
         elif self.method == "guipart":
             command.runsignal("&gui-partition&", self.gparted, self.device)
         elif self.method == "cfdisk":

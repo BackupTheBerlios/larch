@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.29
+# 2009.10.03
 
 
 doc = _("""
@@ -57,14 +57,14 @@ class Stage:
                 ("&welcome&", self.select_page),
             ]
 
+    def select_page(self):
+        command.pageswitch(self.page_index, _("Welcome!"))
+
     def __init__(self, index):
         self.page_index = index
 
     def setup(self):
         return
-
-    def select_page(self):
-        command.pageswitch(self.page_index)
 
 
     def init(self):

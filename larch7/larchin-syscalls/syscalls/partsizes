@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# partsizes
+
+# Get a list of partitions and their sizes on the given (argument $1) device
+
+dev=${1##*/}
+cat /proc/partitions | grep "$dev" | while read a b s d; do echo "$d $s"; done

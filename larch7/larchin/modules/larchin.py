@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.02
+# 2009.10.07
 
 
 """
@@ -84,7 +84,7 @@ lang = os.getenv("LANG")
 if lang:
     gettext.install('larchin', base_dir+'/i18n', unicode=1)
 
-import welcome, disks   #, autopart
+import welcome, disks, autopart
 from backend import Backend
 
 class Command:
@@ -98,7 +98,7 @@ class Command:
         self.breakin = 0
 
         # Initialize gui modules
-        self.pages = [welcome.Stage(0), disks.Stage(1), ] # autopart.Stage(2)]
+        self.pages = [welcome.Stage(0), disks.Stage(1), autopart.Stage(2)]
 
         # Connect up the signals and slots
         self.connections = {
@@ -124,7 +124,7 @@ class Command:
 
     def run(self):
         # Start on the welcome page
-        self.pageswitch(0)
+        self.pages[0].select_page()
         ui.command(":cancel.enable", False)
         ui.go()
 
@@ -133,10 +133,11 @@ class Command:
         self.pages[self.current_page_index].ok()
 
 
-    def pageswitch(self, index):
+    def pageswitch(self, index, title):
         ui.command(":stack.set", index)
         self.current_page_index = index
         self.pages[index].init()
+        ui.command(":stageheader.set", title)
         ui.command("doc:content.set", self.pages[index].getHelp())
 
 

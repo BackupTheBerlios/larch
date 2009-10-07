@@ -1,22 +1,29 @@
 # GUI description for larchin main window
-# 2009.09.29
+# 2009.10.03
 
 Namespace = ":"
+
+# Formatting strings
+_imagefmt = '<img src="$" />'
+_h2fmt = '<span style="font-size:24px; color:#c55500;"><strong>$</strong></span>'
+_h1fmt = _h2fmt.replace("$", "<em>$</em>")
+_stagehfmt = '<span style="font-size:18px; color:#55c500;">$</span>'
 
 Widgets = [
 ["*Window", "larchin", "larchin", "larchin-icon.png"],
 
 # Header
-["Label", "image", ["%1", ("larchin80.png", "imageformat")]],
+["Label", "image", "larchin80.png", _imagefmt],
 
-["Label", "header", ["%1 %2", ("larch", "larchformat"),
-        (_("Installer"), "titleformat")]],
+["Label", "header1", "larch", _h1fmt],
+["Label", "header2", _("Installer"), _h2fmt],
 
 ["*ToggleButton", "^showlog", _("View Log")],
 ["*ToggleButton", "^docs", _("Help")],
 ["*Button", "^cancel", _("Cancel")],
 ["Button", "^quit", _("Quit")],
 
+["*Label", "stageheader", "", _stagehfmt],
 
 # Main widget
 ["*Stack", "stack", [
@@ -55,9 +62,26 @@ Widgets = [
   ["*RadioButton", "^nopart", _("Use existing partitions")],
 
 
+# Auto-partition page ("page_autopart")
+["Label", "autopart_disk_l", _("Device:")],
+["*LineEdit", "autopart_disk"],
+["Label", "autopart_disksize_l", _("Total device capacity:")],
+["*LineEdit", "autopart_disksize"],
+["Label", "autopart_reserved_l", _("Reserved space:")],
+["*LineEdit", "autopart_reserved"],
+
+["*OptionalFrame", "^autoswap", _("Create Swap Partition")],
+
+
+
+["*OptionalFrame", "^autohome", _("Create Separate Partition for User Data")],
+
+
+["Label", "autopart_syssize_l", _("Space for Arch Root Partition:")],
+["*LineEdit", "autopart_syssize"],
+
+
 ]
-
-
 ################# Tooltips
 Tooltips = [
 ["cancel", _("Stop the current action")],
@@ -67,7 +91,7 @@ Tooltips = [
 ["disks-device-list", _("Select the device to inspect, or for partitioning")],
 ["disks-device-partitions", _("The partitions on the selected device")],
 ["forward", _("Execute any operations pending on this page and continue to next")],
-
+["autopart_reserved", _("Space not available because a Windows partition is to be saved")],
 
 ]
 
@@ -85,10 +109,10 @@ Layout = [
 
 ["HBOX", "hbh", ["image", "vbh"]],
   ["VBOX", "vbh", ["hbh1", "hbh2"]],
-    ["HBOX", "hbh1", ["header"]],
-      #["HSPACE", "hsh1"],
-    ["HBOX", "hbh2", ["showlog", "docs", "hsh2", "cancel", "quit"]],
-      ["HSPACE", "hsh2"],
+    ["HBOX", "hbh1", ["header1", "header2", "hsh1", "showlog", "docs", "cancel", "quit"]],
+      ["HSPACE", "hsh1"],
+    ["HBOX", "hbh2", ["stageheader"]],
+      #["HSPACE", "hsh2"],
 
 ["HBOX", "hbf", ["hsf", "forward"]],
   ["HSPACE", "hsf"],
@@ -110,6 +134,24 @@ Layout = [
   ["VBOX", "vb_disks_part1", ["keep1", "ntfs-shrink", "vs_disks2"]],
     ["VSPACE", "vs_disks2"],
 
+# Auto-partition page ("page_autopart")
+["+LAYOUT", "page_autopart", "vb_autopart"],
+["VBOX", "vb_autopart", ["hb_autopart1", "hb_autopart2", ]],
+  ["HBOX", "hb_autopart1", ["autopart_disk_l", "autopart_disk", "hs_autopart1",
+        "autopart_disksize_l", "autopart_disksize"]],
+    ["HSPACE", "hs_autopart1"],
+
+  ["HBOX", "hb_autopart2", ["autopart_reserved_l", "autopart_reserved"]],
+
+#["*OptionalFrame", "^autoswap", _("Create Swap Partition")],
+
+
+
+#["*OptionalFrame", "^autohome", _("Create Separate Partition for User Data")],
+
+
+#["Label", "autopart_syssize_l", _("Space for Arch Root Partition:")],
+#["*LineEdit", "autopart_syssize"],
 ]
 
 
@@ -120,13 +162,11 @@ Layout = [
 # without having to change the base description.
 
 Attributes = [
-["header", "align", "center"],
+["stageheader", "align", "center"],
+["autopart_disk", "readonly", "true"],
+["autopart_disksize", "readonly", "true"],
+["autopart_reserved", "readonly", "true"],
+["autopart_syssize", "readonly", "true"],
 ]
 
-StringFormats = {
-    "larchformat": ('<span style="font-size:24px; color:#c55500;">'
-            '<strong><em>%s</em></strong>'),
-    "titleformat": '<strong>%s</strong></span>',
-    "imageformat": '<img src="%s" />'
-}
 

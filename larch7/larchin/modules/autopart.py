@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.28
+# 2009.10.07
 
 MINSPLITSIZE = 20.0    # GB, if less available, no /home
 SWAPPZ0 = 5            # % of total, initial swap size, but:
@@ -57,16 +57,39 @@ class Stage:
                 ("&auto-partition&", self.select_page),
             ]
 
-    def __init__(self):
+    def __init__(self, index):
         self.page_index = index
 
-    def select_page(self, device):
+    def select_page(self, device, keep1):
         self.device = device
-        command.pageswitch(self.page_index)
+        self.keep1 = keep1
+        command.pageswitch(self.page_index,
+                _("Automatic Partitioning"))
+
+    def setup(self):
+        return
+
 
 #TODO
     def init(self):
         # Info on drive
+        partsizes = backend.xlist("partsizes " + self.device)[1]
+        assert len(partsizes) > 1
+
+        debug(partsizes[0])
+        debug(partsizes[1])
+
+        self.disksize = float(partsizes[0].split()[1]) * 1024 / 10**9
+        self.p1size = (float(partsizes[1].split()[1]) * 1024.0 / 10**9
+                if self.keep1 else 0.0)
+        ui.command(":autopart_disk.set", self.device)
+        ui.command(":autopart_disksize.set", "%4.0f GB" % self.disksize)
+        ui.command(":autopart_reserved.set", "%4.0f GB" % self.p1size)
+
+        return
+
+
+
         self.device = install.get_config('autodevice', trap=False)
         if not self.device:
             self.device = install.listDevices()[0][0]
@@ -254,8 +277,4 @@ class Stage:
         return newstartcyl
 
 
-#################################################################
-
-moduleName = 'AutoPart'
-moduleDescription = _("Automatic Partitioning")
 
