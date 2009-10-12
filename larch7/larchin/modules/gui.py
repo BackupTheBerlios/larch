@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.11
+# 2009.10.12
 
 import os, pwd
 import json
@@ -189,23 +189,30 @@ class Ui:
 
 
     def infoDialog(self, message, title=None, async=""):
+        if title == None:
+            title = _("Information")
         if async:
             return self.asknowait("infoDialog", async, message, title)
         return self.ask("infoDialog", message, title)
 
 
     def confirmDialog(self, message, title=None, async=""):
+        if title == None:
+            title = _("Confirmation")
         if async:
             return self.asknowait("confirmDialog", async, message, title)
         return self.ask("confirmDialog", message, title)
 
 
     def error(self, message, title=None, fatal=False):
+        if title == None:
+            title = _("Error")
         self.command("errorDialog" if fatal else "warningDialog",
             message, title)
 
 
     def busy(self):
+        self.command("larchin:forward.enable", False)
         self.command("larchin:.busy", "larchin:stack", True)
         self.command("larchin:cancel.enable", True)
 
@@ -213,6 +220,7 @@ class Ui:
     def completed(self, ok):
         self.command("larchin:cancel.enable", False)
         self.command("larchin:.busy", "larchin:stack", False)
+        self.command("larchin:forward.enable", True)
 
 
     def set_stageheader(self, text):

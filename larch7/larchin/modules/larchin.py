@@ -316,17 +316,17 @@ def savefile(f, d):
     r = fh.write(d)
     fh.close()
 
-
+#TODO: am I using this one?
 def config_error(text):
-    ui.error(text, _("CONFIG ERROR"))
+    ui.error(text, _("Configuration Error"))
 __builtin__.config_error = config_error
 
 def run_error(text):
-    ui.error(text, _("BUILD ERROR"))
+    ui.error(text)
 __builtin__.run_error = run_error
 
 def fatal_error(text):
-    ui.error(text, fatal=True)
+    ui.error(text, _("Fatal Error"), fatal=True)
 __builtin__.fatal_error = fatal_error
 
 #---------------------------

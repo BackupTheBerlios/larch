@@ -19,10 +19,11 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.28
+# 2009.10.12
 
 from subprocess import Popen, PIPE, STDOUT
 import os, threading
+import re
 
 
 class Backend:
@@ -189,5 +190,47 @@ class Backend:
             else:
                 r = False
         return r
+
+########################################################################
+# Interface functions
+
+    def getDeviceInfo(self, dev):
+        """Get info on drive and partitions (dev="/dev/sda", etc.)
+        Return tuple: ( drive size as string,
+                        drive size in cylinders,
+                        cylinder size in sectors,
+                        sector size in bytes )
+        """
+        dinfo = self.xlist("fdisk-l %s" % dev)[1]
+
+        # get the drive size as a string
+        ds = re.search(r"%s:([^,]+)" % dev, dinfo[0])
+        dsize = ds.group(1)
+
+        # get the drive size in cylinders
+        ds = re.search(r",[^,]+,[ ]*([0-9]+)", dinfo[1])
+        dcsize = ds.group(1)
+
+        # get cylinder size in sectors and sector size in bytes
+        ds = re.search(r"([0-9]+)[ ]*\*[ ]*([0-9]+)", dinfo[2])
+        csize = ds.group(1)
+        ssize = ds.group(2)
+
+        return (dsize, int(dcsize), int(csize), int(ssize))
+
+
+    def rmparts(self, dev, partno):
+        """Remove all partitions on the given device starting from the
+        given partition number.
+        """
+        parts = self.xlist("listparts " + dev)[1]
+        i = len(parts)
+        while (i > 0):
+            i -= 1
+            p = int(parts[i])
+            if (p >= partno) and not self.xcall("rmpart %s %d" % (dev, p))[0]:
+                run_error(_("Couldn't remove partition %s%d") % (dev, p))
+                return False
+        return True
 
 

@@ -70,6 +70,7 @@ class Stage:
                 ("autopart:swap*toggled", self.swaptoggled),
                 ("autopart:homesize*changed", self.homesizechanged),
                 ("autopart:home*toggled", self.hometoggled),
+                ("&autopartition-run&", self.partition),
             ]
 
     def __init__(self, index):
@@ -250,18 +251,21 @@ class Stage:
 
 
 #TODO: ok method
-# This forward method is still from the old version
-    def forward(self):
-        if not popupWarning(_("You are about to perform a destructive"
+# This method is still from the old version
+    def ok(self):
+        ui.confirmDialog(_("You are about to perform a destructive"
                 " operation on the data on your disk drive (%s):\n"
                 "    Repartitioning (removing old and creating new"
                 " partitions)\n\n"
                 "This is a risky business, so don't proceed if"
                 " you have not backed up your important data.\n\n"
-                "Continue?") % self.device):
-            return -1
+                "Continue?") % self.device, async="&autopartition-run&")
 
-        # I'll make the sequence: root, then swap then home.
+
+    def partition(self, doit):
+        if not doit:
+            return
+        # I'll make the sequence: root, then swap then home/data.
         # But swap and/or home may be absent.
         # Start partitioning from partition with index self.startpart,
         # default value (no NTFS partitions) = 1.
@@ -272,9 +276,23 @@ class Stage:
         # be handled - given the appropriate information - by the
         # installation stage.
 
-        # Remove all existing partitions from self.startpart
-        install.rmparts(self.device, self.startpart)
+        dinfo = backend.getDeviceInfo(self.device)
 
+# From now on I should probably only test in VirtualBox, as any further
+# steps are likely to destroy the system!
+
+        debug(repr(dinfo))
+        import time
+        time.sleep(5)
+
+        return
+
+        startpart = 2 if self.keep1 else 1
+        # Remove all existing partitions from self.startpart
+        if not backend.rmparts(self.device, startpart):
+            return
+
+#TODO ...
         secspercyl = self.dinfo[2]
         startcyl = (self.startsector + secspercyl - 1) / secspercyl
         endcyl = self.dinfo[1]
