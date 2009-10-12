@@ -19,11 +19,10 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.12
+# 2009.10.03
 
 
 doc = _("""
-<h2><em>larchin</em> - An installer for <em>larch live</em> systems</h2>
 <p>This installation program concentrates on just the most essential aspects
 of Arch Linux system installation: disk preparation, copying of the system
 data, generation of the initramfs, setting up the GRUB bootloader and setting
@@ -49,19 +48,6 @@ Guide.
 stage to the next.
 </p>""")
 
-text = _("""
-<p>Welcome to larchin, the easy way to install a ready-configured
-Arch Linux.
-</p>
-<p>With this program you can install a larch live system as a normal
-Arch Linux system, retaining its configuration settings.
-</p>
-<p align="center"><img src="larchin.png" width="200" height="200" />
-</p>
-<p>Press the 'OK' button to progress to the next stage.
-</p>
-""")
-
 class Stage:
     def getHelp(self):
         return doc
@@ -76,10 +62,6 @@ class Stage:
 
     def __init__(self, index):
         self.page_index = index
-        ui.newwidget("HtmlView", "page:welcome:l1", html=text)
-
-        ui.layout("page:welcome", ["*VBOX*", "page:welcome:l1"])
-
 
     def setup(self):
         return

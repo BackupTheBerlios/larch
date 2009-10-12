@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# get-memsize
+
+# Get the size of the system memory, in kB.
+
+cat /proc/meminfo | grep MemTotal | ( read a b c; echo $b )

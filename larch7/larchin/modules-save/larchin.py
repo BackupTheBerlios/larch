@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.12
+# 2009.10.07
 
 
 """
@@ -102,19 +102,17 @@ class Command:
 
         # Connect up the signals and slots
         self.connections = {
-                "$$$uiclose$$$": [self._uiclose_clicked],
-                "$$$uidoquit$$$": [self._uiclose],
                 "$$$uiquit$$$": [self.uiquit],
-                "larchin:quit*clicked": [self.uiquit],
-                "larchin:cancel*clicked": [self.cancel],
-                "log:hide*clicked": [self._activatehidelog],
+                ":quit*clicked": [self.uiquit],
+                ":cancel*clicked": [self.cancel],
+                "log:log_hide*clicked": [self._activatehidelog],
                 "$$$hidelog$$$": [self._activatehidelog],
-                "larchin:showlog*toggled": [self._showlog],
+                ":showlog*toggled": [self._showlog],
                 "doc:hide*clicked": [self._activatehidedocs],
                 "$$$hidedoc$$$": [self._activatehidedocs],
-                "larchin:docs*toggled": [self._showdocs],
-                "log:clear*clicked": [self._clearlog],
-                "larchin:forward*clicked": [self.next],
+                ":docs*toggled": [self._showdocs],
+                "log:log_clear*clicked": [self._clearlog],
+                ":forward*clicked": [self.next],
             }
         for p in self.pages:
             for s, f in p.connect():
@@ -127,7 +125,7 @@ class Command:
     def run(self):
         # Start on the welcome page
         self.pages[0].select_page()
-        ui.command("larchin:cancel.enable", False)
+        ui.command(":cancel.enable", False)
         ui.go()
 
 
@@ -136,11 +134,11 @@ class Command:
 
 
     def pageswitch(self, index, title):
-        ui.command("larchin:stack.set", index)
+        ui.command(":stack.set", index)
         self.current_page_index = index
         self.pages[index].init()
-        ui.set_stageheader(title)
-        ui.command("doc:content.x__html", self.pages[index].getHelp())
+        ui.command(":stageheader.set", title)
+        ui.command("doc:content.set", self.pages[index].getHelp())
 
 
     def runsignal(self, sig, *args):
@@ -182,7 +180,7 @@ class Command:
 
 
     def _activatehidelog(self):
-        ui.command("larchin:showlog.set", False)
+        ui.command(":showlog.set", False)
 
 
     def _showlog(self, on):
@@ -194,11 +192,11 @@ class Command:
 
 
     def _activatehidedocs(self):
-        ui.command("larchin:docs.set", False)
+        ui.command(":docs.set", False)
 
 
     def _showdocs(self, on):
-        ui.command("doc:.setVisible", on)
+        ui.command("doc:help.setVisible", on)
 
 
     def _browse(self, btype, path):
@@ -227,22 +225,6 @@ class Command:
         logger, and then, finally, terminate the ui process.
         """
         self.uiquit()
-
-
-    def _uiclose_clicked(self):
-        """Called when Window-Close ('X') is clicked in main window.
-        """
-        ui.confirmDialog(_("Do you really want to quit the program?"),
-                async="$$$uidoquit$$$")
-
-
-    def _uiclose(self, doit):
-        """Called when Window-Close ('X') confirmation dialog is closed.
-        If doit is True the application should close. The gui itself won't
-        be closed until it receives a close command from the main app.
-        """
-        if doit:
-            self.uiquit()
 
 
     def uiquit(self):
@@ -302,7 +284,7 @@ class Command:
 
 
     def NYI(self):
-        ui.infoDialog(_("Function not yet implemented"))
+        ui.ask("infoDialog", _("Function not yet implemented"))
 
 
 def readfile(f, filter=None):
@@ -355,7 +337,8 @@ def mainloop():
         elif line[0] == "^":
             # signal, call slots
             sig, args = line[1:].split(None, 1)
-            command.runsignal(sig, *json.loads(args))
+            debug("SIG: " + line)
+            command.runsignal(sig, *json.loads(args)[1])
 
         elif line[0] == "@":
             # The response to an enquiry
@@ -397,7 +380,7 @@ def tidyquit():
 
 
 
-__builtin__.tt_seedocs = _("See documentation for further details")
+
 
 
 
@@ -432,20 +415,18 @@ if __name__ == "__main__":
 
 
     if options.ui == "cli":
-        from console import Ui, Logger, DocViewer
+        from console import Ui, Logger
         guiexec = None
     else:
-        from gui import Ui, Logger, DocViewer
+        from gui import Ui, Logger
         if options.ui == "pyqt":
-            guiexec = [base_dir + "/modules/pyqt/guibuild.py"]
+            guiexec = [base_dir + "/modules/pyqt/larchingui.py"]
         else:
             errout(_("ERROR: Unsupported ui option - '%s'\n") % options.ui)
             sys.exit(1)
 
     __builtin__.ui = Ui(guiexec)
     __builtin__.logger = Logger()
-    # Build the documentation viewer
-    doc = DocViewer()
     __builtin__.backend = Backend(host)
 #???
 #    __builtin__.installation = Installation()

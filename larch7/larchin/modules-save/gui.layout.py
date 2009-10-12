@@ -71,11 +71,12 @@ Widgets = [
 ["*LineEdit", "autopart_reserved"],
 
 ["*OptionalFrame", "^autoswap", _("Create Swap Partition")],
-
+# I need a spinbox?
+# Button: Sector check?
 
 
 ["*OptionalFrame", "^autohome", _("Create Separate Partition for User Data")],
-
+# Button: Create a data partition instead of a home partition?
 
 ["Label", "autopart_syssize_l", _("Space for Arch Root Partition:")],
 ["*LineEdit", "autopart_syssize"],

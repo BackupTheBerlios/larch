@@ -19,11 +19,10 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.12
+# 2009.10.07
 
 
 doc = _("""
-<h2>Disk Selection</h2>
 <p>On the basis of the detected disk(-like) devices a choice of devices
 for automatic or manual partitioning will be offered.
 </p>
@@ -56,13 +55,13 @@ class Stage:
 
     def connect(self):
         return [
+                (":disks-device-list*select", self.select_device),
                 ("&device-select&", self.select_page),
-                ("disks:device-list*select", self.select_device),
-                ("disks:auto*toggled", self.auto_toggle),
-                ("disks:guipart*toggled", self.guipart_toggle),
-                ("disks:cfdisk*toggled", self.cfdisk_toggle),
-                ("disks:nopart*toggled", self.nopart_toggle),
-                ("disks:keep1*toggled", self.keep1_toggle),
+                (":auto*toggled", self.auto_toggle),
+                (":guipart*toggled", self.guipart_toggle),
+                (":cfdisk*toggled", self.cfdisk_toggle),
+                (":nopart*toggled", self.nopart_toggle),
+                (":keep1*toggled", self.keep1_toggle),
             ]
 
     def select_page(self):
@@ -72,39 +71,9 @@ class Stage:
     def __init__(self, index):
         self.page_index = index
         self.device_index = 0
-        ui.newwidget("List", "^disks:device-list", selectionmode="Single",
-                tt=_("Select the device to inspect, or for partitioning"))
-        ui.newwidget("List", "disks:device-partitions", selectionmode="None",
-                tt=_("The partitions on the selected device"))
-
-        ui.newwidget("Button", "^disks:ntfs-shrink",
-                text=_("Shrink first partition (Windows - NTFS)"))
-        ui.newwidget("CheckBox", "^disks:keep1",
-                text=_("Keep first partition (Windows - NTFS)"))
-
-        ui.newwidget("Frame", "disks:choose_partition_method",
-                text=_("Choose Partitioning Method"))
-        ui.newwidget("RadioButton", "^disks:auto",
-                text=_("Autopartition and install to selected device"))
-        ui.newwidget("RadioButton", "^disks:guipart",
-                text=_("Graphical partition manager"))
-        ui.newwidget("RadioButton", "^disks:cfdisk",
-                text=_("Console partition manager (cfdisk) on selected device"))
-        ui.newwidget("RadioButton", "^disks:nopart",
-                text=_("Use existing partitions"))
-
-        ui.layout("disks:choose_partition_method", ["*HBOX*",
-                ["*VBOX*", "disks:auto", "disks:guipart",
-                        "disks:cfdisk", "disks:nopart"],
-                ["*SPACE", 50],
-                ["*VBOX*", "disks:keep1", "disks:ntfs-shrink", "*SPACE"]])
-        ui.layout("page:disks", ["*VBOX*",
-                ["*HBOX*", "disks:device-list", "disks:device-partitions"],
-                "*SPACE", "disks:choose_partition_method"])
-
-        ui.command("disks:device-list.setHeaders", ["", _("Device"),
+        ui.command(":disks-device-list.setHeaders", ["", _("Device"),
                 _("Size"), _("Model")])
-        ui.command("disks:device-partitions.setHeaders", [_("Partition"),
+        ui.command(":disks-device-partitions.setHeaders", [_("Partition"),
                 _("Size (GB)"), _("Type")])
         self.method = ""
 
@@ -117,7 +86,7 @@ class Stage:
             self.gparted = "partitionmanager"
         else:
             self.gparted = None
-        ui.command("disks:guipart.enable", self.gparted != None)
+        ui.command(":guipart.enable", self.gparted != None)
 
 
     def init(self):
@@ -173,8 +142,8 @@ class Stage:
 
         if len(self.devices) <= self.device_index:
             self.device_index = 0
-        ui.command("disks:device-list.set", self.devices, self.device_index)
-        ui.command("disks:device-list.compact")
+        ui.command(":disks-device-list.set", self.devices, self.device_index)
+        ui.command(":disks-device-list.compact")
         #self.select_device(self.device_index)
 
 
@@ -189,14 +158,14 @@ class Stage:
                 # Convert size from MiB to GB
                 size = "%-7.2f" % (float(ps[1]) * 10**3 / 2**20)
                 pinfo.append((ps[0], size, ps[4]))
-        ui.command("disks:device-partitions.set", pinfo)
-        ui.command("disks:device-partitions.compact")
+        ui.command(":disks-device-partitions.set", pinfo)
+        ui.command(":disks-device-partitions.compact")
 
 #TODO: test this ...
         # Use blkid to test whether 1st partition is NTFS
         t1 = backend.xlist("get-blkinfo TYPE %s1" % self.device)
         self.ntfs1 = t1[0] and (t1[1][0] == "ntfs")
-        ui.command("disks:ntfs-shrink.enable", self.ntfs1)
+        ui.command(":ntfs-shrink.enable", self.ntfs1)
 
         # If device has mounted partition(s), it is not autopartitionable
 #TODO: remove next and uncomment following
@@ -209,9 +178,9 @@ class Stage:
                 noauto = True
         else:
             noauto = True
-        ui.command("disks:auto.enable", not noauto)
+        ui.command(":auto.enable", not noauto)
         if (self.method == "auto") and noauto:
-            ui.command("disks:nopart.set", True)
+            ui.command(":nopart.set", True)
         self.setkeep1(self.ntfs1 and
                 (self.method == "auto") and not noauto)
 
@@ -227,8 +196,8 @@ class Stage:
         self.keep1 = on
 
     def setkeep1(self, on):
-        ui.command("disks:keep1.set", on)
-        ui.command("disks:keep1.enable", on)
+        ui.command(":keep1.set", on)
+        ui.command(":keep1.enable", on)
         self.keep1_toggle(on)
 
     def guipart_toggle(self, on):

@@ -22,12 +22,12 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.12
+# 2009.10.03
 
 """Build a gui from a layout description.
 """
 
-import os, sys, traceback, threading
+import os, sys, traceback
 from PyQt4 import QtGui, QtCore
 import json
 
@@ -44,83 +44,85 @@ def debug(text):
     sys.stderr.flush()
 
 
-# Widget Base Classes - essentially used as 'Mixins' >>>>>>>>>>>>>>>>
-class WBase:
-    def x__tt(self, text):
-        """Set tooltip.
-        """
-        self.setToolTip(text)                               #qt
-
-    def x__text(self, text=""):
-        """Set widget text.
-        """
-        self.setText(text)                                  #qt
-
-    def enable(self, on):
-        """Enable/Disable widget. on should be True to enable the widget
-        (display it in its normal, active state), False to disable it
-        (which will normally be paler and non-interactive).
-        """
-        self.setEnabled(on)                                 #qt
-
-
+# Widget classes
 class TopLevel:
+    """This class cannot be used directly (it must be subclassed) because
+    it doesn't set 'self.widget' itself, this must be set before
+    calling this '__init__'.
+    """
+    def __init__(self, title, icon):
+        self.layout = QtGui.QVBoxLayout()                   #qt
+        self.widget.setLayout(self.layout)                  #qt
+        self.widget.setWindowTitle(title)                   #qt
+        if icon:
+            app.setWindowIcon(QtGui.QIcon(icon))            #qt
+
+    def add_widget(self, wl):
+        """Add the widget/layout to the top level window.
+        """
+        if isinstance(wl, QtGui.QWidget):                   #qt
+            self.layout.addWidget(wl)                       #qt
+        elif isinstance(wl, SPACE):                         #qt
+            if wl.size:                                     #qt
+                self.layout.addSpacing(wl.size)             #qt
+            self.layout.addStretch()                        #qt
+        else:                                               #qt
+            self.layout.addLayout(wl)                       #qt
+
     def busy(self, widget, on):
         w = guiapp.widgets[widget]
         if on:
             # doesn't work:
             #w.setCursor(QtCore.Qt.BusyCursor)
-            guiapp.qtapp.setOverrideCursor(QtCore.Qt.BusyCursor) #qt
+            app.setOverrideCursor(QtCore.Qt.BusyCursor)     #qt
             w.setEnabled(False)                             #qt
         else:
             #w.unsetCursor()
-            guiapp.qtapp.restoreOverrideCursor()            #qt
+            app.restoreOverrideCursor()                     #qt
             w.setEnabled(True)                              #qt
 
     def setVisible(self, on=True):
-        self.setVisible(on)                                 #qt
+        self.widget.setVisible(on)                          #qt
 
-    def x__size(self, w_h):
+    def x_set_size(self, w_h):
         w, h = [int(i) for i in w_h.split("_")]
-        self.resize(w, h)                                   #qt
-
-    def x__icon(self, iconpath):
-        guiapp.qtapp.setWindowIcon(QtGui.QIcon(iconpath))   #qt
-
-    def x__title(self, text):
-        self.setWindowTitle(text)                           #qt
+        self.widget.resize(w, h)                            #qt
 
     def getSize(self):
-        s = self.size()                                     #qt
-        return "%d_%d" % (s.width(), s.height())            #qt
+        s = self.widget.size()                              #qt
+        return "%d_%d" % (s.width(), s.height())
 
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-class Window(QtGui.QWidget, TopLevel):                      #qt
+class Widget(QtGui.QWidget):                                #qt
     """This is needed to trap window closing events.
     """
-    def __init__(self):
-        QtGui.QWidget.__init__(self)                        #qt
-        self.closesignal = ""
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)                #qt
+        self.trapclose = None
 
     def closeEvent(self, event):                            #qt
-        if self.closesignal:
-            guiapp.sendsignal(self.closesignal)
+        if self.trapclose == True:
             event.ignore()                                  #qt
             return
-        guiapp.send("/", "1")
+        elif self.trapclose and self.trapclose(event):      #qt
+            event.ignore()
+            return
         QtGui.QWidget.closeEvent(self, event)               #qt
 
-    def x__closesignal(self, text):
-        self.closesignal = text
+
+class Window(TopLevel):
+    def __init__(self, title, icon=None):
+        self.widget = Widget()                              #qt
+        TopLevel.__init__(self, title, icon)
 
 
-class Dialog(QtGui.QDialog, TopLevel):
-    def __init__(self):
-        QtGui.QDialog.__init__(self)                        #qt
+class Dialog(TopLevel):
+    def __init__(self, title, icon=None):
+        self.widget = QtGui.QDialog()                       #qt
+        TopLevel.__init__(self, title, icon)
 
     def showmodal(self):
-        return self.exec_() == QtGui.QDialog.Accepted       #qt
+        return self.widget.exec_() == QtGui.QDialog.Accepted    #qt
 
 
 class DialogButtons(QtGui.QDialogButtonBox):                #qt
@@ -132,10 +134,9 @@ class DialogButtons(QtGui.QDialogButtonBox):                #qt
                 assert isinstance(b, int)                   #qt
                 buttons |= b                                #qt
             except:
-                gui_warning("Unknown Dialog button: %s" % a)
+                gui_warning(_("Unknown Dialog button: %s") % a)
         QtGui.QDialogButtonBox.__init__(self, buttons)      #qt
 
-#TODO: there is no widgettree or mainwidget now ...
     def _connect(self, widgettree):
         self._dialog = widgettree.mainwidget.widget
         self.connect(self, QtCore.SIGNAL("clicked(QAbstractButton *)"), #qt
@@ -150,9 +151,9 @@ class DialogButtons(QtGui.QDialogButtonBox):                #qt
 
 def textLineDialog(label=None, title=None, text="", pw=False):
     if label == None:
-        label = "Enter the value here:"
+        label = _("Enter the value here:")
     if title == None:
-        title = "Enter Information"
+        title = _("Enter Information")
     if pw:
         echo = QtGui.QLineEdit.Password                     #qt
     else:
@@ -164,35 +165,17 @@ def textLineDialog(label=None, title=None, text="", pw=False):
 
 def confirmDialog(message, title=None):
     if title == None:
-        title = "Confirmation"
-    return (QtGui.QMessageBox.question(None, title, message,        #qt
-            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel) ==    #qt
-            QtGui.QMessageBox.Yes)                                  #qt
+        title = _("Confirmation")
+    return (QtGui.QMessageBox.question(None, title, message,
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel) ==
+            QtGui.QMessageBox.Yes)
 
 
 def infoDialog(message, title=None):
     if title == None:
-        title = "Information"
-    QtGui.QMessageBox.information(None, title, message)     #qt
+        title = _("Information")
+    QtGui.QMessageBox.information(None, title, message)
 
-
-#+++++++++++++++++++++++++++
-# Error handling
-def gui_error(message, title=None):
-    if title == None:
-        title = "Error"
-    QtGui.QMessageBox.critical(None, title, message)        #qt
-    guiapp.qtapp.exit(1)                                    #qt
-
-def gui_warning(message, title=None):
-    if title == None:
-        title = "Warning"
-    QtGui.QMessageBox.warning(None, title, message)         #qt
-
-def onexcept(text):
-    debug(traceback.format_exc())
-    gui_error(text, "Exception")
-#---------------------------
 
 fileDialogDir = "/"
 def fileDialog(message, start=None, title=None, dir=False, create=False, filter=None):
@@ -222,16 +205,15 @@ def fileDialog(message, start=None, title=None, dir=False, create=False, filter=
 
 
 class Stack(QtGui.QStackedWidget):                          #qt
-    def __init__(self):
+    def __init__(self, args):
         QtGui.QStackedWidget.__init__(self)                 #qt
         self.x_mywidgets = {}
 
-    def x__pages(self, pages):
-        for page in pages:
+        for page in args:
             pw = _Page()                                    #qt
             self.addWidget(pw)                              #qt
-            pw.w_name = page
-            self.x_mywidgets[page] = pw
+            pw.name = page                                  #qt
+            self.x_mywidgets[page] = pw                     #qt
 
     def set(self, index=0):
         self.setCurrentIndex(index)                         #qt
@@ -247,13 +229,13 @@ class Notebook(QtGui.QTabWidget):                           #qt
         self.x_tabs = []
         self.x_mywidgets = {}
 
-    def x__tabs(self, tabs):
-        for tab in tabs:
+        for tab in args:
             tname = tab[0]
             tw = _Page()                                    #qt
             self.addTab(tw, (tab[1]))                       #qt
-            tw.w_name = tname
-            self.x_mywidgets[tname] = tw
+            tw.name = tname                                 #qt
+            self.x_mywidgets[tname] = tw                    #qt
+
             self.x_tabs.append([tname, tw])
 
     def set(self, index=0):
@@ -267,12 +249,14 @@ class _Page(QtGui.QWidget):                                 #qt
         QtGui.QWidget.__init__(self)                        #qt
 
 
-class Frame(QtGui.QGroupBox, WBase):                        #qt
-    def __init__(self):
-        QtGui.QGroupBox.__init__(self)                      #qt
+class Frame(QtGui.QGroupBox):                               #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
+        QtGui.QGroupBox.__init__(self, text)                #qt
 
-    def x__text(self, text):
-        self.setTitle(text)                                 #qt
+    def enable(self, on):
+        self.setEnabled(on)                                 #qt
 
 
 class OptionalFrame(Frame):                                 #qt
@@ -280,12 +264,12 @@ class OptionalFrame(Frame):                                 #qt
     s_signals = {
             "toggled": "toggled(bool)"                      #qt
         }
-    def __init__(self):                                     #qt
-        Frame.__init__(self)                                #qt
+    def __init__(self, text=""):                            #qt
+        Frame.__init__(self, text)                          #qt
         self.setCheckable(True)                             #qt
         self.setChecked(False)                              #qt
 
-    def opton(self, on):
+    def enable(self, on):
         self.setChecked(on)                                 #qt
 
     def enable_hack(self):                                  #qt
@@ -293,18 +277,23 @@ class OptionalFrame(Frame):                                 #qt
             self.setChecked(True)                           #qt
             self.setChecked(False)                          #qt
 
+    def frameEnable(self, on):
+        self.setEnabled(on)                                 #qt
 
-class Label(QtGui.QLabel, WBase):                           #qt
-    def __init__(self):
+
+class Label(QtGui.QLabel):                                  #qt
+    def __init__(self, text="", format=None):
         QtGui.QLabel.__init__(self)                         #qt
+        self.format = format
+        if text:
+            self.set(text)
 
-    def x__html(self, text):
+    def set(self, text):
+        if self.format:
+            text = self.format.replace("$", text)
         self.setText(text)                                  #qt
 
-    def x__image(self, path):
-        self.setPixmap(QtGui.QPixmap(path))                 #qt
-
-    def x__align(self, pos):
+    def x_set_align(self, pos):
         if pos == "center":
             a = QtCore.Qt.AlignCenter                       #qt
         else:
@@ -312,37 +301,46 @@ class Label(QtGui.QLabel, WBase):                           #qt
         self.setAlignment(a)                                #qt
 
 
-class Button(QtGui.QPushButton, WBase):                     #qt
+class Button(QtGui.QPushButton):                            #qt
     s_default = "clicked"
     s_signals = {
             "clicked": "clicked()"                          #qt
         }
-    def __init__(self):
-        QtGui.QPushButton.__init__(self)                    #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
+        QtGui.QPushButton.__init__(self, text)              #qt
+
+    def enable(self, on):
+        self.setEnabled(on)                                 #qt
 
 
-class ToggleButton(QtGui.QPushButton, WBase):               #qt
+class ToggleButton(QtGui.QPushButton):                      #qt
     s_default = "toggled"
     s_signals = {
             "toggled": "toggled(bool)"                      #qt
         }
-    def __init__(self):
-        QtGui.QPushButton.__init__(self)                    #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
+        QtGui.QPushButton.__init__(self, text)              #qt
         self.setCheckable(True)                             #qt
 
     def set(self, on):
         self.setChecked(on)                                 #qt
 
 
-class CheckBox(QtGui.QCheckBox, WBase):                     #qt
+class CheckBox(QtGui.QCheckBox):                            #qt
     # A bit of work is needed to get True/False state       #qt
     # instead of 0/1/2                                      #qt
     s_default = "toggled"
     s_signals = {
             "toggled": "stateChanged(int)"                  #qt
         }
-    def __init__(self):
-        QtGui.QCheckBox.__init__(self)                      #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
+        QtGui.QCheckBox.__init__(self, text)                #qt
 
     def set(self, on):
         self.setCheckState(2 if on else 0)                  #qt
@@ -355,14 +353,19 @@ class CheckBox(QtGui.QCheckBox, WBase):                     #qt
         """                                                 #qt
         return (state != QtCore.Qt.Unchecked,)              #qt
 
+    def enable(self, on):
+        self.setEnabled(on)                                 #qt
 
-class RadioButton(QtGui.QRadioButton, WBase):               #qt
+
+class RadioButton(QtGui.QRadioButton):                      #qt
     s_default = "toggled"
     s_signals = {
             "toggled": "toggled(bool)"                      #qt
         }
-    def __init__(self):
-        QtGui.QPushButton.__init__(self)                    #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
+        QtGui.QPushButton.__init__(self, text)              #qt
 
     def set(self, on):
         self.setChecked(on)                                 #qt
@@ -370,8 +373,11 @@ class RadioButton(QtGui.QRadioButton, WBase):               #qt
     def active(self):
         return self.isChecked()                             #qt
 
+    def enable(self, on):
+        self.setEnabled(on)                                 #qt
 
-class ComboBox(QtGui.QComboBox, WBase):                     #qt
+
+class ComboBox(QtGui.QComboBox):                            #qt
     s_default = "changed"
     s_signals = {
             "changed": "currentIndexChanged(int)" ,         #qt
@@ -389,7 +395,7 @@ class ComboBox(QtGui.QComboBox, WBase):                     #qt
         self.blockSignals(False)
 
 
-class ListChoice(QtGui.QListWidget, WBase):                 #qt
+class ListChoice(QtGui.QListWidget):                        #qt
     s_default = "changed"
     s_signals = {
             "changed": "currentRowChanged(int)" ,           #qt
@@ -406,29 +412,25 @@ class ListChoice(QtGui.QListWidget, WBase):                 #qt
         self.blockSignals(False)
 
 
-class List(QtGui.QTreeWidget, WBase):                       #qt
+class List(QtGui.QTreeWidget):                              #qt
     # Only using top-level items
     s_default = "select"
     s_signals = {
             "select": "itemSelectionChanged()" ,            #qt
         }
-    def __init__(self):
+    def __init__(self, selectionmode=""):
         QtGui.QTreeWidget.__init__(self)                    #qt
-        self.mode = ""
-        self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection) #qt
-        self.setRootIsDecorated(False)                      #qt
-
-    def x__selectionmode(self, sm):
-        self.mode = sm
-        if sm == "None":
+        self.mode = selectionmode
+        if selectionmode == "None":
             self.setSelectionMode(QtGui.QAbstractItemView.NoSelection)  #qt
-        elif sm == "Single":
+        elif selectionmode == "Single":
             self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection) #qt
         else:
-            self.mode = ""
             self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection) #qt
+        self.setRootIsDecorated(False)                      #qt
 
     def setHeaders(self, headers):                          #qt
+        debug(repr(headers))
         self.setHeaderLabels(headers)                       #qt
 
     def set(self, items, index=0):                          #qt
@@ -437,6 +439,7 @@ class List(QtGui.QTreeWidget, WBase):                       #qt
         self.clear()                                        #qt
         c = 0
         for i in items:
+            debug(repr(i))
             item = QtGui.QTreeWidgetItem(self, i)           #qt
             self.addTopLevelItem(item)                      #qt
             if c == index:
@@ -456,38 +459,40 @@ class List(QtGui.QTreeWidget, WBase):                       #qt
             return (s,)
 
 
-class LineEdit(QtGui.QLineEdit, WBase):                     #qt
+class LineEdit(QtGui.QLineEdit):                            #qt
     s_default = "changed"
     s_signals = {
             "enter": "returnPressed()",                     #qt
             "changed": "textEdited(const QString &)"        #qt
         }
-    def __init__(self):
+    def __init__(self, text="", format=None):
+        self.format = format
         QtGui.QLineEdit.__init__(self)                      #qt
+        if text:
+            self.set(text)
+
+    def set(self, text=""):
+        if self.format:
+            text = format.replace("$", text)
+        self.setText(text)                                  #qt
 
     def get(self):
         return unicode(self.text())                         #qt
 
-    def x__ro(self, ro):
-        self.setReadOnly(ro)                                #qt
+    def x_set_readonly(self, ro):
+        self.setReadOnly(ro == "true")                      #qt
 
 
-class CheckList(QtGui.QWidget, WBase):                      #qt
-    def __init__(self):
+class CheckList(QtGui.QWidget):                             #qt
+    def __init__(self, text="", format=None):
+        if format:
+            text = format.replace("$", text)
         QtGui.QWidget.__init__(self)                        #qt
-        self.box = QtGui.QVBoxLayout(self)                  #qt
-        self.title = None
+        l = QtGui.QVBoxLayout(self)                         #qt
         if text:                                            #qt
             l.addWidget(QtGui.QLabel(text))                 #qt
         self.widget = QtGui.QListWidget()                   #qt
         l.addWidget(self.widget)                            #qt
-
-    def x__title(self, text):
-        if self.title:
-            self.title.setText(text)                        #qt
-        else:
-            self.title = QtGui.QLabel(text)                 #qt
-            self.box.insertWidget(0, self.title)            #qt
 
     def checked(self, index):
         return (self.widget.item(index).checkState() ==     #qt
@@ -504,12 +509,14 @@ class CheckList(QtGui.QWidget, WBase):                      #qt
         self.blockSignals(False)                            #qt
 
 
-class TextEdit(QtGui.QTextEdit, WBase):                     #qt
-    def __init__(self):
+class TextEdit(QtGui.QTextEdit):                            #qt
+    def __init__(self, ro=""):
         QtGui.QTextEdit.__init__(self)                      #qt
+        if ro:
+            self.setReadOnly(True)                          #qt
 
-    def x__ro(self, ro):
-        self.setReadOnly(ro)                                #qt
+    def set(self, text=""):
+        self.setText(text)                                  #qt
 
     def append_and_scroll(self, text):
         self.append(text)                                   #qt
@@ -522,146 +529,77 @@ class TextEdit(QtGui.QTextEdit, WBase):                     #qt
         QtGui.QTextEdit.undo(self)                          #qt
 
 
-class HtmlView(QtGui.QTextBrowser, WBase):                  #qt
+class HtmlView(QtGui.QTextBrowser):                         #qt
     def __init__(self):
         QtGui.QTextBrowser.__init__(self)                   #qt
 
-    def x__html(self, content):
+    def set(self, content):
         self.setHtml(content)                               #qt
 
 
-class SpinBox(QtGui.QDoubleSpinBox, WBase):                 #qt
-    s_default = "changed"
-    s_signals = {
-            "changed": "valueChanged(double)"               #qt
-        }
-    def __init__(self):
-        QtGui.QDoubleSpinBox.__init__(self)                 #qt
-        self.step = None
-
-    def x__min(self, min):
-        self.setMinimum(min)
-
-    def x__max(self, max):
-        self.setMaximum(max)
-
-    def x__decimals(self, dec):
-        self.setDecimals(dec)
-        if not self.step:
-            self.setSingleStep(10**(-dec))
-
-    def x__step(self, step):
-        self.setSingleStep(step)
-
-    def x__value(self, val):
-        self.setValue(val)
-
-
 # Layout classes
-class Layout:
-    """A mixin base class for all layout widgets.
-    """
-    pass
-
-
-class _BOX(Layout):
+class _BOX:
     def __init__(self, items):
-        for wl in items:
+        self.x_children = items
+
+    def add_children(self, widgets):
+        for c in self.x_children:
+            wl = widgets[c]
             if isinstance(wl, QtGui.QWidget):               #qt
                 self.addWidget(wl)                          #qt
             elif isinstance(wl, SPACE):                     #qt
                 if wl.size:                                 #qt
                     self.addSpacing(wl.size)                #qt
                 self.addStretch()                           #qt
-            elif isinstance(wl, Layout):                    #qt
-                self.addLayout(wl)                          #qt
             else:                                           #qt
-                gui_error("Invalid Box entry: %s" % repr(wl))
+                self.addLayout(wl)                          #qt
 
 
 class VBOX(QtGui.QVBoxLayout, _BOX):                        #qt
-    def __init__(self, *items):
+    def __init__(self, items):
         QtGui.QVBoxLayout.__init__(self)                    #qt
         _BOX.__init__(self, items)                          #qt
 
 
 class HBOX(QtGui.QHBoxLayout, _BOX):                        #qt
-    def __init__(self, *items):
+    def __init__(self, items):
         QtGui.QHBoxLayout.__init__(self)                    #qt
         _BOX.__init__(self, items)                          #qt
 
 
-class GRID(QtGui.QGridLayout, Layout):                      #qt
+class GRID(QtGui.QGridLayout):                              #qt
     def __init__(self, *rows):
         QtGui.QGridLayout.__init__(self)                    #qt
-        y = -1
-        for row in rows:
-            if not isinstance(row, GRIDROW):
-                gui_error("Grid layouts must be built from 'GRIDROW's ('*+*')."
-                        "\nFound:\n  %s" % repr(row))
+        self.x_children = rows
 
+    def add_children(self, widgets):
+        y = -1
+        for row in self.x_children:
             y += 1
             x = -1
-            for wl in row.items:
+            for col in row:
                 x += 1
-                if isinstance(wl, Span):
+                wl = widgets.get(col)
+                if not wl:
                     continue
                 # Determine the row and column spans
                 x1 = x + 1
-                while (x1 < len(row.items)) and isinstance(row.items[x1], CSPAN):
+                while (x1 < len(row)) and (row[x1] == "-"):
                     x1 += 1
                 y1 = y + 1
-                while (y1 < len(rows)) and isinstance(rows[y1].items[x], RSPAN):
+                while ((y1 < len(self.x_children)) and
+                        (self.x_children[y1][x] == "|")):
                     y1 += 1
 
                 if isinstance(wl, QtGui.QWidget):           #qt
                     self.addWidget(wl, y, x, y1-y, x1-x)    #qt
-                elif isinstance(wl, Layout):
+                else:                                       #qt
                     self.addLayout(wl, y, x, y1-y, x1-x)    #qt
-                elif isinstance(wl, SPACE):
-                    self.addItem(QtGui.QSpacerItem(wl.size, wl.height),
-                            y, x, y1-y, x1-x)               #qt
-                else:
-                    gui_error("Invalid entry in Grid layout: %s" % repr(wl))
 
 
-class GRIDROW:
-    """It is necessary to have a layout class for a grid row because a list
-    is always interpreted as being a layout item.
-    """
-    def __init__(self, *items):
-        self.items = items
-
-
-class SPACE:
-    """Can be used in boxes and grids. In boxes only size is of interest,
-    and it also means vertical size in the case of a vbox. In grids size
-    is the width.
-    """
-    def __init__(self, size_width=0, height=0):             #qt
-        self.size = size_width                              #qt
-        self.height = height                                #qt
-
-
-class Span:
-    """Class to group special grid layout objects together - it doesn't
-    actually do anything itself, but is used for checking object types.
-    """
-    pass
-
-
-class CSPAN(Span):
-    """Column-span layout item. It doesn't do anything itself, but it is used
-    by the Grid layout constructor.
-    """
-    pass
-
-
-class RSPAN(Span):
-    """Row-span layout item. It doesn't do anything itself, but it is used
-    by the Grid layout constructor.
-    """
-    pass
+class SPACE:                                                #qt
+    def __init__(self, size=0):                             #qt
+        self.size = size                                    #qt
 
 
 class HLINE(QtGui.QFrame):                                  #qt
@@ -679,34 +617,33 @@ class VLINE(QtGui.QFrame):                                  #qt
 class Signal:
     """Each instance represents a single connection.
     """
-    def __init__(self, source, signal, name=None):
-        """'source' is the widget object which initiates the signal.
-        'signal' is the signal type.
+    def __init__(self, source, signal, name=None, tag=None):
+        """'source' is the widget which initiates the signal.
+        'signal' is the name of the signal.
         If 'name' is given, the signal will get this as its name,
         and this name may be used for more than one connection.
-        Otherwise the name is built from the name of the source widget and
-        the signal type as 'source*signal' and may only be used once.
-        If 'name' begins with '+' an additional argument, the source
-        widget name, will be inserted at the head of the argument list.
+        Otherwise the name is built as 'source_signal' and may
+        only be used once.
+        'tag' is passed as the first argument to the signal handler.
+        Normal arguments of the signal follow.
         """
         self.signame = signal
-        self.tag = None
         sig = source.s_signals.get(signal)
         if not sig:
-            gui_warning("Signal '%s' is not defined for '%s'."
-                        % (signal, source.w_name))
+            gui_warning(_("Signal '%s' is not defined for '%s'.")
+                        % (signal, source.x_name))
             return
         if name:
             l = guiapp.connections.get(name, [])
-            if name.startswith("+"):
-                self.tag = source.w_name
         else:
             l = self
-            name = "%s*%s" % (source.w_name, signal)
+            name = "%s*%s" % (source.x_name, signal)
             if guiapp.connections.has_key(name):
-                gui_warning("Signal '%s' is defined more than once." % name)
+                gui_warning(_("Signal '%s' is defined more than once.")
+                        % name)
                 return
         self.name = name
+        self.tag = tag
         try:
             self.convert = getattr(source, "s_%s" % signal)
         except:
@@ -716,15 +653,13 @@ class Signal:
                 l.append(self)
             guiapp.connections[name] = l
         else:
-            gui_warning("Signal '%s' couldn't be connected." % name)
+            gui_warning(_("Signal '%s' couldn't be connected.")
+                    % name)
 
     def signal(self, *args):
         if self.convert:
             args = self.convert(*args)
-        if self.tag:
-            guiapp.sendsignal(self.name, self.tag, *args)
-        else:
-            guiapp.sendsignal(self.name, *args)
+        guiapp.send("^", "%s %s" % (self.name, json.dumps([self.tag, args])))
 
 #    def disconnect(self):
 #        ???
@@ -734,128 +669,74 @@ class GuiApp:
     """This class represents an application gui, possibly with more than
     one top level window, these being defined in layout files.
     """
-    def __init__(self):
-        global guiapp
+    def __init__(self, qtapp):
+        global app, guiapp
+        app = qtapp
         guiapp = self
-        self.qtapp = QtGui.QApplication([])                 #qt
-
+        self.windows = []
         self.connections = {}
         self.widgets = {}
 
 
+    def init(self, windowfiles, dir=None):
+        if not dir:
+            dir = os.path.dirname(__file__)
+        for f in windowfiles:
+            d = {}
+            execfile("%s/%s" % (dir, f), globals(), d)
+            self.windows.append(WidgetTree(d))
+
+
     def addwidget(self, fullname, wo):
         if self.widgets.has_key(fullname):
-            gui_error("Attempted to define widget '%s' twice." % fullname)
+            gui_error(_("Attempted to define widget '%s' twice.") % fullname)
         self.widgets[fullname] = wo
 
 
-    def getwidget(self, wname):
-        if self.widgets.has_key(wname):
-            return self.widgets[wname]
-        gui_error("Unknown widget: '%s'" % wname)
-
-
     def show(self, windowname):
-        self.getwidget(windowname).setVisible()
+        self.widgets[windowname].setVisible()
 
 
     def new_line(self, line):
         """An input line has been received.
-        The initial character determines the action:
-            '!' - method calls to an exported widget, with no result.
-                They have the form '!widget.method [arg1, arg2, ...]'
-                where the argument list is json-encoded. If there are no
-                arguments the square brackets needn't be present.
-            '?' - similar to '!', but a return value is expected. It has
-                a key value, which is everything up to the first ':' After
-                that the arguments are as for '!'. The result is '@' followed
-                by the key value, then ':', then the json-encoded call result.
-            '%' - widget definition. The form is
-                '%widget-type widget-name {attributes}', where the attribute
-                dict is optional. If widget-name starts with '^' this will be
-                stripped and the default signal for this widget will be enabled.
-            '$' - set a layout on an existing widget. The form is
-                '$ widget-name layout', where layout is in list form (see below).
-            '^' -  enable emission of the given signal. The form is
-                '^widget-name signal-type signal-name' where signal-name is
-                optional (see below for details).
+        Lines starting with '!' are method calls to an exported widget,
+        with no result. They have the form
+          '!widget.method [arg1, arg2, ...]'
+        where the argument list is json-encoded. If there are no arguments
+        the square brackets needn't be present.
+        Lines starting with '?' are similar, but a return value is expected.
+        This is returned as '@' followed by the json-encoded result.
         """
         line = str(line).rstrip()
 
-        if line[0] == "!":
-            # Process a method call - a command with no response
-            try:
-                self._methodcall(line[1:])
-            except:
-                onexcept("Bad gui command line:\n  " + line)
+        #DEBUG
+        #sys.stderr.write(line+'\n')
+        #sys.stderr.flush()
 
-        elif line[0] == "?":
-            # Process a method call - an enquiry.
-            try:
-                l, r = line.split(":", 1)
-                res = self._methodcall(r)
-            except:
-                onexcept("Bad gui enquiry line:\n  " + line)
-            self.send("@", "%s:%s" % (l[1:], json.dumps(res)))
+        if line[0] in ["!", "?"]:
+            wma = line[1:].split(None, 1)
+            cmd = specials_table.get(wma[0])
+            if not cmd:
+                w, m = wma[0].split(".")
+                wo = self.widgets[w]
+                cmd = getattr(wo, m)
+            if len(wma) > 1:
+                res = cmd(*json.loads(wma[1]))
+            else:
+                res = cmd()
 
-        elif line[0] == "%":
-            # Add a widget
-            try:
-                args = line[1:].split(None, 2)
-                if len(args) > 2:
-                    a = json.loads(args[2])
-                    assert isinstance(a, dict)
-                else:
-                    a = {}
-                self.newwidget(args[0], args[1], a)
-            except:
-                onexcept("Bad widget definition:\n  " + line)
-                # fatal
-
-        elif line[0] == "$":
-            # Set a widget's layout
-            try:
-                wn, l = line[1:].split(None, 1)
-                self.layout(wn, json.loads(l))
-            except:
-                onexcept("Bad layout line:\n  " + line)
-
-        elif line[0] == "^":
-            # Enable a signal
-            args = line[1:].split()
-            w = self.getwidget(args[0])
-            if w:
-                Signal(w, *args[1:])
-
-        elif line[0] == "/":
-            # Quit
-            arg = line[1:].strip()
-            self.send("/", arg if arg else "0")
-            guiapp.qtapp.quit()
+            if line[0] == "?":
+                self.send("@", json.dumps(res))
 
         else:
             self.got(line)
 
-        ithread.event.set()
 
-
-    def _methodcall(self, text):
-        wma = text.split(None, 1)
-        cmd = specials_table.get(wma[0])
-        if not cmd:
-            w, m = wma[0].split(".")
-            wo = self.getwidget(w)
-            cmd = getattr(wo, m)
-        if len(wma) > 1:
-            return cmd(*json.loads(wma[1]))
-        else:
-            return cmd()
-
-
+#TODO: But I'm not very sure what this should do.
     def got(self, line):
         """Reimplement this in a sub-class to do something else?
         """
-        gui_error("Unexpected input line:\n  " + line)
+        self.send("=", line)
 
 
     def send(self, mtype, line):
@@ -865,105 +746,150 @@ class GuiApp:
         sys.stdout.flush()
 
 
-    def sendsignal(self, name, *args):
-        self.send("^", name + " " + json.dumps(args))
+    def answer(self, obj):
+        self.send("@", json.dumps(obj))
 
 
-    def newwidget(self, wtype, wname, args):
-        if wname[0] == "^":
-            wname = wname[1:]
-            connect = True
-        else:
-            connect = False
+class WidgetTree:
+    """This class represents one top level window.
+    """
+    def __init__(self, info):
+        self.namespace = info.get("Namespace", "")
 
-        wobj = widget_table[wtype]()
-        wobj.w_name = wname
+        # Create all widgets
+        wlist = info["Widgets"]
+        main = wlist[0][1]
 
-        # Attributes
-        for key, val in args.iteritems():
-            handler = "x__" + key
-            if hasattr(wobj, handler):
-                getattr(wobj, handler)(val)
-# Unrecognized attributes are ignored ...
-
-        # The widget may itself have created widgets that need including
-        if hasattr(wobj, "x_mywidgets"):
-            for n, w in wobj.x_mywidgets.iteritems():
-                self.addwidget(n, w)
-        if connect:
-            Signal(wobj, wobj.s_default)
-        self.addwidget(wname, wobj)
-
-
-# A layout call specifies and organizes the contents of a widget. The first
-# argument is the name of the widget, the second argument is a layout
-# manager list.
-
-# There are three sorts of thing which can appear in layout manager lists
-# (apart from the layout type at the head of the list and an optional attribute
-# dict as second item). There can be named widgets, there can be further layout
-# managers (specified as lists, nested as deeply as you like) and there
-# can be layout widgets, like spacers and separators.
-
-# A layout widget can appear in two forms - either as a simple string (the
-# layout widget type), or as a list with two entries, the layout widget type
-# and an attribute dict. In the former case all attributes take on their
-# default values.
-    def layout(self, wname, ltree):
-        wobj = self.getwidget(wname)
-        assert isinstance(ltree, list)
-        lobj = self.getobj(ltree)
-        assert isinstance(lobj, Layout)
-        wobj.setLayout(lobj)                                #qt
-
-
-    def getobj(self, item):
-        if isinstance(item, list):
-            if (len(item) > 1) and isinstance(item[1], dict):
-                dictarg = item[1]
-                ilist = item[2:]
+        self.widgets = {}
+        for w in wlist:
+            wtype = w[0]
+            wname = w[1]
+            if wname[0] == "^":
+                wname = wname[1:]
+                connect = True
             else:
-                dictarg = {}
-                ilist = item[1:]
-            if item[0].endswith("*"):
-                args = [self.getobj(i) for i in ilist]
+                connect = False
+            fullname = self.namespace + wname
+            #sys.stderr.write(">>>%s\n" % fullname)
+            if wtype[0] == "*":
+                wo = widget_table[wtype[1:]](*w[2:])
+                guiapp.addwidget(fullname, wo)
             else:
-                args = ilist
-            return self.newlayout(item[0], dictarg, args)
+                wo = widget_table[wtype](*w[2:])
+            self.widgets[wname] = wo
+            wo.x_name = fullname
+            if connect:
+                Signal(wo, wo.s_default)
 
-        elif item.startswith("*"):
-            return self.newlayout(item, {}, [])
+            # The widget may itself have created widgets that need including
+            try:
+                self.widgets.update(wo.x_mywidgets)
+            except:
+                pass
 
-        else:
-            return self.getwidget(item)
+        self.mainwidget = self.widgets[main]
 
 
-    def newlayout(self, item, parms, args):
-        lfunc = layout_table.get(item)
-        if lfunc:
-            lobj = lfunc(*args)
-            # Attributes
-            for key, val in parms:
-                handler = "x__" + key
-                if hasattr(lobj, handler):
-                    getattr(lobj, handler)(val)
-            return lobj
-        else:
-            gui_error("Unknown layout type: %s" % item)
+        # Do the layouts in two stages to allow definition-after-use
+        layout = info.get("Layout", [])
+        pending = []
+        for l in layout:
+            ltype = l[0]
+            if ltype[0] == "+":
+                pending.append(l)
+
+            else:
+                lname = l[1]
+                lo = layout_table[ltype](*l[2:])
+                lo.x_name = lname
+                if hasattr(lo, "x_children"):
+                    pending.append(("+", lo))
+                self.widgets[lname] = lo
+
+        for p in pending:
+            ptype = p[0]
+            if ptype == "+":
+                p[1].add_children(self.widgets)
+
+            elif ptype == "+MAIN":
+                for wl in p[1]:
+                    self.mainwidget.add_widget(self.widgets[wl])
+
+            elif ptype == "+LAYOUT":
+                self.widgets[p[1]].setLayout(self.widgets[p[2]])
+
+            else:
+                gui_error(_("Unknown node type: %s") % ptype)
+                # fatal
+
+
+        # Handle tooltips
+        tooltips = info.get("Tooltips", [])
+        # This is a list of [widget, text] pairs
+        for w, t in tooltips:
+            widget = self.getwidget(w)
+            if widget:
+                widget.setToolTip(t)
+
+
+        # Handle attributes
+        attributes = info.get("Attributes", [])
+        # This is a list of [widget, attribute, value] triplets
+        for w, a, v in attributes:
+            widget = self.getwidget(w)
+            if not widget:
+                continue
+            setter = "x_set_" + a
+            try:
+                getattr(widget, setter)(v)
+            except:
+                # If there is no setter, just ignore it
+                pass
+
+
+        # Connect signals
+        signals = info.get("Signals", [])
+        # This is, in principle, a list of [widget, signal, arg] triplets,
+        # but the 'arg' element may be missing. There may also be special
+        # forms, e.g. for dealing with 'internal' connections.
+        for conn in signals:
+            if conn[0] == "+INTERNAL":
+                source = self.getwidget(conn[1])
+                if not source:
+                    continue
+                source._connect(self, *conn[2:])
+
+            else:
+                w = self.widgets.get(conn[0])
+                Signal(w, *conn[1:])
 
 
     def getwidget(self, w):
         widget = self.widgets.get(w)
         if not widget:
-            gui_warning("Unknown widget: %s" % w)
+            gui_warning(_("Unknown widget: %s") % w)
         return widget
 
+
+#+++++++++++++++++++++++++++
+# Error handling
+def gui_error(message, title=None):
+    if not title:
+        title = _("Error")
+    d = QtGui.QMessageBox.critical(None, title, message)    #qt
+    app.exit(1)
+
+def gui_warning(message, title=None):
+    if not title:
+        title = _("Warning")
+    d = QtGui.QMessageBox.warning(None, title, message)     #qt
+#---------------------------
 
 #+++++++++++++++++++++++++++
 # Catch all unhandled errors.
 def errorTrap(type, value, tb):
     etext = "".join(traceback.format_exception(type, value, tb))
-    gui_error(etext, "This error could not be handled.")
+    gui_error(etext, _("This error could not be handled."))
 
 sys.excepthook = errorTrap
 #---------------------------
@@ -988,28 +914,23 @@ widget_table = {
     "LineEdit": LineEdit,
     "TextEdit": TextEdit,
     "HtmlView": HtmlView,
-    "SpinBox": SpinBox,
 }
 
 specials_table = {
     "textLineDialog": textLineDialog,
     "infoDialog": infoDialog,
     "confirmDialog": confirmDialog,
-    "errorDialog": gui_error,
-    "warningDialog": gui_warning,
     "fileDialog": fileDialog,
 }
 
 layout_table = {
-    "*VBOX*": VBOX,
-    "*HBOX*": HBOX,
-    "*GRID*": GRID,
-    "*+*": GRIDROW,
-    "*-": CSPAN,
-    "*|": RSPAN,
-    "*SPACE": SPACE,
-    "*VLINE": VLINE,
-    "*HLINE": HLINE,
+    "VBOX": VBOX,
+    "HBOX": HBOX,
+    "GRID": GRID,
+    "VSPACE": SPACE,
+    "HSPACE": SPACE,
+    "VLINE": VLINE,
+    "HLINE": HLINE,
 }
 
 
@@ -1025,24 +946,13 @@ class Input(QtCore.QThread):                                #qt
         self.lineReady = QtCore.SIGNAL("lineReady(QString)")    #qt
         self.input = input
         self.connect(self, self.lineReady, target)          #qt
-        self.event = threading.Event()
-        self.event.set()
 
     def run(self):
         while True:
             line = self.input.readline()
             if not line:        # Is this at all possible?
                 return
-            self.event.wait()
-            self.event.clear()
             self.emit(self.lineReady, line)                 #qt
 #---------------------------
 
-if __name__ == "__main__":
-    GuiApp()
-
-    ithread = Input(sys.stdin, guiapp.new_line)
-    ithread.start()
-
-    guiapp.qtapp.exec_()                                    #qt
 

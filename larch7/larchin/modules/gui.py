@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.28
+# 2009.10.11
 
 import os, pwd
 import json
@@ -62,10 +62,48 @@ class Ui:
         self.guiprocess = Popen(guiexec, cwd=base_dir, preexec_fn= chid,
                 stdin=PIPE, stdout=PIPE)
 
+        # Build the main window
+        self.newwidget("Window", "larchin:", title="larchin",
+                icon="larchin-icon.png", closesignal="$$$uiclose$$$")
+        # - Header
+        self.newwidget("Label", "larchin:i", image="larchin80.png")
+        self.newwidget("Label", "larchin:h", html='<span '
+                'style="font-size:xx-large; color:#c55500;">'
+                '<b>%s</b></span>' % _("<i>larch</i> Installer"))
+        self.newwidget("ToggleButton", "^larchin:showlog", text=_("View Log"),
+                tt=_("This button toggles the visibility of the log viewer"))
+        self.newwidget("ToggleButton", "^larchin:docs", text=_("Help"),
+                tt=_("Open the larchin docs in a browser"))
+        self.newwidget("Button", "^larchin:cancel", text=_("Cancel"),
+                tt=_("Stop the current action"))
+        self.newwidget("Button", "^larchin:quit", text=_("Quit"),
+                tt=_("Stop the current action and quit the program"))
+        self.newwidget("Label", "larchin:stageheader", align="center")
 
-#???
+        # - Main widget
+        self.newwidget("Stack", "larchin:stack", pages=[
+                "page:welcome",
+                "page:disks",
+                "page:autopart",])
+
+        # - Footer
+        self.newwidget("Button", "^larchin:forward", text=_("OK"),
+                tt=_("Execute any operations pending on this page and continue to next"))
+
+        self.layout("larchin:", ["*VBOX*",
+                ["*HBOX*", "larchin:i",
+                    ["*VBOX*",
+                        ["*HBOX*", "larchin:h", "*SPACE",
+                            "larchin:showlog", "larchin:docs",
+                            "larchin:cancel", "larchin:quit"],
+                        "larchin:stageheader"]],
+                "larchin:stack",
+                ["*HBOX*", "*SPACE", "larchin:forward"]
+                ])
+
+
     def go(self):
-        return
+        self.command("larchin:.show")
 
 
     def getline(self):
@@ -84,15 +122,30 @@ class Ui:
         self.sendui(c)
 
 
+    def asknowait(self, cmd, signal, *args):
+        """Send a request for information to the user interface.
+        The command is of the form 'widget.method', 'args' is the
+        list of arguments. The argument list is encoded as json for
+        transmission.
+        signal is the name of the signal to be sent by the ui to return
+        the result of the enquiry.
+        """
+        c = "?%s:%s" % (signal, cmd)
+        if args:
+            c += " " + json.dumps(args)
+        self.sendui(c)
+        return None
+
+
     def ask(self, cmd, *args):
         """Send a request for information to the user interface.
         To be used in the background thread (only '&'-signals!).
         The command is of the form 'widget.method', 'args' is the
         list of arguments. The argument list is encoded as json for
         transmission.
-        Then wait for the answer and return it as result.
+        Wait for the answer and return it as result.
         """
-        c = "?" + cmd
+        c = "?:" + cmd
         if args:
             c += " " + json.dumps(args)
         if not self.answer_event.is_set():
@@ -105,10 +158,23 @@ class Ui:
 
 
     def response(self, text):
-        if self.answer_event.is_set():
-            fatal_error(_("Unexpected response from ui:\n") + text)
-        self.answer = json.loads(text)
-        self.answer_event.set()
+        l, r = text.split(":", 1)
+        a = json.loads(r)
+        if l:
+            command.runsignal(l, a)
+        else:
+            if self.answer_event.is_set():
+                fatal_error(_("Unexpected response from ui:\n") + text)
+            self.answer = a
+            self.answer_event.set()
+
+
+    def newwidget(self, wtype, wname, **args):
+        self.sendui("%%%s %s %s" % (wtype, wname, json.dumps(args)))
+
+
+    def layout(self, wname, ltree):
+        self.sendui("$%s %s" % (wname, json.dumps(ltree)))
 
 
     def sendui(self, line):
@@ -122,28 +188,37 @@ class Ui:
         self.process_lock.release()
 
 
-    def infoDialog(self, message, title=None):
-        self.ask("infoDialog", message, title)
-        return True
+    def infoDialog(self, message, title=None, async=""):
+        if async:
+            return self.asknowait("infoDialog", async, message, title)
+        return self.ask("infoDialog", message, title)
 
 
-    def confirmDialog(self, message, title=None):
+    def confirmDialog(self, message, title=None, async=""):
+        if async:
+            return self.asknowait("confirmDialog", async, message, title)
         return self.ask("confirmDialog", message, title)
 
 
     def error(self, message, title=None, fatal=False):
-        self.sendui("_!_ " + json.dumps((fatal, message, title)))
+        self.command("errorDialog" if fatal else "warningDialog",
+            message, title)
 
 
     def busy(self):
-        self.command(":larchin.busy", ":stack", True)
-        self.command(":cancel.enable", True)
+        self.command("larchin:.busy", "larchin:stack", True)
+        self.command("larchin:cancel.enable", True)
 
 
     def completed(self, ok):
-        self.command(":cancel.enable", False)
-        self.command(":larchin.busy", ":stack", False)
+        self.command("larchin:cancel.enable", False)
+        self.command("larchin:.busy", "larchin:stack", False)
 
+
+    def set_stageheader(self, text):
+        self.command("larchin:stageheader.x__html",
+                '<span style="font-size:x-large; color:#55c500;">%s</span>'
+                % text)
 
 
 class Logger:
@@ -154,21 +229,44 @@ class Logger:
         if self.encoding == "UTF8":
             self.encoding = None
 
+        ui.newwidget("Window", "log:", title="larchin log", size="600_400",
+                icon="larchin-icon.png", closesignal="$$$hidelog$$$")
+        ui.newwidget("Label", "log:header",
+                text=_("Here you can follow the progress of the commands."))
+        ui.newwidget("TextEdit", "log:text", ro=True)
+        ui.newwidget("Button", "^log:clear", text=_("Clear"))
+        ui.newwidget("Button", "^log:hide", text=_("Hide"))
+
+        ui.layout("log:", ["*VBOX*", "log:header", "log:text",
+                ["*HBOX*", "*SPACE", "log:clear", "log:hide"]])
+
     def setVisible(self, on):
-        ui.command("log:log.setVisible", on)
+        ui.command("log:.setVisible", on)
 
     def clear(self):
-        ui.command("log:logtext.set")
+        ui.command("log:text.x__text")
 
     def addLine(self, line):
-#TODO: This is experimental - it is intended to work around problems arising
+#TODO: This line is experimental - it is intended to work around problems arising
 #      when the system encoding is not utf8.
         if self.encoding:
             line = line.decode(self.encoding, "replace").encode("UTF8")
-        ui.command("log:logtext.append_and_scroll", line)
+        ui.command("log:text.append_and_scroll", line)
 
     def undo(self):
-        ui.command("log:logtext.undo")
+        ui.command("log:text.undo")
 
     def quit(self):
         return
+
+
+class DocViewer:
+    def __init__(self):
+        ui.newwidget("Window", "doc:", title= _("larchin Help"), size="600_400",
+                icon="larchin-icon.png", closesignal="$$$hidedoc$$$")
+        ui.newwidget("HtmlView", "doc:content")
+        ui.newwidget("Button", "^doc:hide", text=_("Hide"))
+
+        ui.layout("doc:", ["*VBOX*", "doc:content",
+                ["*HBOX*", "*SPACE", "doc:hide"]])
+

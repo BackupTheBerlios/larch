@@ -19,15 +19,10 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.07
-
-MINSPLITSIZE = 20.0    # GB, if less available, no /home
-SWAPPZ0 = 5            # % of total, initial swap size, but:
-SWAPDEF = 1.0          # GB, max initial swap size
-SWAPMAXPZ = 10         # % of total, max swap size, but:
-SWAPMAX  = 4.0         # GB, absolute max swap size
+# 2009.10.12
 
 doc = _("""
+<h2>Automatic Partitioning</h2>
 <p>To make straightforward installations easier it is possible to choose
 a simple automatic division of your disk drive for the Arch Linux installation.
 </p>
@@ -39,12 +34,27 @@ existing partitions) by selecting 'Edit disk partitions manually' (or
 <p>EXCEPTION: if the existing operating system uses the NTFS file-system
 (Windows), it is also possible to use automatic partitioning, if enough
 space is free, or has been freed by deleting or shrinking one or more NTFS
-partitions.
+partitions. At present this method only supports retention of the first
+disk partition.
 </p>
-<p>Here only space after the last NTFS partition will be available for the
-new Linux installation. ??? Maybe just skip sdx1 if it is NTFS??? If you
-want to use some or all of the space occupied by Windows, you must shrink
-or remove the last NTS partitions first.??
+<h3>Swap Partition</h3>
+<p>You can choose to allocate space for a swap partition, which is especially
+useful if you don't have a lot of memory installed, or if you want to use
+'suspend-to-disk' (which must be set up separately, larchin itself does not
+set it up). It is difficult to say how much space you should allocate for
+a swap partition, it depends on your system and your usage patterns.
+</p>
+<h3>Partition for User Data</h3>
+<p>If you have enough free space on your device you also have the option of
+creating a separate partition for user data. This allows you to keep your data
+separate from the system files, so that the operating system can later be
+reinstalled without destroying your data. Traditionally this partition is
+mounted at /home, so all user files reside on it, but there are some advantages
+to using a different mount point. One potential advantage is that the
+configuration files for the system and various applications which are saved in
+a user's home directory (and which may cause problems if used by other systems,
+e.g. after a reinstallation) can easily be kept separate from the user's
+personal data. Here /data is offered as an alternative to /home.
 </p>""")
 
 
@@ -55,10 +65,70 @@ class Stage:
     def connect(self):
         return [
                 ("&auto-partition&", self.select_page),
+                ("autopart:free*changed", self.freesizechanged),
+                ("autopart:swapsize*changed", self.swapsizechanged),
+                ("autopart:swap*toggled", self.swaptoggled),
+                ("autopart:homesize*changed", self.homesizechanged),
+                ("autopart:home*toggled", self.hometoggled),
             ]
 
     def __init__(self, index):
         self.page_index = index
+        ui.newwidget("Label", "autopart:disk_l", text=_("Device:"))
+        ui.newwidget("LineEdit", "autopart:disk", ro=True)
+        ui.newwidget("Label", "autopart:disksize_l",
+                text=_("Total device capacity:"))
+        ui.newwidget("LineEdit", "autopart:disksize", ro=True)
+        ui.newwidget("Label", "autopart:free_l",
+                text=_("Leave unallocated:"))
+        ui.newwidget("SpinBox", "^autopart:free", decimals=0, min=0.0,
+                tt=_("You can choose to leave some of the space unallocated"))
+        ui.newwidget("Label", "autopart:reserved_l",
+                text=_("Reserved space:"))
+        ui.newwidget("LineEdit", "autopart:reserved", ro=True,
+                tt=_("Space not available because a Windows partition is to be retained"))
+
+        ui.newwidget("OptionalFrame", "^autopart:swap",
+                text=_("Create Swap Partition"))
+        ui.newwidget("Label", "autopart:swapsize_l",
+                text=_("Swap partition size (GB):"))
+        ui.newwidget("SpinBox", "^autopart:swapsize", decimals=1, min=0.5,
+                tt=_("Enter the desired size for the swap partition here"))
+        ui.newwidget("CheckBox", "^autopart:swapcheck", tt=_(tt_seedocs),
+                text=_("Check for bad blocks when formatting."
+                        " Don't use this in VirtualBox (it takes forever)."))
+
+        ui.newwidget("OptionalFrame", "^autopart:home",
+                text=_("Create Separate Partition for User Data"))
+        ui.newwidget("Label", "autopart:homesize_l",
+                text=_("User data partition size (GB):"))
+        ui.newwidget("SpinBox", "^autopart:homesize", decimals=0, min=1.0,
+                tt=_("Enter the desired size for the user data partition here"))
+        ui.newwidget("CheckBox", "^autopart:homedata", tt=_(tt_seedocs),
+                text=_("Create /data instead of /home partition"))
+
+        ui.newwidget("Label", "autopart:syssize_l",
+                text=_("Space for Arch root partition:"))
+        ui.newwidget("LineEdit", "autopart:syssize", ro=True)
+
+        ui.layout("page:autopart", ["*VBOX*",
+                ["*GRID*",
+                    ["*+*", "autopart:disk_l", "autopart:disk", ["*SPACE", 100],
+                            "autopart:disksize_l", "autopart:disksize"],
+                    ["*+*", "autopart:free_l", "autopart:free", "*|",
+                            "autopart:reserved_l", "autopart:reserved"]],
+                "autopart:swap",
+                "autopart:home",
+                ["*HBOX*", "*SPACE", "autopart:syssize_l", "autopart:syssize"]
+                ])
+
+        ui.layout("autopart:home", ["*VBOX*",
+                ["*HBOX*", "autopart:homesize_l", "autopart:homesize"],
+                "autopart:homedata"])
+
+        ui.layout("autopart:swap", ["*VBOX*",
+                ["*HBOX*", "autopart:swapsize_l", "autopart:swapsize"],
+                "autopart:swapcheck"])
 
     def select_page(self, device, keep1):
         self.device = device
@@ -67,7 +137,8 @@ class Stage:
                 _("Automatic Partitioning"))
 
     def setup(self):
-        return
+        self.systemsize = self.get_system_size_estimate()
+        self.memsize = float(backend.xlist("get-memsize")[1][0]) * 1024 / 10**9
 
 
 #TODO
@@ -75,127 +146,111 @@ class Stage:
         # Info on drive
         partsizes = backend.xlist("partsizes " + self.device)[1]
         assert len(partsizes) > 1
-
-        debug(partsizes[0])
-        debug(partsizes[1])
-
         self.disksize = float(partsizes[0].split()[1]) * 1024 / 10**9
         self.p1size = (float(partsizes[1].split()[1]) * 1024.0 / 10**9
                 if self.keep1 else 0.0)
-        ui.command(":autopart_disk.set", self.device)
-        ui.command(":autopart_disksize.set", "%4.0f GB" % self.disksize)
-        ui.command(":autopart_reserved.set", "%4.0f GB" % self.p1size)
-
-        return
-
-
-
-        self.device = install.get_config('autodevice', trap=False)
-        if not self.device:
-            self.device = install.listDevices()[0][0]
-        self.dinfo = install.getDeviceInfo(self.device)
-
-        # Info: total drive size
-        totalsize = self.addWidget(ShowInfoWidget(
-                _("Total capacity of drive %s:  ") % self.device))
-        totalsize.set(self.dinfo[0])
-
-        # Get partition info (consider only space after NTFS partitions)
-        parts = install.getParts(self.device)
-        self.startpart = 1
-        self.startsector = 0
-        for p in parts:
-            if (p[1] == 'ntfs'):
-                self.startpart = p[0] + 1
-                self.startsector = p[4] + 1
-
-        avsec = (self.dinfo[1] * self.dinfo[2] - self.startsector)
-        self.avG = avsec * self.dinfo[3] / 1.0e9
-        if (self.startpart > 1):
-            popupMessage(_("One or more NTFS (Windows) partitions were"
-                    " found. These will be retained. The available space"
-                    " is thus reduced to %3.1f GB.\n"
-                    "Allocation will begin at partition %d.") %
-                        (self.avG, self.startpart))
-
-        self.homesizeG = 0.0
-        self.swapsizeG = 0.0
-        self.root = None    # To suppress writing before widget is created
-
-        self.swapfc = None  # To suppress errors due to widget not yet ready
-        # swap size
-        self.swapWidget()
-
-        self.swapfc = self.addCheckButton(_("Check for bad blocks "
-                "when formatting swap partition.\nClear this when running "
-                "in VirtualBox (it takes forever)."))
-        self.setCheck(self.swapfc, True)
-
-        # home size
-        self.homeWidget()
-
-        # root size
-        self.root = self.addWidget(ShowInfoWidget(
-                _("Space for Linux system:  ")))
-        self.adjustroot()
-
-    def swapsize_cb(self, sizeG):
-        self.swapsizeG = sizeG
-        self.adjustroot()
-        if self.swapfc:
-            self.swapfc.set_sensitive(sizeG > 0.0)
-
-    def homesize_cb(self, sizeG):
-        self.homesizeG = sizeG
-        self.adjustroot()
-
-    def adjustroot(self):
-        self.rootsizeG = self.avG - self.swapsizeG - self.homesizeG
-        if self.root:
-            self.root.set("%8.1f GB" % self.rootsizeG)
-
-    def homeWidget(self):
-        if (self.avG >= MINSPLITSIZE):
-            self.home = self.addWidget(PartitionWidget(
-                _("Set size of '/home' partition (GB)"),
-                _("Create partition for user data (/home)"),
-                _("The creation of a separate partition"
-                  " for user data (in the folder /home) allows you to keep"
-                  " this separate from the system files.\n"
-                  "One advantage is that the operating system can later be"
-                  " freshly installed without destroying your data."),
-                self.homesize_cb))
-
-            home_upper = self.avG - SWAPMAX - 5.0
-            home_value = home_upper - 2.0
-            self.home.set_adjust(upper=home_upper, value=home_value)
-            self.home.set_on(True)
-
+        ui.command("autopart:disk.x__text", self.device)
+        ui.command("autopart:disksize.x__text", "%4.0f GB" % self.disksize)
+        ui.command("autopart:reserved.x__text", "%4.0f GB" % self.p1size)
+        # Set up unallocated space display
+        self.unallocated = 0.0
+        self.maxunallocated = self.disksize - self.p1size - self.systemsize - 15.0
+        # Also use this as criterion for possibility of user data partition
+        self.datapart = self.maxunallocated > 0.0
+        ui.command("autopart:free.enable", self.datapart)
+        ui.command("autopart:free_l.enable", self.datapart)
+        ui.command("autopart:home.enable", self.datapart)
+        if self.datapart:
+            ui.command("autopart:free.x__max", self.maxunallocated)
+            ui.command("autopart:free.x__value", 0.0)
+            self.datasize = self.maxunallocated + 5.0
+            self.datasize_old = self.datasize
+            if self.datasize > 20.0:
+                ui.command("autopart:home.opton", True)
+                ui.command("autopart:homesize.x__max", self.datasize)
+                ui.command("autopart:homesize.x__value", self.datasize)
+            else:
+                self.datasize = 0
+                ui.command("autopart:home.opton", False)
         else:
-            self.addLabel(_("There is too little free space on this"
-                    " drive to make a separate partition for user data"
-                    " (/home) worthwhile."))
+            self.datasize = 0.0
+        # Set up swap partition display
+        ui.command("autopart:swap.opton", True)
+        self.swapsize = 1.0
+        self.swapsize_old = 1.0
+        self.recalculate()
 
-    def swapWidget(self):
-        self.swap = self.addWidget(PartitionWidget(
-                _("Set size of swap partition (GB)"),
-                _("Create swap partition"),
-                 _("No swap partition allocated.\n"
-                "Unless you have more memory than you will ever need"
-                " it is a good idea to set aside some disk space"
-                " for a swap partition. 0.5 - 1.0 GB should be plenty"
-                " for most purposes."),
-                self.swapsize_cb))
 
-        swap_upper = self.avG * SWAPMAXPZ / 100
-        if (swap_upper > SWAPMAX):
-            swap_upper = SWAPMAX
-        swap_value = self.avG * SWAPPZ0 / 100
-        if (swap_value > SWAPDEF):
-            swap_value = SWAPDEF
-        self.swap.set_adjust(upper=swap_upper, value=swap_value)
-        self.swap.set_on(True)
+    def recalculate(self):
+        self.freesize = (self.disksize - self.p1size - self.unallocated
+                - self.systemsize - 5.0)
 
+        # Set up swap partition display
+        if self.swapsize:
+            maxswap = round(self.memsize + 0.5) if self.memsize > 2.0 else 2.0
+            if (self.freesize - maxswap) < 10.0:
+                maxswap = 1.0
+            ui.command("autopart:swapsize.x__max", maxswap)
+            if self.swapsize > maxswap:
+                self.swapsize = maxswap
+            ui.command("autopart:swapsize.x__value", self.swapsize)
+
+        # Set up data partition display
+        if self.datapart:
+            maxdata = self.freesize - self.swapsize
+            if maxdata > 30.0:
+                maxdata = maxdata - 10.0
+            elif maxdata > 10.0:
+                maxdata = 5.0 + maxdata/2
+            ui.command("autopart:homesize.x__max", maxdata)
+            if self.datasize > maxdata:
+                self.datasize = maxdata
+                ui.command("autopart:homesize.x__value", maxdata)
+
+        self.rootsize = (self.disksize - self.p1size - self.unallocated
+                - self.swapsize - self.datasize)
+        ui.command("autopart:syssize.x__text", "%5.1f GB" % self.rootsize)
+
+
+#TODO
+    def get_system_size_estimate(self):
+        return 5.0
+
+
+    def freesizechanged(self, size):
+        self.unallocated = size
+        self.recalculate()
+
+    def swaptoggled(self, on):
+        if on:
+            self.swapsize = self.swapsize_old
+        else:
+            self.swapsize_old = self.swapsize
+            self.swapsize = 0.0
+        self.recalculate()
+
+    def swapsizechanged(self, size):
+        self.swapsize = size
+        self.recalculate()
+
+    def hometoggled(self, on):
+        if on:
+            self.datasize = self.datasize_old
+        else:
+            self.datasize_old = self.datasize
+            self.datasize = 0.0
+        self.recalculate()
+
+    def homesizechanged(self, size):
+        self.datasize = size
+        self.recalculate()
+
+
+
+
+
+#TODO: ok method
+# This forward method is still from the old version
     def forward(self):
         if not popupWarning(_("You are about to perform a destructive"
                 " operation on the data on your disk drive (%s):\n"
