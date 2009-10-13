@@ -19,7 +19,9 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.12
+# 2009.10.13
+
+from backend import DiskInfo
 
 doc = _("""
 <h2>Automatic Partitioning</h2>
@@ -142,14 +144,16 @@ class Stage:
         self.memsize = float(backend.xlist("get-memsize")[1][0]) * 1024 / 10**9
 
 
-#TODO
     def init(self):
         # Info on drive
-        partsizes = backend.xlist("partsizes " + self.device)[1]
-        assert len(partsizes) > 1
-        self.disksize = float(partsizes[0].split()[1]) * 1024 / 10**9
-        self.p1size = (float(partsizes[1].split()[1]) * 1024.0 / 10**9
-                if self.keep1 else 0.0)
+        di = DiskInfo(self.device)
+        c2G = float(di.cyl2B()) / 10**9
+        self.disksize = di.drvcyls * c2G
+        if self.keep1:
+            p = di.parts[0]
+            self.p1size = (p[2]-p[1]+1)*c2G
+        else:
+            self.p1size = 0.0
         ui.command("autopart:disk.x__text", self.device)
         ui.command("autopart:disksize.x__text", "%4.0f GB" % self.disksize)
         ui.command("autopart:reserved.x__text", "%4.0f GB" % self.p1size)
@@ -247,11 +251,6 @@ class Stage:
         self.recalculate()
 
 
-
-
-
-#TODO: ok method
-# This method is still from the old version
     def ok(self):
         ui.confirmDialog(_("You are about to perform a destructive"
                 " operation on the data on your disk drive (%s):\n"
@@ -276,26 +275,57 @@ class Stage:
         # be handled - given the appropriate information - by the
         # installation stage.
 
-        dinfo = backend.getDeviceInfo(self.device)
-
-# From now on I should probably only test in VirtualBox, as any further
-# steps are likely to destroy the system!
-
-        debug(repr(dinfo))
-        import time
-        time.sleep(5)
-
-        return
-
         startpart = 2 if self.keep1 else 1
-        # Remove all existing partitions from self.startpart
+        # Remove all existing partitions from startpart
         if not backend.rmparts(self.device, startpart):
             return
 
-#TODO ...
-        secspercyl = self.dinfo[2]
+        diskinfo = DiskInfo(self.device)
+        # Check that the free space corresponds to what is expected.
+        # Convert GB to cylinders for (self.disksize - self.p1size)
+        allfreecyls = diskinfo.get_freecyls()
+        bytespercyl = diskinfo.cyl2B()
+        deviation = abs(self.disksize - self.p1size -
+                (allfreecyls * bytespercyl / 10**9))
+        if deviation > 1:
+            fatal_error("BUG in autopart: free space deviation = %5.1f"
+                    % deviation)
+
+        # Allocate number of cylinders for the largest partition last,
+        # just in case it gets tight ...
+        newparts = []
+        maxp = None
+        maxs = 0
+        for s, p in ((self.rootsize, startpart), (self.swapsize, startpart + 1),
+                (self.datasize, 5), (self.unallocated, -1)):
+            if s > 0.1:
+                # Convert GB to cylinders
+                entry = [p, int((s * 10**9 / bytespercyl) + 0.5)]
+                newparts.append(entry)
+                if s > maxs:
+                    maxs = s
+                    maxp = entry
+        sum = 0
+        for ps in newparts:
+            if ps == maxp:
+                continue
+            sum += ps[1]
+        maxp[1] = allfreecyls - sum
+
+        debug(repr(newparts))
+        return
+
+# Then use: parted -s self.device unit cyl mkpart primary ext2 0 20
+# or whatever to create a partition
+
+
+
+
+#TODO:
+# This method is still from the old version
+        secspercyl = dinfo[2]
         startcyl = (self.startsector + secspercyl - 1) / secspercyl
-        endcyl = self.dinfo[1]
+        endcyl = dinfo[1]
         # Note that the ending cylinder referred to in the commands
         # will not be included in the partition, it is available to
         # be the start of the next one.

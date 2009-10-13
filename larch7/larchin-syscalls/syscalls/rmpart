@@ -2,7 +2,7 @@
 
 # rmpart
 
-# Remove the partitions (argument $2) on the given (argument $1) device
+# Remove the partition (argument $2) on the given (argument $1) device
 # using parted.
 
 if ! parted -s $1 rm $2; then

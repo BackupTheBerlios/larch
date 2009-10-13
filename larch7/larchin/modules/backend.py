@@ -194,43 +194,75 @@ class Backend:
 ########################################################################
 # Interface functions
 
-    def getDeviceInfo(self, dev):
-        """Get info on drive and partitions (dev="/dev/sda", etc.)
-        Return tuple: ( drive size as string,
-                        drive size in cylinders,
-                        cylinder size in sectors,
-                        sector size in bytes )
-        """
-        dinfo = self.xlist("fdisk-l %s" % dev)[1]
-
-        # get the drive size as a string
-        ds = re.search(r"%s:([^,]+)" % dev, dinfo[0])
-        dsize = ds.group(1)
-
-        # get the drive size in cylinders
-        ds = re.search(r",[^,]+,[ ]*([0-9]+)", dinfo[1])
-        dcsize = ds.group(1)
-
-        # get cylinder size in sectors and sector size in bytes
-        ds = re.search(r"([0-9]+)[ ]*\*[ ]*([0-9]+)", dinfo[2])
-        csize = ds.group(1)
-        ssize = ds.group(2)
-
-        return (dsize, int(dcsize), int(csize), int(ssize))
-
-
     def rmparts(self, dev, partno):
         """Remove all partitions on the given device starting from the
         given partition number.
         """
-        parts = self.xlist("listparts " + dev)[1]
-        i = len(parts)
-        while (i > 0):
-            i -= 1
-            p = int(parts[i])
-            if (p >= partno) and not self.xcall("rmpart %s %d" % (dev, p))[0]:
-                run_error(_("Couldn't remove partition %s%d") % (dev, p))
+        parts = DiskInfo(dev).parts
+        parts.reverse()
+        for p in parts:
+            pn = int(p[0][8:])
+            if (pn >= partno) and not self.xlist("rmpart %s %d" % (dev, pn))[0]:
+                run_error(_("Couldn't remove partition %s") % p[0])
                 return False
         return True
+
+
+
+class DiskInfo:
+    """Get info on drive and partitions.
+
+    It uses 'fdisk -l' to get the information about the drive.
+    The output of the call is parsed to extract useful information.
+    Of course the instance must be discarded as soon as changes are
+    made to the device.
+    """
+    def __init__(self, device):
+        self.device = device
+        info = backend.xlist("fdisk-l " + device)[1]
+        while not info[0].startswith("Disk"):
+            del(info[0])
+        self.driveinfo = info[0]
+
+        # get the drive size in cylinders
+        self.drvcyls = int(re.search(r",[^,]+,[ ]*([0-9]+)", info[1]).group(1))
+
+        # get cylinder size in sectors and sector size in bytes
+        ds = re.search(r"([0-9]+)[ ]*\*[ ]*([0-9]+)", info[2])
+        self.cylsects = int(ds.group(1))
+        self.secbytes = int(ds.group(2))
+
+        # Get partition info
+        self.parts = []
+        for pline in info[5:]:
+            if pline.startswith("/dev/"):
+                items = pline.replace("*", " ").split(None, 5)
+                self.parts.append((items[0], int(items[1]), int(items[2]),
+                        items[4], items[5]))
+                # That's (device, startcyl, endcyl, type-id, type-name)
+
+    def drivesize_str(self):
+        """Get the drive size as a string.
+        """
+        return re.search(r"%s:([^,]+)" % self.device, self.driveinfo).group(1)
+
+    def cyl2B(self):
+        """Return the number of bytes per cylinder.
+        """
+        return self.cylsects * self.secbytes
+
+    def get_freecyls(self):
+        """Assume the free space is at the end of the drive!
+        Return the number of free cylinders at the end of the device.
+        """
+        lastcyl = 0
+        for p in self.parts:
+            if p[2] > lastcyl:
+                lastcyl = p[2]
+        return self.drvcyls - lastcyl
+
+
+
+
 
 

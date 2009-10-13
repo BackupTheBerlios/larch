@@ -19,8 +19,10 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.12
+# 2009.10.13
 
+from backend import DiskInfo
+import re
 
 doc = _("""
 <h2>Disk Selection</h2>
@@ -49,6 +51,7 @@ will be skipped if the automatic partitioning scheme is accepted.
 not immediately cause it to be modified, so try it out without fear. You
 can return here and choose manual partitioning later if necessary.
 </p>""")
+
 
 class Stage:
     def getHelp(self):
@@ -121,37 +124,40 @@ class Stage:
 
 
     def init(self):
-        count = 0
-        while True:
+        # If devices are added (by writing partition tables to blank devices)
+        # the detection process should be repeated, so a loop is used
+        rex = re.compile(r"Error: *(/dev/[^:]*): *unrec[^:]*label")
+        for round in (0, 1):
+            newdev = False
             ld = backend.xlist("get-devices")
             # Note that if one of these has mounted partitions it will not be
             # available for automatic partitioning, and should thus not be
             # included in the list used for automatic installation
             lines = []
-#TODO: Test this with fresh disk in virtualbox ...
             for line in ld[1]:
                 # In virtualbox with a fresh virtual disk, we can get this:
                 # "Error: /dev/sda: unrecognised disk label:"
-                if ("Error:" in line) and ("unrecognised" in line):
-                    if count < 0:
+                # but the output line is pretty mangled, so it needs filtering
+                m = rex.search(line)
+                if m:
+                    if round > 0:
                         # Don't offer formatting on second round
                         continue
-                    dev = line.split(":")[0]
-                    if ui.confirmDialog(_("Error scanning devices:\n %s\n"
+                    dev = m.group(1)
+                    if ui.confirmDialog(_("Error scanning devices: "
+                            "unrecognised disk label\n\n"
                             "Your disk (%s) seems to be empty and unformatted. "
                             "Shall I prepare it for use (create an msdos "
                             "partition table on it)?")
-                            % (line, dev)):
+                            % dev):
                         if backend.xlist("make-parttable %s" % dev)[0]:
-                            count += 1
+                            newdev = True
                         else:
                             run_error(_("Couldn't create partition table on %s" % dev))
                 else:
                     lines.append(line)
 
-            if count <= 0:
-                break
-            count = -1
+            if not newdev: break
 
         if lines:
             mounts = backend.xlist("get-mounts")[1]
@@ -181,14 +187,14 @@ class Stage:
     def select_device(self, index):
         self.device_index = index
         self.device = self.devices[index][1]
-        parts = backend.xlist("listparts %s" % self.device)[1]
+        di = DiskInfo(self.device)
+        # Convert size from cyls to GB
+        c2G = float(di.cyl2B()) / 10**9
+        parts = di.parts
         pinfo = []
         for p in parts:
-            ps = p.split(None, 4)
-            if ps[1] != "0":
-                # Convert size from MiB to GB
-                size = "%-7.2f" % (float(ps[1]) * 10**3 / 2**20)
-                pinfo.append((ps[0], size, ps[4]))
+            size = "%-7.2f" % ((p[2]-p[1]+1)*c2G)
+            pinfo.append((p[0], size, p[4]))
         ui.command("disks:device-partitions.set", pinfo)
         ui.command("disks:device-partitions.compact")
 
@@ -199,13 +205,12 @@ class Stage:
         ui.command("disks:ntfs-shrink.enable", self.ntfs1)
 
         # If device has mounted partition(s), it is not autopartitionable
-#TODO: remove next and uncomment following
-        noauto = False
-        #noauto = (self.devices[index][0] == '-')
+        #Might be useful for testing: noauto = False
+        noauto = (self.devices[index][0] == '-')
 
         size = self.devices[index][2]
         if size.endswith("GB"):
-            if int(size[:-2]) < 10:
+            if float(size[:-2]) < 10.0:
                 noauto = True
         else:
             noauto = True

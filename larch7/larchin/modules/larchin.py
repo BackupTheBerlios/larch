@@ -75,7 +75,7 @@ def debug(text):
 __builtin__.debug = debug
 
 def bug(text):
-    errout("BUG: " + text.strip() + "\n")
+    errout("BUG: " + text.strip() + "\n", 1)
 __builtin__.bug = bug
 
 

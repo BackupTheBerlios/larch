@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# get-part-sector-info
+
+# Get info on the drive (argument $1) and its partitions using parted.
+# Set unit to sectors, include free space.
+
+#parted -sm $1 unit s print free | grep -E "^[0-9]+:"
+parted -sm $1 unit s print free

@@ -2,7 +2,15 @@
 
 # partsizes
 
-# Get a list of partitions and their sizes on the given (argument $1) device
+# Get a list of partitions and their sizes (in blocks) on the given
+# (argument $1) device.
+# The first result line is for the whole device.
+
+
+# Unfortunately this is unreliable if the partition tables change ...
+# Use fdisk -l (or parted?) instead.
+
+
 
 dev=${1##*/}
 cat /proc/partitions | grep "$dev" | while read a b s d; do echo "$d $s"; done

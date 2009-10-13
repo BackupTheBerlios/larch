@@ -2,10 +2,7 @@
 
 # listparts
 
-# Get a list of partitions on the given (argument $1) device using parted ... or sfdisk
-
-# This doesn't mark Extended partitions ...
-#LANG=C parted -sm $1 print | grep '^[0-9]\+' | cut -d':' -f1,4,5
+# Get a list of partitions + info on the given (argument $1) device
 
 # so this might be better, but more complicated to filter
 LANG=C sfdisk -uM -l $1 | grep '^/dev/' | tr -d '*+-' | while read d x y m b i t; do
