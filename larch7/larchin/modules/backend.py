@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.12
+# 2009.10.14
 
 from subprocess import Popen, PIPE, STDOUT
 import os, threading
@@ -159,6 +159,14 @@ class Backend:
         return (rc == 0, lines)
 
 
+    def xcheck(self, cmd, opt="", onfail=None):
+        ok, l = self.xlist(cmd, opt)
+        if not ok:
+            run_error(onfail if onfail else
+                    (_("Operation failed:\n  %s") % cmd))
+        return ok
+
+
     def killprocess(self):
         self.process_lock.acquire()
         if self.process:
@@ -194,38 +202,106 @@ class Backend:
 ########################################################################
 # Interface functions
 
-    def rmparts(self, dev, partno):
+    def rmparts(self, dev, frompartno):
         """Remove all partitions on the given device starting from the
         given partition number.
         """
         parts = DiskInfo(dev).parts
         parts.reverse()
         for p in parts:
-            pn = int(p[0][8:])
-            if (pn >= partno) and not self.xlist("rmpart %s %d" % (dev, pn))[0]:
-                run_error(_("Couldn't remove partition %s") % p[0])
+            pn = int(p[0][len(dev):])
+            if (pn >= frompartno) and not self.rmpart(dev, pn):
                 return False
         return True
 
 
-    def newpart(self, device, primary, ncyls, startcyl=-1, swap=False):
+    def rmpart(self, dev, partno):
+        """Remove the given partition.
+        """
+        return self.xcheck("rmpart %s %d" % (device, exp),
+                onfail=_("Couldn't remove partition %s%d")
+                        % (device, exp))
+
+
+    def newpart(self, device, primary, ncyls, swap=False):
         """Create a partition on the given device.
-        If startcyl is not given, assume the partition is to be created
-        immediately after the last occupied cylinder.
+        The partition will be created immediately after the last occupied
+        cylinder.
         Only Linux and Linux Swap partition types are supported.
         Return the partition number of the created partition.
         """
+        # This is a simple partitioning tool, which only supports
+        # adding partitions sequentially, with all primary partitions
+        # being before the extended partition, so once a logical
+        # partition has been added, it is not possible to add further
+        # primary ones.
         di = DiskInfo(device)
-#TODO
-# Do I want to handle resizing of an extended partition to accommodate
-# new partitions, or do I just allocate all remaining space to it when
-# the first logical partition is added? If I use the latter approach
-# it would mean any elaborate editing would have to be delegated to
-# gparted or cfdisk.
+        pmax = 0            # Record highest partition number
+        lim = -1            # Used for seeking last used cylinder
+        exp = 0             # Number of extended partition
+        ex0, ex1 = 0, -1    # Extended partition start and end
+        log0, log1 = 0, -1  # Start and end of area used by logical partitions
+        for p in di.parts:
+            pn = int(p[0][len(device):])
+            scyl, ecyl = p[1:3]
+            if pn <= 4:
+                if exp:
+                    run_error(_("Not supported: primary partition (%s%d)\n"
+                            "has higher partition number than extended "
+                            "partition") % (device, pn))
+                    return ""
+            if scyl <= lim:
+                run_error(_("Partitions must be ordered on the device.\n"
+                        "%s%d is out of order.") % (device, pn))
+                return ""
+            if p[3] in ("5", "f"):
+                # extended
+                exp = pn
+                ex0, ex1 = scyl, ecyl
+                continue
+            pmax = pn
+            lim = ecyl
 
-        # Use: parted -s self.device unit cyl mkpart primary ext2 0 20
-        # or whatever to create the partition
+        startcyl = lim + 1
+        endcyl = lim + ncyls
+        if endcyl >= di.drvcyls:
+            run_error(_("Too little space at end of drive for new partition"))
+            return ""
+        if exp and (pmax <= 4):
+            # Remove the extended partition, which is empty anyway
+            if not self.rmpart(device, exp):
+                return ""
+            pmax = exp - 1
+        if primary:
+            if pmax >= 4:
+                run_error(_("Cannot add primary partition to %s") % device)
+                return ""
+            t = "primary"
+        else:
+            t = "logical"
+            if pmax > 4:
+                # resize extended partition
+                if not self.xcheck("resize %d %d %d" % (device, exp,
+                                ex0, endcyl),
+                        onfail=_("Couldn't resize extended partition %s%d")
+                                % (device, exp)):
+                    return False
+            else:
+                # create extended partition
+                if not self.xcheck("newpart %s %d %d extended" % (device,
+                                startcyl, endcyl),
+                        onfail=_("Couldn't create extended partition on %s")
+                                % device):
+                    return False
+            if pmax < 4:
+                pmax = 4
 
+        if self.xcheck("newpart %s %d %d %s %s" % (device, startcyl, endcyl,
+                t, "linux-swap" if swap else "ext2")):
+            return "%s%d" % (device, pmax + 1)
+        else:
+            run_error(_("Couldn't add new partition to %s") % device)
+            return ""
 
 
     def mkswap(self, partition, check):
@@ -233,7 +309,8 @@ class Backend:
         check is True and bad blocks are found, so including it is a bit
         pointless, but maybe I'll find out one day ...
         """
-        self.xlist("swap-format " + ("-c " if check else "") + partition)
+        return self.xlist("swap-format " + ("-c " if check else "")
+                + partition)[0]
 
 
 class DiskInfo:

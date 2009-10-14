@@ -343,7 +343,9 @@ class Stage:
             else:
                 t = "primary"
             swap = (m=="swap")
-            part = backend.newpart(t, s, swap)
+            part = backend.newpart(self.device, t, s, swap)
+            if not part:
+                return
             if swap:
                 backend.mkswap(part, self.swapcheck)
             else:

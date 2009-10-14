@@ -5,6 +5,6 @@
 # Create a new partition on the given device (argument $1)
 # $2 - start position (cylinders)
 # $3 - end position (cylinders)
-# $4 - fstype (ext2/linux-swap/... absent for extended partition)
-# $5 - primary/logical/extended
-parted -s $1 unit cyl mkpart $5 $4 $2 $3
+# $4 - primary/logical/extended
+# $5 - fstype (ext2/linux-swap/... absent for extended partition)
+parted -s $1 unit cyl mkpart $4 $5 $2 $3

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# resizepart
+
+# Resize a partition on the given device (argument $1)
+# $2 - partition number
+# $3 - new start position (cylinders)
+# $4 - new end position (cylinders)
+parted -s $1 unit cyl resize $2 $3 $4
