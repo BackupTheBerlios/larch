@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.13
+# 2009.10.14
 
 from backend import DiskInfo
 
@@ -73,6 +73,8 @@ class Stage:
                 ("autopart:homesize*changed", self.homesizechanged),
                 ("autopart:home*toggled", self.hometoggled),
                 ("&autopartition-run&", self.partition),
+                ("autopart:swapcheck*toggled", self.swapcheck_toggle),
+                ("autopart:homedata*toggled", self.homedata_toggle),
             ]
 
     def __init__(self, index):
@@ -185,6 +187,11 @@ class Stage:
         self.swapsize_old = 1.0
         self.recalculate()
 
+        self.swapcheck = False
+        ui.command("autopart:swapcheck.set", False)
+        self.homedata = False
+        ui.command("autopart:homedata.set", False)
+
 
     def recalculate(self):
         self.freesize = (self.disksize - self.p1size - self.unallocated
@@ -251,6 +258,14 @@ class Stage:
         self.recalculate()
 
 
+    def swapcheck_toggle(self, on):
+        self.swapcheck = on
+
+
+    def homedata_toggle(self, on):
+        self.homedata = on
+
+
     def ok(self):
         ui.confirmDialog(_("You are about to perform a destructive"
                 " operation on the data on your disk drive (%s):\n"
@@ -296,11 +311,14 @@ class Stage:
         newparts = []
         maxp = None
         maxs = 0
-        for s, p in ((self.rootsize, startpart), (self.swapsize, startpart + 1),
-                (self.datasize, 5), (self.unallocated, -1)):
+        for m, s, p in (
+                ("/", self.rootsize, startpart),
+                ("swap", self.swapsize, startpart + 1),
+                ("/data" if self.homedata else "/home", self.datasize, 5),
+                ("", self.unallocated, -1)):
             if s > 0.1:
                 # Convert GB to cylinders
-                entry = [p, int((s * 10**9 / bytespercyl) + 0.5)]
+                entry = [p, int((s * 10**9 / bytespercyl) + 0.5), m]
                 newparts.append(entry)
                 if s > maxs:
                     maxs = s
@@ -315,9 +333,21 @@ class Stage:
         debug(repr(newparts))
         return
 
-# Then use: parted -s self.device unit cyl mkpart primary ext2 0 20
-# or whatever to create a partition
-
+        # Create the partitions
+        iparts = []
+        for p, s, m in newparts:
+            if p < 0:
+                continue
+            if p > 4:
+                t = "logical"
+            else:
+                t = "primary"
+            swap = (m=="swap")
+            part = backend.newpart(t, s, swap)
+            if swap:
+                backend.mkswap(part, self.swapcheck)
+            else:
+                iparts.append((m, part))
 
 
 

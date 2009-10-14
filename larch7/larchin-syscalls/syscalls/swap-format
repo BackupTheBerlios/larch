@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# swap-format
+
+# Format a swap partition (argument = options ... device)
+
+mkswap $*

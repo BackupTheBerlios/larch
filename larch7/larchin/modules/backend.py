@@ -208,6 +208,33 @@ class Backend:
         return True
 
 
+    def newpart(self, device, primary, ncyls, startcyl=-1, swap=False):
+        """Create a partition on the given device.
+        If startcyl is not given, assume the partition is to be created
+        immediately after the last occupied cylinder.
+        Only Linux and Linux Swap partition types are supported.
+        Return the partition number of the created partition.
+        """
+        di = DiskInfo(device)
+#TODO
+# Do I want to handle resizing of an extended partition to accommodate
+# new partitions, or do I just allocate all remaining space to it when
+# the first logical partition is added? If I use the latter approach
+# it would mean any elaborate editing would have to be delegated to
+# gparted or cfdisk.
+
+        # Use: parted -s self.device unit cyl mkpart primary ext2 0 20
+        # or whatever to create the partition
+
+
+
+    def mkswap(self, partition, check):
+        """Format the given swap partition. I don't know what happens if
+        check is True and bad blocks are found, so including it is a bit
+        pointless, but maybe I'll find out one day ...
+        """
+        self.xlist("swap-format " + ("-c " if check else "") + partition)
+
 
 class DiskInfo:
     """Get info on drive and partitions.
@@ -237,9 +264,11 @@ class DiskInfo:
         for pline in info[5:]:
             if pline.startswith("/dev/"):
                 items = pline.replace("*", " ").split(None, 5)
-                self.parts.append((items[0], int(items[1]), int(items[2]),
+                self.parts.append((items[0], int(items[1])-1, int(items[2])-1,
                         items[4], items[5]))
                 # That's (device, startcyl, endcyl, type-id, type-name)
+                # fdisk counts cylinders from 1, but sfdisk and parted
+                # count from 0, so adjust the values here to start from 0.
 
     def drivesize_str(self):
         """Get the drive size as a string.
@@ -259,7 +288,7 @@ class DiskInfo:
         for p in self.parts:
             if p[2] > lastcyl:
                 lastcyl = p[2]
-        return self.drvcyls - lastcyl
+        return self.drvcyls - lastcyl - 1   # cylinder numbers start at 0
 
 
 
