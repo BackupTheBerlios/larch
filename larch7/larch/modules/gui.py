@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.16
+# 2009.10.15
 
 import json
 import threading
@@ -121,6 +121,7 @@ class Ui:
 
 
     def completed(self, ok):
+        # 'ok' is only used by the console interface
         self.command(":cancel.enable", False)
         self.command(":larch.busy", ":notebook", False)
 

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.24
+# 2009.10.15
 
 
 """
@@ -435,7 +435,7 @@ class Command:
                 fields = line.replace("*", "").replace(" - ", " ? ")
                 fields = fields.replace("+", "").replace("-", "").split()
                 #debug("F5 '%s'" % fields[5])
-                if fields[5] in ["0", "5", "82"]:
+                if fields[5] in ["0", "5", "f", "82"]:
                     #debug("No")
                     continue        # ignore uninteresting partitions
                 if fields[0] in mounteds:
