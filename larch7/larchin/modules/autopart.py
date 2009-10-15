@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.14
+# 2009.10.15
 
 from backend import DiskInfo
 
@@ -281,17 +281,19 @@ class Stage:
             return
         # I'll make the sequence: root, then swap then home/data.
         # But swap and/or home may be absent.
-        # Start partitioning from partition with index self.startpart,
-        # default value (no NTFS partitions) = 1.
-        # The first sector to use is self.startsector
-        # default value (no NTFS partitions) = 0.
+        # root and swap are created as primary partitions, home/data
+        # as logical (to ensure that ny unallocated space may also be used).
 
-        # The actual partitioning should be done, but the formatting can
-        # be handled - given the appropriate information - by the
-        # installation stage.
+        # The actual partitioning is done, but the formatting is
+        # handled - given the appropriate information - by the
+        # installation stage. If a swap partition is created that will,
+        # however, be formatted.
 
         startpart = 2 if self.keep1 else 1
         # Remove all existing partitions from startpart
+        ui.progressPopup.start()
+        ui.progressPopup.add(_("Removing all partitions on %s,\n"
+                "   starting from number %d") % (self.device, startpart))
         if not backend.rmparts(self.device, startpart):
             return
 
@@ -311,14 +313,14 @@ class Stage:
         newparts = []
         maxp = None
         maxs = 0
-        for m, s, p in (
-                ("/", self.rootsize, startpart),
-                ("swap", self.swapsize, startpart + 1),
-                ("/data" if self.homedata else "/home", self.datasize, 5),
-                ("", self.unallocated, -1)):
+        for m, s, t in (
+                ("/", self.rootsize, "primary"),
+                ("swap", self.swapsize, "primary"),
+                ("/data" if self.homedata else "/home", self.datasize, "logical"),
+                ("", self.unallocated, None)):
             if s > 0.1:
                 # Convert GB to cylinders
-                entry = [p, int((s * 10**9 / bytespercyl) + 0.5), m]
+                entry = [t, int((s * 10**9 / bytespercyl) + 0.5), m]
                 newparts.append(entry)
                 if s > maxs:
                     maxs = s
@@ -330,86 +332,27 @@ class Stage:
             sum += ps[1]
         maxp[1] = allfreecyls - sum
 
-        debug(repr(newparts))
-        return
-
         # Create the partitions
         iparts = []
-        for p, s, m in newparts:
-            if p < 0:
+        for t, s, m in newparts:
+            if not t:
                 continue
-            if p > 4:
-                t = "logical"
-            else:
-                t = "primary"
             swap = (m=="swap")
-            part = backend.newpart(self.device, t, s, swap)
+            ui.progressPopup.add(_("Creating %s partition for %s")
+                    % (t, m))
+            part = backend.newpart(self.device, t.startswith("p"), s, swap)
             if not part:
-                return
-            if swap:
-                backend.mkswap(part, self.swapcheck)
+                iparts = None
+                break
+            if swap and not backend.mkswap(part, self.swapcheck):
+                iparts = None
+                break
             else:
                 iparts.append((m, part))
+                ui.progressPopup.add("   ---> " + part)
+        ui.progressPopup.end()
 
-
-
-#TODO:
-# This method is still from the old version
-        secspercyl = dinfo[2]
-        startcyl = (self.startsector + secspercyl - 1) / secspercyl
-        endcyl = dinfo[1]
-        # Note that the ending cylinder referred to in the commands
-        # will not be included in the partition, it is available to
-        # be the start of the next one.
-
-        # Get partition sizes in cylinder units
-        ncyls = endcyl - startcyl
-        cylsizeB = secspercyl * self.dinfo[3]
-        swapC = int(self.swapsizeG * 1e9 / cylsizeB + 0.5)
-        homeC = int(self.homesizeG * 1e9 / cylsizeB + 0.5)
-        rootC = ncyls - swapC - homeC
-
-        startcyl = self.newpart(startcyl, endcyl, rootC,
-                (swapC == 0) and (homeC == 0))
-        # See partition formatting and fstab setting up for the
-        # meaning of the flags
-        config = "/:%s%d:%s:%s:%s" % (self.device, self.startpart,
-                install.DEFAULTFS, install.FORMATFLAGS, install.MOUNTFLAGS)
-        self.startpart += 1
-        if (swapC > 0):
-            format = "cformat" if self.getCheck(self.swapfc) else "format"
-            startcyl = self.newpart(startcyl, endcyl, swapC,
-                    (homeC == 0), True)
-            install.set_config("swaps", "%s%d:%s:include" %
-                    (self.device, self.startpart, format))
-            self.startpart += 1
-
-        if (homeC > 0):
-            startcyl = self.newpart(startcyl, endcyl, homeC, True)
-            config += "\n/home:%s%d:%s:%s:%s" % (self.device, self.startpart,
-                    install.DEFAULTFS, install.FORMATFLAGS, install.MOUNTFLAGS)
-
-        install.set_config("partitions", config)
-        return 0
-
-    def newpart(self, startcyl, endcyl, size, last, swap=False):
-        """Add a new partition, taking primary/extended/logical into
-        account.
-        """
-        # Use install.makepart, passing the cylinder boundaries
-        part = -1
-        if (self.startpart == 4) and not last:
-            self.startpart = 5
-            install.makepart(self.device, 0, startcyl, endcyl)
-        elif (self.startpart <= 4):
-            part = self.startpart
-
-        newstartcyl = startcyl + size
-        install.makepart(self.device, part,
-                startcyl, newstartcyl,
-                swap)
-
-        return newstartcyl
-
-
-
+        # Go to installation stage
+        # As we are already in the background the signal cannot be run directly
+        if iparts:
+            command.queuesignal("&install&", iparts)

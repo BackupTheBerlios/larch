@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.14
+# 2009.10.15
 
 from subprocess import Popen, PIPE, STDOUT
 import os, threading
@@ -218,9 +218,8 @@ class Backend:
     def rmpart(self, dev, partno):
         """Remove the given partition.
         """
-        return self.xcheck("rmpart %s %d" % (device, exp),
-                onfail=_("Couldn't remove partition %s%d")
-                        % (device, exp))
+        return self.xcheck("rmpart %s %d" % (dev, partno),
+                onfail=_("Couldn't remove partition %s%d") % (dev, partno))
 
 
     def newpart(self, device, primary, ncyls, swap=False):

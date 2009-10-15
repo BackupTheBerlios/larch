@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.12
+# 2009.10.15
 
 
 """
@@ -117,11 +117,15 @@ class Command:
                 "larchin:forward*clicked": [self.next],
             }
         for p in self.pages:
-            for s, f in p.connect():
-                if self.connections.has_key(s):
-                    self.connections[s].append(f)
-                else:
-                    self.connections[s] = [f]
+            self.addconnections(p.connect())
+
+
+    def addconnections(self, connlist):
+        for s, f in connlist:
+            if self.connections.has_key(s):
+                self.connections[s].append(f)
+            else:
+                self.connections[s] = [f]
 
 
     def run(self):
@@ -158,6 +162,16 @@ class Command:
                     s(*args)
 
 
+    def queuesignal(self, sig, *args):
+        """This is called from background code to set up a following
+        background demanding ('&') signal, to be called when the current
+        one ends.
+        """
+        if self.bgnext:
+            fatal_error("Bug: attempt to queue a second background signal")
+        self.bgnext = (sig, args)
+
+
     def background(self, *args):
         if self.blocking:
             bug("Attempt to run a second background thread")
@@ -169,13 +183,22 @@ class Command:
     def worker_run(self, slots, *args):
         ui.busy()
         self.breakin = 0
-        try:
-            for s in slots:
-                s(*args)
-        except:
-            if self.breakin == 0:
-                typ, val, tb = sys.exc_info()
-                fatal_error("".join(traceback.format_exception(typ, val, tb)))
+        while self.breakin == 0:
+            self.bgnext = None
+            try:
+                for s in slots:
+                    s(*args)
+            except:
+                if self.breakin == 0:
+                    fatal_error("".join(traceback.format_exc()))
+
+            # Check for successor signal
+            if self.bgnext == None:
+                break
+            sig, args = self.bgnext
+            slots = self.connections.get(sig)
+            if not slots:
+                break
 
         self.blocking = False
         ui.completed(self.breakin == 0)

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.12
+# 2009.10.15
 
 import os, pwd
 import json
@@ -103,6 +103,9 @@ class Ui:
 
 
     def go(self):
+        # A popup window for reporting on progress of lengthier operations
+        self.progressPopup = ProgressPopup()
+        command.addconnections([("pp:hide*clicked", self.progressPopup.done)])
         self.command("larchin:.show")
 
 
@@ -218,6 +221,7 @@ class Ui:
 
 
     def completed(self, ok):
+        # 'ok' is not used here, but might be in the console interface
         self.command("larchin:cancel.enable", False)
         self.command("larchin:.busy", "larchin:stack", False)
         self.command("larchin:forward.enable", True)
@@ -240,7 +244,8 @@ class Logger:
         ui.newwidget("Window", "log:", title="larchin log", size="600_400",
                 icon="larchin-icon.png", closesignal="$$$hidelog$$$")
         ui.newwidget("Label", "log:header",
-                text=_("Here you can follow the progress of the commands."))
+                text=_("Here you can follow the detailed, low-level progress"
+                        " of the commands."))
         ui.newwidget("TextEdit", "log:text", ro=True)
         ui.newwidget("Button", "^log:clear", text=_("Clear"))
         ui.newwidget("Button", "^log:hide", text=_("Hide"))
@@ -278,3 +283,25 @@ class DocViewer:
         ui.layout("doc:", ["*VBOX*", "doc:content",
                 ["*HBOX*", "*SPACE", "doc:hide"]])
 
+class ProgressPopup:
+    def __init__(self):
+        ui.newwidget("Window", "pp:", title= _("Progress"), size="300_200",
+                icon="larchin-icon.png", closesignal="pp:hide*clicked")
+        ui.newwidget("TextEdit", "pp:text", ro=True)
+        ui.newwidget("Button", "^pp:hide", text=_("OK"))
+        ui.layout("pp:", ["*VBOX*", "pp:text",
+                ["*HBOX*", "*SPACE", "pp:hide"]])
+
+    def start(self):
+        ui.command("pp:hide.enable", False)
+        ui.command("pp:.setVisible", True)
+        ui.command("pp:text.x__text")
+
+    def add(self, line):
+        ui.command("pp:text.append_and_scroll", line)
+
+    def end(self):
+        ui.command("pp:hide.enable", True)
+
+    def done(self):
+        ui.command("pp:.setVisible", False)
