@@ -25,6 +25,8 @@ from subprocess import Popen, PIPE, STDOUT
 import os, threading
 import re
 
+# Mount point for the installation root partition
+IBASE = "/tmp/install"
 
 class Backend:
     """Interaction with the machine is dealt with via the interface provided
@@ -175,10 +177,11 @@ class Backend:
         self.process_lock.release()
 
 
-#??? - do I need these? (in modified form!)
-    def mount(self, src, dst, opts=""):
-        if supershell("mount %s %s %s" % (opts, src, dst)).ok:
-            self.mounts.append(dst)
+    def imount(self, dev, mp):
+        mpreal = IBASE if mp == "/" else IBASE + mp
+        if self.xcheck("do-imount %s %s %s" % (IBASE, dev, mp),
+                onfail=_("Couldn't mount %s at %s") % (dev, mpreal)):
+            self.mounts.append(mpreal)
             return True
         return False
 
@@ -192,12 +195,19 @@ class Backend:
             mounts = [dst]
 
         r = True
+        mounts.reverse()
         for m in mounts:
-            if supershell("umount %s" % m).ok:
+            if self.xcheck("do-unmount %s" % m,
+                    onfail=_("Couldn't unmount %s") % m):
                 self.mounts.remove(m)
             else:
                 r = False
         return r
+
+
+    def format(self, dev, fmt, flags):
+        return self.xcheck("part-format %s %s %s" % (dev, fmt, flags),
+                onfail=_("Formatting of %s failed") % dev)
 
 ########################################################################
 # Interface functions

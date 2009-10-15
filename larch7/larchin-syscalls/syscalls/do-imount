@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# do-imount
+
+# Mount a partition (argument $2) at mount point $3 using $1 as base
+# for all mount-points
+installmp="$1"
+
+mkdir -p "${installmp}"
+if [ "$3" = "/" ]; then
+    mount -o dev,exec "$2" "${installmp}"
+else
+    mkdir -p "${installmp}$3" || exit 1
+    chmod "${installmp}$3" --reference="$3"
+    chown "${installmp}$3" --reference="$3"
+    mount "$2" "${installmp}$3"
+fi

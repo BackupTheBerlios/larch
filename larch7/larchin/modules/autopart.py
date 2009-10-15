@@ -26,7 +26,8 @@ from backend import DiskInfo
 doc = _("""
 <h2>Automatic Partitioning</h2>
 <p>To make straightforward installations easier it is possible to choose
-a simple automatic division of your disk drive for the Arch Linux installation.
+a simple automatic division of your disk drive for the <em>Arch Linux</em>
+installation.
 </p>
 <p>WARNING: If you have an operating system already installed on this drive
 which you wish to keep, you must perform partitioning manually (or use the
@@ -34,17 +35,17 @@ existing partitions) by selecting 'Edit disk partitions manually' (or
 'Select Installation Partitions') from the stage menu.
 </p>
 <p>EXCEPTION: if the existing operating system uses the NTFS file-system
-(Windows), it is also possible to use automatic partitioning, if enough
-space is free, or has been freed by deleting or shrinking one or more NTFS
-partitions. At present this method only supports retention of the first
-disk partition.
+(<em>Windows</em>), it is also possible to use automatic partitioning, if
+enough space is free, or has been freed by deleting or shrinking one or
+more NTFS partitions. At present this method only supports retention of
+the first disk partition.
 </p>
 <h3>Swap Partition</h3>
 <p>You can choose to allocate space for a swap partition, which is especially
 useful if you don't have a lot of memory installed, or if you want to use
-'suspend-to-disk' (which must be set up separately, larchin itself does not
-set it up). It is difficult to say how much space you should allocate for
-a swap partition, it depends on your system and your usage patterns.
+'suspend-to-disk' (which must be set up separately, <em>larchin</em> itself
+does not set it up). It is difficult to say how much space you should allocate
+for a swap partition, it depends on your system and your usage patterns.
 </p>
 <h3>Partition for User Data</h3>
 <p>If you have enough free space on your device you also have the option of
@@ -327,9 +328,8 @@ class Stage:
                     maxp = entry
         sum = 0
         for ps in newparts:
-            if ps == maxp:
-                continue
-            sum += ps[1]
+            if ps != maxp:
+                sum += ps[1]
         maxp[1] = allfreecyls - sum
 
         # Create the partitions
@@ -348,7 +348,10 @@ class Stage:
                 iparts = None
                 break
             else:
-                iparts.append((m, part))
+                # Convert size to GB
+                size = "%6.1f" % (float(s) * bytespercyl / 10**9)
+                # [mount-point, device, size, format, format-flags, mount-flags]
+                iparts.append([m, part, size, "" if swap else "ext4", "", ""])
                 ui.progressPopup.add("   ---> " + part)
         ui.progressPopup.end()
 

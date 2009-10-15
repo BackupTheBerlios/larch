@@ -84,7 +84,7 @@ lang = os.getenv("LANG")
 if lang:
     gettext.install('larchin', base_dir+'/i18n', unicode=1)
 
-import welcome, disks, autopart
+import welcome, disks, autopart, install
 from backend import Backend
 
 class Command:
@@ -98,7 +98,10 @@ class Command:
         self.breakin = 0
 
         # Initialize gui modules
-        self.pages = [welcome.Stage(0), disks.Stage(1), autopart.Stage(2)]
+        self.pages = []
+        for s in (welcome, disks, autopart, install,
+                ):
+            self.pages.append(s.Stage(len(self.pages)))
 
         # Connect up the signals and slots
         self.connections = {

@@ -84,7 +84,9 @@ class Ui:
         self.newwidget("Stack", "larchin:stack", pages=[
                 "page:welcome",
                 "page:disks",
-                "page:autopart",])
+                "page:autopart",
+                "page:install",
+                ])
 
         # - Footer
         self.newwidget("Button", "^larchin:forward", text=_("OK"),
@@ -231,6 +233,16 @@ class Ui:
         self.command("larchin:stageheader.x__html",
                 '<span style="font-size:x-large; color:#55c500;">%s</span>'
                 % text)
+
+
+    def formattable(self, headers, rows):
+        """Build a html table from the given information.
+        """
+        html = '<table cellpadding="5" border="1">'
+        html += '\n  <tr><th>%s</th></tr>' % '</th><th>'.join(headers)
+        for r in rows:
+            html += '\n  <tr><td>%s</td></tr>' % '</td><td>'.join(r)
+        return html + '\n</table>'
 
 
 class Logger:
