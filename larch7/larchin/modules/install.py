@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.15
+# 2009.10.16
 
 doc = _("""
 <h2>System Installation</h2>
@@ -75,6 +75,13 @@ class Stage:
 
     def select_page(self, partitions):
         self.partlist = partitions
+#debugging
+        if "P" in dbg_flags:
+            self.partlist = [
+                    ["/", "/dev/sdb1", "???", "ext4", "", ""],
+                    ["swap", "/dev/sdb2", "???", "", "", ""],
+                    ["/home", "/dev/sdb5", "???", "ext4", "", ""]]
+#-
         command.pageswitch(self.page_index,
                 _("Disk formatting and system installation"))
 
@@ -108,6 +115,9 @@ class Stage:
         for part in self.partlist:
             dev = part[1]
             fmt = part[3]
+#debugging
+            if "f" in dbg_flags: fmt = None
+#-
             flags = part[4]
             if fmt:
                 ui.progressPopup.add(_("Formatting %s") % dev)
@@ -115,20 +125,31 @@ class Stage:
                     self.tidy()
                     return
 
-
         # Mount
         self.partlist.sort()    # in case of mounts within mounts
+        root = False            # Check for root partition
+        mlist = []
         for part in self.partlist:
             mp = part[0]
             if mp.startswith("/"):
-                ui.progressPopup.add(_("Mounting %s to %s") % (part[1], mp))
-                if not backend.imount(part[1], mp):
-                    self.tidy()
-                    return
-
+                if (mp == '/'):
+                    root = True
+                ui.progressPopup.add(_("Mounting %s at %s") % (part[1], mp))
+                mlist.append((part[1], mp))
+        if not root:
+            config_error(_("No root partition ('/') found"))
+            self.tidy()
+            return
+        if not backend.imounts(mlist):
+            self.tidy()
+            return
 
         # Copy system
-
+        indo = Installer()
+        if not indo.start():
+            self.tidy()
+            return
+        indo.stop()
 
         # Delivify
 
@@ -144,3 +165,37 @@ class Stage:
         ui.progressPopup.end()
         if not backend.unmount():
             fatal_error(_("Can't recover from failed unmounting"))
+
+
+
+class Installer:
+    """This class manages the copying of the live system to the disk.
+    """
+    def __init__(self):
+        ui.progressPopup.show_extra(_("Installed MB:"))
+
+    def start(self):
+        self.rootdir = ""
+        self.installed = 0      # bytes
+        self.target = 10**7     # bytes
+        return backend.copy_system(self.progress)
+
+    def progress(self, line):
+        if "!" not in line:
+            #debug(line)
+            return
+        fname, size = line.split("!")
+        frdir = fname.lstrip("/").split("/", 1)[0]
+        if frdir != self.rootdir:
+            self.rootdir = frdir
+            ui.progressPopup.add(" ... /%s ..." % frdir)
+        self.installed += int(size)
+        if self.installed >= self.target:
+            self.target = self.installed + 10**7
+            ui.progressPopup.set_info("%5d" % (self.installed / 10**6))
+
+    def stop(self):
+        ui.progressPopup.hide_extra()
+        ui.progressPopup.add("Copy finished: %6.1f GB" %
+                (float(self.installed) / 10**9))
+

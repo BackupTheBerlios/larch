@@ -217,15 +217,16 @@ class Ui:
 
 
     def busy(self):
+        self.busywidget = "larchin:stack"
         self.command("larchin:forward.enable", False)
-        self.command("larchin:.busy", "larchin:stack", True)
+        self.command("larchin:.busy", self.busywidget, True)
         self.command("larchin:cancel.enable", True)
 
 
     def completed(self, ok):
         # 'ok' is not used here, but might be in the console interface
         self.command("larchin:cancel.enable", False)
-        self.command("larchin:.busy", "larchin:stack", False)
+        self.command("larchin:.busy", self.busywidget, False)
         self.command("larchin:forward.enable", True)
 
 
@@ -300,17 +301,32 @@ class ProgressPopup:
         ui.newwidget("Window", "pp:", title= _("Progress"), size="300_200",
                 icon="larchin-icon.png", closesignal="pp:hide*clicked")
         ui.newwidget("TextEdit", "pp:text", ro=True)
+        ui.newwidget("Frame", "pp:extra")
+        ui.newwidget("Label", "pp:le")
+        ui.newwidget("LineEdit", "pp:info", ro=True)
         ui.newwidget("Button", "^pp:hide", text=_("OK"))
-        ui.layout("pp:", ["*VBOX*", "pp:text",
+        ui.layout("pp:", ["*VBOX*", "pp:text", "pp:extra",
                 ["*HBOX*", "*SPACE", "pp:hide"]])
+        ui.layout("pp:extra", ["*HBOX*", "pp:le", "pp:info"])
 
     def start(self):
         ui.command("pp:hide.enable", False)
+        self.hide_extra()
         ui.command("pp:.setVisible", True)
         ui.command("pp:text.x__text")
 
     def add(self, line):
         ui.command("pp:text.append_and_scroll", line)
+
+    def show_extra(self, text):
+        ui.command("pp:le.x__text", text)
+        ui.command("pp:extra.setVisible", True)
+
+    def hide_extra(self):
+        ui.command("pp:extra.setVisible", False)
+
+    def set_info(self, text):
+        ui.command("pp:info.x__text", text)
 
     def end(self):
         ui.command("pp:hide.enable", True)

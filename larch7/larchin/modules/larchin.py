@@ -54,6 +54,11 @@ imported modules, one for each 'stage'.
 import os, sys, traceback, signal
 
 import __builtin__
+
+#debugging
+__builtin__.dbg_flags = ""
+#-
+
 __builtin__.base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append("%s/modules" % base_dir)
 
@@ -291,6 +296,8 @@ class Command:
             self.pthread.join()
         self.breakin = 0
 
+        ui.progressPopup.end()
+
         if terminate:
             # Tell the user interface to exit, which will in turn cause the
             # main loop (reading its output) to exit.
@@ -298,8 +305,6 @@ class Command:
 
         else:
             backend.unmount()
-
-
 
 
     def browser(self, path):

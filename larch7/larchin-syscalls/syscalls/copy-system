@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# copy-system  - Copy the live system to the installation partitions
+
+installmp="$1"
+
+for d in bin boot etc lib home opt root sbin srv usr; do
+    rsync -a --out-format="%n!%l" "/${d}" "${installmp}" || exit 1
+done
+
+rsync -a --out-format="%n!%l" --exclude="/var/tmp/*" "/var" "${installmp}"

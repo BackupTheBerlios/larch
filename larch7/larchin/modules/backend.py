@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.15
+# 2009.10.16
 
 from subprocess import Popen, PIPE, STDOUT
 import os, threading
@@ -90,7 +90,7 @@ class Backend:
             basePath = base_dir
         else:
             basePath = os.path.dirname(base_dir) + "/larchin-syscalls"
-        xcmd = ("%s/syscalls/%s" % (basePath, cmd))
+        xcmd = ("%s/syscalls/0call %s" % (basePath, cmd))
         return Popen(xcmd, shell=True, stdout=PIPE, stderr=STDOUT, bufsize=1)
 
 
@@ -99,7 +99,7 @@ class Backend:
         Public key authentication must be already set up so that no passsword
         is required.
         """
-        xcmd = ("ssh %s root@%s /opt/larchin/syscalls/%s" %
+        xcmd = ("ssh %s root@%s /opt/larchin/syscalls/0call %s" %
                 (opt, self.host, cmd))
         return Popen(xcmd, shell=True, stdout=PIPE, stderr=STDOUT, bufsize=1)
 
@@ -129,7 +129,7 @@ class Backend:
         assert self.interrupt == None
 
 
-    def xlist(self, cmd, opt=""):
+    def xlist(self, cmd, opt="", xlog=None):
         self.process_lock.acquire()
         if self.process:
             bug("Attempt to start second shell process")
@@ -146,8 +146,11 @@ class Backend:
             line = self.process.stdout.readline()
             if not line: break
             line = line.rstrip()
-            self.oplines.append(line)
-            logger.addLine(line)
+            if xlog:
+                xlog(line)
+            else:
+                self.oplines.append(line)
+                logger.addLine(line)
         logger.addLine("END-XCALL")
         self.process.wait()
         rc = self.process.returncode
@@ -161,8 +164,8 @@ class Backend:
         return (rc == 0, lines)
 
 
-    def xcheck(self, cmd, opt="", onfail=None):
-        ok, l = self.xlist(cmd, opt)
+    def xcheck(self, cmd, opt="", xlog=None, onfail=None):
+        ok, l = self.xlist(cmd, opt, xlog)
         if not ok:
             run_error(onfail if onfail else
                     (_("Operation failed:\n  %s") % cmd))
@@ -172,7 +175,10 @@ class Backend:
     def killprocess(self):
         self.process_lock.acquire()
         if self.process:
-            self.process.kill()
+            if self.host:
+                self._xcall_net("0kill").wait()
+            else:
+                self._xcall_local("0kill").wait()
             self.interrupt = 1
         self.process_lock.release()
 
@@ -184,6 +190,14 @@ class Backend:
             self.mounts.append(mpreal)
             return True
         return False
+
+
+    def imounts(self, mlist):
+        self.mountlist = mlist
+        for d, m in mlist:
+            if not self.imount(d, m):
+                return False
+        return True
 
 
     def unmount(self, dst=None):
@@ -322,6 +336,17 @@ class Backend:
                 + partition)[0]
 
 
+    def copy_system(self, logfun):
+        if ("i" not in dbg_flags) and not self.xcheck("copy-system %s"
+                % IBASE, xlog=logfun,
+                        onfail=_("Copying of system data failed")):
+            return False
+        if not self.xcheck("fix-system1 %s" % IBASE,
+                onfail=_("Initial installed system tweaks failed (see log)")):
+            return False
+        return True
+
+
 class DiskInfo:
     """Get info on drive and partitions.
 
@@ -375,9 +400,4 @@ class DiskInfo:
             if p[2] > lastcyl:
                 lastcyl = p[2]
         return self.drvcyls - lastcyl - 1   # cylinder numbers start at 0
-
-
-
-
-
 

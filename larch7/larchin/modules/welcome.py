@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.13
+# 2009.10.16
 
 
 doc = _("""
@@ -90,5 +90,10 @@ class Stage:
 
 
     def ok(self):
+#debugging
+        if "P" in dbg_flags:
+            command.runsignal("&install&", None)
+            return
+#-
         command.runsignal("&device-select&")
 

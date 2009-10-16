@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# 0call   - run a syscall ( a script in this directory)
+#              ... or kill it
+
+pidfile=/tmp/larchin-callpid
+apath="$( readlink -f $0 )"
+adir="$( dirname ${apath} )"
+if [ "$1" = "0kill" ]; then
+    pid="$( cat ${pidfile} )"
+    :>${pidfile}
+    exec "${adir}/0killr" ${pid}
+fi
+echo "$$" >${pidfile}
+eval "${adir}/$*"
