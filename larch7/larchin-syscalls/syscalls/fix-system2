@@ -1,0 +1,21 @@
+#! /bin/sh
+
+# fix-system2  - Remove live-system specific stuff
+
+installmp="$1"
+
+# Get the 'original' version of saved files in /etc
+find /etc -name '*.larchsave' -type f -print | while read fls; do
+        mv -f "${installmp}${fls}"  "${installmp}${fls%.larchsave}"
+    done
+
+# Remove live-specific packages
+for p in larch-live larchin larchin-syscalls; do
+    pacman -r "${installmp}" -R "${p}" 2>/dev/null
+done
+
+# Remove any files and directories intended only for the live system,
+# perform any other custom tweaks
+if [ -f /.livesys/larch0 ]; then
+    . /.livesys/larch0
+fi

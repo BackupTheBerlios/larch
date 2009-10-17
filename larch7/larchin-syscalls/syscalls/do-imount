@@ -11,7 +11,9 @@ if [ "$3" = "/" ]; then
     mount -o dev,exec "$2" "${installmp}"
 else
     mkdir -p "${installmp}$3" || exit 1
-    chmod "${installmp}$3" --reference="$3"
-    chown "${installmp}$3" --reference="$3"
+    if [ -d "$3" ]; then
+        chmod "${installmp}$3" --reference="$3"
+        chown "${installmp}$3" --reference="$3"
+    fi
     mount "$2" "${installmp}$3"
 fi

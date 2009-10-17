@@ -19,7 +19,9 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.16
+# 2009.10.17
+
+from backend import PartInfo
 
 doc = _("""
 <h2>System Installation</h2>
@@ -45,10 +47,15 @@ entirely left up to the creator of the <em>larch</em> profile.
 </ol>
 </p>
 <h3>Format flags</h3>
-<p>TODO: describe them
+<p>TODO: describe them. Can these be done later? What about a tweaks
+page (e.g. for fsck intervals), or should all this stuff be left to
+separate utilities, as they are not specific to installation?
+The existing tweaks can be dnoe later, though for dir_index it may be
+useful to run 'e2fsck -D'.
 </p>
 <h3>Mount flags</h3>
-<p>TODO: describe them
+<p>TODO: describe them - or, rather, shouldn't mount option come later,
+when /etc/fstab is being built?!
 </p>""")
 
 text = _("""
@@ -60,7 +67,7 @@ and all <em>live</em>-specific alterations will be undone so that a normal
 use within the new installation (mount-points) corresponds with what you
 had in mind. Accidents could well result in serious data loss.
 </p>
-<p>%s</p>""")
+<p align="center">%s</p>""")
 
 
 class Stage:
@@ -69,21 +76,9 @@ class Stage:
 
     def connect(self):
         return [
-                ("&install&", self.select_page),
+                ("&install!", self.select_page),
                 ("&do-install&", self.do_install),
             ]
-
-    def select_page(self, partitions):
-        self.partlist = partitions
-#debugging
-        if "P" in dbg_flags:
-            self.partlist = [
-                    ["/", "/dev/sdb1", "???", "ext4", "", ""],
-                    ["swap", "/dev/sdb2", "???", "", "", ""],
-                    ["/home", "/dev/sdb5", "???", "ext4", "", ""]]
-#-
-        command.pageswitch(self.page_index,
-                _("Disk formatting and system installation"))
 
     def __init__(self, index):
         self.page_index = index
@@ -91,17 +86,49 @@ class Stage:
 
         ui.layout("page:install", ["*VBOX*", "install:l1"])
 
-
     def setup(self):
         return
 
 
+    def select_page(self, init, partitions=[]):
+        self.initialize = init
+        if init:
+            self.partlist = partitions
+#debugging
+            if "P" in dbg_flags:
+                self.partlist = [
+                        ["/", "/dev/sdb1", "ext4"],
+                        ["swap", "/dev/sdb2", ""],
+                        ["/home", "/dev/sdb5", "ext4"]]
+#-
+        command.pageswitch(self.page_index,
+                _("Disk formatting and system installation"))
+
+
     def init(self):
         """The information passed in self.partlist for each partition is:
-        [mount-point, device, size(GB), format, format-flags, mount-flags]
+        [mount-point, device, format-fstype]
         """
+        ok = True
+        rows = []
+        for r in self.partlist:
+            pinfo = PartInfo(r[1])
+            s = "%6.1f" % pinfo.sizeGB()
+            if r[2] == "":
+                f = "-"
+                fst = pinfo.getfstype()
+                if not fst:
+                    config_error(_("No fs-type for unformatted partition %s")
+                            % r[1])
+                    ok = False
+            else:
+                f = "+"
+                fst = r[2]
+            rows.append((r[0], r[1], s, f, fst))
+        if not ok: return False
+
         table = ui.formattable(["Mount-point", "Device", "Size (GB)",
-                "Format", "Format-flags", "Mount-flags"], self.partlist)
+                "Format", "fs-type"], rows)
         ui.command("install:l1.x__html", text % table)
 
 
@@ -111,70 +138,76 @@ class Stage:
 
     def do_install(self):
         ui.progressPopup.start()
+        ui.progressPopup.show_extra(_("Installed MB:"))
+        installer = Installer(self.partlist)
+
         # Format
-        for part in self.partlist:
-            dev = part[1]
-            fmt = part[3]
-#debugging
-            if "f" in dbg_flags: fmt = None
-#-
-            flags = part[4]
-            if fmt:
-                ui.progressPopup.add(_("Formatting %s") % dev)
-                if not backend.format(dev, fmt, flags):
-                    self.tidy()
-                    return
+        if not installer.format():
+            installer.tidy()
+            return
 
         # Mount
-        self.partlist.sort()    # in case of mounts within mounts
-        root = False            # Check for root partition
-        mlist = []
-        for part in self.partlist:
-            mp = part[0]
-            if mp.startswith("/"):
-                if (mp == '/'):
-                    root = True
-                ui.progressPopup.add(_("Mounting %s at %s") % (part[1], mp))
-                mlist.append((part[1], mp))
-        if not root:
-            config_error(_("No root partition ('/') found"))
-            self.tidy()
-            return
-        if not backend.imounts(mlist):
-            self.tidy()
+        if not installer.mount():
+            installer.tidy()
             return
 
         # Copy system
-        indo = Installer()
-        if not indo.start():
-            self.tidy()
+        if not installer.copysystem():
+            installer.tidy()
             return
-        indo.stop()
+        installer.copydone()
 
-        # Delivify
+        # Delivify (including running 'larch0' script)
+        ui.progressPopup.add(_("Removing live-system modifications"))
+        if not backend.delivify():
+            installer.tidy()
+            return
 
-        # larch0
+        # initramfs (last step here, so don't need check)
+        ui.progressPopup.add(_("Generating initramfs"))
+        ok = backend.initramfs()
 
-        # initramfs
-
-        # Unmount
-        self.tidy()
-
-
-    def tidy(self):
-        ui.progressPopup.end()
-        if not backend.unmount():
-            fatal_error(_("Can't recover from failed unmounting"))
+        # Unmount, clear popup
+        installer.tidy()
+        if ok:
+            command.runsignal("&fstab!", self.partlist)
 
 
 
 class Installer:
     """This class manages the copying of the live system to the disk.
     """
-    def __init__(self):
-        ui.progressPopup.show_extra(_("Installed MB:"))
+    def __init__(self, partlist):
+        self.partlist = partlist
+        self.partlist.sort()    # in case of mounts within mounts
 
-    def start(self):
+    def format(self):
+        for part in self.partlist:
+            dev = part[1]
+            fmt = part[2]
+#debugging
+            if "f" in dbg_flags: fmt = None
+#-
+            if fmt:
+                ui.progressPopup.add(_("Formatting %s") % dev)
+                if not backend.format(dev, fmt):
+                    return False
+        return True
+
+    def mount(self):
+        if self.partlist[0][0] != "/":
+            config_error(_("No root partition ('/') found"))
+            return False
+        mlist = []
+        for part in self.partlist:
+            mp, dev = part[0], part[1]
+            if mp.startswith("/"):
+                ui.progressPopup.add(_("Mounting %s at %s") % (dev, mp))
+                mlist.append((dev, mp))
+        return backend.imounts(mlist)
+
+    def copysystem(self):
+        ui.progressPopup.add(_("Copying system to selected partitions"))
         self.rootdir = ""
         self.installed = 0      # bytes
         self.target = 10**7     # bytes
@@ -194,8 +227,13 @@ class Installer:
             self.target = self.installed + 10**7
             ui.progressPopup.set_info("%5d" % (self.installed / 10**6))
 
-    def stop(self):
+    def copydone(self):
         ui.progressPopup.hide_extra()
         ui.progressPopup.add("Copy finished: %6.1f GB" %
                 (float(self.installed) / 10**9))
+
+    def tidy(self):
+        ui.progressPopup.end()
+        if not backend.unmount():
+            fatal_error(_("Can't recover from failed unmounting"))
 

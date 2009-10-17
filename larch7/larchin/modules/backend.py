@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.16
+# 2009.10.17
 
 from subprocess import Popen, PIPE, STDOUT
 import os, threading
@@ -42,12 +42,6 @@ class Backend:
         self.process = None
         self.process_lock = threading.Lock()
 
-        #self.interrupt = 0
-        #self.error = None
-        #self.outputmethod = None
-
-
-#???
         # Keep a record of mounts
         self.mounts = []
 
@@ -57,17 +51,9 @@ class Backend:
 #            fatal_error(_("Couldn't initialize installation system"))
 
 
-# I am not using this at the moment, I just thought it might be useful.
-    def read_output_cb(self, textline):
-        """By setting self.outputmethod to a (gui thread) method, the
-        output of an xcall command can be processed line-by-line in the gui.
-        """
-        self.outputmethod(textline)
-        return False        # So this method is not repeatedly called
-
-
     #************ Methods for calling bash scripts
 
+#Not yet used
     def xsendfile(self, path, dest):
         """Copy the given file (path) to dest on the target.
         """
@@ -104,6 +90,7 @@ class Backend:
         return Popen(xcmd, shell=True, stdout=PIPE, stderr=STDOUT, bufsize=1)
 
 
+#Not yet used
     def terminal(self, cmd):
         """Run a command in a terminal. The environment variable 'XTERM' is
         recognized, otherwise one will be chosen from a list.
@@ -183,6 +170,25 @@ class Backend:
         self.process_lock.release()
 
 
+########################################################################
+# Interface functions
+
+    def run_mount_devprocsys(self, fn, *args):
+        ok = True
+        dirs = []
+        for d in ("/dev", "/proc", "/sys"):
+            mpb = IBASE + d
+            if self.xcheck("do-mount --bind %s %s" % (d, mpb),
+                    onfail=_("Couldn't bind-mount %s at %s") % (d, mpb)):
+                self.mounts.append(mpb)
+                dirs.append(mpb)
+            else:
+                ok = False
+        if ok:
+            ok = fn(*args)
+        return self.unmount(dirs) and ok
+
+
     def imount(self, dev, mp):
         mpreal = IBASE if mp == "/" else IBASE + mp
         if self.xcheck("do-imount %s %s %s" % (IBASE, dev, mp),
@@ -219,12 +225,10 @@ class Backend:
         return r
 
 
-    def format(self, dev, fmt, flags):
-        return self.xcheck("part-format %s %s %s" % (dev, fmt, flags),
+    def format(self, dev, fmt):
+        return self.xcheck("part-format %s %s" % (dev, fmt),
                 onfail=_("Formatting of %s failed") % dev)
 
-########################################################################
-# Interface functions
 
     def rmparts(self, dev, frompartno):
         """Remove all partitions on the given device starting from the
@@ -341,10 +345,23 @@ class Backend:
                 % IBASE, xlog=logfun,
                         onfail=_("Copying of system data failed")):
             return False
-        if not self.xcheck("fix-system1 %s" % IBASE,
-                onfail=_("Initial installed system tweaks failed (see log)")):
-            return False
-        return True
+        return self.xcheck("fix-system1 %s" % IBASE,
+                onfail=_("Initial installed system tweaks failed (see log)"))
+
+
+    def delivify(self):
+        return self.xcheck("fix-system2 %s" % IBASE,
+                onfail=_("Failure while removing live-system modifications"
+                        " (see log)"))
+
+
+    def initramfs(self):
+        return self.run_mount_devprocsys(self._initramfs)
+
+    def _initramfs(self):
+        return self.xcheck("do-mkinitcpio %s" % IBASE,
+                onfail=_("Problem building initramfs (see log)"))
+
 
 
 class DiskInfo:
@@ -391,6 +408,12 @@ class DiskInfo:
         """
         return self.cylsects * self.secbytes
 
+    def partsizeMB(self, device):
+        for p in self.parts:
+            if p[0] == device:
+                return ((p[2] - p[1] + 1) * self.cyl2B() + 5*10**5) / 10**6
+        return None
+
     def get_freecyls(self):
         """Assume the free space is at the end of the drive!
         Return the number of free cylinders at the end of the device.
@@ -401,3 +424,20 @@ class DiskInfo:
                 lastcyl = p[2]
         return self.drvcyls - lastcyl - 1   # cylinder numbers start at 0
 
+
+class PartInfo:
+    """Get information on a specific partition.
+    """
+    def __init__(self, device):
+        self.device = device
+
+    def getfstype(self):
+        ok, l = backend.xlist("get-blkinfo TYPE %s" % self.device)
+        if ok and l:
+            return l[0]
+        else:
+            return ""
+
+    def sizeGB(self):
+        l = backend.xlist("partsizes %s" % self.device)[1]
+        return float(l[0].split()[1]) / 1e9

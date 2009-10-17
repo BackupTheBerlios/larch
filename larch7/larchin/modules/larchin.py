@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.15
+# 2009.10.17
 
 
 """
@@ -94,11 +94,17 @@ from backend import Backend
 
 class Command:
     def __init__(self):
-        """The user interface must already be running before entering here.
-        """
-        # Used to block further background signal handling while a background
-        # thread is running
+        # The user interface must already be running before entering here.
+
+        self.current_page_index = 0
+        self.pagehistory = []
+
+        # Used to block further background signal handling while a
+        # background thread is running
         self.blocking = False
+        self.blocking_lock = threading.Lock()
+        # A single-entry queue for background signals
+        self.bgnext = None
         # Used to indicate that a background thread was interrupted
         self.breakin = 0
 
@@ -123,7 +129,8 @@ class Command:
                 "larchin:docs*toggled": [self._showdocs],
                 "log:clear*clicked": [self._clearlog],
                 "larchin:forward*clicked": [self.next],
-            }
+                "larchin:goback*clicked": [self.previous],
+           }
         for p in self.pages:
             self.addconnections(p.connect())
 
@@ -138,13 +145,20 @@ class Command:
 
     def run(self):
         # Start on the welcome page
-        self.pages[0].select_page()
         ui.command("larchin:cancel.enable", False)
         ui.go()
+        self.runsignal("&welcome!")
 
 
     def next(self):
         self.pages[self.current_page_index].ok()
+
+
+    def previous(self):
+        if len(self.pagehistory) <= 1:
+            return
+        self.pagehistory.pop()
+        self.runsignal(self.pagehistory[-1] + "-", False)
 
 
     def pageswitch(self, index, title):
@@ -156,6 +170,14 @@ class Command:
 
 
     def runsignal(self, sig, *args):
+        if sig.endswith("-"):
+            # Remove the '-'
+            sig = sig[:-1]
+        elif sig.endswith("!"):
+            # It is a page switch, and needs an extra argument
+            self.pagehistory.append(sig)
+            args = (True,) + (args)
+
         slots = self.connections.get(sig)
         if slots:
             if ":&" in ":" + sig:
@@ -170,29 +192,25 @@ class Command:
                     s(*args)
 
 
-    def queuesignal(self, sig, *args):
-        """This is called from background code to set up a following
-        background demanding ('&') signal, to be called when the current
-        one ends.
-        """
-        if self.bgnext:
-            fatal_error("Bug: attempt to queue a second background signal")
-        self.bgnext = (sig, args)
-
-
     def background(self, *args):
+        self.blocking_lock.acquire()
+        queued = False
         if self.blocking:
-            bug("Attempt to run a second background thread")
-            return
+            if self.bgnext:
+                fatal_error("Bug: attempt to queue a second background signal")
+            self.bgnext = args
+            queued = True
         self.blocking = True
+        self.blocking_lock.release()
+        if queued:
+            return
         self.pthread = simple_thread(self.worker_run, *args)
 
 
     def worker_run(self, slots, *args):
         ui.busy()
         self.breakin = 0
-        while self.breakin == 0:
-            self.bgnext = None
+        while True: # Use a loop to handle queued signals easily
             try:
                 for s in slots:
                     s(*args)
@@ -201,15 +219,20 @@ class Command:
                     fatal_error("".join(traceback.format_exc()))
 
             # Check for successor signal
-            if self.bgnext == None:
+            self.blocking_lock.acquire()
+            if self.bgnext:
+                slots = self.bgnext[0]
+                args = self.bgnext[1:]
+                self.bgnext = None
+                done = (self.breakin != 0) or not slots
+            else:
+                done = True
+            if done:
+                ui.completed(self.breakin == 0)
+                self.blocking = False
+            self.blocking_lock.release()
+            if done:
                 break
-            sig, args = self.bgnext
-            slots = self.connections.get(sig)
-            if not slots:
-                break
-
-        self.blocking = False
-        ui.completed(self.breakin == 0)
 
 
     def _activatehidelog(self):
@@ -347,7 +370,6 @@ def savefile(f, d):
     r = fh.write(d)
     fh.close()
 
-#TODO: am I using this one?
 def config_error(text):
     ui.error(text, _("Configuration Error"))
 __builtin__.config_error = config_error

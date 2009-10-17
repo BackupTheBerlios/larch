@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.15
+# 2009.10.17
 
 import os, pwd
 import json
@@ -89,6 +89,8 @@ class Ui:
                 ])
 
         # - Footer
+        self.newwidget("Button", "^larchin:goback", text=_("Go Back"),
+                tt=_("Return to previous stage"))
         self.newwidget("Button", "^larchin:forward", text=_("OK"),
                 tt=_("Execute any operations pending on this page and continue to next"))
 
@@ -100,7 +102,7 @@ class Ui:
                             "larchin:cancel", "larchin:quit"],
                         "larchin:stageheader"]],
                 "larchin:stack",
-                ["*HBOX*", "*SPACE", "larchin:forward"]
+                ["*HBOX*", "larchin:goback", "*SPACE", "larchin:forward"]
                 ])
 
 
@@ -219,6 +221,7 @@ class Ui:
     def busy(self):
         self.busywidget = "larchin:stack"
         self.command("larchin:forward.enable", False)
+        self.command("larchin:goback.enable", False)
         self.command("larchin:.busy", self.busywidget, True)
         self.command("larchin:cancel.enable", True)
 
@@ -227,6 +230,7 @@ class Ui:
         # 'ok' is not used here, but might be in the console interface
         self.command("larchin:cancel.enable", False)
         self.command("larchin:.busy", self.busywidget, False)
+        self.command("larchin:goback.enable", True)
         self.command("larchin:forward.enable", True)
 
 

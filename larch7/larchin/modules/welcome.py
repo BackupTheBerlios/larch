@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.16
+# 2009.10.17
 
 
 doc = _("""
@@ -68,11 +68,8 @@ class Stage:
 
     def connect(self):
         return [
-                ("&welcome&", self.select_page),
+                ("&welcome!", self.select_page),
             ]
-
-    def select_page(self):
-        command.pageswitch(self.page_index, _("Welcome!"))
 
     def __init__(self, index):
         self.page_index = index
@@ -80,9 +77,12 @@ class Stage:
 
         ui.layout("page:welcome", ["*VBOX*", "page:welcome:l1"])
 
-
     def setup(self):
         return
+
+
+    def select_page(self, init):
+        command.pageswitch(self.page_index, _("Welcome!"))
 
 
     def init(self):
@@ -92,8 +92,8 @@ class Stage:
     def ok(self):
 #debugging
         if "P" in dbg_flags:
-            command.runsignal("&install&", None)
+            command.runsignal("&install!", None)
             return
 #-
-        command.runsignal("&device-select&")
+        command.runsignal("&device-select!")
 

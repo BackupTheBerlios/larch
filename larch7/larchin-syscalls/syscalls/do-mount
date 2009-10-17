@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# do-mount
+
+# Use the mount command
+
+mount $*

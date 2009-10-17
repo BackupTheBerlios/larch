@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.13
+# 2009.10.17
 
 from backend import DiskInfo
 import re
@@ -59,7 +59,7 @@ class Stage:
 
     def connect(self):
         return [
-                ("&device-select&", self.select_page),
+                ("&device-select!", self.select_page),
                 ("disks:device-list*select", self.select_device),
                 ("disks:auto*toggled", self.auto_toggle),
                 ("disks:guipart*toggled", self.guipart_toggle),
@@ -67,10 +67,6 @@ class Stage:
                 ("disks:nopart*toggled", self.nopart_toggle),
                 ("disks:keep1*toggled", self.keep1_toggle),
             ]
-
-    def select_page(self):
-        command.pageswitch(self.page_index,
-                _("Disk information and selection"))
 
     def __init__(self, index):
         self.page_index = index
@@ -121,6 +117,11 @@ class Stage:
         else:
             self.gparted = None
         ui.command("disks:guipart.enable", self.gparted != None)
+
+
+    def select_page(self, init):
+        command.pageswitch(self.page_index,
+                _("Disk information and selection"))
 
 
     def init(self):
@@ -184,7 +185,9 @@ class Stage:
         #self.select_device(self.device_index)
 
 
-    def select_device(self, index):
+    def select_device(self, index=-1):
+        if index < 0:
+            return
         self.device_index = index
         self.device = self.devices[index][1]
         di = DiskInfo(self.device)
@@ -251,11 +254,11 @@ class Stage:
 
     def ok(self):
         if self.method == "auto":
-            command.runsignal("&auto-partition&", self.device, self.keep1)
+            command.runsignal("&auto-partition!", self.device, self.keep1)
         elif self.method == "guipart":
-            command.runsignal("&gui-partition&", self.gparted, self.device)
+            command.runsignal("&gui-partition!", self.gparted, self.device)
         elif self.method == "cfdisk":
-            command.runsignal("&cfdisk-partition&", self.device)
+            command.runsignal("&cfdisk-partition!", self.device)
         else:
-            command.runsignal("&manual-partition&", self.device)
+            command.runsignal("&manual-partition!", self.device)
 

@@ -2,15 +2,14 @@
 
 # partsizes
 
-# Get a list of partitions and their sizes (in blocks) on the given
-# (argument $1) device.
-# The first result line is for the whole device.
-
-
-# Unfortunately this is unreliable if the partition tables change ...
-# Use fdisk -l (or parted?) instead.
-
-
+# Get the size of a given device or partition ($1) by reading /proc/partitions
+# The result is 'device size-in-bytes'
+# Note that the sizes of partitions (not whole-devices) in /proc/partitions
+# are sometimes 1 sector (512 bytes) less than the sizes read by, for
+# example, parted.
+# By passing e.g. '/dev/sda.*' as $1 a line is output for the whole device
+# and for each partition.
 
 dev=${1##*/}
-cat /proc/partitions | grep "$dev" | while read a b s d; do echo "$d $s"; done
+cat /proc/partitions | grep "$dev$" | while read a b s d; do
+        echo "$d $(( $s * 1024 ))"; done

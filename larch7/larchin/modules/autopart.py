@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.15
+# 2009.10.17
 
 from backend import DiskInfo
 
@@ -67,7 +67,7 @@ class Stage:
 
     def connect(self):
         return [
-                ("&auto-partition&", self.select_page),
+                ("&auto-partition!", self.select_page),
                 ("autopart:free*changed", self.freesizechanged),
                 ("autopart:swapsize*changed", self.swapsizechanged),
                 ("autopart:swap*toggled", self.swaptoggled),
@@ -136,18 +136,22 @@ class Stage:
                 ["*HBOX*", "autopart:swapsize_l", "autopart:swapsize"],
                 "autopart:swapcheck"])
 
-    def select_page(self, device, keep1):
-        self.device = device
-        self.keep1 = keep1
-        command.pageswitch(self.page_index,
-                _("Automatic Partitioning"))
-
     def setup(self):
         self.systemsize = self.get_system_size_estimate()
         self.memsize = float(backend.xlist("get-memsize")[1][0]) * 1024 / 10**9
 
 
+    def select_page(self, init, *args):
+        self.initialize = init
+        if init:
+            self.device, self.keep1 = args
+        command.pageswitch(self.page_index,
+                _("Automatic Partitioning"))
+
+
     def init(self):
+        if not self.initialize:
+            return
         # Info on drive
         di = DiskInfo(self.device)
         c2G = float(di.cyl2B()) / 10**9
@@ -348,14 +352,11 @@ class Stage:
                 iparts = None
                 break
             else:
-                # Convert size to GB
-                size = "%6.1f" % (float(s) * bytespercyl / 10**9)
-                # [mount-point, device, size, format, format-flags, mount-flags]
-                iparts.append([m, part, size, "" if swap else "ext4", "", ""])
+                # [mount-point, device, size, format]
+                iparts.append([m, part, "" if swap else "ext4"])
                 ui.progressPopup.add("   ---> " + part)
         ui.progressPopup.end()
 
         # Go to installation stage
-        # As we are already in the background the signal cannot be run directly
         if iparts:
-            command.queuesignal("&install&", iparts)
+            command.runsignal("&install!", iparts)
