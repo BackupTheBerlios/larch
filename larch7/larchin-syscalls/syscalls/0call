@@ -3,13 +3,36 @@
 # 0call   - run a syscall ( a script in this directory)
 #              ... or kill it
 
-pidfile=/tmp/larchin-callpid
-apath="$( readlink -f $0 )"
-adir="$( dirname ${apath} )"
+# When a syscall script is started, a corresponding pidfile is created,
+# containing the pid of the process, so that it can be killed if
+# necessary. This file is deleted when the scripts terminates.
+
+pidfile=/tmp/larchin_callpid
+apath=$( readlink -f $0 )
+adir=$( dirname ${apath} )
 if [ "$1" = "0kill" ]; then
-    pid="$( cat ${pidfile} )"
-    :>${pidfile}
-    exec "${adir}/0killr" ${pid}
+    cd "${adir}"
+    export pidfile
+    :> ${pidfile}
+    for pidf in ${pidfile}-*; do
+        pid=$( cat ${pidf} )
+        eval "${adir}/0killr" ${pid}
+        rm -f ${pidf}
+    done
+    pidlist=$( cat ${pidfile} )
+    i=0
+    while [ ${i} -lt 50 ]; do
+        undead=$( ps -o pid --no-headers -p ${pidlist} )
+        if [ -z "${undead}" ]; then
+            :> ${pidfile}
+            exit 0
+        fi
+        i=$(( ${i} + 1 ))
+        sleep 0.2
+    done
+    echo "${undead}" >${pidfile}
+    exit 1
 fi
-echo "$$" >${pidfile}
+echo "$$" >${pidfile}-$1
 eval "${adir}/$*"
+rm ${pidfile}-$1

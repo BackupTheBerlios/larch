@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.17
+# 2009.10.18
 
 from backend import PartInfo
 
@@ -138,7 +138,6 @@ class Stage:
 
     def do_install(self):
         ui.progressPopup.start()
-        ui.progressPopup.show_extra(_("Installed MB:"))
         installer = Installer(self.partlist)
 
         # Format
@@ -152,10 +151,12 @@ class Stage:
             return
 
         # Copy system
+        ui.progressPopup.show_extra(_("Installed MB:"))
         if not installer.copysystem():
             installer.tidy()
             return
         installer.copydone()
+        ui.progressPopup.start_percent()
 
         # Delivify (including running 'larch0' script)
         ui.progressPopup.add(_("Removing live-system modifications"))
@@ -224,8 +225,11 @@ class Installer:
             ui.progressPopup.add(" ... /%s ..." % frdir)
         self.installed += int(size)
         if self.installed >= self.target:
-            self.target = self.installed + 10**7
-            ui.progressPopup.set_info("%5d" % (self.installed / 10**6))
+            self.target = self.installed + 10**6
+            mb = (self.installed + 5*10**5) / 10**6
+            ui.progressPopup.set_info("%5d" % mb)
+            total = backend.gettotalMB()
+            ui.progressPopup.set_percent(mb, total if total>0 else 0)
 
     def copydone(self):
         ui.progressPopup.hide_extra()

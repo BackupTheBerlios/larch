@@ -21,13 +21,12 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.17
+# 2009.10.18
 
 
 """
-This is the main module of the larchin program, which should be started with
-root priveleges. ????If it is started as a normal user, the actual building
-commands will not be exectued, but it might still be useful for debugging.
+This is the main module of the larchin program, which must be started with
+root priveleges.
 
 The actual installation commands are run as a separate process, possibly even
 on a different machine (using ssh with public-key authentication). These
@@ -37,7 +36,8 @@ Also the graphical user interface is run as a separate process and the
 communication runs via pipes to the subprocess's stdio channels.
 Data is passed as json objects.
 
-???The command-line user interface runs in the same process but a separate
+
+???NYI: The command-line user interface runs in the same process but a separate
 thread is used to dispatch the commands - several commands can be passed
 on the command line. The dispatcher waits for one command to complete
 before sending the next, so the behaviour should be 'as expected'.
@@ -121,13 +121,6 @@ class Command:
                 "$$$uiquit$$$": [self.uiquit],
                 "larchin:quit*clicked": [self.uiquit],
                 "larchin:cancel*clicked": [self.cancel],
-                "log:hide*clicked": [self._activatehidelog],
-                "$$$hidelog$$$": [self._activatehidelog],
-                "larchin:showlog*toggled": [self._showlog],
-                "doc:hide*clicked": [self._activatehidedocs],
-                "$$$hidedoc$$$": [self._activatehidedocs],
-                "larchin:docs*toggled": [self._showdocs],
-                "log:clear*clicked": [self._clearlog],
                 "larchin:forward*clicked": [self.next],
                 "larchin:goback*clicked": [self.previous],
            }
@@ -170,6 +163,7 @@ class Command:
 
 
     def runsignal(self, sig, *args):
+        #debug("SIG:" + sig + "---" + repr(args))
         if sig.endswith("-"):
             # Remove the '-'
             sig = sig[:-1]
@@ -204,7 +198,7 @@ class Command:
         self.blocking_lock.release()
         if queued:
             return
-        self.pthread = simple_thread(self.worker_run, *args)
+        self.pthread = self.simple_thread(self.worker_run, *args)
 
 
     def worker_run(self, slots, *args):
@@ -235,46 +229,7 @@ class Command:
                 break
 
 
-    def _activatehidelog(self):
-        ui.command("larchin:showlog.set", False)
-
-
-    def _showlog(self, on):
-        logger.setVisible(on)
-
-
-    def _clearlog(self):
-        logger.clear()
-
-
-    def _activatehidedocs(self):
-        ui.command("larchin:docs.set", False)
-
-
-    def _showdocs(self, on):
-        ui.command("doc:.setVisible", on)
-
-
-    def _browse(self, btype, path):
-        simple_thread(self._browse_set, btype, path)
-
-
-    def _browse_set(self, btype, path):
-        appcall = config.get(btype)
-        while (call(["which", appcall.split()[0]],
-                stdout=PIPE, stderr=STDOUT) != 0):
-            ok, new = ui.ask("textLineDialog",
-                    _("Enter '%s' application ('$' for path argument):") % btype,
-                    None, appcall)
-            if ok:
-                appcall = new
-                config.set(btype, appcall)
-            else:
-                return
-
-        Popen(appcall.replace("$", path) + " &", shell=True)
-
-
+#???
     def sigint(self, num, frame):
         """CONSOLE MODE ONLY: A handler for SIGINT. Tidy up properly and quit.
         First kill potential running supershell process, then terminate
@@ -289,7 +244,6 @@ class Command:
         ui.confirmDialog(_("Do you really want to quit the program?"),
                 async="$$$uidoquit$$$")
 
-
     def _uiclose(self, doit):
         """Called when Window-Close ('X') confirmation dialog is closed.
         If doit is True the application should close. The gui itself won't
@@ -298,16 +252,14 @@ class Command:
         if doit:
             self.uiquit()
 
-
     def uiquit(self):
         self.cancel(True)
-
 
     def cancel(self, terminate=False):
 # This is a bit experimental - I'm not sure the worker threads will handle
 # the break-ins sensibly.
         # This is not called from the worker thread, so it mustn't block.
-        self.qthread = simple_thread(self._quit_run, terminate)
+        self.qthread = self.simple_thread(self._quit_run, terminate)
 
 
     def _quit_run(self, terminate):
@@ -330,45 +282,11 @@ class Command:
             backend.unmount()
 
 
-    def browser(self, path):
-        self._browse("filebrowser", path)
+    def simple_thread(self, func, *args):
+        t = threading.Thread(target=func, args=args)
+        t.start()
+        return t
 
-
-    def chroot(self, cmd, mounts=[]):
-        ip = config.ipath()
-        if ip != "/":
-            for m in mounts:
-                self.mount("/" + m, "%s/%s" % (ip, m), "--bind")
-            cmd = "chroot %s %s" % (ip, cmd)
-
-        s = supershell(cmd)
-
-        if ip != "/":
-            self.unmount(["%s/%s" % (ip, m) for m in mounts])
-
-        if s.ok:
-            if s.result:
-                return s.result
-            else:
-                return True
-        return False
-
-
-
-    def NYI(self):
-        ui.infoDialog(_("Function not yet implemented"))
-
-
-def readfile(f, filter=None):
-    fh = open(f)
-    r = fh.read()
-    fh.close()
-    return filter(r) if filter else r
-
-def savefile(f, d):
-    fh = open(f, "w")
-    r = fh.write(d)
-    fh.close()
 
 def config_error(text):
     ui.error(text, _("Configuration Error"))
@@ -388,8 +306,7 @@ def errorTrap(type, value, tb):
     etext = "".join(traceback.format_exception(type, value, tb))
     ui.error(etext, _("This error could not be handled"), fatal=True)
 
-#TODO
-#sys.excepthook = errorTrap
+sys.excepthook = errorTrap
 #---------------------------
 
 
@@ -416,43 +333,22 @@ def mainloop():
 
         elif line[0] == "/":
             # ui exiting
+            debug("ui exiting")
             exitcode = int(line[1:])
 
         else:
             fatal_error(_("Unexpected message from ui:\n") + line)
 
-
-#TODO
-
-
-    ut = simple_thread(tidyquit)
+    ut = command.simple_thread(tidyquit)
 
 #---------------------------
 
-
-
-
-def simple_thread(func, *args):
-        t = threading.Thread(target=func, args=args)
-        t.start()
-        return t
-
-
-
-
 def tidyquit():
+    debug("Tidying up before quitting")
     backend.unmount()
-#???
-
-
-
-
-
 
 
 __builtin__.tt_seedocs = _("See documentation for further details")
-
-
 
 
 if __name__ == "__main__":
@@ -485,10 +381,10 @@ if __name__ == "__main__":
 
 
     if options.ui == "cli":
-        from console import Ui, Logger, DocViewer
+        from console import Ui, Logger
         guiexec = None
     else:
-        from gui import Ui, Logger, DocViewer
+        from gui import Ui, Logger
         if options.ui == "pyqt":
             guiexec = [base_dir + "/modules/pyqt/guibuild.py"]
         else:
@@ -497,12 +393,7 @@ if __name__ == "__main__":
 
     __builtin__.ui = Ui(guiexec)
     __builtin__.logger = Logger()
-    # Build the documentation viewer
-    doc = DocViewer()
     __builtin__.backend = Backend(host)
-#???
-#    __builtin__.installation = Installation()
-
     __builtin__.command = Command()
 
     for p in command.pages:

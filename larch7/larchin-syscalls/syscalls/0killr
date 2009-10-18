@@ -2,11 +2,10 @@
 
 # 0killr   - recursive killing of child processes
 
-apath="$( readlink -f $0 )"
-adir="$( dirname ${apath} )"
-ppp="$( pgrep -P $1 )"
-echo "killing $1">>/tmp/killed
-kill -9 $1
+pid0="$1"
+ppp="$( pgrep -P ${pid0} )"
+kill -9 ${pid0}
 for pid in ${ppp}; do
-    "${adir}/0killr" ${pid}
+    "./0killr" ${pid}
 done
+echo ${pid0} >>${pidfile}

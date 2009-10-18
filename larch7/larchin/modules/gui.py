@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.17
+# 2009.10.18
 
 import os, pwd
 import json
@@ -67,20 +67,23 @@ class Ui:
                 icon="larchin-icon.png", closesignal="$$$uiclose$$$")
         # - Header
         self.newwidget("Label", "larchin:i", image="larchin80.png")
-        self.newwidget("Label", "larchin:h", html='<span '
-                'style="font-size:xx-large; color:#c55500;">'
-                '<b>%s</b></span>' % _("<i>larch</i> Installer"))
-        self.newwidget("ToggleButton", "^larchin:showlog", text=_("View Log"),
-                tt=_("This button toggles the visibility of the log viewer"))
-        self.newwidget("ToggleButton", "^larchin:docs", text=_("Help"),
-                tt=_("Open the larchin docs in a browser"))
+        self.newwidget("Label", "larchin:h", html='<h1><span '
+                'style="color:#c55500;">%s</span></h1>'
+                % _("<i>larch</i> Installer"))
+        self.newwidget("Button", "^larchin:showlog", text=_("View Log"),
+                tt=_("This button switches to the log viewer"))
+        self.newwidget("Button", "^larchin:docs", text=_("Help"),
+                tt=_("This button switches to the documentation viewer"))
         self.newwidget("Button", "^larchin:cancel", text=_("Cancel"),
                 tt=_("Stop the current action"))
-        self.newwidget("Button", "^larchin:quit", text=_("Quit"),
-                tt=_("Stop the current action and quit the program"))
+#        self.newwidget("Button", "^larchin:quit", text=_("Quit"),
+#                tt=_("Stop the current action and quit the program"))
         self.newwidget("Label", "larchin:stageheader", align="center")
 
         # - Main widget
+        self.newwidget("Stack", "larchin:tabs", pages=[
+                "tab:main", "tab:progress", "tab:log", "tab:doc"])
+
         self.newwidget("Stack", "larchin:stack", pages=[
                 "page:welcome",
                 "page:disks",
@@ -98,18 +101,30 @@ class Ui:
                 ["*HBOX*", "larchin:i",
                     ["*VBOX*",
                         ["*HBOX*", "larchin:h", "*SPACE",
-                            "larchin:showlog", "larchin:docs",
-                            "larchin:cancel", "larchin:quit"],
+                            "larchin:showlog", "larchin:docs",],
+#                            "larchin:cancel", "larchin:quit"],
                         "larchin:stageheader"]],
-                "larchin:stack",
+                "larchin:tabs",
+                ])
+        self.layout("tab:main", ["*VBOX*", "larchin:stack",
                 ["*HBOX*", "larchin:goback", "*SPACE", "larchin:forward"]
                 ])
 
 
     def go(self):
+        # Build the documentation viewer
+        self.docViewer = DocViewer()
         # A popup window for reporting on progress of lengthier operations
         self.progressPopup = ProgressPopup()
-        command.addconnections([("pp:hide*clicked", self.progressPopup.done)])
+        command.addconnections([
+                ("pp:hide*clicked", self.progressPopup.done),
+                ("log:hide*clicked", self._hidelog),
+                ("larchin:showlog*clicked", self._showlog),
+                ("doc:hide*clicked", self._hidedocs),
+                ("larchin:docs*clicked", self._showdocs),
+                ("log:clear*clicked", logger.clear),
+            ])
+        self.runningtab(0)
         self.command("larchin:.show")
 
 
@@ -236,7 +251,7 @@ class Ui:
 
     def set_stageheader(self, text):
         self.command("larchin:stageheader.x__html",
-                '<span style="font-size:x-large; color:#55c500;">%s</span>'
+                '<h2><span style="color:#55c500;">%s</span></h2>'
                 % text)
 
 
@@ -250,6 +265,27 @@ class Ui:
         return html + '\n</table>'
 
 
+    def _hidelog(self):
+        self.runningtab()
+
+    def _showlog(self):
+        self.runningtab(2)
+
+    def _hidedocs(self):
+        self.runningtab()
+
+    def _showdocs(self):
+        self.runningtab(3)
+
+    def runningtab(self, i=-1):
+        if i < 0:
+            i = self.maintab
+        elif i < 2:
+            self.maintab = i
+        self.command("larchin:tabs.set", i)
+
+
+
 class Logger:
     def __init__(self):
 #TODO: This is experimental - it is intended to work around problems arising
@@ -258,20 +294,17 @@ class Logger:
         if self.encoding == "UTF8":
             self.encoding = None
 
-        ui.newwidget("Window", "log:", title="larchin log", size="600_400",
-                icon="larchin-icon.png", closesignal="$$$hidelog$$$")
         ui.newwidget("Label", "log:header",
-                text=_("Here you can follow the detailed, low-level progress"
-                        " of the commands."))
+            html='<h2>%s</h2><p>%s</p>' % (_("Low-level Command Logging"),
+            _("Here you can follow the detailed, low-level progress"
+            " of the commands.")))
         ui.newwidget("TextEdit", "log:text", ro=True)
         ui.newwidget("Button", "^log:clear", text=_("Clear"))
         ui.newwidget("Button", "^log:hide", text=_("Hide"))
 
-        ui.layout("log:", ["*VBOX*", "log:header", "log:text",
-                ["*HBOX*", "*SPACE", "log:clear", "log:hide"]])
-
-    def setVisible(self, on):
-        ui.command("log:.setVisible", on)
+        ui.layout("tab:log", ["*VBOX*", "log:header",
+                ["*HBOX*", "log:text",
+                    ["*VBOX*", "log:clear", "log:hide", "*SPACE"]]])
 
     def clear(self):
         ui.command("log:text.x__text")
@@ -292,32 +325,40 @@ class Logger:
 
 class DocViewer:
     def __init__(self):
-        ui.newwidget("Window", "doc:", title= _("larchin Help"), size="600_400",
-                icon="larchin-icon.png", closesignal="$$$hidedoc$$$")
+        ui.newwidget("Label", "doc:header",
+            html='<h2>%s</h2>' % _("Documentation"))
         ui.newwidget("HtmlView", "doc:content")
         ui.newwidget("Button", "^doc:hide", text=_("Hide"))
 
-        ui.layout("doc:", ["*VBOX*", "doc:content",
-                ["*HBOX*", "*SPACE", "doc:hide"]])
+        ui.layout("tab:doc", ["*VBOX*", "doc:header",
+                ["*HBOX*", "doc:content",
+                    ["*VBOX*", "doc:hide", "*SPACE"]]])
+
 
 class ProgressPopup:
     def __init__(self):
-        ui.newwidget("Window", "pp:", title= _("Progress"), size="300_200",
-                icon="larchin-icon.png", closesignal="pp:hide*clicked")
+        ui.newwidget("Label", "pp:header",
+            html='<h2>%s</h2>' % _("Progress Report"))
         ui.newwidget("TextEdit", "pp:text", ro=True)
         ui.newwidget("Frame", "pp:extra")
         ui.newwidget("Label", "pp:le")
         ui.newwidget("LineEdit", "pp:info", ro=True)
         ui.newwidget("Button", "^pp:hide", text=_("OK"))
-        ui.layout("pp:", ["*VBOX*", "pp:text", "pp:extra",
-                ["*HBOX*", "*SPACE", "pp:hide"]])
-        ui.layout("pp:extra", ["*HBOX*", "pp:le", "pp:info"])
+        ui.newwidget("ProgressBar", "pp:pbar")
+        ui.layout("tab:progress", ["*VBOX*", "pp:header",
+                "pp:text",
+                "pp:pbar",
+                "pp:extra",
+                ["*HBOX*", "larchin:cancel", "*SPACE", "pp:hide"]])
+        ui.layout("pp:extra", ["*HBOX*", ["*SPACE", 300],
+                "pp:le", "pp:info"])
 
     def start(self):
         ui.command("pp:hide.enable", False)
         self.hide_extra()
-        ui.command("pp:.setVisible", True)
         ui.command("pp:text.x__text")
+        self.start_percent()
+        ui.runningtab(1)
 
     def add(self, line):
         ui.command("pp:text.append_and_scroll", line)
@@ -332,8 +373,24 @@ class ProgressPopup:
     def set_info(self, text):
         ui.command("pp:info.x__text", text)
 
+    def set_percent(self, value, max=0):
+        if max != self.max:
+            self.start_percent(max, value)
+        elif self.max > 0:
+            ui.command("pp:pbar.set", value)
+
+    def start_percent(self, max=0, start=0):
+        self.max = max if max >= 0 else 0
+        ui.command("pp:pbar.x__max", self.max)
+        ui.command("pp:pbar.set", start)
+        self.percent = start
+
     def end(self):
+        if self.max == 0:
+            self.max = 100
+            ui.command("pp:pbar.x__max", self.max)
+        ui.command("pp:pbar.set", self.max)
         ui.command("pp:hide.enable", True)
 
     def done(self):
-        ui.command("pp:.setVisible", False)
+        ui.runningtab(0)

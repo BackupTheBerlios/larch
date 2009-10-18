@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.17
+# 2009.10.18
 
 
 doc = _("""
@@ -56,7 +56,7 @@ Arch Linux.
 <p>With this program you can install a larch live system as a normal
 Arch Linux system, retaining its configuration settings.
 </p>
-<p align="center"><img src="larchin.png" width="160" height="160" />
+<p align="center"><img src="larchin.png" width="150" height="150" />
 </p>
 <p>Press the 'OK' button to progress to the next stage.
 </p>

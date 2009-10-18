@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# system-size
+
+# Use du to get an estimate for the size of the system
+
+LANG=C du -s -c -B MB /bin /boot /etc /lib /home /opt /root /sbin /srv /usr /var \
+        | grep total

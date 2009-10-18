@@ -45,6 +45,9 @@ class Backend:
         # Keep a record of mounts
         self.mounts = []
 
+        # Keep a record of the (estimated) size of the installation
+        self.totalMB = 0
+
 
 #TODO: Maybe this should be done outside of __init__
 #        if (self.xcall("init") != ""):
@@ -162,12 +165,16 @@ class Backend:
     def killprocess(self):
         self.process_lock.acquire()
         if self.process:
-            if self.host:
-                self._xcall_net("0kill").wait()
-            else:
-                self._xcall_local("0kill").wait()
+            self.bgproc("0kill")
             self.interrupt = 1
         self.process_lock.release()
+
+
+    def bgproc(self, cmd, tidy=None):
+        fn = self._xcall_net if self.host else self._xcall_local
+        res = fn(cmd).communicate()[0]
+        if tidy:
+            tidy(res)
 
 
 ########################################################################
@@ -338,6 +345,22 @@ class Backend:
         """
         return self.xlist("swap-format " + ("-c " if check else "")
                 + partition)[0]
+
+
+    def gettotalMB(self):
+        if self.totalMB > 0:
+            return self.totalMB
+        if self.totalMB == 0:
+            self.totalMB = -1
+            # Start a background thread to estimate the size
+            command.simple_thread(self.bgproc, "1system-size", self._setsize)
+        # but for now return 0
+        return 0
+
+    def _setsize(self, textlines):
+        line = textlines.strip()
+        rem = re.search(r"(\d+)\s*MB\s+total", line)
+        self.totalMB = int(rem.group(1)) if rem else 0
 
 
     def copy_system(self, logfun):

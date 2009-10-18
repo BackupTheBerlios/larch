@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.17
+# 2009.10.18
 
 from backend import DiskInfo
 import re
@@ -204,7 +204,7 @@ class Stage:
 #TODO: test this ...
         # Use blkid to test whether 1st partition is NTFS
         t1 = backend.xlist("get-blkinfo TYPE %s1" % self.device)
-        self.ntfs1 = t1[0] and (t1[1][0] == "ntfs")
+        self.ntfs1 = t1[0] and (len(t1[1]) != 0) and (t1[1][0] == "ntfs")
         ui.command("disks:ntfs-shrink.enable", self.ntfs1)
 
         # If device has mounted partition(s), it is not autopartitionable

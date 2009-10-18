@@ -166,6 +166,8 @@ class Stage:
         ui.command("autopart:reserved.x__text", "%4.0f GB" % self.p1size)
         # Set up unallocated space display
         self.unallocated = 0.0
+        self.swapsize = 1.0
+        self.swapsize_old = 1.0
         self.maxunallocated = self.disksize - self.p1size - self.systemsize - 15.0
         # Also use this as criterion for possibility of user data partition
         self.datapart = self.maxunallocated > 0.0
@@ -182,14 +184,12 @@ class Stage:
                 ui.command("autopart:homesize.x__max", self.datasize)
                 ui.command("autopart:homesize.x__value", self.datasize)
             else:
-                self.datasize = 0
+                self.datasize = 0.0
                 ui.command("autopart:home.opton", False)
         else:
             self.datasize = 0.0
         # Set up swap partition display
         ui.command("autopart:swap.opton", True)
-        self.swapsize = 1.0
-        self.swapsize_old = 1.0
         self.recalculate()
 
         self.swapcheck = False
@@ -247,8 +247,9 @@ class Stage:
         self.recalculate()
 
     def swapsizechanged(self, size):
-        self.swapsize = size
-        self.recalculate()
+        if self.swapsize > 0.0:
+            self.swapsize = size
+            self.recalculate()
 
     def hometoggled(self, on):
         if on:
@@ -259,8 +260,9 @@ class Stage:
         self.recalculate()
 
     def homesizechanged(self, size):
-        self.datasize = size
-        self.recalculate()
+        if self.datasize > 0.0:
+            self.datasize = size
+            self.recalculate()
 
 
     def swapcheck_toggle(self, on):

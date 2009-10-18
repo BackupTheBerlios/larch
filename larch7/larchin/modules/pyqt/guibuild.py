@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.12
+# 2009.10.18
 
 """Build a gui from a layout description.
 """
@@ -557,15 +557,28 @@ class SpinBox(QtGui.QDoubleSpinBox, WBase):                 #qt
         self.setValue(val)
 
 
+class ProgressBar(QtGui.QProgressBar, WBase):               #qt
+    def __init__(self):
+        QtGui.QProgressBar.__init__(self)                   #qt
+
+    def set(self, value):
+        self.setValue(value)                                #qt
+
+    def x__max(self, max):
+        self.setMaximum(max)                                #qt
+
+
+
 # Layout classes
 class Layout:
     """A mixin base class for all layout widgets.
     """
     pass
 
-
+boxmargin=3
 class _BOX(Layout):
     def __init__(self, items):
+        self.setContentsMargins(boxmargin, boxmargin, boxmargin, boxmargin) #qt
         for wl in items:
             if isinstance(wl, QtGui.QWidget):               #qt
                 self.addWidget(wl)                          #qt
@@ -989,6 +1002,7 @@ widget_table = {
     "TextEdit": TextEdit,
     "HtmlView": HtmlView,
     "SpinBox": SpinBox,
+    "ProgressBar": ProgressBar,
 }
 
 specials_table = {
