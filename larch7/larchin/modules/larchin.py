@@ -333,7 +333,7 @@ def mainloop():
 
         elif line[0] == "/":
             # ui exiting
-            debug("ui exiting")
+            #debug("ui exiting")
             exitcode = int(line[1:])
 
         else:
@@ -341,10 +341,23 @@ def mainloop():
 
     ut = command.simple_thread(tidyquit)
 
+def plog(line=None):
+    """The lines should not be newline-terminated.
+    """
+    plog_lock.acquire()
+    if line == None:
+        logger.clear()
+        line = "---*** Log cleared ***---"
+    else:
+        logger.addLine(line)
+    logfile.write(line + '\n')
+    plog_lock.release()
+__builtin__.plog = plog
+
 #---------------------------
 
 def tidyquit():
-    debug("Tidying up before quitting")
+    #debug("Tidying up before quitting")
     backend.unmount()
 
 
@@ -392,7 +405,9 @@ if __name__ == "__main__":
             sys.exit(1)
 
     __builtin__.ui = Ui(guiexec)
-    __builtin__.logger = Logger()
+    plog_lock = threading.Lock()
+    logfile = open("/tmp/larchin_log", "w")
+    logger = Logger()
     __builtin__.backend = Backend(host)
     __builtin__.command = Command()
 
@@ -404,4 +419,5 @@ if __name__ == "__main__":
     command.run()
     mainloop()
 
+    logfile.close()
     sys.exit(exitcode)

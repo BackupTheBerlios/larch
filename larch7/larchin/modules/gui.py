@@ -122,7 +122,7 @@ class Ui:
                 ("larchin:showlog*clicked", self._showlog),
                 ("doc:hide*clicked", self._hidedocs),
                 ("larchin:docs*clicked", self._showdocs),
-                ("log:clear*clicked", logger.clear),
+                ("log:clear*clicked", plog),
             ])
         self.runningtab(0)
         self.command("larchin:.show")
@@ -337,6 +337,7 @@ class DocViewer:
 
 class ProgressPopup:
     def __init__(self):
+        self.max = 0
         ui.newwidget("Label", "pp:header",
             html='<h2>%s</h2>' % _("Progress Report"))
         ui.newwidget("TextEdit", "pp:text", ro=True)

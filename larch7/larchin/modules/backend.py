@@ -130,7 +130,7 @@ class Backend:
             self.process = self._xcall_local(cmd)
         self.process_lock.release()
 
-        logger.addLine("XCALL: %s" % cmd)
+        plog("XCALL: %s" % cmd)
         self.oplines = []
         while True:
             line = self.process.stdout.readline()
@@ -140,8 +140,8 @@ class Backend:
                 xlog(line)
             else:
                 self.oplines.append(line)
-                logger.addLine(line)
-        logger.addLine("END-XCALL")
+                plog(line)
+        plog("END-XCALL")
         self.process.wait()
         rc = self.process.returncode
         lines = self.oplines
@@ -171,10 +171,12 @@ class Backend:
 
 
     def bgproc(self, cmd, tidy=None):
+        plog("CALL: %s" % cmd)
         fn = self._xcall_net if self.host else self._xcall_local
         res = fn(cmd).communicate()[0]
         if tidy:
             tidy(res)
+        plog("CALL-END: %s" % cmd)
 
 
 ########################################################################
