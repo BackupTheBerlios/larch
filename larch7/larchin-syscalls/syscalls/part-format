@@ -6,9 +6,15 @@
 p=$1
 f=$2
 
+# I'll assume that ext3 should have "journal_data_ordered", the old
+# default. The alternatives are "journal_data_writeback" - the new
+# default - and "journal_data". It can be changed in tweaks/format-ext3.
+journal_data=""
+
 case ${f} in
     ext4 ) mkfs.ext4 ${p} ;;
-    ext3 ) mkfsext3 ${p} ;;
+    ext3 ) journal_data="journal_data_ordered"
+           mkfs.ext3 ${p} ;;
     reiserfs ) mkreiserfs -q ${p} ;;
     ext2 ) mke2fs ${p} ;;
     jfs ) mkfs.jfs -q ${p} ;;
@@ -16,3 +22,10 @@ case ${f} in
     * ) echo -n "Bad arguments: ${p} ${f}"
         false ;;
 esac
+[ $? -ne 0 ] && exit 1
+
+apath=$( readlink -f $0 )
+atweak=$( dirname ${apath} )/tweaks/format-${f}
+[ -f ${atweak} ] && . ${atweak}
+
+[ -n "${journal_data}" ] && tune2fs -o ${journal_data} ${p}
