@@ -59,11 +59,15 @@ so that it is retained from one <em>larch</em> run to the next.
    <li>If you install it as a package it should be available via the desktop application
    list, or just by running 'larch' (after logging out and in, to update the search path).
    If you haven't installed it run the 'larch' script in the 'run' directory. There is,
-   however, one small catch: <em>larch</em> must be run as root.
+   however, one small catch: <em>larch</em> must be run with root privileges.
    If you are running as root (not generally recommended!), or you have
    <em>gksu</em> or <em>kdesu</em> installed, this should be no problem - the
    start script will manage these situations automatically.
-   Otherwise you can start it from a terminal with <em>su</em> or <em>sudo</em>,
+   Otherwise you can start it from a terminal with <em>su</em> - but don't use the '-'
+   ('-l' / '-login') option, or else you will probably have problems with X-authentication -
+   or <em>sudo</em>. As it is a gui program, you must of course be running xorg (see
+    <a href="larch_console.html">Command-Line Interface</a> for use
+    from the command line).
    </li>
    <li>To build a <em>larch live</em> system you basically just have to go through
    the first four pages one after the other.
