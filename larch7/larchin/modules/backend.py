@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.17
+# 2009.10.20
 
 from subprocess import Popen, PIPE, STDOUT
 import os, threading
@@ -457,7 +457,7 @@ class PartInfo:
         self.device = device
 
     def getfstype(self):
-        ok, l = backend.xlist("get-blkinfo TYPE %s" % self.device)
+        ok, l = backend.xlist("get-blkinfo %s TYPE" % self.device)
         if ok and l:
             return l[0]
         else:

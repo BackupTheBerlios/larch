@@ -37,12 +37,15 @@
 
 
 backend:
+# Note that this should now be done using get-blkinfo to return ALL
+# information about all partitions. The filtering can be done in python.
+# But one will probably also need to read partition type-ids.
     def usableparts(self):
         return self.xlist("get-usableparts")[1]
     def getUUID(self, part):
-        return self.xcall("get-blkinfo UUID %s" % part).strip()
+        return self.xcall("get-blkinfo %s UUID" % part).strip()
     def getLABEL(self, part):
-        return self.xcall("get-blkinfo LABEL %s" % part).strip()
+        return self.xcall("get-blkinfo %s LABEL" % part).strip()
 
 
 

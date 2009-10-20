@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.17
+# 2009.10.20
 
 from backend import DiskInfo
 
@@ -57,7 +57,7 @@ to using a different mount point. One potential advantage is that the
 configuration files for the system and various applications which are saved in
 a user's home directory (and which may cause problems if used by other systems,
 e.g. after a reinstallation) can easily be kept separate from the user's
-personal data. Here /data is offered as an alternative to /home.
+personal data. Here /home/DATA is offered as an alternative to /home.
 </p>""")
 
 
@@ -111,7 +111,7 @@ class Stage:
         ui.newwidget("SpinBox", "^autopart:homesize", decimals=0, min=1.0,
                 tt=_("Enter the desired size for the user data partition here"))
         ui.newwidget("CheckBox", "^autopart:homedata", tt=_(tt_seedocs),
-                text=_("Create /data instead of /home partition"))
+                text=_("Create /home/DATA instead of /home partition"))
 
         ui.newwidget("Label", "autopart:syssize_l",
                 text=_("Space for Arch root partition:"))
@@ -286,9 +286,9 @@ class Stage:
     def partition(self, doit):
         if not doit:
             return
-        # I'll make the sequence: root, then swap then home/data.
+        # I'll make the sequence: root, then swap then home(/DATA).
         # But swap and/or home may be absent.
-        # root and swap are created as primary partitions, home/data
+        # root and swap are created as primary partitions, home(/DATA)
         # as logical (to ensure that ny unallocated space may also be used).
 
         # The actual partitioning is done, but the formatting is
@@ -323,7 +323,7 @@ class Stage:
         for m, s, t in (
                 ("/", self.rootsize, "primary"),
                 ("swap", self.swapsize, "primary"),
-                ("/data" if self.homedata else "/home", self.datasize, "logical"),
+                ("/home/DATA" if self.homedata else "/home", self.datasize, "logical"),
                 ("", self.unallocated, None)):
             if s > 0.1:
                 # Convert GB to cylinders

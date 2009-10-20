@@ -5,5 +5,7 @@
 # Get all mounted devices - so that each line contains a mounted device
 # Here managed by reading the contents of /etc/mtab
 
-cat /etc/mtab | grep "^/dev/[sh]d" | cut -d' ' -f1
+cat /etc/mtab | grep "^/dev/" | while read dev x; do
+        echo $( readlink -f ${dev} )
+    done
 exit 0
