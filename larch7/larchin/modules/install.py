@@ -83,8 +83,12 @@ class Stage:
     def __init__(self, index):
         self.page_index = index
         ui.newwidget("HtmlView", "install:l1")
+        ui.newwidget("CheckBox", "^install:devname",
+                tt=_("Use device name (/dev/sda1, etc.), not LABEL or UUID,"
+                        " in /etc/fstab and for grub"),
+                text=_("Use /dev/sda1, etc. (NOT LABEL / UUID)"))
 
-        ui.layout("page:install", ["*VBOX*", "install:l1"])
+        ui.layout("page:install", ["*VBOX*", "install:l1", "install:devname"])
 
     def setup(self):
         return
@@ -97,9 +101,9 @@ class Stage:
 #debugging
             if "P" in dbg_flags:
                 self.partlist = [
-                        ["/", "/dev/sdb1", "ext4"],
-                        ["swap", "/dev/sdb2", ""],
-                        ["/home", "/dev/sdb5", "ext4"]]
+                        ["/", "/dev/sda1", "ext4"],
+                        ["swap", "/dev/sda2", ""],
+                        ["/home", "/dev/sda5", "ext4"]]
 #-
         command.pageswitch(self.page_index,
                 _("Disk formatting and system installation"))
@@ -141,9 +145,12 @@ class Stage:
         installer = Installer(self.partlist)
 
         # Format
-        if not installer.format():
-            installer.tidy()
-            return
+#debugging
+        if "f" not in dbg_flags:
+#-
+            if not installer.format():
+                installer.tidy()
+                return
 
         # Mount
         if not installer.mount():
@@ -151,27 +158,138 @@ class Stage:
             return
 
         # Copy system
-        ui.progressPopup.show_extra(_("Installed MB:"))
-        if not installer.copysystem():
-            installer.tidy()
-            return
-        installer.copydone()
-        ui.progressPopup.start_percent()
+#debugging
+        if "i" not in dbg_flags:
+#-
+            ui.progressPopup.show_extra(_("Installed MB:"))
+            if not installer.copysystem():
+                installer.tidy()
+                return
+            installer.copydone()
+            ui.progressPopup.start_percent()
 
-        # Delivify (including running 'larch0' script)
-        ui.progressPopup.add(_("Removing live-system modifications"))
-        if not backend.delivify():
-            installer.tidy()
-            return
+            # Delivify (including running 'larch0' script)
+            ui.progressPopup.add(_("Removing live-system modifications"))
+            if not backend.delivify():
+                installer.tidy()
+                return
 
-        # initramfs (last step here, so don't need check)
-        ui.progressPopup.add(_("Generating initramfs"))
-        ok = backend.initramfs()
+            # initramfs
+            ui.progressPopup.add(_("Generating initramfs"))
+            if not backend.initramfs():
+                installer.tidy()
+                return
+
+        # /etc/fstab (last step here, so don't need check)
+        ui.progressPopup.add(_("Generating /etc/fstab"))
+        ok = self.fstab(self.partlist)
 
         # Unmount, clear popup
         installer.tidy()
         if ok:
-            command.runsignal("&fstab!", self.partlist)
+            command.runsignal("&passwd!", self.partlist)
+
+
+    def fstab(self, partlist, devname=False):
+        """Build a suitable /etc/fstab for the newly installed system.
+        partlist (entries: [mount-point, device, format-type]) contains
+        the partitions which are of main interest to this method.
+        """
+        # Get a dict of all 'mountable' partitions
+        uparts = backend.usableparts()
+        # Each entry has the form:
+        #    device: (fstype, label, uuid, removable)
+        # Check that all fs-types correspond to the desired ones and
+        # build lists of automount, noautomount and swap partitions.
+        automounts = []
+        noautomounts = []
+        swaps = []
+        for mp, dev, fmt in partlist:
+            partinfo = uparts.get(dev)
+            label, uuid = partinfo[1:3]
+            if not partinfo:
+                run_error(_("Unusable partition: %s") % dev)
+                return False
+            fst = partinfo[0]
+            if mp == "swap":
+                if fst != "swap":
+                    run_error(_("Invalid swap partition: %s") % dev)
+                    return False
+                swaps.append(("swap", dev, "swap", label, uuid))
+            else:
+                if fst == "swap":
+                    run_error(_("Illegal swap partition: %s") % dev)
+                    return False
+                if fmt and (fmt != fst):
+                    run_error(_("Detected fstype not same as format spec: %s")
+                            % dev)
+                    return False
+                automounts.append((mp, dev, fst, label, uuid))
+            del(uparts[dev])
+        # Now the partitions not specified in partlist
+        for dev, tup in uparts.items():
+            if not tup[3]:
+                # Only make entries for non-removable devices
+                noautomounts.append((None, dev) + tup[0:3])
+
+        fstab = ("# fstab generated by larchin\n"
+                "#<file system>   <dir>       <type>      <options>"
+                        "    <dump> <pass>\n\n")
+        # Unless device names are explicitly selected (devname=True),
+        # partition labels will be used, if present, or else UUID.
+        automounts.sort()
+        for part in automounts:
+            pas = '1'if (part[0] == '/') else '2'
+            fstab += self.fstabentry(part, devname, pas)
+
+        fstab += ("\nnone            /dev/pts    devpts      defaults"
+                        "        0     0\n"
+                "none            /dev/shm    tmpfs       defaults"
+                        "        0     0\n\n")
+
+        fstab += "# Swaps\n"
+        for part in swaps:
+            fstab += self.fstabentry(part, devname, 0)
+
+        fstab += "\n# Other partitions\n"
+        noautomounts.sort()
+        for part in noautomounts:
+            fstab += self.fstabentry(part, devname, 0)
+
+        fw = open("/tmp/larchin_fstab", "w")
+        fw.write(fstab)
+        fw.close()
+        backend.xsendfile("/tmp/larchin_fstab", "/etc/fstab")
+
+
+    def fstabentry(self, part, devname, pas):
+        mp = part[0]
+        fst = part[2]
+        if devname:
+            dn = part[1]
+        else:
+            l = part[3]
+            dn = ("/dev/disk/by-label/" + l if l else
+                    "/dev/disk/by-uuid/" + part[4])
+            opt = "defaults"
+            if not mp:
+                opt += ",noauto"
+                mp = "/mnt/" + dn.rsplit("/", 1)[1]
+                backend.mkdir(mp)
+
+            if fst == "ntfs":
+                dn = "#" + dn
+#see wiki
+
+            elif fst == "vfat":
+                dn = "#" + dn
+#see wiki
+
+            elif fst != "swap":
+                opt += ",noatime"
+
+            return ("%-15s %-12s %-8s %s  0  %s\n"
+                    % (dn, mp, fst, opt, pas))
 
 
 
@@ -186,9 +304,6 @@ class Installer:
         for part in self.partlist:
             dev = part[1]
             fmt = part[2]
-#debugging
-            if "f" in dbg_flags: fmt = None
-#-
             if fmt:
                 ui.progressPopup.add(_("Formatting %s") % dev)
                 if not backend.format(dev, fmt):

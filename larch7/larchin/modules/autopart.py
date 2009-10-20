@@ -100,7 +100,7 @@ class Stage:
                 text=_("Swap partition size (GB):"))
         ui.newwidget("SpinBox", "^autopart:swapsize", decimals=1, min=0.5,
                 tt=_("Enter the desired size for the swap partition here"))
-        ui.newwidget("CheckBox", "^autopart:swapcheck", tt=_(tt_seedocs),
+        ui.newwidget("CheckBox", "^autopart:swapcheck", tt=tt_seedocs,
                 text=_("Check for bad blocks when formatting."
                         " Don't use this in VirtualBox (it takes forever)."))
 
@@ -110,7 +110,7 @@ class Stage:
                 text=_("User data partition size (GB):"))
         ui.newwidget("SpinBox", "^autopart:homesize", decimals=0, min=1.0,
                 tt=_("Enter the desired size for the user data partition here"))
-        ui.newwidget("CheckBox", "^autopart:homedata", tt=_(tt_seedocs),
+        ui.newwidget("CheckBox", "^autopart:homedata", tt=tt_seedocs,
                 text=_("Create /home/DATA instead of /home partition"))
 
         ui.newwidget("Label", "autopart:syssize_l",

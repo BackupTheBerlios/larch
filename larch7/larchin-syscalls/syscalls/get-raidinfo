@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# get-raidinfo
+
+# Use mdadm to get information about a partition ($1) used for raid
+# Its output is like:
+#   ARRAY /dev/md0 level=raid1 num-devices=2 UUID=ab5cfc68:7922b7dd:8c5856b1:a2506cbd
+# If the partition is not a raid partition, the output is empty
+
+mdadm -E --brief $1

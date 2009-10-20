@@ -22,7 +22,7 @@
 # 2009.10.20
 
 from subprocess import Popen, PIPE, STDOUT
-import os, threading
+import os, shutil, threading
 import re
 
 # Mount point for the installation root partition
@@ -62,14 +62,22 @@ class Backend:
         """
         plog("COPY FILE: %s (host) to %s (target)" % (path, dest))
         if self.host:
+            self.process_lock.acquire()
+            if self.process:
+                bug("Attempt to start second shell process")
+            self.interrupt = 0
             self.process = Popen("scp -q %s root@%s:%s" %
-                    (path, self.host, dest), shell=True,
+                    (path, self.host, IBASE + dest), shell=True,
                     stdout=PIPE, stderr=STDOUT)
+            self.process_lock.acquire()
             plog(self.process.communicate()[0])
+            self.process_lock.acquire()
+            command.breakin = self.interrupt
             self.process = None
+            self.process_lock.release()
+            assert command.breakin == 0
         else:
-            shutil.copyfile(path, dest)
-        assert self.interrupt == None
+            shutil.copyfile(path, IBASE + dest)
 
 
     def _xcall_local(self, cmd):
@@ -386,6 +394,38 @@ class Backend:
     def _initramfs(self):
         return self.xcheck("do-mkinitcpio %s" % IBASE,
                 onfail=_("Problem building initramfs (see log)"))
+
+
+    def usableparts(self):
+        """Return a dict of information tuples for mountable partitions.
+        Also swap partitions are included.
+        Each entry has the form:
+            device: (fstype, label, uuid, removable)
+        When an item is not defined the value is None.
+        """
+        ups = {}
+        for s in self.xlist("get-blkinfo")[1]:
+            mo = re.match(r'(/dev/[^:]*):(?: LABEL="([^"]*)")?(?:'
+                    ' UUID="([^"]*)")?(?: TYPE="([^"]*)")?', s)
+            if mo:
+                dev, label, uuid, fstype = mo.groups()
+                if fstype in (None, "linux_raid_member", "LVM2_member",
+                        "lvm2pv"):
+                    continue
+                if dev.startswith("/dev/loop"):
+                    continue
+                rem = None
+                if dev.startswith("/dev/sd"):
+                    if self.xlist("get-raidinfo %s" % dev)[1]:
+                        continue
+                    rem = self.xlist("removable %s" % dev)[1][0].strip() == "1"
+                ups[dev] = (fstype, label, uuid, rem)
+        return ups
+
+
+    def mkdir(self, dir):
+        return self.xcheck("do-mkdir %s" % IBASE + dir,
+                onfail =_("Couldn't create directory '%s'") % IBASE + dir)
 
 
 
