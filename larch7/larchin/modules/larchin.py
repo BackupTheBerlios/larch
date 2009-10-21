@@ -21,12 +21,12 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.18
+# 2009.10.21
 
 
 """
 This is the main module of the larchin program, which must be started with
-root priveleges.
+root priveleges - unless performing a remote installation via ssh.
 
 The actual installation commands are run as a separate process, possibly even
 on a different machine (using ssh with public-key authentication). These
@@ -54,10 +54,6 @@ imported modules, one for each 'stage'.
 import os, sys, traceback, signal
 
 import __builtin__
-
-#debugging
-__builtin__.dbg_flags = ""
-#-
 
 __builtin__.base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append("%s/modules" % base_dir)
@@ -365,12 +361,6 @@ __builtin__.tt_seedocs = _("See documentation for further details")
 
 
 if __name__ == "__main__":
-
-    if os.getuid() != 0:
-        errout(_("You need to run larchin as root!\n  - otherwise"
-                " the installation cannot be carried out.\n"))
-        sys.exit(1)
-
     parser = OptionParser(usage="usage: %prog [options] ['cmd1'] ['cmd2'] ...")
     parser.add_option("-u", "--ui", action="store", type="string", dest="ui",
             default="pyqt", help=_("Select user interface %s") % "(cli, pyqt)",
@@ -384,15 +374,23 @@ if __name__ == "__main__":
 
     parser.add_option("-r", "--remote", action="store", type="string",
             dest="host", help=_("Remote installation"), metavar="TARGET")
+
+    parser.add_option("-d", "--debug", action="store", type="string",
+            default="", dest="dbg", help=_("Debug flags %s") % "[Pfi]",
+            metavar="FLAGS")
     (options, args) = parser.parse_args()
+
+#debugging
+    __builtin__.dbg_flags = options.dbg
+#-
+    host = options.host
+    if (host != "") and (os.getuid() != 0):
+        errout(_("You need to run larchin as root!\n  - otherwise"
+                " the installation cannot be carried out.\n"))
+        sys.exit(1)
 
     # Various ui toolkits could be supported, but at the moment there
     # is only support for pyqt (apart from the console)
-
-    host = options.host
-
-
-
     if options.ui == "cli":
         from console import Ui, Logger
         guiexec = None
@@ -410,7 +408,8 @@ if __name__ == "__main__":
     logger = Logger()
     __builtin__.backend = Backend(host)
     __builtin__.command = Command()
-
+    if not backend.init():
+        sys.exit(1)
     for p in command.pages:
         p.setup()
 

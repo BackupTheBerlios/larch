@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.20
+# 2009.10.21
 
 from subprocess import Popen, PIPE, STDOUT
 import os, shutil, threading
@@ -49,14 +49,13 @@ class Backend:
         self.totalMB = 0
 
 
-#TODO: Maybe this should be done outside of __init__
-#        if (self.xcall("init") != ""):
-#            fatal_error(_("Couldn't initialize installation system"))
+    def init(self):
+        return self.xcheck("init",
+                onfail=_("Couldn't initialize installation system"))
 
 
-    #************ Methods for calling bash scripts
+    #************ Basic communication methods
 
-#Not yet used
     def xsendfile(self, path, dest):
         """Copy the given file (path) to dest on the target.
         """
@@ -101,7 +100,8 @@ class Backend:
         return Popen(xcmd, shell=True, stdout=PIPE, stderr=STDOUT, bufsize=1)
 
 
-#Not yet used
+#TODO
+#Not yet used/updated
     def terminal(self, cmd):
         """Run a command in a terminal. The environment variable 'XTERM' is
         recognized, otherwise one will be chosen from a list.
@@ -403,20 +403,29 @@ class Backend:
             device: (fstype, label, uuid, removable)
         When an item is not defined the value is None.
         """
-        ups = {}
+        # First get the partition type-id for all hard disk partitions
+        partid = {}
+        for line in self.xlist("fdisk-l")[1]:
+            if pline.startswith("/dev/"):
+                items = pline.replace("*", " ").split(None, 5)
+                partid[items[0]] = items[4]
+
         for s in self.xlist("get-blkinfo")[1]:
             mo = re.match(r'(/dev/[^:]*):(?: LABEL="([^"]*)")?(?:'
                     ' UUID="([^"]*)")?(?: TYPE="([^"]*)")?', s)
             if mo:
                 dev, label, uuid, fstype = mo.groups()
-                if fstype in (None, "linux_raid_member", "LVM2_member",
-                        "lvm2pv"):
+                if fstype in (None, "linux_raid_member", "LVM2_member"):
                     continue
                 if dev.startswith("/dev/loop"):
                     continue
                 rem = None
                 if dev.startswith("/dev/sd"):
-                    if self.xlist("get-raidinfo %s" % dev)[1]:
+                    if partid.get(dev) == "fd":
+                        # This test seems to be necessary because blkid
+                        # sometimes returns an fs-type, rather than
+                        # linux_raid_member", for the the first device
+                        # in a formatted raid array
                         continue
                     rem = self.xlist("removable %s" % dev)[1][0].strip() == "1"
                 ups[dev] = (fstype, label, uuid, rem)

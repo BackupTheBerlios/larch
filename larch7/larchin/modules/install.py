@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.18
+# 2009.10.21
 
 from backend import PartInfo
 
@@ -43,19 +43,28 @@ entirely left up to the creator of the <em>larch</em> profile.
   <li>Remove <em>live</em>-specific features.</li>
   <li>Perform custom installation tweaks (medium:larch/copy/larch0).</li>
   <li>Generate new initramfs.</li>
+  <li>Generate /etc/fstab.</li>
   <li>Unmount installation partitions.</li>
 </ol>
 </p>
-<h3>Format flags</h3>
-<p>TODO: describe them. Can these be done later? What about a tweaks
-page (e.g. for fsck intervals), or should all this stuff be left to
-separate utilities, as they are not specific to installation?
-The existing tweaks can be dnoe later, though for dir_index it may be
-useful to run 'e2fsck -D'.
+
+<h3>Device recognition via LABEL or UUID</h3>
+<p>Because of the way block devices are detected in <em>Linux</em> it is
+possible under certain circumstances for a partition to get assigned a
+different name (e.g. /dev/sda can become /dev/sdb) from one boot to the
+next. For this reason it is often sensible to address these devices in a
+more stable way in grub and /etc/fstab.
 </p>
-<h3>Mount flags</h3>
-<p>TODO: describe them - or, rather, shouldn't mount option come later,
-when /etc/fstab is being built?!
+<p>The default in <em>larchin</em> is to use the device LABEL, if there
+is one, otherwise the UUID. Only if the checkbox 'Use device name' is
+checked will the device name (/dev/sda1, etc.) be used.
+</p>
+
+<h3>Customizing Formatting</h3>
+<p>To allow tweaking of the way partitions are formatted, the syscall
+script 'part-format' sources a script in the sub-directory 'tweaks' with
+    a name built from the file-system type, 'tweaks/format-<em>fstype</em>'.
+    If you want to make use of this feature, see the 'part-format' script.
 </p>""")
 
 text = _("""
@@ -269,21 +278,21 @@ class Stage:
             dn = part[1]
         else:
             l = part[3]
-            dn = ("/dev/disk/by-label/" + l if l else
-                    "/dev/disk/by-uuid/" + part[4])
+            dn = ("LABEL=" + l if l else "UUID=" + part[4])
             opt = "defaults"
             if not mp:
-                opt += ",noauto"
+                opt = "users,noauto"
                 mp = "/mnt/" + dn.rsplit("/", 1)[1]
                 backend.mkdir(mp)
 
             if fst == "ntfs":
                 dn = "#" + dn
-#see wiki
+                fst = "ntfs-3g"
+                opt += ",umask=111,dmask=000"
 
             elif fst == "vfat":
                 dn = "#" + dn
-#see wiki
+                opt += ",umask=111,dmask=000"
 
             elif fst != "swap":
                 opt += ",noatime"

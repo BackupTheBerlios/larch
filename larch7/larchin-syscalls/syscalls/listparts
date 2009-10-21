@@ -3,8 +3,6 @@
 # listparts
 
 # Get a list of partitions + info on the given (argument $1) device
-
-# so this might be better, but more complicated to filter
 LANG=C sfdisk -uM -l $1 | grep '^/dev/' | tr -d '*+-' | while read d x y m b i t; do
         echo "$d $m $b $i $t"
     done

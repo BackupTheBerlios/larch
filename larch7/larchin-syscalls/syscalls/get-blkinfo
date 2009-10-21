@@ -31,7 +31,7 @@
 #    LABEL
 
 if [ -n "$2" ]; then
-    blkid -c /dev/null -o value -s $1 $2
+    blkid -c /dev/null -o value -s $2 $1
 else
     blkid -c /dev/null $1
 fi
