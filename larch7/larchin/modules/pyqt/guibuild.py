@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.18
+# 2009.10.22
 
 """Build a gui from a layout description.
 """
@@ -470,6 +470,11 @@ class LineEdit(QtGui.QLineEdit, WBase):                     #qt
 
     def x__ro(self, ro):
         self.setReadOnly(ro)                                #qt
+
+    def x__pw(self, star):
+        self.setEchoMode(QtGui.QLineEdit.Password if star == "+" #qt
+                else QtGui.QLineEdit.NoEcho if star == "-"  #qt
+                else QtGui.QLineEdit.Normal)                #qt
 
 
 class CheckList(QtGui.QWidget, WBase):                      #qt

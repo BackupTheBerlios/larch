@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.20
+# 2009.10.24
 
 from backend import DiskInfo
 
@@ -138,7 +138,7 @@ class Stage:
 
     def setup(self):
         self.systemsize = self.get_system_size_estimate()
-        self.memsize = float(backend.xlist("get-memsize")[1][0]) * 1024 / 10**9
+        self.memsize = float(backend.memsize()) / 10**9     # GB
 
 
     def select_page(self, init, *args):

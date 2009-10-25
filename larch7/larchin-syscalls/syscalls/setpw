@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# setpw
+
+# Set the password (encrypted $2) for the given user (argument $3)
+# in the system at $1 (fails if $1 looks dodgy)
+
+[ "${1:0:1}" != "/" ] && exit 1
+
+if [ "$2" = "0" ]; then
+    echo "Empty password for $3"
+    chroot $1 /usr/sbin/usermod -p '' "$3"
+else
+    chroot $1 /usr/sbin/usermod -p "$2" "$3"
+fi

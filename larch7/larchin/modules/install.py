@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.21
+# 2009.10.25
 
 from backend import PartInfo
 
@@ -95,7 +95,7 @@ class Stage:
         ui.newwidget("CheckBox", "^install:devname",
                 tt=_("Use device name (/dev/sda1, etc.), not LABEL or UUID,"
                         " in /etc/fstab and for grub"),
-                text=_("Use /dev/sda1, etc. (NOT LABEL / UUID)"))
+                text=_("Use plain device id (NOT LABEL / UUID)"))
 
         ui.layout("page:install", ["*VBOX*", "install:l1", "install:devname"])
 
@@ -103,28 +103,22 @@ class Stage:
         return
 
 
-    def select_page(self, init, partitions=[]):
+    def select_page(self, init, partitions=None):
         self.initialize = init
-        if init:
-            self.partlist = partitions
-#debugging
-            if "P" in dbg_flags:
-                self.partlist = [
-                        ["/", "/dev/sda1", "ext4"],
-                        ["swap", "/dev/sda2", ""],
-                        ["/home", "/dev/sda5", "ext4"]]
-#-
+        if init and partitions:
+            backend.set_partlist(partitions)
+
         command.pageswitch(self.page_index,
                 _("Disk formatting and system installation"))
 
 
     def init(self):
-        """The information passed in self.partlist for each partition is:
-        [mount-point, device, format-fstype]
+        """The information in backend.partlist() for each partition is:
+        [mount-point, device, format-fstype, (uuid/label info)]
         """
         ok = True
         rows = []
-        for r in self.partlist:
+        for r in backend.partlist():
             pinfo = PartInfo(r[1])
             s = "%6.1f" % pinfo.sizeGB()
             if r[2] == "":
@@ -151,7 +145,7 @@ class Stage:
 
     def do_install(self):
         ui.progressPopup.start()
-        installer = Installer(self.partlist)
+        installer = Installer()
 
         # Format
 #debugging
@@ -162,7 +156,7 @@ class Stage:
                 return
 
         # Mount
-        if not installer.mount():
+        if not backend.mount():
             installer.tidy()
             return
 
@@ -191,18 +185,18 @@ class Stage:
 
         # /etc/fstab (last step here, so don't need check)
         ui.progressPopup.add(_("Generating /etc/fstab"))
-        ok = self.fstab(self.partlist)
+        ok = self.fstab()
 
         # Unmount, clear popup
         installer.tidy()
         if ok:
-            command.runsignal("&passwd!", self.partlist)
+            command.runsignal("&passwd!")
 
 
-    def fstab(self, partlist, devname=False):
+    def fstab(self, devname=False):
         """Build a suitable /etc/fstab for the newly installed system.
-        partlist (entries: [mount-point, device, format-type]) contains
-        the partitions which are of main interest to this method.
+        partlist contains the partitions which are of main interest to
+        this method: [mount-point, device, format-type, (uuid/label info)])
         """
         # Get a dict of all 'mountable' partitions
         uparts = backend.usableparts()
@@ -213,7 +207,7 @@ class Stage:
         automounts = []
         noautomounts = []
         swaps = []
-        for mp, dev, fmt in partlist:
+        for mp, dev, fmt in backend.partlist()[:3]:
             partinfo = uparts.get(dev)
             label, uuid = partinfo[1:3]
             if not partinfo:
@@ -246,7 +240,6 @@ class Stage:
                         "    <dump> <pass>\n\n")
         # Unless device names are explicitly selected (devname=True),
         # partition labels will be used, if present, or else UUID.
-        automounts.sort()
         for part in automounts:
             pas = '1'if (part[0] == '/') else '2'
             fstab += self.fstabentry(part, devname, pas)
@@ -261,56 +254,54 @@ class Stage:
             fstab += self.fstabentry(part, devname, 0)
 
         fstab += "\n# Other partitions\n"
-        noautomounts.sort()
         for part in noautomounts:
             fstab += self.fstabentry(part, devname, 0)
 
-        fw = open("/tmp/larchin_fstab", "w")
-        fw.write(fstab)
-        fw.close()
-        backend.xsendfile("/tmp/larchin_fstab", "/etc/fstab")
+        return backend.xwritefile(fstab, "/etc/fstab")
 
 
     def fstabentry(self, part, devname, pas):
         mp = part[0]
         fst = part[2]
-        if devname:
-            dn = part[1]
-        else:
+        dn = part[1]
+        tag = dn.rsplit("/", 1)[1]
+        if not devname:
             l = part[3]
-            dn = ("LABEL=" + l if l else "UUID=" + part[4])
-            opt = "defaults"
-            if not mp:
-                opt = "users,noauto"
-                mp = "/mnt/" + dn.rsplit("/", 1)[1]
-                backend.mkdir(mp)
+            if l:
+                tag = l
+                dn = "LABEL=" + l
+            else:
+                dn = "UUID=" + part[4]
+        # So that the information is also available for the bootloader:
+        backend.set_label(mp, dn)
+        opt = "defaults"
+        if not mp:
+            opt = "users,noauto"
+            mp = "/mnt/" + tag
+            backend.mkdir(mp)
 
-            if fst == "ntfs":
-                dn = "#" + dn
-                fst = "ntfs-3g"
-                opt += ",umask=111,dmask=000"
+        if fst == "ntfs":
+            dn = "#" + dn
+            fst = "ntfs-3g"
+            opt += ",umask=111,dmask=000"
 
-            elif fst == "vfat":
-                dn = "#" + dn
-                opt += ",umask=111,dmask=000"
+        elif fst == "vfat":
+            dn = "#" + dn
+            opt += ",umask=111,dmask=000"
 
-            elif fst != "swap":
-                opt += ",noatime"
+        elif fst != "swap":
+            opt += ",noatime"
 
-            return ("%-15s %-12s %-8s %s  0  %s\n"
-                    % (dn, mp, fst, opt, pas))
+        return ("%-15s %-12s %-8s %s  0  %s\n"
+                % (dn, mp, fst, opt, pas))
 
 
 
 class Installer:
     """This class manages the copying of the live system to the disk.
     """
-    def __init__(self, partlist):
-        self.partlist = partlist
-        self.partlist.sort()    # in case of mounts within mounts
-
     def format(self):
-        for part in self.partlist:
+        for part in backend.partlist():
             dev = part[1]
             fmt = part[2]
             if fmt:
@@ -318,18 +309,6 @@ class Installer:
                 if not backend.format(dev, fmt):
                     return False
         return True
-
-    def mount(self):
-        if self.partlist[0][0] != "/":
-            config_error(_("No root partition ('/') found"))
-            return False
-        mlist = []
-        for part in self.partlist:
-            mp, dev = part[0], part[1]
-            if mp.startswith("/"):
-                ui.progressPopup.add(_("Mounting %s at %s") % (dev, mp))
-                mlist.append((dev, mp))
-        return backend.imounts(mlist)
 
     def copysystem(self):
         ui.progressPopup.add(_("Copying system to selected partitions"))

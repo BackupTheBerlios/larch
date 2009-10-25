@@ -19,11 +19,13 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.21
+# 2009.10.25
 
 from subprocess import Popen, PIPE, STDOUT
 import os, shutil, threading
-import re
+from Queue import Queue
+import re, json
+import crypt, random
 
 # Mount point for the installation root partition
 IBASE = "/tmp/install"
@@ -40,7 +42,13 @@ class Backend:
         self.host = host
 
         self.process = None
+        # Lock to protect starting and ending of processes
         self.process_lock = threading.Lock()
+        # Event to wait for backend shutdown
+        self.process_event = threading.Event()
+        self.fgid = None
+        self.idcount = 0
+        self.queues = {}
 
         # Keep a record of mounts
         self.mounts = []
@@ -50,54 +58,129 @@ class Backend:
 
 
     def init(self):
-        return self.xcheck("init",
-                onfail=_("Couldn't initialize installation system"))
-
-
-    #************ Basic communication methods
-
-    def xsendfile(self, path, dest):
-        """Copy the given file (path) to dest on the target.
-        """
-        plog("COPY FILE: %s (host) to %s (target)" % (path, dest))
         if self.host:
-            self.process_lock.acquire()
-            if self.process:
-                bug("Attempt to start second shell process")
-            self.interrupt = 0
-            self.process = Popen("scp -q %s root@%s:%s" %
-                    (path, self.host, IBASE + dest), shell=True,
-                    stdout=PIPE, stderr=STDOUT)
-            self.process_lock.acquire()
-            plog(self.process.communicate()[0])
-            self.process_lock.acquire()
-            command.breakin = self.interrupt
-            self.process = None
+            cmd = "ssh -Y root@%s larchin-0call" % self.host
+        else:
+            cmd = "larchin-0call"
+        self.process = Popen(cmd, stdin=PIPE,
+                stdout=PIPE, stderr=STDOUT, bufsize=1)
+        # Start a thread to read input from 0call.
+        command.simple_thread(self.read0call)
+        # Perform initialization of the installation system
+        ok, textlines = self.xlist("init")
+        if not ok:
+            run_error(_("Couldn't initialize installation system:\n\n%s")
+                    % "\n".join(textlines))
+        return ok
+
+
+    def read0call(self):
+        while True:
+            line = self.process.stdout.readline()
+            if not line:
+                break
+            line = line.strip()
+            if line[0] == "/":
+                plog(line)
+
+                if line[1] =="/":
+                    break
+
+                else:
+                    id, rc = line[1:].split(":")
+                    if id == "kill":
+                        self.kill_rc = rc
+                        self.kill_event.set()
+                    elif id == "file":
+                        self.file_rc = rc
+                        self.file_event.set()
+                    else:
+                        self.queues[int(id)].put("/" + rc)
+
+            elif line[0] == ">":
+                id, rest = line[1:].split(":", 1)
+                if id[0] != "-":
+                    plog(line)
+                self.queues[int(id)].put(">" + rest)
+
+            elif line[0] == "!":
+                # This is just a message from the backend, for logging
+                plog(line)
+
+            else:
+                plog(line)
+                plog("BUG: ^^^ Unexpected line from 0call")
+
+        # 0call is exiting
+        self.process = None
+        self.process_event.set()
+
+
+    def call0(self, cmd, args, fg=True, xlog=None):
+        self.process_lock.acquire()
+        try:
+            self.idcount += 1
+            id = self.idcount
+            if xlog:
+                # There must be some way for the receiver to know that
+                # the normal output of this process is not to go to plog.
+                id = -id
+            if fg:
+                if self.fgid:
+                    bug("Attempt to start second foreground syscall")
+                    return  # Actually, bug should terminate the run
+                self.fgid = id
+                self.interrupt = 0
+            self.queues[id] = Queue()
+            self.process.stdin.write("call %d %s %s\n" %
+                    (id, cmd, json.dumps(args)))
+        finally:
             self.process_lock.release()
-            assert command.breakin == 0
-        else:
-            shutil.copyfile(path, IBASE + dest)
+        return id
 
 
-    def _xcall_local(self, cmd):
-        """Call a function on the same machine.
+    def killprocess(self, terminate=False):
+        if not self.process:
+            return False
+        self.process_lock.acquire()
+        self.kill_event = threading.Event()
+        self.process.stdin.write("kill\n")
+        self.kill_event.wait()
+        if self.fgid:
+            self.interrupt = 1
+        ret = self.kill_rc == "0"
+        self.process_lock.release()
+        return ret
+
+
+    def tidy(self, terminate):
+        if self.process:
+            self.unmount()
+        if terminate:
+            self.process.stdin.write("/\n")
+            self.process_event.wait()
+
+
+    def readline(self, id):
+        r = self.queues[id].get()
+        self.queues[id].task_done()
+        if r[0] == "/":
+            del(self.queues[id])
+        return r
+
+
+    def xwritefile(self, contents, dest):
+        """Write the contents to the given file (dest) on the target.
         """
-        if os.path.isdir(base_dir + "/syscalls"):
-            basePath = base_dir
-        else:
-            basePath = os.path.dirname(base_dir) + "/larchin-syscalls"
-        xcmd = ("%s/syscalls/0call %s" % (basePath, cmd))
-        return Popen(xcmd, shell=True, stdout=PIPE, stderr=STDOUT, bufsize=1)
-
-
-    def _xcall_net(self, cmd, opt=""):
-        """Call a function on another machine.
-        Public key authentication must be already set up so that no passsword
-        is required.
-        """
-        xcmd = ("ssh %s root@%s /opt/larchin/syscalls/0call %s" %
-                (opt, self.host, cmd))
-        return Popen(xcmd, shell=True, stdout=PIPE, stderr=STDOUT, bufsize=1)
+        plog("Write FILE: %s (target)" % dest)
+        self.process_lock.acquire()
+        self.file_event = threading.Event()
+        self.process.stdin.write("file %s\n" %
+                json.dumps((IBASE, dest, contents)))
+        self.file_event.wait()
+        ret = self.file_rc == "0"
+        self.process_lock.release()
+        return ret
 
 
 #TODO
@@ -127,61 +210,45 @@ class Backend:
         assert self.interrupt == None
 
 
-    def xlist(self, cmd, opt="", xlog=None):
-        self.process_lock.acquire()
-        if self.process:
-            bug("Attempt to start second shell process")
-        self.interrupt = 0
-        if self.host:
-            self.process = self._xcall_net(cmd, opt)
-        else:
-            self.process = self._xcall_local(cmd)
-        self.process_lock.release()
-
-        plog("XCALL: %s" % cmd)
-        self.oplines = []
+    def xlist(self, cmd, *args, **kargs):
+        plog("XCALL: %s %s" % (cmd, repr(args)))
+        xlog = kargs.get("xlog")
+        id = self.call0(cmd, args, xlog=xlog)
+        lines = []
         while True:
-            line = self.process.stdout.readline()
-            if not line: break
-            line = line.rstrip()
+            line = self.queues[id].get()
+            rest = line[1:]
+            if line[0] == "/": break
             if xlog:
-                xlog(line)
+                xlog(rest)
             else:
-                self.oplines.append(line)
-                plog(line)
+                lines.append(rest)
         plog("END-XCALL")
-        self.process.wait()
-        rc = self.process.returncode
-        lines = self.oplines
-
         self.process_lock.acquire()
         command.breakin = self.interrupt
-        self.process = None
+        self.fgid = None
         self.process_lock.release()
         assert command.breakin == 0
-        return (rc == 0, lines)
+        return (rest == "0", lines)
 
 
-    def xcheck(self, cmd, opt="", xlog=None, onfail=None):
-        ok, l = self.xlist(cmd, opt, xlog)
+    def xcheck(self, cmd, *args, **kargs):
+        ok, l = self.xlist(cmd, *args, **kargs)
         if not ok:
+            onfail = kargs.get("onfail")
             run_error(onfail if onfail else
                     (_("Operation failed:\n  %s") % cmd))
         return ok
 
 
-    def killprocess(self):
-        self.process_lock.acquire()
-        if self.process:
-            self.bgproc("0kill")
-            self.interrupt = 1
-        self.process_lock.release()
-
-
-    def bgproc(self, cmd, tidy=None):
-        plog("CALL: %s" % cmd)
-        fn = self._xcall_net if self.host else self._xcall_local
-        res = fn(cmd).communicate()[0]
+    def bgproc(self, cmd, args=[], tidy=None):
+        plog("CALL: %s %s" % (cmd, repr(args)))
+        id = self.call0(cmd, args, fg=False)
+        res = ""
+        while True:
+            line = self.readline(id)
+            if line[0] == "/": break
+            res += line[1:] + "\n"
         if tidy:
             tidy(res)
         plog("CALL-END: %s" % cmd)
@@ -190,12 +257,81 @@ class Backend:
 ########################################################################
 # Interface functions
 
+    def memsize(self):
+        """Return the size of the system memory, in bytes.
+        """
+        return self.xlist("get-memsize")[1][0] * 1024
+
+
+    def available(self, app):
+        """Test the availability of the given application (whether the
+        given name is executable, using 'which') on the installation
+        system.
+        """
+        return self.xlist("testfor", app)[0]
+
+
+    def get_devices(self):
+        """Return a list of discovered devices, for each a list of strings:
+            [device, size, device type]
+        This is intended for information only, not for calculation with the
+        size, which will also include a unit.
+        """
+        # If devices are added (by writing partition tables to blank devices)
+        # the detection process should be repeated, so a loop is used
+        rex = re.compile(r"Error: *(/dev/[^:]*): *unrec[^:]*label")
+        for round in (0, 1):
+            newdev = False
+            # Note that if one of the devices has mounted partitions it
+            # won't be available for automatic partitioning, and should
+            # thus not be included in the list used for automatic installation
+            lines = []
+            for line in self.xlist("get-devices")[1]:
+                # In virtualbox with a fresh virtual disk, we can get this:
+                # "Error: /dev/sda: unrecognised disk label:"
+                # but the output line is pretty mangled, so it needs filtering
+                m = rex.search(line)
+                if m:
+                    if round > 0:
+                        # Don't offer formatting on second round
+                        continue
+                    dev = m.group(1)
+                    if ui.confirmDialog(_("Error scanning devices: "
+                            "unrecognised disk label\n\n"
+                            "Your disk (%s) seems to be empty and unformatted. "
+                            "Shall I prepare it for use (create an msdos "
+                            "partition table on it)?")
+                            % dev):
+                        if self.xlist("make-parttable", dev)[0]:
+                            newdev = True
+                        else:
+                            run_error(_("Couldn't create partition table on %s" % dev))
+                else:
+                    lines.append([i.strip() for i in line.split(":")])
+
+            if not newdev: break
+        return lines
+
+
+    def get_mounts(self):
+        """Return a list of mounted partitions.
+        """
+        return [m.strip() for m in self.xlist("get-mounts")[1]]
+
+
+    def get_partfstype(self, part):
+        """Use blkid to get fstype of the given partition.
+        """
+        t = self.xlist("get-blkinfo", part, "TYPE")
+        return t[1][0] if t[0] and (len(t[1]) != 0) else ""
+
+
     def run_mount_devprocsys(self, fn, *args):
         ok = True
         dirs = []
         for d in ("/dev", "/proc", "/sys"):
             mpb = IBASE + d
-            if self.xcheck("do-mount --bind %s %s" % (d, mpb),
+            if self.xcheck("do-mount", "--bind", d, mpb,
                     onfail=_("Couldn't bind-mount %s at %s") % (d, mpb)):
                 self.mounts.append(mpb)
                 dirs.append(mpb)
@@ -206,13 +342,17 @@ class Backend:
         return self.unmount(dirs) and ok
 
 
-    def imount(self, dev, mp):
-        mpreal = IBASE if mp == "/" else IBASE + mp
-        if self.xcheck("do-imount %s %s %s" % (IBASE, dev, mp),
-                onfail=_("Couldn't mount %s at %s") % (dev, mpreal)):
-            self.mounts.append(mpreal)
-            return True
-        return False
+    def mount(self):
+        if self.partition_list[0][0] != "/":
+            config_error(_("No root partition ('/') found"))
+            return False
+        mlist = []
+        for part in self.partition_list:
+            mp, dev = part[0], part[1]
+            if mp.startswith("/"):
+                ui.progressPopup.add(_("Mounting %s at %s") % (dev, mp))
+                mlist.append((dev, mp))
+        return self.imounts(mlist)
 
 
     def imounts(self, mlist):
@@ -221,6 +361,15 @@ class Backend:
             if not self.imount(d, m):
                 return False
         return True
+
+
+    def imount(self, dev, mp):
+        mpreal = IBASE if mp == "/" else IBASE + mp
+        if self.xcheck("do-imount", IBASE, dev, mp,
+                onfail=_("Couldn't mount %s at %s") % (dev, mpreal)):
+            self.mounts.append(mpreal)
+            return True
+        return False
 
 
     def unmount(self, dst=None):
@@ -234,7 +383,7 @@ class Backend:
         r = True
         mounts.reverse()
         for m in mounts:
-            if self.xcheck("do-unmount %s" % m,
+            if self.xcheck("do-unmount", m,
                     onfail=_("Couldn't unmount %s") % m):
                 self.mounts.remove(m)
             else:
@@ -243,7 +392,7 @@ class Backend:
 
 
     def format(self, dev, fmt):
-        return self.xcheck("part-format %s %s" % (dev, fmt),
+        return self.xcheck("part-format", dev, fmt,
                 onfail=_("Formatting of %s failed") % dev)
 
 
@@ -263,7 +412,7 @@ class Backend:
     def rmpart(self, dev, partno):
         """Remove the given partition.
         """
-        return self.xcheck("rmpart %s %d" % (dev, partno),
+        return self.xcheck("rmpart", dev, str(partno),
                 onfail=_("Couldn't remove partition %s%d") % (dev, partno))
 
 
@@ -325,23 +474,23 @@ class Backend:
             t = "logical"
             if pmax > 4:
                 # resize extended partition
-                if not self.xcheck("resize %d %d %d" % (device, exp,
-                                ex0, endcyl),
+                if not self.xcheck("resize", device, str(exp),
+                                str(ex0), str(endcyl),
                         onfail=_("Couldn't resize extended partition %s%d")
                                 % (device, exp)):
                     return False
             else:
                 # create extended partition
-                if not self.xcheck("newpart %s %d %d extended" % (device,
-                                startcyl, endcyl),
+                if not self.xcheck("newpart", device,
+                                str(startcyl), str(endcyl), "extended",
                         onfail=_("Couldn't create extended partition on %s")
                                 % device):
                     return False
             if pmax < 4:
                 pmax = 4
 
-        if self.xcheck("newpart %s %d %d %s %s" % (device, startcyl, endcyl,
-                t, "linux-swap" if swap else "ext2")):
+        if self.xcheck("newpart", device, str(startcyl), str(endcyl),
+                t, "linux-swap" if swap else "ext2"):
             return "%s%d" % (device, pmax + 1)
         else:
             run_error(_("Couldn't add new partition to %s") % device)
@@ -353,8 +502,10 @@ class Backend:
         check is True and bad blocks are found, so including it is a bit
         pointless, but maybe I'll find out one day ...
         """
-        return self.xlist("swap-format " + ("-c " if check else "")
-                + partition)[0]
+        args = [partition]
+        if check:
+            args.insert(0, "-c")
+        return self.xlist("swap-format", *args)[0]
 
 
     def gettotalMB(self):
@@ -363,7 +514,8 @@ class Backend:
         if self.totalMB == 0:
             self.totalMB = -1
             # Start a background thread to estimate the size
-            command.simple_thread(self.bgproc, "1system-size", self._setsize)
+            command.simple_thread(self.bgproc, "1system-size",
+                    [], self._setsize)
         # but for now return 0
         return 0
 
@@ -373,17 +525,55 @@ class Backend:
         self.totalMB = int(rem.group(1)) if rem else 0
 
 
+    def set_partlist(self, plist):
+        """The partition list consists of lists:
+            [mount-point, device, format, uuid/label info]
+        The first entry should be for root ("/"), swap partitions
+        have mount-point "swap".
+        The format entry is the desired formatting for the partition,
+        e.g. "ext4" or "jfs". If it is empty, no formatting will be
+        performed. Swap partitions are formatted when they are created,
+        so they have this field empty.
+        The final entry has one of the following forms:
+            None: before it has been set
+            /dev/sdxn: using straight device names
+            LABEL=xxxxx: using partition labels
+            UUID=xxxxx: using UUIDs
+        plist may have only 3-entry items.
+        """
+        self.partition_list = []
+        for p in plist:
+            if len(p) == 3:
+                p.append(None)
+            self.partition_list.append(p)
+        self.partition_list.sort()  # in case of mounts within mounts
+
+
+    def set_label(mp, dn):
+        """Set the uuid/label info for the given partition
+        (see self.set_partlist).
+        """
+        for p in self.partition_list:
+            if p[0] == mp:
+                p[3] = dn
+
+
+    def partlist(self):
+        return self.partition_list
+
+
     def copy_system(self, logfun):
-        if ("i" not in dbg_flags) and not self.xcheck("copy-system %s"
-                % IBASE, xlog=logfun,
-                        onfail=_("Copying of system data failed")):
-            return False
-        return self.xcheck("fix-system1 %s" % IBASE,
-                onfail=_("Initial installed system tweaks failed (see log)"))
+        if "i" in dbg_flags:
+            return True
+        return (self.xcheck("copy-system", IBASE, xlog=logfun,
+                        onfail=_("Copying of system data failed"))
+                and self.xcheck("fix-system1", IBASE,
+                        onfail=_("Initial installed system tweaks failed"
+                                " (see log)")))
 
 
     def delivify(self):
-        return self.xcheck("fix-system2 %s" % IBASE,
+        return self.xcheck("fix-system2", IBASE,
                 onfail=_("Failure while removing live-system modifications"
                         " (see log)"))
 
@@ -392,7 +582,7 @@ class Backend:
         return self.run_mount_devprocsys(self._initramfs)
 
     def _initramfs(self):
-        return self.xcheck("do-mkinitcpio %s" % IBASE,
+        return self.xcheck("do-mkinitcpio", IBASE,
                 onfail=_("Problem building initramfs (see log)"))
 
 
@@ -405,11 +595,9 @@ class Backend:
         """
         # First get the partition type-id for all hard disk partitions
         partid = {}
-        for line in self.xlist("fdisk-l")[1]:
-            if pline.startswith("/dev/"):
-                items = pline.replace("*", " ").split(None, 5)
-                partid[items[0]] = items[4]
-
+        for pline in self.fdiskl():
+            partid[pline[0]] = pline[4]
+        ups = {}
         for s in self.xlist("get-blkinfo")[1]:
             mo = re.match(r'(/dev/[^:]*):(?: LABEL="([^"]*)")?(?:'
                     ' UUID="([^"]*)")?(?: TYPE="([^"]*)")?', s)
@@ -427,14 +615,80 @@ class Backend:
                         # linux_raid_member", for the the first device
                         # in a formatted raid array
                         continue
-                    rem = self.xlist("removable %s" % dev)[1][0].strip() == "1"
+                    rem = self.xlist("removable", dev)[1][0].strip() == "1"
                 ups[dev] = (fstype, label, uuid, rem)
         return ups
 
 
     def mkdir(self, dir):
-        return self.xcheck("do-mkdir %s" % IBASE + dir,
-                onfail =_("Couldn't create directory '%s'") % IBASE + dir)
+        return self.xcheck("do-mkdir", "-p", IBASE + dir,
+                onfail =_("Couldn't create directory '%s'") % (IBASE + dir))
+
+
+    def set_pw(self, pw, user="root"):
+        if (pw == ''):
+            # Passwordless login
+            pwcrypt = '0'
+        else:
+            # Normal MD5 password
+            salt = '$1$'
+            for i in range(8):
+                salt += random.choice("./0123456789abcdefghijklmnopqrstuvwxyz"
+                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+            pwcrypt = crypt.crypt(pw, salt)
+
+        self.mount()
+        res = self.xcheck("setpw", IBASE, pwcrypt, user,
+                onfail =_("Couldn't set password for user '%s'") % user)
+        self.unmount()
+        return res
+
+
+    def mkdevicemap(self):
+        return self.xlist("mkdevicemap", IBASE)[1]
+
+
+    def fdiskl(self, parts=True):
+        lines = self.xlist("fdisk-l")[1]
+        if parts:
+            # Return a list of information for each partition.
+            # The information is itself in list form:
+            #   [device, startcyl, endcyl, blocks(+-), id, type, boot]
+            plist = []
+            for line in lines:
+                if line.startswith("/dev/"):
+                    items = line.replace("*", " ").split(None, 5)
+                    items.append("*" if "*" in line else "")
+                    plist.append(items)
+            return plist
+        return lines
+
+
+    def listNTFSpartitions(self):
+        return self.xlist("get-ntfs-parts")[1]
+
+
+    def getbootinfo(self):
+        """Retrieves kernel file name and a list of initramfs files from
+        the boot directory of the newly installed system.
+        """
+        self.mount()
+        kernel = None
+        inits = []
+        for line in self.xlist("get-bootinfo", IBASE)[1]:
+            if line.startswith('+++'):
+                kernel = line.split()[1]
+            else:
+                inits.append(line)
+        self.unmount()
+        if not inits:
+            run_error(_("No initramfs found"))
+            return None
+        if not kernel:
+            run_error(_("GRUB problem:\n") + inits[0])
+            return None
+        return (kernel, inits)
+
 
 
 
@@ -448,7 +702,7 @@ class DiskInfo:
     """
     def __init__(self, device):
         self.device = device
-        info = backend.xlist("fdisk-l " + device)[1]
+        info = backend.xlist("fdisk-l", device)[1]
         while not info[0].startswith("Disk"):
             del(info[0])
         self.driveinfo = info[0]
@@ -506,12 +760,12 @@ class PartInfo:
         self.device = device
 
     def getfstype(self):
-        ok, l = backend.xlist("get-blkinfo %s TYPE" % self.device)
+        ok, l = backend.xlist("get-blkinfo", self.device, "TYPE")
         if ok and l:
             return l[0]
         else:
             return ""
 
     def sizeGB(self):
-        l = backend.xlist("partsizes %s" % self.device)[1]
+        l = backend.xlist("partsizes", self.device)[1]
         return float(l[0].split()[1]) / 1e9

@@ -28,4 +28,6 @@ apath=$( readlink -f $0 )
 atweak=$( dirname ${apath} )/tweaks/format-${f}
 [ -f ${atweak} ] && . ${atweak}
 
-[ -n "${journal_data}" ] && tune2fs -o ${journal_data} ${p}
+if [ -n "${journal_data}" ]; then
+    tune2fs -o ${journal_data} ${p}
+fi

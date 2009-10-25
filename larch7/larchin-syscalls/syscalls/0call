@@ -1,40 +1,140 @@
-#!/bin/sh
+#!/usr/bin/env python
+#
+# 0call   - run syscalls ( scripts in this directory)
+#              ... or kill them
+#
+# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+#
+# This file is part of the larch project.
+#
+#    larch is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    larch is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with larch; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+#----------------------------------------------------------------------------
+# 2009.10.24
 
-# 0call   - run a syscall ( a script in this directory)
-#              ... or kill it
+import sys, os, threading, signal, json, time
+from subprocess import call, Popen, PIPE, STDOUT
 
-# When a syscall script is started, a corresponding pidfile is created,
-# containing the pid of the process, so that it can be killed if
-# necessary. This file is deleted when the scripts terminates.
 
-pidfile=/tmp/larchin_callpid
-apath=$( readlink -f $0 )
-adir=$( dirname ${apath} )
-if [ "$1" = "0kill" ]; then
-    cd "${adir}"
-    export pidfile
-    :> ${pidfile}
-    for pidf in ${pidfile}-*; do
-        pid=$( cat ${pidf} )
-        eval "${adir}/0killr" ${pid}
-        rm -f ${pidf}
-    done
-    pidlist=$( cat ${pidfile} )
-    i=0
-    while [ ${i} -lt 50 ]; do
-        undead=$( ps -o pid --no-headers -p ${pidlist} )
-        if [ -z "${undead}" ]; then
-            :> ${pidfile}
-            exit 0
-        fi
-        i=$(( ${i} + 1 ))
-        sleep 0.2
-    done
-    echo "${undead}" >${pidfile}
-    exit 1
-fi
-echo "$$" >${pidfile}-$1
-eval "${adir}/$*"
-res=$?
-rm ${pidfile}-$1
-exit ${res}
+# I decided to do this dispatcher in python as passing (quoted) arguments
+# in bash got to be such a pain, especially (but not only!) in view of
+# differences arising between the remote case, via ssh, and the local case.
+# Using json provides, in a way, a further simplification (even though
+# only a fraction of its capabilities are used - I just pass an array of
+# strings).
+
+# Each syscall gets its own thread and output from it is distinguished by
+# the prefix to each line containing the process-id sent from larchin (not
+# the actual pid!).
+
+# A list of currently active processes (their pid)
+pidlist = []
+# Make syscalls the current directory
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+def out(line):
+    out_lock.acquire()
+    sys.stdout.write(line + '\n')
+    sys.stdout.flush()
+    out_lock.release()
+
+def killp(pid):
+    sublist = Popen(["pgrep", "-P", str(pid)],
+                stdout=PIPE).communicate()[0].split()
+    try:
+        os.kill(pid, signal.SIGKILL)
+    except:
+        out("! (Process %d already dead)" % pid)
+    for p in sublist:
+        killp(int(p))
+    kill_list.append(pid)
+
+def pcall(syscall, id, arglist):
+    # Correct call path
+    arglist.insert(0, "./" + syscall)
+    process = Popen(arglist, stdout=PIPE, stderr=STDOUT, bufsize=1)
+    pidlist.append(process.pid)
+    while True:
+        line = process.stdout.readline()
+        if not line: break
+        out(">%d:%s" % (id, line.rstrip()))
+    process.wait()
+    out("/%d:%d" % (id, process.returncode))
+    pidlist.remove(process.pid)
+
+
+
+# The loop starts here
+out_lock = threading.Lock()
+out("!!! *** 0call starting *** !!!")
+while True:
+    line = sys.stdin.readline().strip()
+    if not line:
+        out("!*BUG* Empty line received")
+        break
+
+    elif line == "kill":
+        out("!!! *** Killing all syscall processes *** !!!")
+        kill_list = []
+        for pid in pidlist:
+            killp(pid)
+
+        # Now wait a few seconds until the processes have actually exited
+        for i in range(50):
+            undead=Popen(["ps", "-o", "pid", "--no-headers", "-p"]
+                    + [str(i) for i in kill_list],
+                    stdout=PIPE, stderr=PIPE).communicate()[0].strip()
+            if not undead:
+                break
+            time.sleep(0.2)
+        if undead:
+            out("!*PROBLEM* Processes still running:\n  " + undead)
+        else:
+            out("!!! *** All syscall processes killed *** !!!")
+        out("/kill:" + ("1" if undead else "0"))
+
+    elif line.startswith("/"):
+        # Exit program
+        break
+
+    elif line.startswith("file "):
+        try:
+            ft = line.split(None, 1)
+            base, f, t = json.loads(ft[1])
+            fh = open(base + f, "w")
+            fh.write(t)
+            fh.close()
+            out("/file:0")
+        except:
+            out("! Bad file transfer, possibly a BUG.\n/file:1")
+
+    else:
+        try:
+            s, i, c, a = line.split(None, 3)
+            assert s == "call"
+            args = json.loads(a)
+            assert isinstance(args, list)
+            if os.access(c, os.X_OK):
+                threading.Thread(target=pcall, args=(c, int(i), args)).start()
+            else:
+                out("!*BUG* Invalid syscall: %s" % c)
+                break
+        except:
+            out("!*BUG* Bad syscall: %s" % line)
+            break
+
+
+# Signal end of program
+out("//")

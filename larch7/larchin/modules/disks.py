@@ -19,10 +19,9 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.18
+# 2009.10.24
 
 from backend import DiskInfo
-import re
 
 doc = _("""
 <h2>Disk Selection</h2>
@@ -109,10 +108,9 @@ class Stage:
 
     def setup(self):
         # Test for a graphical partition manager
-        if backend.xlist("testfor gparted")[0]:
+        if backend.available("gparted"):
             self.gparted = "gparted"
-#TODO: Is 'partitionmanager' the right command?
-        elif backend.xlist("testfor partitionmanager")[0]:
+        elif backend.available("partitionmanager"):
             self.gparted = "partitionmanager"
         else:
             self.gparted = None
@@ -125,46 +123,11 @@ class Stage:
 
 
     def init(self):
-        # If devices are added (by writing partition tables to blank devices)
-        # the detection process should be repeated, so a loop is used
-        rex = re.compile(r"Error: *(/dev/[^:]*): *unrec[^:]*label")
-        for round in (0, 1):
-            newdev = False
-            ld = backend.xlist("get-devices")
-            # Note that if one of these has mounted partitions it will not be
-            # available for automatic partitioning, and should thus not be
-            # included in the list used for automatic installation
-            lines = []
-            for line in ld[1]:
-                # In virtualbox with a fresh virtual disk, we can get this:
-                # "Error: /dev/sda: unrecognised disk label:"
-                # but the output line is pretty mangled, so it needs filtering
-                m = rex.search(line)
-                if m:
-                    if round > 0:
-                        # Don't offer formatting on second round
-                        continue
-                    dev = m.group(1)
-                    if ui.confirmDialog(_("Error scanning devices: "
-                            "unrecognised disk label\n\n"
-                            "Your disk (%s) seems to be empty and unformatted. "
-                            "Shall I prepare it for use (create an msdos "
-                            "partition table on it)?")
-                            % dev):
-                        if backend.xlist("make-parttable %s" % dev)[0]:
-                            newdev = True
-                        else:
-                            run_error(_("Couldn't create partition table on %s" % dev))
-                else:
-                    lines.append(line)
-
-            if not newdev: break
-
-        if lines:
-            mounts = backend.xlist("get-mounts")[1]
+        disks = backend.get_devices()
+        if disks:
+            mounts = backend.get_mounts()
             self.devices = []
-            for dsn in lines:
-                d, s, n = [i.strip() for i in dsn.split(":")]
+            for d, s, n in disks:
                 # Determine devices which have mounted partitions
                 dm = '+'
                 for m in mounts:
@@ -183,6 +146,7 @@ class Stage:
         ui.command("disks:device-list.set", self.devices, self.device_index)
         ui.command("disks:device-list.compact")
         #self.select_device(self.device_index)
+        return True
 
 
     def select_device(self, index=-1):
@@ -201,14 +165,12 @@ class Stage:
         ui.command("disks:device-partitions.set", pinfo)
         ui.command("disks:device-partitions.compact")
 
-#TODO: test this ...
-        # Use blkid to test whether 1st partition is NTFS
-        t1 = backend.xlist("get-blkinfo TYPE %s1" % self.device)
-        self.ntfs1 = t1[0] and (len(t1[1]) != 0) and (t1[1][0] == "ntfs")
+        # Test whether 1st partition is NTFS
+        self.ntfs1 = backend.get_partfstype(self.device + "1") == "ntfs"
         ui.command("disks:ntfs-shrink.enable", self.ntfs1)
 
         # If device has mounted partition(s), it is not autopartitionable
-        #Might be useful for testing: noauto = False
+        # Might be useful for testing: noauto = False
         noauto = (self.devices[index][0] == '-')
 
         size = self.devices[index][2]

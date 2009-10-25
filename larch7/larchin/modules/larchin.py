@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.21
+# 2009.10.24
 
 
 """
@@ -85,7 +85,7 @@ lang = os.getenv("LANG")
 if lang:
     gettext.install('larchin', base_dir+'/i18n', unicode=1)
 
-import welcome, disks, autopart, install
+import welcome, disks, autopart, install, rootpw
 from backend import Backend
 
 class Command:
@@ -106,7 +106,7 @@ class Command:
 
         # Initialize gui modules
         self.pages = []
-        for s in (welcome, disks, autopart, install,
+        for s in (welcome, disks, autopart, install, rootpw
                 ):
             self.pages.append(s.Stage(len(self.pages)))
 
@@ -257,7 +257,6 @@ class Command:
         # This is not called from the worker thread, so it mustn't block.
         self.qthread = self.simple_thread(self._quit_run, terminate)
 
-
     def _quit_run(self, terminate):
         # Kill any running background process
         backend.killprocess()
@@ -269,19 +268,32 @@ class Command:
 
         ui.progressPopup.end()
 
+        # Do 'unmount' if possible, and quit the backend if terminating
+        backend.tidy(terminate)
+
         if terminate:
             # Tell the user interface to exit, which will in turn cause the
             # main loop (reading its output) to exit.
             ui.sendui("/")
-
-        else:
-            backend.unmount()
 
 
     def simple_thread(self, func, *args):
         t = threading.Thread(target=func, args=args)
         t.start()
         return t
+
+
+    def readfile(self, path):
+        try:
+            if path[0] != "/":
+                path = base_dir + "/data/" + path
+            fh = open(os.path.join(base_dir, path))
+            ft = fh.read()
+            fh.close()
+        except:
+            run_error(_("Couldn't read file '%s'") % path)
+            return ""
+        return ft
 
 
 def config_error(text):

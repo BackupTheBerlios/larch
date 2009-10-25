@@ -1,4 +1,4 @@
-# disks.py - discover possible (disk-like) installation devices
+# welcome.py - Initial page
 #
 # (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
 #
@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.18
+# 2009.10.24
 
 
 doc = _("""
@@ -56,7 +56,7 @@ Arch Linux.
 <p>With this program you can install a larch live system as a normal
 Arch Linux system, retaining its configuration settings.
 </p>
-<p align="center"><img src="larchin.png" width="150" height="150" />
+<p align="center"><img src="images/larchin.png" width="150" height="150" />
 </p>
 <p>Press the 'OK' button to progress to the next stage.
 </p>
@@ -69,6 +69,7 @@ class Stage:
     def connect(self):
         return [
                 ("&welcome!", self.select_page),
+                ("&step1&", self.step1),
             ]
 
     def __init__(self, index):
@@ -92,8 +93,21 @@ class Stage:
     def ok(self):
 #debugging
         if "P" in dbg_flags:
-            command.runsignal("&install!", None)
+            self.plist = [["/", "/dev/sda1", "ext4"],
+                    ["swap", "/dev/sda2", ""],
+                    ["/home", "/dev/sda5", "ext4"]]
+            parts = ""
+            for p in self.plist:
+                parts += "\n  " + " : ".join(p)
+            ui.confirmDialog("Debugging. Using:" + parts,
+                async="&step1&")
             return
 #-
-        command.runsignal("&device-select!")
+        self.step1(False)
 
+
+    def step1(self, dbg):
+        if dbg:
+            command.runsignal("&install!", self.plist)
+        else:
+            command.runsignal("&device-select!")

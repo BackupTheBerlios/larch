@@ -1,0 +1,14 @@
+#!/bin/sh
+
+APP="$( basename $0 )"
+# Get path to this script
+FULLPATH="$( readlink -f $0 )"
+SCRIPTDIR="$( dirname ${FULLPATH} )"
+
+cd ${SCRIPTDIR}/modules
+
+# I've put this in to make the packaging easier, but it
+# might be better to byte compile.
+export PYTHONDONTWRITEBYTECODE=x
+
+exec python larchin.py "$@"

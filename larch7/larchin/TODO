@@ -1,0 +1,43 @@
+TODO
+====
+
+Do I need a boot partition for ext4 root?
+Should it be on offer (autopart) anyway?
+Should I offer a larch-based boot partition (good for rescue/maintenance)?
+
+Should I copy /.livesys/overlay and use a separate union mount for the
+system-copy stage? At the cost of a little time and memory this would
+reduce (not eliminate) potential problems with changes made during the
+copying process.
+
+Tweaks page?
+------------
+
+* Remove authorized keys from root account (esp. relevant with remote
+  install).
+* Regenerate system ssh keys (or just delete them so that at boot they
+  will get regenerated).
+* Tuning of fsck intervals (days and mounts).
+* Storage Load Cycle Count problem ... daemon????
+
+Other pages
+-----------
+
+* grub
+* manual partitioning
+* manual swaps??
+* manual selection of mount-points, formatting, etc.
+* ntfs shrinking
+
+
+Maybe somehow in connection with the tweaks page?:
+* timezone, time-setting
+* add user(s?)
+* locales
+* keyboard???
+
+
+...
+
+raid, lvm ???
+partitioner

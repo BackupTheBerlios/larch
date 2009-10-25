@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# remount-root
+
+# Remount / ro or rw - ro is used to avoid changes to the system while
+#                      it is being copied to the hard disk
+
+# This doesn't work!
+mount -o remount,$1 /

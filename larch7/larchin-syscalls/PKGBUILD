@@ -1,17 +1,21 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.09.22
+# 2009.10.24
 pkgname=larchin-syscalls
-pkgver=7.0.0
+pkgver=7.0.1
 pkgrel=1
 
 pkgdesc="bash scripts for larchin (larch hard disk installer with gui)"
 url="http://larch.berlios.de"
-depends=('parted' 'ntfsprogs')
-# strongly recommended: gparted
+depends=('python' 'rsync' 'parted' 'ntfsprogs')
+optdepends=('gparted: graphical partition manager, recommended'
+        'partitionmanager: alternative graphical partition manager')
 arch=(any)
 license=('GPL')
 
 build() {
-  mkdir -p ${startdir}/pkg/opt/larchin
-  cp -dr ${startdir}/syscalls ${startdir}/pkg/opt/larchin
+  destdir=/opt/larchin
+  mkdir -p ${startdir}/pkg${destdir}
+  cp -dr ${startdir}/syscalls ${startdir}/pkg${destdir}
+  mkdir -p ${startdir}/pkg/sbin
+  ln -s ${destdir}/syscalls/0call ${startdir}/pkg/sbin/larchin-0call
 }

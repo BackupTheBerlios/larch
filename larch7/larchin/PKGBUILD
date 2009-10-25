@@ -1,27 +1,33 @@
-# Maintainer: Michael Towers <gradgrind[at]online[dot]de>
-# 2009.09.22
+# Maintainer: Michael Towers (larch42 at googlemail dot com)
+# 2009.10.24
 pkgname=larchin
-pkgver=7.0.0
+pkgver=7.0.1
 pkgrel=1
 
 pkgdesc="Arch hard disk installer with gui for larch live media"
 url="http://larch.berlios.de"
-depends=('pyqt' 'larchin-syscalls')
+depends=('python')
+optdepends=('larchin-syscalls: necessary on the system to be installed'
+        'pyqt: for a nice graphical interface, highly recommended')
 arch=(any)
 license=('GPL')
-install=${pkgname}.install
+#install=${pkgname}.install
 
 build() {
-  mkdir -p ${startdir}/pkg/opt/larchin
-  cp -dr ${startdir}/modules ${startdir}/pkg/opt/larchin
-  ${startdir}/compile.py ${startdir}/pkg/opt/larchin/modules
-  cp -dr ${startdir}/etc ${startdir}/pkg
-  cp -dr ${startdir}/run ${startdir}/pkg/opt/larchin
-  cp -dr ${startdir}/i18n ${startdir}/pkg/opt/larchin
+  destdir=/opt/larchin
+  mkdir -p ${startdir}/pkg${destdir}
+
+  cp -dr ${startdir}/modules ${startdir}/pkg${destdir}
+  cp -dr ${startdir}/data ${startdir}/pkg${destdir}
+  cp -dr ${startdir}/i18n ${startdir}/pkg${destdir}
+
+  cp ${startdir}/larchin-run ${startdir}/pkg${destdir}
+  ln ${destdir}/larchin-run /usr/bin/larchin
+
+  cp -dr ${startdir}/images ${startdir}/pkg${destdir}
   mkdir -p ${startdir}/pkg/usr/share/pixmaps
-  cp ${startdir}/larchin1.jpg ${startdir}/pkg/usr/share/pixmaps
-  cp ${startdir}/larchin.png ${startdir}/pkg/usr/share/pixmaps
-  cp ${startdir}/larchin2.png ${startdir}/pkg/usr/share/pixmaps
+  ln -s ${destdir}/images/larchin.png ${startdir}/pkg/usr/share/pixmaps
+
   mkdir -p ${startdir}/pkg/usr/share/applications
   cp ${startdir}/larchin.desktop ${startdir}/pkg/usr/share/applications
 }

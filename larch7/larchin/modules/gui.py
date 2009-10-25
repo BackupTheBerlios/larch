@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.18
+# 2009.10.24
 
 import os, pwd
 import json
@@ -64,9 +64,9 @@ class Ui:
 
         # Build the main window
         self.newwidget("Window", "larchin:", title="larchin",
-                icon="larchin-icon.png", closesignal="$$$uiclose$$$")
+                icon="images/larchin-icon.png", closesignal="$$$uiclose$$$")
         # - Header
-        self.newwidget("Label", "larchin:i", image="larchin80.png")
+        self.newwidget("Label", "larchin:i", image="images/larchin80.png")
         self.newwidget("Label", "larchin:h", html='<h1><span '
                 'style="color:#c55500;">%s</span></h1>'
                 % _("<i>larch</i> Installer"))
@@ -89,6 +89,7 @@ class Ui:
                 "page:disks",
                 "page:autopart",
                 "page:install",
+                "page:passwd",
                 ])
 
         # - Footer
