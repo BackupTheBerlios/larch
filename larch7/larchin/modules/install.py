@@ -207,7 +207,8 @@ class Stage:
         automounts = []
         noautomounts = []
         swaps = []
-        for mp, dev, fmt in backend.partlist()[:3]:
+        for mdf in backend.partlist():
+            mp, dev, fmt = mdf[:3]
             partinfo = uparts.get(dev)
             label, uuid = partinfo[1:3]
             if not partinfo:

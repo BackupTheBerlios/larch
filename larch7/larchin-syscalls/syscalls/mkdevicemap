@@ -6,7 +6,7 @@ INSTALL="$1"
 
 # Create a device.map file
 rm -f ${INSTALL}/boot/grub/device.map
-#mkdir -p ${INSTALL}/boot/grub
+mkdir -p ${INSTALL}/boot/grub
 ${INSTALL}/sbin/grub --batch --no-floppy \
         --device-map=${INSTALL}/boot/grub/device.map &>/dev/null <<EOF
 quit

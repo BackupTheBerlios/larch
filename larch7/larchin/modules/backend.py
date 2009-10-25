@@ -549,7 +549,7 @@ class Backend:
         self.partition_list.sort()  # in case of mounts within mounts
 
 
-    def set_label(mp, dn):
+    def set_label(self, mp, dn):
         """Set the uuid/label info for the given partition
         (see self.set_partlist).
         """
@@ -688,6 +688,29 @@ class Backend:
             run_error(_("GRUB problem:\n") + inits[0])
             return None
         return (kernel, inits)
+
+
+    def readfile(self, dev, path):
+        ok, lines = self.xlist("readfile", IBASE, dev, path)
+        text = "\n".join(lines)
+        if ok:
+            return text + "\n"
+        else:
+            run_error(_("Couldn't read %s+%s:\n  %s") % (dev, path, text))
+            return ""
+
+
+    def setup_grub(self, dev, path, text):
+        if dev:
+            self.mount()
+            res = (self.xcheck("grubinstall", IBASE, dev)
+                    and self.xwritefile(text, "/boot/grub/menu.lst"))
+        else:
+            # Just replace the appropriate menu.lst
+            d, p = path.split(':')
+            res = self.imount(d, "/") and self.xwritefile(text, p)
+        self.unmount()
+        return res
 
 
 

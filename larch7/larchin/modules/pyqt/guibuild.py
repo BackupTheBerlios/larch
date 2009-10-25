@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.22
+# 2009.10.25
 
 """Build a gui from a layout description.
 """
@@ -62,6 +62,11 @@ class WBase:
         (which will normally be paler and non-interactive).
         """
         self.setEnabled(on)                                 #qt
+
+    def x__width(self, w):
+        """Set the minimum width for the widget.
+        """
+        self.setMinimumWidth(w)                             #qt
 
 
 class TopLevel:

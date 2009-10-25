@@ -21,7 +21,6 @@
 #----------------------------------------------------------------------------
 # 2009.10.25
 
-TODO
 doc = _("""
 <h2>Set up the GRUB bootloader</h2>
 <p>GRUB allows the booting of more than one operating system.
@@ -45,7 +44,9 @@ class Stage:
                 ("grub:old*toggled", self.oldtoggled),
                 ("grub:part*toggled", self.parttoggled),
                 ("grub:device-list*select", self.select_mbr),
-                ("grub:xmenulst*changed", self.select_old),
+                ("grub:xmenulist*changed", self.select_old),
+                ("grub:include*toggled", self.includetoggled),
+                ("grub:edit*clicked", self.editmbr),
             ]
 
     def __init__(self, index):
@@ -58,24 +59,41 @@ class Stage:
         ui.newwidget("RadioButton", "^grub:part",
                 text=_("Install GRUB to installation partition"))
 
-        ui.newwidget("Label", "grub:mbrl", text=_("Select device for MBR"))
+        ui.newwidget("Frame", "grub:mbr-frame",
+                text=_("Select device for MBR"))
         ui.newwidget("List", "^grub:device-list", selectionmode="Single",
                 tt=_("Select the drive to whose MBR grub should be installed"))
-
-        ui.newwidget("Label", "grub:oldl", text=_("Use existing menu.lst:"))
-        ui.newwidget("ComboBox", "^grub:xmenulist",
-                tt=_("Select the partition with the relevant menu.lst"))
-
-
-
-        ui.command("grub:device-list.setHeaders", ["", _("Device"),
+        ui.command("grub:device-list.setHeaders", [_("Device"),
                 _("Size"), _("Model")])
 
+        ui.newwidget("Frame", "grub:xmenulist-frame")
+        ui.newwidget("Label", "grub:oldl",
+                text=_("Choose existing menu.lst:"))
+        ui.newwidget("ComboBox", "^grub:xmenulist", width=300,
+                tt=_("Select the partition with the relevant menu.lst"))
 
+        ui.newwidget("CheckBox", "^grub:include",
+                text=_("Include existing menu"),
+                tt=_("The boot lines from an existing menu.lst can be"
+                        " included in the new file"))
 
+        ui.newwidget("Button", "^grub:edit", text=_("Edit menulst.conf"),
+                tt=_("The automatically generated menulst.conf can be"
+                        " edited.\nBut if you change some options your"
+                        " new version may be lost."))
 
         ui.layout("page:grub", ["*VBOX*",
-                ])
+                "grub:mbr", "grub:old", "grub:part",
+                ["*HBOX*", "grub:mbr-frame",
+                    ["*VBOX*", "grub:xmenulist-frame", "grub:edit"]]])
+
+        ui.layout("grub:mbr-frame", ["*VBOX*",
+                "grub:device-list"])
+
+        ui.layout("grub:xmenulist-frame", ["*VBOX*",
+                "grub:oldl", "grub:xmenulist", "*SPACE",
+                "grub:include"])
+
 
     def setup(self):
         return
@@ -91,17 +109,19 @@ class Stage:
             run_error(_("Couldn't get device map for GRUB"))
 
         # There is also the list of device / menu.list-path pairs
-        ui.command("grub:xmenulst.set", [":".join(i)
-                for i in self.xmenulst])
-        ui.command("grub:xmenulst-frame.enable", False)
+        ui.command("grub:xmenulist.set", [":".join(i)
+                for i in self.xmenulist])
+        ui.command("grub:xmenulist-frame.enable", False)
 
         self.mbrdevices = backend.get_devices()
         self.mbr_index = 0
         ui.command("grub:device-list.set", self.mbrdevices, self.mbr_index)
         ui.command("grub:device-list.compact")
 
-
-        ui.command("grub:old.enable", self.xmenulst != [])
+# I suppose I could share the extraneous menu.lst choice between the
+# options 'Add to other menu.lst' and 'Include other menu.lst'
+        ui.command("grub:xmenulist-frame.enable", self.xmenulist != [])
+        ui.command("grub:old.enable", self.xmenulist != [])
         ui.command("grub:mbr.set", True)
 
         self.ntfsboot = None
@@ -121,33 +141,41 @@ class Stage:
     def mbrtoggled(self, on):
         if on:
             self.where = "mbr"
+        ui.command("grub:mbr-frame.enable", on)
 
     def oldtoggled(self, on):
         if on:
             self.where = "old"
-        ui.command("grub:menulst-frame.enable", on)
+        self.menulst = None
+        ui.command("grub:include.enable", not on)
 
     def parttoggled(self, on):
         if on:
             self.where = "part"
+
+    def includetoggled(self, on):
+        self.include = on
 
 
     def select_mbr(self, index=-1):
         if index < 0:
             return
         self.mbr_index = index
-        self.mbrdevice = self.devices[index][0]
+        self.mbrdevice = self.mbrdevices[index][0]
 
     def select_old(self, index=-1):
         if index < 0:
             return
         self.old_index = index
-        self.oldwhere = ":".join(self.xmenulst[index])
-        self.ml = self.reml_cb()
+        self.oldwhere = ":".join(self.xmenulist[index])
+        self.oldml = self.reml_cb()
 
 
+    def editmbr(self):
+        return
 
-TODO
+
+#TODO
     def ok(self):
         if (self.where == 'mbr'):
             device = self.mbrdevice
@@ -166,6 +194,9 @@ TODO
             self.menulstwhere = None
             text = self.revert_cb()
 
+# Remove when ready
+        return
+
         if backend.setup_grub(device, path, text):
             command.runsignal("&tweaks!")
 
@@ -175,17 +206,17 @@ TODO
         """Generate a (temporary) device.map file on the target and read
         its contents to a list of pairs in self.device_map.
         It also scans all partitions for menu.lst files, which are
-        then stored as (device, path) pairs, in the list self.xmenulst.
+        then stored as (device, path) pairs, in the list self.xmenulist.
         """
         if backend.mount():
             # Filter out new system '/' and '/boot'
             bar = []
-            for m, d in backend.partlist()[:2]:
-                if (m == '/') or (m == '/boot'):
-                    bar.append(d)
+            for md in backend.partlist():
+                if md[0] in ('/', '/boot'):
+                    bar.append(md[1])
 
             self.device_map = []
-            self.xmenulst = []
+            self.xmenulist = []
             for line in backend.mkdevicemap():
                 spl = line.split()
                 if (spl[0].startswith('(')):
@@ -193,7 +224,7 @@ TODO
                 elif (spl[0] == '+++'):
                     d = self.grubdevice(spl[2])
                     if d not in bar:
-                        self.xmenulst.append((d, spl[1]))
+                        self.xmenulist.append((d, spl[1]))
             return backend.unmount() and (self.device_map != [])
         return False
 
@@ -224,44 +255,23 @@ TODO
                     return a.replace(')', part)
         return None
 
-??? fix
->>>backend
-    def readmenulst(self, dev, path):
-        return self.xcall("readmenulst %s %s" % (dev, path))
-
->>>backend
-    def setup_grub(self, dev, path, text):
-        if dev:
-            self.mount()
-            res = (self.xcheck("grubinstall", IBASE, dev)
-                    and self.xwritefile(text, "/boot/grub/menu.lst"))
-            self.unmount()
-            return res
-TODO
-        else:
-            # Just replace the appropriate menu.lst
-            d, p = path.split(':')
-            self.xcall("mount1 %s" % d)
-            self.xsendfile("/tmp/larchin/menulst", "/tmp/mnt%s" % p)
-            self.xcall("unmount1")
-
-
 
 
 
 ##################################
 
-???
+#???
     # Stuff for 'include existing menu'
     def setimport_cb(self, devpath):
         self.menulstwhere = devpath
         self.menulst = self.revert_cb()
-???
+#???
     def editmbr_cb(self):
         newtext = popupEditor(_("Edit menu.lst"), self.menulst, self.revert_cb)
         if newtext:
             self.menulst = newtext
 
+#???
     def revert_cb(self):
         # Get template
         text = command.readfile("menu_lst_base")
@@ -272,7 +282,7 @@ TODO
         # add old entries
         if self.menulstwhere:
             dev, path = self.menulstwhere.split(':')
-            ml = backend.readmenulst(dev, path)
+            ml = backend.readfile(dev, path)
             # Take everything from the first 'title'
             mlp = re.compile(".*?^(title.*)", re.M | re.S)
             m = mlp.search(ml)
@@ -280,7 +290,7 @@ TODO
                 text += "\n" + m.group(1)
 
         return text
-
+#???
     # Stuff for 'use existing menu'
     def editml_cb(self):
         newtext = popupEditor(_("Edit existing menu.lst"), self.ml,
@@ -293,12 +303,12 @@ TODO
         if self.oldwhere:
             # Get existing menu.lst
             dev, path = self.oldwhere.split(':')
-            text = backend.readmenulst(dev, path)
+            text = backend.readfile(dev, path)
 
             # Add entries for new installation
             text += "\n" + self.newgrubentries()
         else:
-            text = None
+            text = ""
         return text
 
 #DONE

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.24
+# 2009.10.25
 
 
 """
@@ -85,7 +85,7 @@ lang = os.getenv("LANG")
 if lang:
     gettext.install('larchin', base_dir+'/i18n', unicode=1)
 
-import welcome, disks, autopart, install, rootpw
+import welcome, disks, autopart, install, rootpw, grub
 from backend import Backend
 
 class Command:
@@ -106,7 +106,7 @@ class Command:
 
         # Initialize gui modules
         self.pages = []
-        for s in (welcome, disks, autopart, install, rootpw
+        for s in (welcome, disks, autopart, install, rootpw, grub
                 ):
             self.pages.append(s.Stage(len(self.pages)))
 

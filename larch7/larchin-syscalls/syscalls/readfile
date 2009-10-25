@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# readfile - Get the contents of the file $3 (abs path) on device $2.
+#           Use $1 as mountpoint. 
+
+mp=$1
+mkdir -p ${mp}
+mount $2 ${mp} && cat ${mp}$2 && umount ${mp}

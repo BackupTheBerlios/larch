@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.24
+# 2009.10.25
 
 import os, pwd
 import json
@@ -90,6 +90,7 @@ class Ui:
                 "page:autopart",
                 "page:install",
                 "page:passwd",
+                "page:grub",
                 ])
 
         # - Footer
