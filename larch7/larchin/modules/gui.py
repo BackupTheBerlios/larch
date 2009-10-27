@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.25
+# 2009.10.26
 
 import os, pwd
 import json
@@ -56,6 +56,7 @@ class Ui:
         self.answer_event = threading.Event()
         self.answer_event.set()
         self.answer = None
+        self.stagetext = None
 
         self.process_lock = threading.Lock()
 
@@ -81,8 +82,8 @@ class Ui:
         self.newwidget("Label", "larchin:stageheader", align="center")
 
         # - Main widget
-        self.newwidget("Stack", "larchin:tabs", pages=[
-                "tab:main", "tab:progress", "tab:log", "tab:doc"])
+        self.newwidget("Stack", "larchin:tabs", pages=["tab:main",
+                "tab:progress", "tab:log", "tab:doc", "tab:edit"])
 
         self.newwidget("Stack", "larchin:stack", pages=[
                 "page:welcome",
@@ -116,15 +117,28 @@ class Ui:
     def go(self):
         # Build the documentation viewer
         self.docViewer = DocViewer()
+        # Build the editor
+        self.editor = Editor()
+        self.edit = self.editor.start
         # A popup window for reporting on progress of lengthier operations
         self.progressPopup = ProgressPopup()
         command.addconnections([
                 ("pp:hide*clicked", self.progressPopup.done),
-                ("log:hide*clicked", self._hidelog),
+                ("log:hide*clicked", self.runningtab),
                 ("larchin:showlog*clicked", self._showlog),
-                ("doc:hide*clicked", self._hidedocs),
+                ("doc:hide*clicked", self.runningtab),
                 ("larchin:docs*clicked", self._showdocs),
                 ("log:clear*clicked", plog),
+                ("edit:ok*clicked", self.runningtab),
+                ("edit:ok*clicked", self.editor.ok),
+                ("edit:cancel*clicked", self.runningtab),
+                ("edit:revert*clicked", self.editor.dorevert),
+                ("edit:copy*clicked", self.editor.copy),
+                ("edit:cut*clicked", self.editor.cut),
+                ("edit:paste*clicked", self.editor.paste),
+                ("edit:undo*clicked", self.editor.undo),
+                ("edit:redo*clicked", self.editor.redo),
+                ("$edit-done$", self.editor.sendtext),
             ])
         self.runningtab(0)
         self.command("larchin:.show")
@@ -251,7 +265,17 @@ class Ui:
         self.command("larchin:forward.enable", True)
 
 
-    def set_stageheader(self, text):
+    def set_stageheader(self, text=None):
+        # Delay setting if running progress tab
+        if text == None:
+            if self.stagetext != None:
+                text = self.stagetext
+                self.stagetext = None
+            else:
+                return
+        elif (self.maintab != 0):
+            self.stagetext = text
+            return
         self.command("larchin:stageheader.x__html",
                 '<h2><span style="color:#55c500;">%s</span></h2>'
                 % text)
@@ -267,14 +291,8 @@ class Ui:
         return html + '\n</table>'
 
 
-    def _hidelog(self):
-        self.runningtab()
-
     def _showlog(self):
         self.runningtab(2)
-
-    def _hidedocs(self):
-        self.runningtab()
 
     def _showdocs(self):
         self.runningtab(3)
@@ -284,6 +302,8 @@ class Ui:
             i = self.maintab
         elif i < 2:
             self.maintab = i
+            if i == 0:
+                self.set_stageheader()
         self.command("larchin:tabs.set", i)
 
 
@@ -335,6 +355,67 @@ class DocViewer:
         ui.layout("tab:doc", ["*VBOX*", "doc:header",
                 ["*HBOX*", "doc:content",
                     ["*VBOX*", "doc:hide", "*SPACE"]]])
+
+
+class Editor:
+    def __init__(self):
+        ui.newwidget("Label", "edit:header",
+            html='<h2>%s</h2>' % _("Editor"))
+        ui.newwidget("Label", "edit:title")
+        ui.newwidget("TextEdit", "edit:content")
+        ui.newwidget("Button", "^edit:ok", text=_("OK"))
+        ui.newwidget("Button", "^edit:cancel", text=_("Cancel"))
+        ui.newwidget("Button", "^edit:revert", text=_("Revert"),
+                tt=_("Restore the text to its initial state"))
+        ui.newwidget("Button", "^edit:copy", text=_("Copy"))
+        ui.newwidget("Button", "^edit:cut", text=_("Cut"))
+        ui.newwidget("Button", "^edit:paste", text=_("Paste"))
+        ui.newwidget("Button", "^edit:undo", text=_("Undo"))
+        ui.newwidget("Button", "^edit:redo", text=_("Redo"))
+
+        ui.layout("tab:edit", ["*VBOX*",
+                ["*HBOX*", "edit:header", "*SPACE", "edit:title"],
+                ["*HBOX*", "edit:content",
+                    ["*VBOX*", "edit:copy", "edit:cut", "edit:paste",
+                        "edit:undo", "edit:redo", "edit:revert",
+                        "*SPACE", "edit:cancel", "edit:ok"]]])
+
+    def start(self, title, endcall, text="", revert=None):
+        ui.command("edit:title.x__text", title)
+        self.endcall = endcall
+        self.revert = revert
+        try:
+            self.text0 = revert() if text == None else text
+        except:
+            run_error("BUG: No revert function?")
+        ui.command("edit:content.x__text", self.text0)
+        ui.runningtab(4)
+
+    def ok(self):
+        ui.asknowait("edit:content.get", "$edit-done$")
+
+    def sendtext(self, text):
+        self.endcall(text)
+
+    def dorevert(self):
+        if self.revert:
+            self.text0 = self.revert()
+        ui.command("edit:content.x__text", self.text0)
+
+    def copy(self):
+        ui.command("edit:content.copy")
+
+    def cut(self):
+        ui.command("edit:content.cut")
+
+    def paste(self):
+        ui.command("edit:content.paste")
+
+    def undo(self):
+        ui.command("edit:content.undo")
+
+    def redo(self):
+        ui.command("edit:content.redo")
 
 
 class ProgressPopup:

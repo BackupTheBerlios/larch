@@ -6,10 +6,12 @@ INSTALL="$1"
 mount --bind /proc ${INSTALL}/proc
 mount --bind /sys ${INSTALL}/sys
 mount --bind /dev ${INSTALL}/dev
-cat /proc/mounts | grep ${INSTALL} | sed "s|${INSTALL}|/|" | \
+cat /proc/mounts | grep ${INSTALL} | sed "s|[^ ]*${INSTALL}/*|/|" | \
     sed "s|//|/|" >${INSTALL}/etc/mtab
 chroot ${INSTALL} /sbin/grub-install --no-floppy $2
+ret=$?
 : >${INSTALL}/etc/mtab
 umount ${INSTALL}/dev
 umount ${INSTALL}/sys
 umount ${INSTALL}/proc
+exit ${ret}

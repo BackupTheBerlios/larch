@@ -36,7 +36,8 @@ Maybe somehow in connection with the tweaks page?:
 * locales
 * keyboard???
 
-
+COMMENT OUT DEBUG OPTION IN COMMAND LINE PARAMETERS - normally this
+should not be available!
 ...
 
 raid, lvm ???

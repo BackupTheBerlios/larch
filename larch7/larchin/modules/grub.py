@@ -19,18 +19,31 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.25
+# 2009.10.27
 
 doc = _("""
 <h2>Set up the GRUB bootloader</h2>
 <p>GRUB allows the booting of more than one operating system.
 Normally it will be installed to the 'master boot record' on the
-first disk drive, but the new Linux system can also be booted from an
-existing GRUB set-up.
+first disk drive. Here it can be installed to the mbr of the drive
+on which /boot of the new installation is found - which may or may not be
+the same as the root (/) partition.
+</p>
+<p>It may also be installed to the partition containing /boot.
+Alternatively, the new Linux system can be booted from an
+existing GRUB set-up by adding the entries for the new system to its
+menu.lst file.
+</p>
+<p>A further option is to add the entries from an existing menu.lst to
+those arising from the new installation, so that the operating systems
+therein can still be booted, but from the newly installed bootloader.
+</p>
+<p>If an NTFS formatted partition is detected it will be added to the list
+automatically.
 </p>""")
 
 
-import time
+import time, re
 
 
 class Stage:
@@ -43,10 +56,11 @@ class Stage:
                 ("grub:mbr*toggled", self.mbrtoggled),
                 ("grub:old*toggled", self.oldtoggled),
                 ("grub:part*toggled", self.parttoggled),
-                ("grub:device-list*select", self.select_mbr),
                 ("grub:xmenulist*changed", self.select_old),
                 ("grub:include*toggled", self.includetoggled),
+                ("grub:newedit*clicked", self.editnew),
                 ("grub:edit*clicked", self.editmbr),
+                ("&grubsetup&", self.grubsetup),
             ]
 
     def __init__(self, index):
@@ -59,23 +73,20 @@ class Stage:
         ui.newwidget("RadioButton", "^grub:part",
                 text=_("Install GRUB to installation partition"))
 
-        ui.newwidget("Frame", "grub:mbr-frame",
-                text=_("Select device for MBR"))
-        ui.newwidget("List", "^grub:device-list", selectionmode="Single",
-                tt=_("Select the drive to whose MBR grub should be installed"))
-        ui.command("grub:device-list.setHeaders", [_("Device"),
-                _("Size"), _("Model")])
-
         ui.newwidget("Frame", "grub:xmenulist-frame")
         ui.newwidget("Label", "grub:oldl",
                 text=_("Choose existing menu.lst:"))
-        ui.newwidget("ComboBox", "^grub:xmenulist", width=300,
+        ui.newwidget("ComboBox", "^grub:xmenulist", #width=300,
                 tt=_("Select the partition with the relevant menu.lst"))
 
         ui.newwidget("CheckBox", "^grub:include",
                 text=_("Include existing menu"),
                 tt=_("The boot lines from an existing menu.lst can be"
                         " included in the new file"))
+
+        ui.newwidget("Button", "^grub:newedit", text=_("Edit boot options"),
+                tt=_("Options for booting the new installation are\n"
+                        "generated automatically. You can edit them here."))
 
         ui.newwidget("Button", "^grub:edit", text=_("Edit menulst.conf"),
                 tt=_("The automatically generated menulst.conf can be"
@@ -84,15 +95,11 @@ class Stage:
 
         ui.layout("page:grub", ["*VBOX*",
                 "grub:mbr", "grub:old", "grub:part",
-                ["*HBOX*", "grub:mbr-frame",
-                    ["*VBOX*", "grub:xmenulist-frame", "grub:edit"]]])
-
-        ui.layout("grub:mbr-frame", ["*VBOX*",
-                "grub:device-list"])
+                "grub:xmenulist-frame", "*SPACE",
+                ["*HBOX*", "grub:newedit", "grub:edit"]])
 
         ui.layout("grub:xmenulist-frame", ["*VBOX*",
-                "grub:oldl", "grub:xmenulist", "*SPACE",
-                "grub:include"])
+                "grub:oldl", "grub:xmenulist", "grub:include"])
 
 
     def setup(self):
@@ -111,15 +118,13 @@ class Stage:
         # There is also the list of device / menu.list-path pairs
         ui.command("grub:xmenulist.set", [":".join(i)
                 for i in self.xmenulist])
+        self.old_index = 0
+        self.oldwhere = (":".join(self.xmenulist[0]) if self.xmenulist[0]
+                else None)
         ui.command("grub:xmenulist-frame.enable", False)
 
-        self.mbrdevices = backend.get_devices()
-        self.mbr_index = 0
-        ui.command("grub:device-list.set", self.mbrdevices, self.mbr_index)
-        ui.command("grub:device-list.compact")
-
-# I suppose I could share the extraneous menu.lst choice between the
-# options 'Add to other menu.lst' and 'Include other menu.lst'
+        # I share the extraneous menu.lst choice between the
+        # options 'Add to other menu.lst' and 'Include other menu.lst'
         ui.command("grub:xmenulist-frame.enable", self.xmenulist != [])
         ui.command("grub:old.enable", self.xmenulist != [])
         ui.command("grub:mbr.set", True)
@@ -137,71 +142,86 @@ class Stage:
             # Else just guess first NTFS partition
             self.ntfsboot = nlist[0]
 
+        self.newgrubentries()
+        self.includetoggled(False)
+
 
     def mbrtoggled(self, on):
         if on:
             self.where = "mbr"
-        ui.command("grub:mbr-frame.enable", on)
+
 
     def oldtoggled(self, on):
         if on:
             self.where = "old"
-        self.menulst = None
         ui.command("grub:include.enable", not on)
+        self.newmenulst()
+
 
     def parttoggled(self, on):
         if on:
             self.where = "part"
 
+
     def includetoggled(self, on):
         self.include = on
+        self.newmenulst()
 
-
-    def select_mbr(self, index=-1):
-        if index < 0:
-            return
-        self.mbr_index = index
-        self.mbrdevice = self.mbrdevices[index][0]
 
     def select_old(self, index=-1):
         if index < 0:
             return
         self.old_index = index
         self.oldwhere = ":".join(self.xmenulist[index])
-        self.oldml = self.reml_cb()
+        self.newmenulst()
+
+
+    def editnew(self):
+        ui.edit(_("Bootloader entries for new installation"),
+            self.setnewentries, self.newentries, self.newgrubentries)
+
+
+    def setnewentries(self, text):
+        self.newentries = text
 
 
     def editmbr(self):
-        return
+        ui.edit(_("New menu.lst"),
+            self.newmenulst, self.getmenulst(), self.revert)
 
 
-#TODO
+    def revert(self):
+        self.newmenulst()
+        return self.getmenulst()
+
+
     def ok(self):
-        if (self.where == 'mbr'):
-            device = self.mbrdevice
-            path = None
-            text = self.menulst
-        elif (self.where == 'old'):
+        command.runsignal("&grubsetup&")
+
+
+    def grubsetup(self):
+        if (self.where == 'old'):
+            # Add this installation to an already existing menu.lst
             device = None
             path = self.oldwhere
-            text = self.ml
         else:
+            # Install grub to partition or mbr
             if self.bootpart:
                 device = self.bootpart
             else:
                 device = self.rootpart
+            if self.where == 'mbr':
+                device = device.rstrip("0123456789")
             path = None
-            self.menulstwhere = None
-            text = self.revert_cb()
 
-# Remove when ready
-        return
-
-        if backend.setup_grub(device, path, text):
+        if backend.setup_grub(device, path, self.getmenulst()):
             command.runsignal("&tweaks!")
+        else:
+            run_error(_("GRUB setup failed - see log"))
+
 
 ##################################
-#DONE:
+
     def set_devicemap(self):
         """Generate a (temporary) device.map file on the target and read
         its contents to a list of pairs in self.device_map.
@@ -228,7 +248,7 @@ class Stage:
             return backend.unmount() and (self.device_map != [])
         return False
 
-#DONE:
+
     def grubdevice(self, device):
         """Convert from a grub drive name to a linux drive name, or vice
         versa. Uses the information previously gathered by set_devicemap().
@@ -256,62 +276,42 @@ class Stage:
         return None
 
 
+    def newmenulst(self, text=None):
+        self.menulst = text
 
 
-##################################
+    def getmenulst(self):
+        if self.menulst == None:
+            if self.where != "old":
+                # Get template
+                text = command.readfile("menu_lst_base")
 
-#???
-    # Stuff for 'include existing menu'
-    def setimport_cb(self, devpath):
-        self.menulstwhere = devpath
-        self.menulst = self.revert_cb()
-#???
-    def editmbr_cb(self):
-        newtext = popupEditor(_("Edit menu.lst"), self.menulst, self.revert_cb)
-        if newtext:
-            self.menulst = newtext
+                # Add entries for new installation
+                text += self.newentries
 
-#???
-    def revert_cb(self):
-        # Get template
-        text = command.readfile("menu_lst_base")
+                # add old entries
+                if self.include:
+                    dev, path = self.oldwhere.split(':')
+                    ml = backend.readfile(dev, path)
+                    # Take everything from the first 'title'
+                    mlp = re.compile(".*?^(title.*)", re.M | re.S)
+                    m = mlp.search(ml)
+                    if m:
+                        text += "\n" + m.group(1)
 
-        # Add entries for new installation
-        text += self.newgrubentries()
+            else:
+                # Get existing menu.lst
+                dev, path = self.oldwhere.split(':')
+                text = backend.readfile(dev, path)
 
-        # add old entries
-        if self.menulstwhere:
-            dev, path = self.menulstwhere.split(':')
-            ml = backend.readfile(dev, path)
-            # Take everything from the first 'title'
-            mlp = re.compile(".*?^(title.*)", re.M | re.S)
-            m = mlp.search(ml)
-            if m:
-                text += "\n" + m.group(1)
+                # Add entries for new installation
+                text += "\n" + self.newentries
 
-        return text
-#???
-    # Stuff for 'use existing menu'
-    def editml_cb(self):
-        newtext = popupEditor(_("Edit existing menu.lst"), self.ml,
-                self.reml_cb)
-        if newtext:
-            self.ml = newtext
+            self.menulst = text
 
-#DONE
-    def reml_cb(self):
-        if self.oldwhere:
-            # Get existing menu.lst
-            dev, path = self.oldwhere.split(':')
-            text = backend.readfile(dev, path)
+        return self.menulst
 
-            # Add entries for new installation
-            text += "\n" + self.newgrubentries()
-        else:
-            text = ""
-        return text
 
-#DONE
     def newgrubentries(self):
         # look for separate boot partition
         self.bootpart = None
@@ -347,35 +347,12 @@ class Stage:
             text += "initrd %s/%s\n\n" % (bp, init)
 
         if self.ntfsboot:
+            text += "# ....\n"
             text += "title Windows\n"
             text += "rootnoverify %s\n" % self.grubdevice(self.ntfsboot)
             text += "makeactive\n"
             text += "chainloader +1\n\n"
 
-        return (text + "# ---- End of section added by larchin\n")
-
-#OK?
-    def getmenu(self, filestring):
-        """Try to extract grub entries from the given menu.lst file contents
-        (in the form of a string). Return as a list.
-        """
-        titles = []
-        lines = filestring.splitlines(True)
-        reading = False
-        for l in lines:
-            ls = l.strip()
-            if reading:
-                if (not ls) or (ls == '#'):
-                    titles.append(thisone)
-                    reading = False
-                else:
-                    thisone += l
-            elif ls.startswith('title'):
-                reading = True
-                thisone = l
-        if reading:
-            titles.append(thisone + '\n')
-        return titles
-
-
-
+        text += "# ---- End of section added by larchin\n"
+        self.newentries = text
+        return text

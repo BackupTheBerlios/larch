@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.25
+# 2009.10.27
 
 from subprocess import Popen, PIPE, STDOUT
 import os, shutil, threading
@@ -316,7 +316,7 @@ class Backend:
     def get_mounts(self):
         """Return a list of mounted partitions.
         """
-        return [m.strip() for m in self.xlist("get-mounts")[1]]
+        return [m.split()[0] for m in self.xlist("get-mounts")[1]]
 
 
     def get_partfstype(self, part):
@@ -326,17 +326,36 @@ class Backend:
         return t[1][0] if t[0] and (len(t[1]) != 0) else ""
 
 
+    def mountdev(self, dev):
+        """Mounts the given device at IBASE (which means this method
+        cannot be used while the system being installed is mounted).
+        If the device is already mounted use mount --bind.
+        """
+        for m in self.xlist("get-mounts")[1]:
+            md, mp = m.split()
+            if md == dev:
+                return self.mountbind(mp)
+        return self.imount(dev, "/")
+
+
+    def mountbind(self, dir, mp=""):
+        mpb = IBASE + mp
+        if self.xcheck("do-mount", "--bind", dir, mpb,
+                onfail=_("Couldn't bind-mount %s at %s") % (dir, mpb)):
+            self.mounts.append(mpb)
+            return True
+        return False
+
+
     def run_mount_devprocsys(self, fn, *args):
         ok = True
         dirs = []
         for d in ("/dev", "/proc", "/sys"):
-            mpb = IBASE + d
-            if self.xcheck("do-mount", "--bind", d, mpb,
-                    onfail=_("Couldn't bind-mount %s at %s") % (d, mpb)):
-                self.mounts.append(mpb)
-                dirs.append(mpb)
+            if self.mountbind(d, d):
+                dirs.append(IBASE + d)
             else:
                 ok = False
+                break
         if ok:
             ok = fn(*args)
         return self.unmount(dirs) and ok
@@ -691,27 +710,29 @@ class Backend:
 
 
     def readfile(self, dev, path):
-        ok, lines = self.xlist("readfile", IBASE, dev, path)
-        text = "\n".join(lines)
+        ok = self.mountdev(dev)
+        if ok:
+            ok, lines = self.xlist("readfile", IBASE + path)
+            text = "\n".join(lines)
+            self.unmount()
         if ok:
             return text + "\n"
-        else:
-            run_error(_("Couldn't read %s+%s:\n  %s") % (dev, path, text))
-            return ""
+        run_error(_("Couldn't read %s+%s:\n  %s") % (dev, path, text))
+        return ""
 
 
     def setup_grub(self, dev, path, text):
         if dev:
-            self.mount()
-            res = (self.xcheck("grubinstall", IBASE, dev)
+            res = (self.mount()
+                    and self.xlist("grubinstall", IBASE, dev)[0]
                     and self.xwritefile(text, "/boot/grub/menu.lst"))
         else:
             # Just replace the appropriate menu.lst
             d, p = path.split(':')
-            res = self.imount(d, "/") and self.xwritefile(text, p)
+            res = self.mountdev(d) and self.xwritefile(text, p)
+
         self.unmount()
         return res
-
 
 
 

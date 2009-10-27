@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.25
+# 2009.10.26
 
 """Build a gui from a layout description.
 """
@@ -530,6 +530,18 @@ class TextEdit(QtGui.QTextEdit, WBase):                     #qt
 
     def undo(self):
         QtGui.QTextEdit.undo(self)                          #qt
+
+    def redo(self):
+        QtGui.QTextEdit.redo(self)                          #qt
+
+    def copy(self):
+        QtGui.QTextEdit.copy(self)                          #qt
+
+    def cut(self):
+        QtGui.QTextEdit.cut(self)                           #qt
+
+    def paste(self):
+        QtGui.QTextEdit.paste(self)                         #qt
 
 
 class HtmlView(QtGui.QTextBrowser, WBase):                  #qt

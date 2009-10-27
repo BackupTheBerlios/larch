@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.25
+# 2009.10.26
 
 
 """
@@ -153,9 +153,9 @@ class Command:
     def pageswitch(self, index, title):
         ui.command("larchin:stack.set", index)
         self.current_page_index = index
-        self.pages[index].init()
         ui.set_stageheader(title)
         ui.command("doc:content.x__html", self.pages[index].getHelp())
+        self.pages[index].init()
 
 
     def runsignal(self, sig, *args):

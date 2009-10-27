@@ -3,9 +3,9 @@
 # get-mounts
 
 # Get all mounted devices - so that each line contains a mounted device
-# Here managed by reading the contents of /etc/mtab
+# Here managed by reading the contents of /proc/mounts
 
-cat /etc/mtab | grep "^/dev/" | while read dev x; do
-        echo $( readlink -f ${dev} )
+cat /proc/mounts | grep "^/dev/" | while read dev mp x; do
+        echo "$( readlink -f ${dev} ) ${mp}"
     done
 exit 0
