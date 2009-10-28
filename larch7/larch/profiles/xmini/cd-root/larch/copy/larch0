@@ -4,6 +4,7 @@
 # ${INSTALL} is the path to the installed system root directory.
 
 rm -f "${INSTALL}/root/Desktop/Install Arch Linux.desktop"
+rm -f "${INSTALL}/etc/rc.d/functions.d/larch-autologin"
 
 if [ -f ${INSTALL}/etc/rc.local.orig ]; then
     mv ${INSTALL}/etc/rc.local.orig ${INSTALL}/etc/rc.local
@@ -11,8 +12,6 @@ fi
 if [ -f ${INSTALL}/etc/rc.local.shutdown.orig ]; then
     mv ${INSTALL}/etc/rc.local.shutdown.orig ${INSTALL}/etc/rc.local.shutdown
 fi
-
-sed "/^DAEMONS=/ s|!gdm|gdm|" -i ${INSTALL}/etc/rc.conf
 
 # start gdm from rc.conf
 sed -i '/^DAEMONS=/ s|!gdm|@gdm|' ${INSTALL}/etc/rc.conf
