@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.27
+# 2009.10.28
 
 doc = _("""
 <h2>Set up the GRUB bootloader</h2>
@@ -40,6 +40,15 @@ therein can still be booted, but from the newly installed bootloader.
 </p>
 <p>If an NTFS formatted partition is detected it will be added to the list
 automatically.
+</p>
+<h3>WARNING</h3>
+<p>If you have mixed IDE(PATA)/SCSI/SATA devices attached it is quite
+possible that GRUB will get confused about their order. In other words you
+might find that the association of GRUB names (hd0, hd1, etc.) to Linux
+device names (/dev/sda, /dev/sdb, etc.) is incorrect. The result is
+probably that you will not be able to boot your new system. In this case
+you will have to manually edit menu.lst and put the correct number after
+the 'hd' device entries.
 </p>""")
 
 
@@ -73,6 +82,7 @@ class Stage:
         ui.newwidget("RadioButton", "^grub:part",
                 text=_("Install GRUB to installation partition"))
 
+        ui.newwidget("Label", "grub:pic", image="images/grub.png")
         ui.newwidget("Frame", "grub:xmenulist-frame")
         ui.newwidget("Label", "grub:oldl",
                 text=_("Choose existing menu.lst:"))
@@ -95,8 +105,9 @@ class Stage:
 
         ui.layout("page:grub", ["*VBOX*",
                 "grub:mbr", "grub:old", "grub:part",
-                "grub:xmenulist-frame", "*SPACE",
-                ["*HBOX*", "grub:newedit", "grub:edit"]])
+                ["*HBOX*", "grub:pic",
+                    ["*VBOX*", "grub:xmenulist-frame", "*SPACE",
+                        "grub:newedit", "grub:edit"]]])
 
         ui.layout("grub:xmenulist-frame", ["*VBOX*",
                 "grub:oldl", "grub:xmenulist", "grub:include"])

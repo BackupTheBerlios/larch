@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.27
+# 2009.10.28
 
 from subprocess import Popen, PIPE, STDOUT
 import os, shutil, threading
@@ -170,7 +170,8 @@ class Backend:
 
 
     def xwritefile(self, contents, dest):
-        """Write the contents to the given file (dest) on the target.
+        """Write the contents to the given file (dest) on the target,
+        within the installation mount.
         """
         plog("Write FILE: %s (target)" % dest)
         self.process_lock.acquire()
@@ -263,6 +264,25 @@ class Backend:
         return self.xlist("get-memsize")[1][0] * 1024
 
 
+    def get_medium_size_estimate(self):
+        """Base the estimate on the sizes of system.sqf, mods.sqf
+        and overlay.tar.lzo. The result is in MB.
+        """
+        size = 10   # Start with 10 MB
+        for f in ("system.sqf", "mods.sqf", "overlay.tar.lzo"):
+            sb = self.filesize("/.livesys/medium/larch/" + f)
+            size += (sb + 5*10**5) / 10**6
+        return size
+
+
+    def filesize(self, path):
+        ok, bytes = self.xlist("filesize", path)
+        if not ok:
+            run_error(_("Couldn't stat file '%s'") % path)
+            return 0
+        return int(bytes[0])
+
+
     def available(self, app):
         """Test the availability of the given application (whether the
         given name is executable, using 'which') on the installation
@@ -326,16 +346,56 @@ class Backend:
         return t[1][0] if t[0] and (len(t[1]) != 0) else ""
 
 
-    def mountdev(self, dev):
-        """Mounts the given device at IBASE (which means this method
+    def file_rw(self, dev, path, text=None):
+        """Reads or writes the file at 'path' on device 'dev'.
+        Mounts the given device at IBASE (which means this method
         cannot be used while the system being installed is mounted).
         If the device is already mounted use mount --bind.
+        If text!=None it is a write operation, and if the device is
+        already mounted, but ro, an attempt will be made to remount it
+        rw for the duration of the operation.
+        On writing the result can be None or True, but on reading the
+        result is more complicated. None indicates something went wrong
+        with the mounting, otherwise the pair (ok, linelist) is returned,
+        in which linelist is the file contents if ok is True, otherwise
+        whatever output the low level command provides.
         """
+        rorw = None     # Flag to indicate remount rw
+        bind = False    # Flag to indicate mount --bind
         for m in self.xlist("get-mounts")[1]:
             md, mp = m.split()
             if md == dev:
-                return self.mountbind(mp)
-        return self.imount(dev, "/")
+                if (text != None) and self.xlist("testromount", mp)[0]:
+                    # Writing to ro mount, attempt to remount rw
+                    if not self.remount(mp, "rw"):
+                        return None
+                    rorw = mp
+                if not self.mountbind(mp):
+                    if rorw:
+                        self.remount(mp, "ro")
+                    return None
+                bind = True
+                break
+        if (not bind) and not self.imount(dev, "/"):
+            return None
+        if (text != None):
+            # Write file
+            ok = self.xwritefile(text, path)
+            ok = self.unmount() and ok
+            if rorw:
+                ok = self.remount(rorw, "ro") and ok
+            return True if ok else None
+        else:
+            # Read file
+            ok, lines = self.xlist("readfile", IBASE + path)
+            if not self.unmount():
+                return None
+            return (ok, lines)
+
+
+    def remount(self, mp, opt):
+        return self.xcheck("do-mount", "-o", "remount," + opt, mp,
+                onfail=_("Couldn't remount '%s' %s") % (mp, opt))
 
 
     def mountbind(self, dir, mp=""):
@@ -493,7 +553,7 @@ class Backend:
             t = "logical"
             if pmax > 4:
                 # resize extended partition
-                if not self.xcheck("resize", device, str(exp),
+                if not self.xcheck("resizepart", device, str(exp),
                                 str(ex0), str(endcyl),
                         onfail=_("Couldn't resize extended partition %s%d")
                                 % (device, exp)):
@@ -710,30 +770,32 @@ class Backend:
 
 
     def readfile(self, dev, path):
-        ok = self.mountdev(dev)
-        if ok:
-            ok, lines = self.xlist("readfile", IBASE + path)
-            text = "\n".join(lines)
-            self.unmount()
-        if ok:
-            return text + "\n"
-        run_error(_("Couldn't read %s+%s:\n  %s") % (dev, path, text))
+        res = self.file_rw(dev, path)
+        if res:
+            text = "\n".join(res[1])
+            if res[0]:
+                return text + "\n"
+            else:
+                run_error(_("Couldn't read %s+%s:\n  %s")
+                        % (dev, path, text))
         return ""
 
 
     def setup_grub(self, dev, path, text):
         if dev:
             res = (self.mount()
-                    and self.xlist("grubinstall", IBASE, dev)[0]
+                    and self.run_mount_devprocsys(self._setup_grub, dev)
                     and self.xwritefile(text, "/boot/grub/menu.lst"))
         else:
             # Just replace the appropriate menu.lst
             d, p = path.split(':')
-            res = self.mountdev(d) and self.xwritefile(text, p)
+            res = self.file_rw(d, p, text)
+        if self.unmount() and res:
+            return True
+        return False
 
-        self.unmount()
-        return res
-
+    def _setup_grub(self, dev):
+        return self.xlist("grubinstall", IBASE, dev)[0]
 
 
 class DiskInfo:

@@ -19,14 +19,14 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.24
+# 2009.10.28
 
 from backend import DiskInfo
 
 doc = _("""
 <h2>Automatic Partitioning</h2>
 <p>To make straightforward installations easier it is possible to choose
-a simple automatic division of your disk drive for the <em>Arch Linux</em>
+an automatic division of your disk drive for the <em>Arch Linux</em>
 installation.
 </p>
 <p>WARNING: If you have an operating system already installed on this drive
@@ -58,6 +58,13 @@ configuration files for the system and various applications which are saved in
 a user's home directory (and which may cause problems if used by other systems,
 e.g. after a reinstallation) can easily be kept separate from the user's
 personal data. Here /home/DATA is offered as an alternative to /home.
+</p>
+<h3>Boot Partition</h3>
+<p>A boot partition will always be created, and its size will be set
+automatically. One can choose here whether to save the 'live' system on
+this partition - an option which can be useful for rescue and maintenance
+tasks. If this option is not chosen, less space will be allocated to the
+boot partition.
 </p>""")
 
 
@@ -75,6 +82,7 @@ class Stage:
                 ("autopart:home*toggled", self.hometoggled),
                 ("&autopartition-run&", self.partition),
                 ("autopart:swapcheck*toggled", self.swapcheck_toggle),
+                ("autopart:larchboot*toggled", self.larchboot_toggle),
                 ("autopart:homedata*toggled", self.homedata_toggle),
             ]
 
@@ -113,6 +121,8 @@ class Stage:
         ui.newwidget("CheckBox", "^autopart:homedata", tt=tt_seedocs,
                 text=_("Create /home/DATA instead of /home partition"))
 
+        ui.newwidget("CheckBox", "^autopart:larchboot",
+                text=_("Install live system to boot partition."))
         ui.newwidget("Label", "autopart:syssize_l",
                 text=_("Space for Arch root partition:"))
         ui.newwidget("LineEdit", "autopart:syssize", ro=True)
@@ -125,7 +135,8 @@ class Stage:
                             "autopart:reserved_l", "autopart:reserved"]],
                 "autopart:swap",
                 "autopart:home",
-                ["*HBOX*", "*SPACE", "autopart:syssize_l", "autopart:syssize"]
+                ["*HBOX*", "autopart:larchboot", "*SPACE",
+                        "autopart:syssize_l", "autopart:syssize"]
                 ])
 
         ui.layout("autopart:home", ["*VBOX*",
@@ -139,6 +150,7 @@ class Stage:
     def setup(self):
         self.systemsize = self.get_system_size_estimate()
         self.memsize = float(backend.memsize()) / 10**9     # GB
+        self.larchboot = False
 
 
     def select_page(self, init, *args):
@@ -198,6 +210,7 @@ class Stage:
         ui.command("autopart:homedata.set", False)
 
 
+#TODO: include self.larchboot
     def recalculate(self):
         self.freesize = (self.disksize - self.p1size - self.unallocated
                 - self.systemsize - 5.0)
@@ -226,17 +239,28 @@ class Stage:
 
         self.rootsize = (self.disksize - self.p1size - self.unallocated
                 - self.swapsize - self.datasize)
+        if not self.larchboot:
+            self.rootsize += self.live_gb
         ui.command("autopart:syssize.x__text", "%5.1f GB" % self.rootsize)
 
 
-#TODO
     def get_system_size_estimate(self):
-        return 5.0
+        """Assume 3*medium_size for the installation, the rest being for
+        the boot partition.
+        """
+        self.live_gb = float(backend.get_medium_size_estimate()) / 1000
+        return 4.5 * self.live_gb
 
 
     def freesizechanged(self, size):
         self.unallocated = size
         self.recalculate()
+
+
+    def larchboot_toggle(self, on):
+        self.larchboot = on
+        self.recalculate()
+
 
     def swaptoggled(self, on):
         if on:
@@ -320,10 +344,15 @@ class Stage:
         newparts = []
         maxp = None
         maxs = 0
+        boots = 0.2
+        if self.larchboot:
+            boots += self.live_gb * 1.5
         for m, s, t in (
-                ("/", self.rootsize, "primary"),
+                ("/boot", boots, "primary"),
                 ("swap", self.swapsize, "primary"),
-                ("/home/DATA" if self.homedata else "/home", self.datasize, "logical"),
+                ("/", self.rootsize, "logical"),
+                ("/home/DATA" if self.homedata else "/home", self.datasize,
+                        "logical"),
                 ("", self.unallocated, None)):
             if s > 0.1:
                 # Convert GB to cylinders
@@ -355,7 +384,9 @@ class Stage:
                 break
             else:
                 # [mount-point, device, size, format]
-                iparts.append([m, part, "" if swap else "ext4"])
+                iparts.append([m, part, "" if swap
+                        else "ext2" if m == "/boot"
+                        else "ext4"])
                 ui.progressPopup.add("   ---> " + part)
         ui.progressPopup.end()
 

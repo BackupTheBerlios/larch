@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.24
+# 2009.10.28
 
 
 doc = _("""
@@ -93,9 +93,10 @@ class Stage:
     def ok(self):
 #debugging
         if "P" in dbg_flags:
-            self.plist = [["/", "/dev/sda1", "ext4"],
-                    ["swap", "/dev/sda2", ""],
-                    ["/home", "/dev/sda5", "ext4"]]
+            self.plist = [["/", "/dev/sdb5", "ext4"],
+                    ["/boot", "/dev/sdb1", "ext2"],
+                    ["swap", "/dev/sdb2", ""],
+                    ["/home", "/dev/sdb6", "ext4"]]
             parts = ""
             for p in self.plist:
                 parts += "\n  " + " : ".join(p)
