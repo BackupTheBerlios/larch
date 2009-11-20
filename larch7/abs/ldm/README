@@ -1,0 +1,8 @@
+Each user must have a valid ~/.xinitrc file, otherwise no session can be
+started. It could be as simple as:
+
+exec xfce4-session
+
+You can start ldm from the DAEMONS array in /etc/rc.conf:
+
+DAEMONS=(syslog-ng @network dbus hal @ldm ...

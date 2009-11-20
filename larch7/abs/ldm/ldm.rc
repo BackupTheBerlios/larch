@@ -1,0 +1,35 @@
+#!/bin/bash
+
+. /etc/rc.d/functions
+
+case "$1" in
+  start)
+    stat_busy "Starting LDM"
+    /usr/sbin/ldmd &
+    if [ $? -gt 0 ]; then
+      stat_fail
+    else
+
+      add_daemon ldm
+      stat_done
+    fi
+    ;;
+  stop)
+    stat_busy "Stopping LDM"
+    [ -f /var/run/ldmd.pid ] && kill `cat /var/run/ldmd.pid` &> /dev/null
+    if [ $? -gt 0 ]; then
+      stat_fail
+    else
+      rm_daemon ldm
+      stat_done
+    fi
+    ;;
+  restart)
+    $0 stop
+    sleep 2
+    $0 start
+    ;;
+  *)
+    echo "usage: $0 {start|stop|restart}"
+esac
+exit 0
