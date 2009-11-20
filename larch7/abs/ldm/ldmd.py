@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #-------------------------------------------------------------------
-# 2009.11.19
+# 2009.11.20
 
 """This is the daemon, which waits for messages (via an AF_UNIX socket,
 'ldmd').
@@ -112,8 +112,8 @@ class Ldmd:
 
     def start_session(self, display, tty, user):
         # Start new session
-        process = Popen(["/usr/bin/xinit", ldm_dir + "/ldm.py",
-                (display + "!" + user),
+        process = Popen(["/usr/bin/xinit", "/bin/bash", "--login", "-c",
+                "%s/ldm.py %s!%s" % (ldm_dir, display, user),
                 "--", "/usr/bin/X", display, tty, "-nolisten", "tcp"],
                 stdout=PIPE, stderr=STDOUT)
         displays.append(tty)
