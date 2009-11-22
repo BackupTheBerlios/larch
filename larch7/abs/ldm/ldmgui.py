@@ -19,13 +19,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #-------------------------------------------------------------------
-# 2009.11.19
+# 2009.11.22
 
 from PyQt4 import QtGui, QtCore
 
 
 class LdmGui(QtGui.QGraphicsView):
     def __init__(self):
+        self.starting = True
         QtGui.QGraphicsView.__init__(self)
         self.width = 0
         self.height = 0
@@ -33,6 +34,25 @@ class LdmGui(QtGui.QGraphicsView):
         self.scene = QtGui.QGraphicsScene()
         self.setScene(self.scene)
 
+        # Need some way of setting the widget sizes and positions from
+        # the event loop, as the necessary information is not available
+        # before this starts.
+        #self.connect(self.scene,
+        #        QtCore.SIGNAL("changed ( const QList<QRectF>& )"),
+        #        self.newSize)
+        self.connect(app, QtCore.SIGNAL("focusChanged(QWidget*, QWidget*)"),
+                self.newfocus)
+
+        self.showFullScreen()
+
+        img = theme["background_image"]
+        if img:
+            self.setbgImage(img)
+
+        self.activateWindow()
+
+
+    def makegui(self):
         if theme["showusers"]:
             ulw = self.scene.addWidget(self.userlistWidget())
             ulw.setGeometry(QtCore.QRectF(*theme["showusers_geometry"]))
@@ -85,23 +105,6 @@ class LdmGui(QtGui.QGraphicsView):
         buttonsw = self.scene.addWidget(buttons_w)
         buttonsw.setZValue(10)
         buttonsw.setGeometry(QtCore.QRectF(*theme["buttons_geometry"]))
-
-        # Need some way of setting the widget sizes and positions from
-        # the event loop, as the necessary information is not available
-        # before this starts.
-        #self.connect(self.scene,
-        #        QtCore.SIGNAL("changed ( const QList<QRectF>& )"),
-        #        self.newSize)
-        self.connect(app, QtCore.SIGNAL("focusChanged(QWidget*, QWidget*)"),
-                self.newfocus)
-
-        self.showFullScreen()
-
-        img = theme["background_image"]
-        if img:
-            self.setbgImage(img)
-
-        self.activateWindow()
 
 
     def newSize(self):
@@ -158,6 +161,9 @@ class LdmGui(QtGui.QGraphicsView):
 
     def newfocus(self, old, new):
         if new == ldmgui:
+            if self.starting:
+                self.starting = False
+                self.makegui()
             self.username_w.setFocus()
             self.newSize()
 
