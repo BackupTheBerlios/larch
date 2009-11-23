@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #-------------------------------------------------------------------
-# 2009.11.22
+# 2009.11.23
 
 from PyQt4 import QtGui, QtCore
 
@@ -163,9 +163,9 @@ class LdmGui(QtGui.QGraphicsView):
         if new == ldmgui:
             if self.starting:
                 self.starting = False
+                self.newSize()
                 self.makegui()
             self.username_w.setFocus()
-            self.newSize()
 
 
     def handle_login(self):
