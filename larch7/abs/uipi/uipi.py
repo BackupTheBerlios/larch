@@ -40,7 +40,7 @@ def debug(text):
 
 
 class Uipi:
-    def __init__(self, **kwargs):
+    def __init__(self, backend="quip", **kwargs):
         """Using the **kwargs parameter allows options for the process
         start to be passed, for example 'cwd' or 'preexec_fn'.
         """
@@ -56,9 +56,8 @@ class Uipi:
         # Start ui process
         kwargs['stdin'] = PIPE
         kwargs['stdout'] = PIPE
-        uiexec = kwargs.get("backend", "quip")
-        if uiexec:
-            self.uiprocess = Popen(uiexec, **kwargs)
+        if backend:
+            self.uiprocess = Popen(backend, **kwargs)
 
 
     def addsignal(self, wname, signal, slot=None, sname=None):
