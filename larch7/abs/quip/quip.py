@@ -22,14 +22,66 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.02
+# 2009.11.11
 
-"""This program aims to provide a simple gui toolkit with a
-programming interface based on text lines passed via stdio.
-It can be run as a sub-process of the controlling program.
-By restricting itself to common control elements and simple
-configuration options it should be fairly easy to port it to other
-underlying toolkits. This is the pyqt version.
+"""UIP - User Interface Program
+
+The aim is to provide a means of creating graphical user interfaces of
+moderate complexity while abstracting the interface to the actual underlying
+toolkit in such a way that (at least potentially) an alternative toolkit
+could be used.
+[At present this aspect is rather theoretical since only a pyqt based
+version has been written.]
+
+The GUI is run as a completely separate process from the main program
+using a line-based text interface for communication (pipes connected to
+the stdio channels of the GUI process). An example module using quip is
+provided as uipi.py.
+
+Widgets are defined separately from their layout, to assist in keeping
+the functional aspects separate from the visual.
+
+Commands are sent to the GUI as text lines combining method calls
+(widget.method) with json-encoded arguments.
+A distinction is made between commands requiring a response and those
+where no response is expected: simple commands start with '!', for
+example, while queries start with '?'. The commands to the GUI take
+on various forms. The initial character determines the action:
+
+'!' - method calls to an exported widget, with no result.
+      They have the form '!widget.method [arg1, arg2, …]', where the
+      argument list is json-encoded. If there are no arguments the square
+      brackets needn't be present.
+'?' - similar to '!', but a return value is expected. It has a key value,
+      which is everything up to the first ':' After that the arguments
+      are as for '!'. The result is '@' followed by the key value, then
+      ':', then the json-encoded call result. By using the keys in the
+      queries appropriately it is possible to make these queries run
+      either asynchronously (resulting in signal calls on completion)
+      or synchronously.
+'%' - widget definition. The form is '%widget-type widget-name {attributes}',
+      where the attribute dict is optional. If widget-name starts with
+      '^' this will be stripped and the default signal for this widget
+      will be enabled.
+'$' - set a layout on an existing widget. The form is '$ widget-name layout',
+      where layout is in list form.
+'^' - enable emission of the given signal. The form is
+      '^widget-name signal-type signal-name' where signal-name is optional.
+'/' - quit. The GUI program should terminate immediately. It echoes the
+      command back to the controlling program, adding '0' as a return code
+      if no other text followed the '/' it received.
+
+See the source code below and the example interface, uipi.py, for
+further details.
+
+Apart from the quitting message ('/') the output from the GUI consists of
+responses to queries and 'signals'. The former are json-encoded and
+preceded with '@', the latter start with '^' followed by the signal name,
+and a json-encoded list of arguments.
+    For example:
+    '^app1:showlog*toggled [true]'
+This is output for the signal 'app1:showlog*toggled' – the 'toggled' signal
+from the widget 'app1:showlog', with the single argument 'true'.
 """
 
 import os, sys, traceback, threading
@@ -68,10 +120,21 @@ class WBase:
         """
         self.setEnabled(on)                                 #qt
 
+    def focus(self):
+        self.setFocus()                                     #qt
+
     def x__width(self, w):
         """Set the minimum width for the widget.
         """
         self.setMinimumWidth(w)                             #qt
+
+    def x__typewriter(self, on):
+        """Use a typewriter (fixed spacing) font.
+        """
+        if on:
+            f = QtGui.QFont(self.font())                    #qt
+            f.setFamily("Courier")                          #qt
+            self.setFont(f)                                 #qt
 
 
 class TopLevel:
@@ -91,6 +154,11 @@ class TopLevel:
     def getSize(self):
         s = self.size()                                     #qt
         return "%d_%d" % (s.width(), s.height())            #qt
+
+    def getScreenSize(self):
+        dw = guiapp.qtapp.desktop()                         #qt
+        geom = dw.screenGeometry(self)                      #qt
+        return "%d_%d" % (geom.width(), geom.height())      #qt
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -126,7 +194,6 @@ class Window(QtGui.QWidget, TopLevel):                      #qt
         # I couldn't get the following calls to work:
         #   w.setCursor(QtCore.Qt.BusyCursor)
         #   w.unsetCursor()
-
         self.busy_lock.acquire()
         if on:
             if self.busystate:
@@ -137,7 +204,7 @@ class Window(QtGui.QWidget, TopLevel):                      #qt
             if busycursor:
                 guiapp.qtapp.setOverrideCursor(QtCore.Qt.BusyCursor) #qt
         else:
-            if not on:
+            if not self.busystate:
                 debug("*ERROR* Attempt to release busy state twice")
                 self.busy_lock.release()
                 return
@@ -146,8 +213,11 @@ class Window(QtGui.QWidget, TopLevel):                      #qt
         self.busystate = on
         self.busy_lock.release()
         for wn in widgets:
-            w = guiapp.widgets[wn]
-            w.setEnabled(w, not on)                         #qt
+            w = guiapp.getwidget(wn)
+            if w:
+                w.setEnabled(not on)                        #qt
+            else:
+                debug("*ERROR* No widget '%s'" % wn)
 
 
 class Dialog(QtGui.QDialog, TopLevel):

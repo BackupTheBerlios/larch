@@ -19,29 +19,49 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.02
+# 2009.11.10
 
 """This is an example of an interface class to the larch text-line
-based ui toolkit (telibut!?).
+based ui toolkit (uip).
 
 It includes a very simple signal-slot mechanism, which can easily be
 overridden.
 """
 
+import sys
 from subprocess import Popen, PIPE, STDOUT
 import threading
 import json
 
 
 class Uipi:
-    def __init__(self, uiexec):
+    def __init__(self, uiexec, **kwargs):
+        """Using the **kwargs parameter allows options for the process
+        start to be passed, for example 'cwd' or 'preexec_fn'.
+        """
         # A dict for query tags (see 'Uipi.ask')
         self.query = {}
         # A dict to connect signals to slots. Note that the values
         # are lists of slots, not single slots.
         self.signal_dict = {}
         # Start ui process
-        self.uiprocess = Popen(uiexec, stdin=PIPE, stdout=PIPE)
+        kwargs['stdin'] = PIPE
+        kwargs['stdout'] = PIPE
+        if uiexec:
+            self.uiprocess = Popen(uiexec, **kwargs)
+
+
+    def addsignal(self, wname, signal, slot=None, sname=None):
+        """Enable emission of the given signal.
+        """
+        cmd = "^%s %s" % (wname, signal)
+        if sname:
+            cmd += " " + sname
+        else:
+            sname = wname + "*" + signal
+        self.sendui(cmd)
+        if slot:
+            self.addslot(sname, slot)
 
 
     def addslot(self, signal, function):
@@ -51,6 +71,13 @@ class Uipi:
             self.signal_dict[signal] = [function]
 
 
+#    def sendsignal(self, *args):
+#        # This is a version which starts a new thread for each signal call
+#        t = threading.Thread(target=self._sendsignal, args=args)
+#        t.start()
+
+
+    #def _sendsignal(self, name, *args):
     def sendsignal(self, name, *args):
         # When there are no slots the signal is simply ignored.
         for slot in self.signal_dict.get(name, []):
@@ -71,10 +98,9 @@ class Uipi:
     def mainloop(self):
         """Loop to read input from ui and act on it.
         """
-        global exitcode
         exitcode = 0
         while True:
-            line = ui.getline()
+            line = self.getline()
             if not line:
                 # Occurs when the ui process has exited
                 break
@@ -86,20 +112,21 @@ class Uipi:
 
             elif line[0] == "@":
                 # The response to an enquiry
-                ui.response(line[1:])
+                self.response(line[1:])
 
             elif line[0] == "/":
                 # ui exiting
                 exitcode = int(line[1:])
 
             else:
-                uipi_error("Unexpected message from ui:\n" + line)
+                self.uipi_error("Unexpected message from ui:\n%s\n" % line)
 
+        self.uiprocess = None
         return exitcode
 
 
     def getline(self):
-        return self.guiprocess.stdout.readline()
+        return self.uiprocess.stdout.readline()
 
 
     def command(self, cmd, *args):
@@ -157,7 +184,7 @@ class Uipi:
         a = json.loads(r)
         if self.query.has_key(l):
             self.query[l].set(a)
-        else.
+        else:
             self.sendsignal(l, a)
 
 
@@ -178,12 +205,16 @@ class Uipi:
     def sendui(self, line):
         """Send a text line to the user interface process.
         """
-        self.process_lock.acquire()
+        #self.process_lock.acquire()
         try:
-            self.guiprocess.stdin.write("%s\n" % line)
+            self.uiprocess.stdin.write("%s\n" % line)
         except:
-            errout("ui dead (%s)\n" % line)
-        self.process_lock.release()
+            self.uipi_error("ui dead (%s)\n" % line)
+        #self.process_lock.release()
+
+
+    def quit(self, rc=0):
+        self.sendui("/" + str(rc))
 
 
     def infoDialog(self, message, title=None, async=""):
@@ -200,6 +231,18 @@ class Uipi:
         if async:
             return self.asknowait("confirmDialog", async, message, title)
         return self.ask("confirmDialog", message, title)
+
+
+    def textLineDialog(self, label=None, title=None, text="", pw=False,
+            async=""):
+        if label == None:
+            label = _("Enter the value here:")
+        if title == None:
+            title = _("Enter Information")
+        if async:
+            return self.asknowait("textLineDialog", async, label, title,
+                    text, pw)
+        return self.ask("textLineDialog", label, title, text, pw)
 
 
     def error(self, message, title=None, fatal=False):

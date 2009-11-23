@@ -1,0 +1,23 @@
+_destdir=opt/apps/xkmap
+
+post_install() {
+  post_upgrade
+}
+
+post_upgrade() {
+  echo "byte-compile python modules ..."
+  python -m py_compile $_destdir/xkmap_base.py
+}
+
+pre_remove() {
+  pre_upgrade
+}
+
+pre_upgrade() {
+  echo "Remove .pyc files ..."
+  rm $_destdir/*.pyc
+}
+
+op=$1
+shift
+$op $*

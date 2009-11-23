@@ -1,22 +1,33 @@
-# Contributor: Michael Towers <gradgrind[at]online[dot]de>
-
+# Contributor: Michael Towers <larch42 (at) googlemail (dot) com>
+#2009.11.23
 pkgname=xkmap
-pkgver=3.0
-pkgrel=5
-pkgdesc="A keymap setter for xorg: a simple graphical front-end for setxkbmap"
+pkgver=4.0
+pkgrel=1
+pkgdesc="A simple keymap setter for xorg based on evdev and/or setxkbmap"
 license=('GPL')
 arch=(any)
-depends=('pygtk' 'python-pexpect')
+depends=('python' 'quip')
+optdepends=('python-pexpect: to permit automated running of "su" commands')
 url="http://larch.berlios.de"
+install=xkmap.install
 
 build() {
-  cd $startdir/pkg
+  _destdir=opt/apps/xkmap
+  cd $pkgdir
   mkdir -p usr/bin
+  mkdir -p $_destdir
+
   mkdir -p usr/share/pixmaps
   mkdir -p usr/share/applications
 
-  cp $startdir/xkmap.py usr/bin
-  cp $startdir/xkmap-set usr/bin
+  cp $startdir/xkmap.py $_destdir
+  cp $startdir/xkmap_base.py $_destdir
+  cp $startdir/xkmap-set $_destdir
+  cp $startdir/xkmap.conf $_destdir
   cp $startdir/xkmap.png usr/share/pixmaps
   cp $startdir/xkmap.desktop usr/share/applications
+  cp -dr $startdir/i18n $_destdir
+
+  ln -s /$_destdir/xkmap.py usr/bin/xkmap
+  ln -s /$_destdir/xkmap-set usr/bin/xkmap-set
 }

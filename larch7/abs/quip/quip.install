@@ -1,0 +1,15 @@
+_pylib=/usr/lib/python2.6/site-packages
+
+post_install() {
+  # byte-compile python module
+  python -m py_compile ${_pylib}/uipi.py
+}
+
+pre_remove() {
+  # Remove generated stuff (compiled python files, *.pyc)
+  rm ${_pylib}/uipi.pyc
+}
+
+op=$1
+shift
+$op $*

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Categories=Application;System;Utility
 Encoding=UTF-8
-Exec=xkmap.py
+Exec=xkmap
 Icon=xkmap
 StartupNotify=true
 Terminal=false
