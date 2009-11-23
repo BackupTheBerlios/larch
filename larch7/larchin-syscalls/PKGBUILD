@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.10.24
+# 2009.11.23
 pkgname=larchin-syscalls
-pkgver=7.0.1
+pkgver=7.0.2
 pkgrel=1
 
 pkgdesc="bash scripts for larchin (larch hard disk installer with gui)"

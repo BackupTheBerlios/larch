@@ -1,14 +1,13 @@
 # Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.10.24
+# 2009.11.23
 pkgname=larchin
-pkgver=7.0.1
+pkgver=7.0.3
 pkgrel=1
 
 pkgdesc="Arch hard disk installer with gui for larch live media"
 url="http://larch.berlios.de"
-depends=('python')
-optdepends=('larchin-syscalls: necessary on the system to be installed'
-        'pyqt: for a nice graphical interface, highly recommended')
+depends=('uipi')
+optdepends=('larchin-syscalls: necessary on the system to be installed')
 arch=(any)
 license=('GPL')
 #install=${pkgname}.install

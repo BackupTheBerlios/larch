@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# testromount
+
+# Test if mount point $1 is mounted ro
+
+cat /proc/mounts | grep " $1 .* ro"

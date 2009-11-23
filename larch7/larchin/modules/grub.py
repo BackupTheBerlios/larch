@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.28
+# 2009.11.06
 
 doc = _("""
 <h2>Set up the GRUB bootloader</h2>
@@ -74,31 +74,34 @@ class Stage:
 
     def __init__(self, index):
         self.page_index = index
+        self.run0 = True
 
-        ui.newwidget("RadioButton", "^grub:mbr",
+
+    def buildgui(self):
+        ui.widget("RadioButton", "^grub:mbr",
                 text=_("Install GRUB to MBR - make it the main bootloader"))
-        ui.newwidget("RadioButton", "^grub:old",
+        ui.widget("RadioButton", "^grub:old",
                 text=_("Add new installation to existing GRUB menu"))
-        ui.newwidget("RadioButton", "^grub:part",
+        ui.widget("RadioButton", "^grub:part",
                 text=_("Install GRUB to installation partition"))
 
-        ui.newwidget("Label", "grub:pic", image="images/grub.png")
-        ui.newwidget("Frame", "grub:xmenulist-frame")
-        ui.newwidget("Label", "grub:oldl",
+        ui.widget("Label", "grub:pic", image="images/grub.png")
+        ui.widget("Frame", "grub:xmenulist-frame")
+        ui.widget("Label", "grub:oldl",
                 text=_("Choose existing menu.lst:"))
-        ui.newwidget("ComboBox", "^grub:xmenulist", #width=300,
+        ui.widget("ComboBox", "^grub:xmenulist", #width=300,
                 tt=_("Select the partition with the relevant menu.lst"))
 
-        ui.newwidget("CheckBox", "^grub:include",
+        ui.widget("CheckBox", "^grub:include",
                 text=_("Include existing menu"),
                 tt=_("The boot lines from an existing menu.lst can be"
                         " included in the new file"))
 
-        ui.newwidget("Button", "^grub:newedit", text=_("Edit boot options"),
+        ui.widget("Button", "^grub:newedit", text=_("Edit boot options"),
                 tt=_("Options for booting the new installation are\n"
                         "generated automatically. You can edit them here."))
 
-        ui.newwidget("Button", "^grub:edit", text=_("Edit menulst.conf"),
+        ui.widget("Button", "^grub:edit", text=_("Edit menulst.conf"),
                 tt=_("The automatically generated menulst.conf can be"
                         " edited.\nBut if you change some options your"
                         " new version may be lost."))
@@ -113,11 +116,11 @@ class Stage:
                 "grub:oldl", "grub:xmenulist", "grub:include"])
 
 
-    def setup(self):
-        return
-
-
     def select_page(self, init):
+        if self.run0:
+            self.run0 = False
+            self.buildgui()
+
         command.pageswitch(self.page_index, _("Configure Bootloader"))
 
 
@@ -207,7 +210,7 @@ class Stage:
 
 
     def ok(self):
-        command.runsignal("&grubsetup&")
+        ui.sendsignal("&grubsetup&")
 
 
     def grubsetup(self):
@@ -226,7 +229,7 @@ class Stage:
             path = None
 
         if backend.setup_grub(device, path, self.getmenulst()):
-            command.runsignal("&tweaks!")
+            ui.sendsignal("&tweaks!")
         else:
             run_error(_("GRUB setup failed - see log"))
 

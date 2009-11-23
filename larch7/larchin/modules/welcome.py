@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.28
+# 2009.11.06
 
 
 doc = _("""
@@ -74,15 +74,20 @@ class Stage:
 
     def __init__(self, index):
         self.page_index = index
-        ui.newwidget("HtmlView", "page:welcome:l1", html=text)
+        self.run0 = True
+
+
+    def buildgui(self):
+        ui.widget("HtmlView", "page:welcome:l1", html=text)
 
         ui.layout("page:welcome", ["*VBOX*", "page:welcome:l1"])
 
-    def setup(self):
-        return
-
 
     def select_page(self, init):
+        if self.run0:
+            self.run0 = False
+            self.buildgui()
+
         command.pageswitch(self.page_index, _("Welcome!"))
 
 
@@ -109,6 +114,6 @@ class Stage:
 
     def step1(self, dbg):
         if dbg:
-            command.runsignal("&install!", self.plist)
+            ui.sendsignal("&install!", self.plist)
         else:
-            command.runsignal("&device-select!")
+            ui.sendsignal("&device-select!")

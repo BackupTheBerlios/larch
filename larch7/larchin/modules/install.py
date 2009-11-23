@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.25
+# 2009.11.06
 
 from backend import PartInfo
 
@@ -91,22 +91,27 @@ class Stage:
 
     def __init__(self, index):
         self.page_index = index
-        ui.newwidget("HtmlView", "install:l1")
-        ui.newwidget("CheckBox", "^install:devname",
+        self.run0 = True
+
+
+    def buildgui(self):
+        ui.widget("HtmlView", "install:l1")
+        ui.widget("CheckBox", "^install:devname",
                 tt=_("Use device name (/dev/sda1, etc.), not LABEL or UUID,"
                         " in /etc/fstab and for grub"),
                 text=_("Use plain device id (NOT LABEL / UUID)"))
 
         ui.layout("page:install", ["*VBOX*", "install:l1", "install:devname"])
 
-    def setup(self):
-        return
-
 
     def select_page(self, init, partitions=None):
         self.initialize = init
         if init and partitions:
             backend.set_partlist(partitions)
+
+        if self.run0:
+            self.run0 = False
+            self.buildgui()
 
         command.pageswitch(self.page_index,
                 _("Disk formatting and system installation"))
@@ -140,7 +145,7 @@ class Stage:
 
 
     def ok(self):
-        command.runsignal("&do-install&")
+        ui.sendsignal("&do-install&")
 
 
     def do_install(self):
@@ -190,7 +195,7 @@ class Stage:
         # Unmount, clear popup
         installer.tidy()
         if ok:
-            command.runsignal("&passwd!")
+            ui.sendsignal("&passwd!")
 
 
     def fstab(self, devname=False):

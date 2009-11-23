@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.28
+# 2009.11.06
 
 from backend import DiskInfo
 
@@ -88,44 +88,52 @@ class Stage:
 
     def __init__(self, index):
         self.page_index = index
-        ui.newwidget("Label", "autopart:disk_l", text=_("Device:"))
-        ui.newwidget("LineEdit", "autopart:disk", ro=True)
-        ui.newwidget("Label", "autopart:disksize_l",
+        self.run0 = True
+
+        self.systemsize = self.get_system_size_estimate()
+        self.memsize = float(backend.memsize()) / 10**9     # GB
+        self.larchboot = False
+
+
+    def buildgui(self):
+        ui.widget("Label", "autopart:disk_l", text=_("Device:"))
+        ui.widget("LineEdit", "autopart:disk", ro=True)
+        ui.widget("Label", "autopart:disksize_l",
                 text=_("Total device capacity:"))
-        ui.newwidget("LineEdit", "autopart:disksize", ro=True)
-        ui.newwidget("Label", "autopart:free_l",
+        ui.widget("LineEdit", "autopart:disksize", ro=True)
+        ui.widget("Label", "autopart:free_l",
                 text=_("Leave unallocated:"))
-        ui.newwidget("SpinBox", "^autopart:free", decimals=0, min=0.0,
+        ui.widget("SpinBox", "^autopart:free", decimals=0, min=0.0,
                 tt=_("You can choose to leave some of the space unallocated"))
-        ui.newwidget("Label", "autopart:reserved_l",
+        ui.widget("Label", "autopart:reserved_l",
                 text=_("Reserved space:"))
-        ui.newwidget("LineEdit", "autopart:reserved", ro=True,
+        ui.widget("LineEdit", "autopart:reserved", ro=True,
                 tt=_("Space not available because a Windows partition is to be retained"))
 
-        ui.newwidget("OptionalFrame", "^autopart:swap",
+        ui.widget("OptionalFrame", "^autopart:swap",
                 text=_("Create Swap Partition"))
-        ui.newwidget("Label", "autopart:swapsize_l",
+        ui.widget("Label", "autopart:swapsize_l",
                 text=_("Swap partition size (GB):"))
-        ui.newwidget("SpinBox", "^autopart:swapsize", decimals=1, min=0.5,
+        ui.widget("SpinBox", "^autopart:swapsize", decimals=1, min=0.5,
                 tt=_("Enter the desired size for the swap partition here"))
-        ui.newwidget("CheckBox", "^autopart:swapcheck", tt=tt_seedocs,
+        ui.widget("CheckBox", "^autopart:swapcheck", tt=tt_seedocs,
                 text=_("Check for bad blocks when formatting."
                         " Don't use this in VirtualBox (it takes forever)."))
 
-        ui.newwidget("OptionalFrame", "^autopart:home",
+        ui.widget("OptionalFrame", "^autopart:home",
                 text=_("Create Separate Partition for User Data"))
-        ui.newwidget("Label", "autopart:homesize_l",
+        ui.widget("Label", "autopart:homesize_l",
                 text=_("User data partition size (GB):"))
-        ui.newwidget("SpinBox", "^autopart:homesize", decimals=0, min=1.0,
+        ui.widget("SpinBox", "^autopart:homesize", decimals=0, min=1.0,
                 tt=_("Enter the desired size for the user data partition here"))
-        ui.newwidget("CheckBox", "^autopart:homedata", tt=tt_seedocs,
+        ui.widget("CheckBox", "^autopart:homedata", tt=tt_seedocs,
                 text=_("Create /home/DATA instead of /home partition"))
 
-        ui.newwidget("CheckBox", "^autopart:larchboot",
+        ui.widget("CheckBox", "^autopart:larchboot",
                 text=_("Install live system to boot partition."))
-        ui.newwidget("Label", "autopart:syssize_l",
+        ui.widget("Label", "autopart:syssize_l",
                 text=_("Space for Arch root partition:"))
-        ui.newwidget("LineEdit", "autopart:syssize", ro=True)
+        ui.widget("LineEdit", "autopart:syssize", ro=True)
 
         ui.layout("page:autopart", ["*VBOX*",
                 ["*GRID*",
@@ -147,16 +155,15 @@ class Stage:
                 ["*HBOX*", "autopart:swapsize_l", "autopart:swapsize"],
                 "autopart:swapcheck"])
 
-    def setup(self):
-        self.systemsize = self.get_system_size_estimate()
-        self.memsize = float(backend.memsize()) / 10**9     # GB
-        self.larchboot = False
-
 
     def select_page(self, init, *args):
         self.initialize = init
         if init:
             self.device, self.keep1 = args
+            if self.run0:
+                self.run0 = False
+                self.buildgui()
+
         command.pageswitch(self.page_index,
                 _("Automatic Partitioning"))
 
@@ -210,7 +217,6 @@ class Stage:
         ui.command("autopart:homedata.set", False)
 
 
-#TODO: include self.larchboot
     def recalculate(self):
         self.freesize = (self.disksize - self.p1size - self.unallocated
                 - self.systemsize - 5.0)
@@ -345,10 +351,12 @@ class Stage:
         maxp = None
         maxs = 0
         boots = 0.2
+        bootp = "/boot"
         if self.larchboot:
             boots += self.live_gb * 1.5
+            bootp = "liveboot"
         for m, s, t in (
-                ("/boot", boots, "primary"),
+                (bootp, boots, "primary"),
                 ("swap", self.swapsize, "primary"),
                 ("/", self.rootsize, "logical"),
                 ("/home/DATA" if self.homedata else "/home", self.datasize,
@@ -385,11 +393,11 @@ class Stage:
             else:
                 # [mount-point, device, size, format]
                 iparts.append([m, part, "" if swap
-                        else "ext2" if m == "/boot"
+                        else "ext2" if m == bootp
                         else "ext4"])
                 ui.progressPopup.add("   ---> " + part)
         ui.progressPopup.end()
 
         # Go to installation stage
         if iparts:
-            command.runsignal("&install!", iparts)
+            ui.sendsignal("&install!", iparts)

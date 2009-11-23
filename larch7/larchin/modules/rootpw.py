@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.25
+# 2009.11.06
 
 
 doc = _("""
@@ -46,13 +46,17 @@ class Stage:
 
     def __init__(self, index):
         self.page_index = index
-        ui.newwidget("Label", "passwd:pwrl", image="images/root.png")
-        ui.newwidget("Label", "passwd:pw1l",
+        self.run0 = True
+
+
+    def buildgui(self):
+        ui.widget("Label", "passwd:pwrl", image="images/root.png")
+        ui.widget("Label", "passwd:pw1l",
                 text=_("Enter new password:"))
-        ui.newwidget("LineEdit", "passwd:pw1", pw="+")
-        ui.newwidget("Label", "passwd:pw2l",
+        ui.widget("LineEdit", "passwd:pw1", pw="+")
+        ui.widget("Label", "passwd:pw2l",
                 text=_("Repeat new password:"))
-        ui.newwidget("LineEdit", "passwd:pw2", pw="+")
+        ui.widget("LineEdit", "passwd:pw2", pw="+")
 
         ui.layout("page:passwd", ["*VBOX*",
                 ["*HBOX*", "passwd:pwrl",
@@ -64,11 +68,12 @@ class Stage:
                     ]],
                 "*SPACE"])
 
-    def setup(self):
-        return
-
 
     def select_page(self, init):
+        if self.run0:
+            self.run0 = False
+            self.buildgui()
+
         command.pageswitch(self.page_index, _("Set Root Password"))
 
 
@@ -80,7 +85,7 @@ class Stage:
 
 
     def ok(self):
-        command.runsignal("&rootpw&")
+        ui.sendsignal("&rootpw&")
 
 
     def rootpw(self):
@@ -92,5 +97,5 @@ class Stage:
 
         # Set the password
         if backend.set_pw(pw):
-            command.runsignal("&grub!")
+            ui.sendsignal("&grub!")
 

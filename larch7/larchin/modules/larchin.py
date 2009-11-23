@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.27
+# 2009.11.23
 
 
 """
@@ -85,7 +85,6 @@ lang = os.getenv("LANG")
 if lang:
     gettext.install('larchin', base_dir+'/i18n', unicode=1)
 
-import welcome, disks, autopart, install, rootpw, grub, done
 from backend import Backend
 
 class Command:
@@ -104,39 +103,39 @@ class Command:
         # Used to indicate that a background thread was interrupted
         self.breakin = 0
 
-        # Initialize gui modules
-        self.pages = []
-        for s in (welcome, disks, autopart, install, rootpw, grub,
-                done):
-            self.pages.append(s.Stage(len(self.pages)))
-
         # Connect up the signals and slots
-        self.connections = {
-                "$$$uiclose$$$": [self._uiclose_clicked],
-                "$$$uidoquit$$$": [self._uiclose],
-                "$$$uiquit$$$": [self.uiquit],
-                "larchin:quit*clicked": [self.uiquit],
-                "larchin:cancel*clicked": [self.cancel],
-                "larchin:forward*clicked": [self.next],
-                "larchin:goback*clicked": [self.previous],
-           }
-        for p in self.pages:
-            self.addconnections(p.connect())
+        self.addconnections([
+                ("$$$uiclose$$$", self._uiclose_clicked),
+                ("$$$uidoquit$$$", self._uiclose),
+                ("$$$uiquit$$$", self.uiquit),
+                ("larchin:quit*clicked", self.uiquit),
+                ("larchin:cancel*clicked", self.cancel),
+                ("larchin:forward*clicked", self.next),
+                ("larchin:goback*clicked", self.previous),
+           ])
 
 
     def addconnections(self, connlist):
         for s, f in connlist:
-            if self.connections.has_key(s):
-                self.connections[s].append(f)
-            else:
-                self.connections[s] = [f]
+            ui.addslot(s, f)
+
+
+    def makepages(self):
+        # Initialize gui modules
+        import welcome, disks, autopart, install, rootpw, grub, done
+        self.pages = []
+        for s in (welcome, disks, autopart, install, rootpw, grub,
+                done):
+            stage = s.Stage(len(self.pages))
+            self.pages.append(stage)
+            self.addconnections(stage.connect())
 
 
     def run(self):
         # Start on the welcome page
         ui.command("larchin:cancel.enable", False)
         ui.go()
-        self.runsignal("&welcome!")
+        ui.sendsignal("&welcome!")
 
 
     def next(self):
@@ -147,7 +146,7 @@ class Command:
         if len(self.pagehistory) <= 1:
             return
         self.pagehistory.pop()
-        self.runsignal(self.pagehistory[-1] + "-", False)
+        ui.sendsignal(self.pagehistory[-1] + "-", False)
 
 
     def pageswitch(self, index, title):
@@ -156,30 +155,6 @@ class Command:
         ui.set_stageheader(title)
         ui.command("doc:content.x__html", self.pages[index].getHelp())
         self.pages[index].init()
-
-
-    def runsignal(self, sig, *args):
-        #debug("SIG:" + sig + "---" + repr(args))
-        if sig.endswith("-"):
-            # Remove the '-'
-            sig = sig[:-1]
-        elif sig.endswith("!"):
-            # It is a page switch, and needs an extra argument
-            self.pagehistory.append(sig)
-            args = (True,) + (args)
-
-        slots = self.connections.get(sig)
-        if slots:
-            if ":&" in ":" + sig:
-                # Such slots must be run by a background thread
-                # Only one at a time is permitted
-                self.background(slots, *args)
-            else:
-                # Normal slots are run directly - they must be quick.
-                # They cannot request info from the ui.
-                # They should (really!) not run syscall commands.
-                for s in slots:
-                    s(*args)
 
 
     def background(self, *args):
@@ -319,35 +294,6 @@ sys.excepthook = errorTrap
 
 
 #+++++++++++++++++++++++++++
-def mainloop():
-    """Loop to read input from ui and act on it.
-    """
-    global exitcode
-    exitcode = 0
-    while True:
-        line = ui.getline()
-        if not line:
-            # Occurs when the ui process has exited
-            break
-
-        elif line[0] == "^":
-            # signal, call slots
-            sig, args = line[1:].split(None, 1)
-            command.runsignal(sig, *json.loads(args))
-
-        elif line[0] == "@":
-            # The response to an enquiry
-            ui.response(line[1:])
-
-        elif line[0] == "/":
-            # ui exiting
-            #debug("ui exiting")
-            exitcode = int(line[1:])
-
-        else:
-            fatal_error(_("Unexpected message from ui:\n") + line)
-
-    ut = command.simple_thread(tidyquit)
 
 def plog(line=None):
     """The lines should not be newline-terminated.
@@ -409,7 +355,7 @@ if __name__ == "__main__":
     else:
         from gui import Ui, Logger
         if options.ui == "pyqt":
-            guiexec = [base_dir + "/modules/pyqt/guibuild.py"]
+            guiexec = "quip"
         else:
             errout(_("ERROR: Unsupported ui option - '%s'\n") % options.ui)
             sys.exit(1)
@@ -422,13 +368,11 @@ if __name__ == "__main__":
     __builtin__.command = Command()
     if not backend.init():
         sys.exit(1)
-    for p in command.pages:
-        p.setup()
-
+    command.makepages()
     signal.signal(signal.SIGINT, command.sigint)
 
     command.run()
-    mainloop()
+    exitcode = ui.mainloop()
 
     logfile.close()
     sys.exit(exitcode)

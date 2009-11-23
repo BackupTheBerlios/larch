@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# filesize
+
+# Read the size of file with path $1, in bytes
+
+stat -c %s "$1"

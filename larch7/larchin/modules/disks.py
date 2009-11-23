@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.24
+# 2009.11.06
 
 from backend import DiskInfo
 
@@ -70,25 +70,38 @@ class Stage:
     def __init__(self, index):
         self.page_index = index
         self.device_index = 0
-        ui.newwidget("List", "^disks:device-list", selectionmode="Single",
+        self.method = ""
+        self.run0 = True
+
+        # Test for a graphical partition manager
+        if backend.available("gparted"):
+            self.gparted = "gparted"
+        elif backend.available("partitionmanager"):
+            self.gparted = "partitionmanager"
+        else:
+            self.gparted = None
+
+
+    def buildgui(self):
+        ui.widget("List", "^disks:device-list", selectionmode="Single",
                 tt=_("Select the device to inspect, or for partitioning"))
-        ui.newwidget("List", "disks:device-partitions", selectionmode="None",
+        ui.widget("List", "disks:device-partitions", selectionmode="None",
                 tt=_("The partitions on the selected device"))
 
-        ui.newwidget("Button", "^disks:ntfs-shrink",
+        ui.widget("Button", "^disks:ntfs-shrink",
                 text=_("Shrink first partition (Windows - NTFS)"))
-        ui.newwidget("CheckBox", "^disks:keep1",
+        ui.widget("CheckBox", "^disks:keep1",
                 text=_("Keep first partition (Windows - NTFS)"))
 
-        ui.newwidget("Frame", "disks:choose_partition_method",
+        ui.widget("Frame", "disks:choose_partition_method",
                 text=_("Choose Partitioning Method"))
-        ui.newwidget("RadioButton", "^disks:auto",
+        ui.widget("RadioButton", "^disks:auto",
                 text=_("Autopartition and install to selected device"))
-        ui.newwidget("RadioButton", "^disks:guipart",
+        ui.widget("RadioButton", "^disks:guipart",
                 text=_("Graphical partition manager"))
-        ui.newwidget("RadioButton", "^disks:cfdisk",
+        ui.widget("RadioButton", "^disks:cfdisk",
                 text=_("Console partition manager (cfdisk) on selected device"))
-        ui.newwidget("RadioButton", "^disks:nopart",
+        ui.widget("RadioButton", "^disks:nopart",
                 text=_("Use existing partitions"))
 
         ui.layout("disks:choose_partition_method", ["*HBOX*",
@@ -104,20 +117,15 @@ class Stage:
                 _("Size"), _("Model")])
         ui.command("disks:device-partitions.setHeaders", [_("Partition"),
                 _("Size (GB)"), _("Type")])
-        self.method = ""
 
-    def setup(self):
-        # Test for a graphical partition manager
-        if backend.available("gparted"):
-            self.gparted = "gparted"
-        elif backend.available("partitionmanager"):
-            self.gparted = "partitionmanager"
-        else:
-            self.gparted = None
         ui.command("disks:guipart.enable", self.gparted != None)
 
 
     def select_page(self, init):
+        if self.run0:
+            self.run0 = False
+            self.buildgui()
+
         command.pageswitch(self.page_index,
                 _("Disk information and selection"))
 
@@ -216,11 +224,11 @@ class Stage:
 
     def ok(self):
         if self.method == "auto":
-            command.runsignal("&auto-partition!", self.device, self.keep1)
+            ui.sendsignal("&auto-partition!", self.device, self.keep1)
         elif self.method == "guipart":
-            command.runsignal("&gui-partition!", self.gparted, self.device)
+            ui.sendsignal("&gui-partition!", self.gparted, self.device)
         elif self.method == "cfdisk":
-            command.runsignal("&cfdisk-partition!", self.device)
+            ui.sendsignal("&cfdisk-partition!", self.device)
         else:
-            command.runsignal("&manual-partition!", self.device)
+            ui.sendsignal("&manual-partition!", self.device)
 

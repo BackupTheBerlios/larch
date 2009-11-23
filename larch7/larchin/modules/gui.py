@@ -21,24 +21,20 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.27
+# 2009.11.23
 
 import os, pwd
-import json
-import threading
-from subprocess import Popen, PIPE
+from uipi import Uipi
 import locale
 
 
 def chid():
     """Drop root privileges and reset the home-directory.
     """
-    try:
-        # Seems to fail when run from mc shell
-        user = os.getlogin()
-    except:
-        # This will give the wrong name (root) if started via 'su -c'
-        user = os.environ["USER"]
+    if os.getuid() != 0:
+        return
+    # This will give the wrong name (root) if started via 'su -'
+    user = os.environ["USER"]
 
     pwdinfo = pwd.getpwnam(user)
     # pwdinfo[0] is user name
@@ -51,41 +47,35 @@ def chid():
     os.setuid(pwdinfo[2])
 
 
-class Ui:
+class Ui(Uipi):
     def __init__(self, guiexec):
-        self.answer_event = threading.Event()
-        self.answer_event.set()
-        self.answer = None
+        Uipi.__init__(self, backend=guiexec, cwd=base_dir, preexec_fn= chid)
+
         self.stagetext = None
 
-        self.process_lock = threading.Lock()
-
-        self.guiprocess = Popen(guiexec, cwd=base_dir, preexec_fn= chid,
-                stdin=PIPE, stdout=PIPE)
-
         # Build the main window
-        self.newwidget("Window", "larchin:", title="larchin",
+        self.widget("Window", "larchin:", title="larchin", size="750_450",
                 icon="images/larchin-icon.png", closesignal="$$$uiclose$$$")
         # - Header
-        self.newwidget("Label", "larchin:i", image="images/larchin80.png")
-        self.newwidget("Label", "larchin:h", html='<h1><span '
+        self.widget("Label", "larchin:i", image="images/larchin80.png")
+        self.widget("Label", "larchin:h", html='<h1><span '
                 'style="color:#c55500;">%s</span></h1>'
                 % _("<i>larch</i> Installer"))
-        self.newwidget("Button", "^larchin:showlog", text=_("View Log"),
+        self.widget("Button", "^larchin:showlog", text=_("View Log"),
                 tt=_("This button switches to the log viewer"))
-        self.newwidget("Button", "^larchin:docs", text=_("Help"),
+        self.widget("Button", "^larchin:docs", text=_("Help"),
                 tt=_("This button switches to the documentation viewer"))
-        self.newwidget("Button", "^larchin:cancel", text=_("Cancel"),
+        self.widget("Button", "^larchin:cancel", text=_("Cancel"),
                 tt=_("Stop the current action"))
-#        self.newwidget("Button", "^larchin:quit", text=_("Quit"),
+#        self.widget("Button", "^larchin:quit", text=_("Quit"),
 #                tt=_("Stop the current action and quit the program"))
-        self.newwidget("Label", "larchin:stageheader", align="center")
+        self.widget("Label", "larchin:stageheader", align="center")
 
         # - Main widget
-        self.newwidget("Stack", "larchin:tabs", pages=["tab:main",
+        self.widget("Stack", "larchin:tabs", pages=["tab:main",
                 "tab:progress", "tab:log", "tab:doc", "tab:edit"])
 
-        self.newwidget("Stack", "larchin:stack", pages=[
+        self.widget("Stack", "larchin:stack", pages=[
                 "page:welcome",
                 "page:disks",
                 "page:autopart",
@@ -96,9 +86,9 @@ class Ui:
                 ])
 
         # - Footer
-        self.newwidget("Button", "^larchin:goback", text=_("Go Back"),
+        self.widget("Button", "^larchin:goback", text=_("Go Back"),
                 tt=_("Return to previous stage"))
-        self.newwidget("Button", "^larchin:forward", text=_("OK"),
+        self.widget("Button", "^larchin:forward", text=_("OK"),
                 tt=_("Execute any operations pending on this page and continue to next"))
 
         self.layout("larchin:", ["*VBOX*",
@@ -145,125 +135,41 @@ class Ui:
         self.command("larchin:.show")
 
 
-    def getline(self):
-        return self.guiprocess.stdout.readline()
+    def sendsignal(self, sig, *args):
+        #debug("SIG:" + sig + "---" + repr(args))
+        if sig.endswith("-"):
+            # Remove the '-'
+            sig = sig[:-1]
+        elif sig.endswith("!"):
+            # It is a page switch, and needs an extra argument
+            command.pagehistory.append(sig)
+            args = (True,) + (args)
 
-
-    def command(self, cmd, *args):
-        """Send a command to the user interface.
-        The command is of the form 'widget.method', 'args' is the
-        list of arguments. The argument list is encoded as json for
-        transmission.
-        """
-        c = "!" + cmd
-        if args:
-            c += " " + json.dumps(args)
-        self.sendui(c)
-
-
-    def asknowait(self, cmd, signal, *args):
-        """Send a request for information to the user interface.
-        The command is of the form 'widget.method', 'args' is the
-        list of arguments. The argument list is encoded as json for
-        transmission.
-        signal is the name of the signal to be sent by the ui to return
-        the result of the enquiry.
-        """
-        c = "?%s:%s" % (signal, cmd)
-        if args:
-            c += " " + json.dumps(args)
-        self.sendui(c)
-        return None
-
-
-    def ask(self, cmd, *args):
-        """Send a request for information to the user interface.
-        To be used in the background thread (only '&'-signals!).
-        The command is of the form 'widget.method', 'args' is the
-        list of arguments. The argument list is encoded as json for
-        transmission.
-        Wait for the answer and return it as result.
-        """
-        c = "?:" + cmd
-        if args:
-            c += " " + json.dumps(args)
-        if not self.answer_event.is_set():
-            fatal_error(_("ui not ready for enquiry:\n") + c)
-        self.answer = None
-        self.answer_event.clear()
-        self.sendui(c)
-        self.answer_event.wait()
-        return self.answer
-
-
-    def response(self, text):
-        l, r = text.split(":", 1)
-        a = json.loads(r)
-        if l:
-            command.runsignal(l, a)
-        else:
-            if self.answer_event.is_set():
-                fatal_error(_("Unexpected response from ui:\n") + text)
-            self.answer = a
-            self.answer_event.set()
-
-
-    def newwidget(self, wtype, wname, **args):
-        self.sendui("%%%s %s %s" % (wtype, wname, json.dumps(args)))
-
-
-    def layout(self, wname, ltree):
-        self.sendui("$%s %s" % (wname, json.dumps(ltree)))
-
-
-    def sendui(self, line):
-        """Send a text line to the user interface process.
-        """
-        self.process_lock.acquire()
-        try:
-            self.guiprocess.stdin.write("%s\n" % line)
-        except:
-            errout("ui dead (%s)\n" % line)
-        self.process_lock.release()
-
-
-    def infoDialog(self, message, title=None, async=""):
-        if title == None:
-            title = _("Information")
-        if async:
-            return self.asknowait("infoDialog", async, message, title)
-        return self.ask("infoDialog", message, title)
-
-
-    def confirmDialog(self, message, title=None, async=""):
-        if title == None:
-            title = _("Confirmation")
-        if async:
-            return self.asknowait("confirmDialog", async, message, title)
-        return self.ask("confirmDialog", message, title)
-
-
-    def error(self, message, title=None, fatal=False):
-        if title == None:
-            title = _("Error")
-        self.command("errorDialog" if fatal else "warningDialog",
-            message, title)
+        slots = self.signal_dict.get(sig)
+        if slots:
+            if sig[0] == "&":
+                # Such slots must be run by a background thread
+                # Only one at a time is permitted
+                command.background(slots, *args)
+            else:
+                # Normal slots are run directly - they must be quick.
+                # They cannot request info from the ui.
+                # They should (really!) not run syscall commands.
+                for s in slots:
+                    s(*args)
 
 
     def busy(self):
-        self.busywidget = "larchin:stack"
-        self.command("larchin:forward.enable", False)
-        self.command("larchin:goback.enable", False)
-        self.command("larchin:.busy", self.busywidget, True)
+        self.diswidgets = ("larchin:forward",
+                "larchin:goback", "larchin:stack")
+        self.command("larchin:.busy", self.diswidgets, True)
         self.command("larchin:cancel.enable", True)
 
 
     def completed(self, ok):
         # 'ok' is not used here, but might be in the console interface
         self.command("larchin:cancel.enable", False)
-        self.command("larchin:.busy", self.busywidget, False)
-        self.command("larchin:goback.enable", True)
-        self.command("larchin:forward.enable", True)
+        self.command("larchin:.busy", self.diswidgets, False)
 
 
     def set_stageheader(self, text=None):
@@ -317,13 +223,13 @@ class Logger:
         if self.encoding == "UTF8":
             self.encoding = None
 
-        ui.newwidget("Label", "log:header",
+        ui.widget("Label", "log:header",
             html='<h2>%s</h2><p>%s</p>' % (_("Low-level Command Logging"),
             _("Here you can follow the detailed, low-level progress"
             " of the commands.")))
-        ui.newwidget("TextEdit", "log:text", ro=True)
-        ui.newwidget("Button", "^log:clear", text=_("Clear"))
-        ui.newwidget("Button", "^log:hide", text=_("Hide"))
+        ui.widget("TextEdit", "log:text", ro=True)
+        ui.widget("Button", "^log:clear", text=_("Clear"))
+        ui.widget("Button", "^log:hide", text=_("Hide"))
 
         ui.layout("tab:log", ["*VBOX*", "log:header",
                 ["*HBOX*", "log:text",
@@ -348,10 +254,10 @@ class Logger:
 
 class DocViewer:
     def __init__(self):
-        ui.newwidget("Label", "doc:header",
+        ui.widget("Label", "doc:header",
             html='<h2>%s</h2>' % _("Documentation"))
-        ui.newwidget("HtmlView", "doc:content")
-        ui.newwidget("Button", "^doc:hide", text=_("Hide"))
+        ui.widget("HtmlView", "doc:content")
+        ui.widget("Button", "^doc:hide", text=_("Hide"))
 
         ui.layout("tab:doc", ["*VBOX*", "doc:header",
                 ["*HBOX*", "doc:content",
@@ -360,19 +266,19 @@ class DocViewer:
 
 class Editor:
     def __init__(self):
-        ui.newwidget("Label", "edit:header",
+        ui.widget("Label", "edit:header",
             html='<h2>%s</h2>' % _("Editor"))
-        ui.newwidget("Label", "edit:title")
-        ui.newwidget("TextEdit", "edit:content")
-        ui.newwidget("Button", "^edit:ok", text=_("OK"))
-        ui.newwidget("Button", "^edit:cancel", text=_("Cancel"))
-        ui.newwidget("Button", "^edit:revert", text=_("Revert"),
+        ui.widget("Label", "edit:title")
+        ui.widget("TextEdit", "edit:content")
+        ui.widget("Button", "^edit:ok", text=_("OK"))
+        ui.widget("Button", "^edit:cancel", text=_("Cancel"))
+        ui.widget("Button", "^edit:revert", text=_("Revert"),
                 tt=_("Restore the text to its initial state"))
-        ui.newwidget("Button", "^edit:copy", text=_("Copy"))
-        ui.newwidget("Button", "^edit:cut", text=_("Cut"))
-        ui.newwidget("Button", "^edit:paste", text=_("Paste"))
-        ui.newwidget("Button", "^edit:undo", text=_("Undo"))
-        ui.newwidget("Button", "^edit:redo", text=_("Redo"))
+        ui.widget("Button", "^edit:copy", text=_("Copy"))
+        ui.widget("Button", "^edit:cut", text=_("Cut"))
+        ui.widget("Button", "^edit:paste", text=_("Paste"))
+        ui.widget("Button", "^edit:undo", text=_("Undo"))
+        ui.widget("Button", "^edit:redo", text=_("Redo"))
 
         ui.layout("tab:edit", ["*VBOX*",
                 ["*HBOX*", "edit:header", "*SPACE", "edit:title"],
@@ -422,14 +328,14 @@ class Editor:
 class ProgressPopup:
     def __init__(self):
         self.max = 0
-        ui.newwidget("Label", "pp:header",
+        ui.widget("Label", "pp:header",
             html='<h2>%s</h2>' % _("Progress Report"))
-        ui.newwidget("TextEdit", "pp:text", ro=True)
-        ui.newwidget("Frame", "pp:extra")
-        ui.newwidget("Label", "pp:le")
-        ui.newwidget("LineEdit", "pp:info", ro=True)
-        ui.newwidget("Button", "^pp:hide", text=_("OK"))
-        ui.newwidget("ProgressBar", "pp:pbar")
+        ui.widget("TextEdit", "pp:text", ro=True)
+        ui.widget("Frame", "pp:extra")
+        ui.widget("Label", "pp:le")
+        ui.widget("LineEdit", "pp:info", ro=True)
+        ui.widget("Button", "^pp:hide", text=_("OK"))
+        ui.widget("ProgressBar", "pp:pbar")
         ui.layout("tab:progress", ["*VBOX*", "pp:header",
                 "pp:text",
                 "pp:pbar",

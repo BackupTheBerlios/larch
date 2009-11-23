@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.27
+# 2009.11.06
 
 text = _("""
 <h2>That just about wraps it up for now, folks!</h2>
@@ -54,14 +54,19 @@ class Stage:
 
     def __init__(self, index):
         self.page_index = index
-        ui.newwidget("HtmlView", "done:view", html=text)
+        self.run0 = True
 
+
+    def buildgui(self):
+        ui.widget("HtmlView", "done:view", html=text)
         ui.layout("page:done", ["*VBOX*", "done:view"])
 
-    def setup(self):
-        return
 
     def select_page(self, init):
+        if self.run0:
+            self.run0 = False
+            self.buildgui()
+
         command.pageswitch(self.page_index, _("Installation Complete"))
 
 
@@ -69,4 +74,4 @@ class Stage:
         return
 
     def ok(self):
-        command.runsignal("$$$uiquit$$$")
+        ui.sendsignal("$$$uiquit$$$")
