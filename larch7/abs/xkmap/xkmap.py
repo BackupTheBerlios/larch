@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# xkmap.py   --  Simple GUI for 'setxkbmap'
+# xkmap.py   --  Simple GUI for xorg keymap setting with evdev and 'setxkbmap'
 #
 # (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
 #
@@ -83,8 +83,7 @@ STANDARDLAYOUT = ("-", "Standard")
 
 class Wrapper(Uipi):
     def __init__(self):
-        Uipi.__init__(self, "quip")
-        self.lock = threading.Lock()
+        Uipi.__init__(self)
 
 
     def gui(self):
@@ -98,13 +97,13 @@ class Wrapper(Uipi):
         self.widget("Stack", "stack", pages=["main", "docs"])
 
         # Setter buttons
-        self.widget("Button", "^settemp",
+        self.widget("Button", "^&-settemp",
                 text=_("Set temporarily for this user"))
-        self.widget("Button", "^setuser",
+        self.widget("Button", "^&-setuser",
                 text=_("Set permanently for this user"))
-        self.widget("Button", "^clearuser",
+        self.widget("Button", "^&-clearuser",
                 text=_("Clear user's override setting\n - use global setting"))
-        self.widget("Button", "^setglobal",
+        self.widget("Button", "^&-setglobal",
                 text=_("Set permanently for all users"))
 
         # Quit button
@@ -121,8 +120,8 @@ class Wrapper(Uipi):
         self.layout("xkmap", ["*VBOX*", "header_l", "stack"])
         self.layout("main", ["*VBOX*", "xkmap:frame",
                 ["*HBOX*",
-                    ["*VBOX*", "*SPACE", "clearuser"],
-                    ["*VBOX*", "settemp", "setuser", "setglobal"]],
+                    ["*VBOX*", "*SPACE", "&-clearuser"],
+                    ["*VBOX*", "&-settemp", "&-setuser", "&-setglobal"]],
                 ["*HBOX*", "showdocs", "*SPACE", "quit"]])
         self.layout("docs", ["*VBOX*",
                 "docview",
@@ -131,34 +130,15 @@ class Wrapper(Uipi):
         self.xkmap.init()
         self.command("xkmap.setVisible", True)
 
-        self.addslot("setglobal*clicked", self.xkmap.setSys)
-        self.addslot("settemp*clicked", self.xkmap.setNow)
-        self.addslot("setuser*clicked", self.xkmap.setUser)
-        self.addslot("clearuser*clicked", self.xkmap.clearUser)
+        self.addslot("&-setglobal*clicked", self.xkmap.setSys)
+        self.addslot("&-settemp*clicked", self.xkmap.setNow)
+        self.addslot("&-setuser*clicked", self.xkmap.setUser)
+        self.addslot("&-clearuser*clicked", self.xkmap.clearUser)
         self.addslot("quit*clicked", self.quit)
         self.addslot("docexit*clicked", self._hidedocs)
         self.addslot("showdocs*clicked", self._showdocs)
 
-
-    def sendsignal(self, *args):
-        if self.lock.acquire(False):
-            self.command("xkmap.busy", ("xkmap",), True)
-            # This is a version which starts a new thread for each signal call
-            t = threading.Thread(target=self._sendsignal, args=args)
-            t.start()
-        else:
-            print "Signal ignored:", repr(args)
-
-
-    def _sendsignal(self, name, *args):
-        # When there are no slots the signal is simply ignored.
-        try:
-            for slot in self.signal_dict.get(name, []):
-                slot(*args)
-            self.command("xkmap.busy", ("xkmap",), False)
-        except:
-            print traceback.fmt_exc()
-        self.lock.release()
+        self.setDisableWidgets("xkmap", ("xkmap",))
 
 
     def _showdocs(self):

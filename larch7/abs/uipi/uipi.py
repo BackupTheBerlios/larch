@@ -19,10 +19,10 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.10
+# 2009.11.23
 
 """This is an example of an interface class to the larch text-line
-based ui toolkit (uip).
+based ui toolkit ([q]uip).
 
 It includes a very simple signal-slot mechanism, which can easily be
 overridden.
@@ -34,8 +34,13 @@ import threading
 import json
 
 
+def debug(text):
+    sys.stderr.write("uipi: %s\n" % text)
+    sys.stderr.flush()
+
+
 class Uipi:
-    def __init__(self, uiexec, **kwargs):
+    def __init__(self, **kwargs):
         """Using the **kwargs parameter allows options for the process
         start to be passed, for example 'cwd' or 'preexec_fn'.
         """
@@ -44,9 +49,14 @@ class Uipi:
         # A dict to connect signals to slots. Note that the values
         # are lists of slots, not single slots.
         self.signal_dict = {}
+        # Initially no widgets are disabled while 'busy' is active
+        self.setDisableWidgets()
+        self.siglock = threading.Lock()
+
         # Start ui process
         kwargs['stdin'] = PIPE
         kwargs['stdout'] = PIPE
+        uiexec = kwargs.get("backend", "quip")
         if uiexec:
             self.uiprocess = Popen(uiexec, **kwargs)
 
@@ -71,17 +81,43 @@ class Uipi:
             self.signal_dict[signal] = [function]
 
 
-#    def sendsignal(self, *args):
-#        # This is a version which starts a new thread for each signal call
-#        t = threading.Thread(target=self._sendsignal, args=args)
-#        t.start()
+    def setDisableWidgets(self, window=None, widgetlist=()):
+        self.mainWindow = window
+        self.disableWidgetList = widgetlist
 
 
-    #def _sendsignal(self, name, *args):
-    def sendsignal(self, name, *args):
+    def sendsignal(self, *args):
+        sig = args[0]
+        if sig[0] == "&":
+            # This type starts a new thread for each signal call
+            if sig[1] == "-":
+                # This type also shows 'busy', and cannot be nested
+                if not self.siglock.acquire(False):
+                    debug("Signal ignored: " + repr(args))
+                    return
+                if self.mainWindow:
+                    self.command(self.mainWindow + ".busy",
+                            self.disableWidgetList, True)
+            t = threading.Thread(target=self._sendsignal, args=args)
+            t.start()
+        else:
+            # This type is executed within the mainloop thread
+            for slot in self.signal_dict.get(sig, []):
+                slot(*args[1:])
+
+
+    def _sendsignal(self, name, *args):
         # When there are no slots the signal is simply ignored.
-        for slot in self.signal_dict.get(name, []):
-            slot(*args)
+        try:
+            for slot in self.signal_dict.get(name, []):
+                slot(*args)
+        except:
+            debug(traceback.fmt_exc())
+        if name[1] == "-":
+            if self.mainWindow:
+                self.command(self.mainWindow + ".busy",
+                        self.disableWidgetList, False)
+            self.siglock.release()
 
 
     def uipi_error(self, text):

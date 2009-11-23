@@ -1,12 +1,12 @@
 # Contributor: Michael Towers <larch42 (at) googlemail (dot) com>
 #2009.11.23
 pkgname=xkmap
-pkgver=4.0
+pkgver=4.1
 pkgrel=1
 pkgdesc="A simple keymap setter for xorg based on evdev and/or setxkbmap"
 license=('GPL')
 arch=(any)
-depends=('python' 'quip')
+depends=('uipi')
 optdepends=('python-pexpect: to permit automated running of "su" commands')
 url="http://larch.berlios.de"
 install=xkmap.install
