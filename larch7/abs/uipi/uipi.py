@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.23
+# 2009.11.24
 
 """This is an example of an interface class to the larch text-line
 based ui toolkit ([q]uip).
@@ -51,6 +51,7 @@ class Uipi:
         self.signal_dict = {}
         # Initially no widgets are disabled while 'busy' is active
         self.setDisableWidgets()
+        self.interrupt = False
         self.siglock = threading.Lock()
 
         # Start ui process
@@ -80,13 +81,10 @@ class Uipi:
             self.signal_dict[signal] = [function]
 
 
-    def setDisableWidgets(self, window=None, widgetlist=()):
-        self.mainWindow = window
-        self.disableWidgetList = widgetlist
-
-
     def sendsignal(self, *args):
         sig = args[0]
+        if not self.signal_dict.get(sig):
+            return
         if sig[0] == "&":
             # This type starts a new thread for each signal call
             if sig[1] == "-":
@@ -94,15 +92,13 @@ class Uipi:
                 if not self.siglock.acquire(False):
                     debug("Signal ignored: " + repr(args))
                     return
-                if self.mainWindow:
-                    self.command(self.mainWindow + ".busy",
-                            self.disableWidgetList, True)
+                self.busy()
             t = threading.Thread(target=self._sendsignal, args=args)
             t.start()
         else:
-            # This type is executed within the mainloop thread
-            for slot in self.signal_dict.get(sig, []):
-                slot(*args[1:])
+            # This type is executed within the calling (normally mainloop)
+            # thread
+            self._sendsignal(*args)
 
 
     def _sendsignal(self, name, *args):
@@ -111,12 +107,46 @@ class Uipi:
             for slot in self.signal_dict.get(name, []):
                 slot(*args)
         except:
-            debug(traceback.fmt_exc())
-        if name[1] == "-":
-            if self.mainWindow:
-                self.command(self.mainWindow + ".busy",
-                        self.disableWidgetList, False)
+            if not self.interrupt:
+                debug(traceback.fmt_exc())
+        if name.startswith("&-"):
+            self.interrupt = False
+            self.unbusy()
             self.siglock.release()
+
+
+    def setInterrupt(self):
+        if self.unblocked(False):
+            debug("Attempt to set interrupt when not 'busy'")
+        else:
+            self.interrupt = True
+
+
+    def unblocked(self, block=True, release=True):
+        if not self.siglock.acquire(block):
+            return False
+        if release:
+            self.siglock.release()
+            return True
+        else:
+            return self.siglock
+
+
+##### These might well be overridden
+    def setDisableWidgets(self, window=None, widgetlist=()):
+        self.mainWindow = window
+        self.disableWidgetList = widgetlist
+
+    def busy(self):
+        if self.mainWindow:
+            self.command(self.mainWindow + ".busy",
+                    self.disableWidgetList, True)
+
+    def unbusy(self):
+        if self.mainWindow:
+            self.command(self.mainWindow + ".busy",
+                    self.disableWidgetList, False)
+#####
 
 
     def uipi_error(self, text):
