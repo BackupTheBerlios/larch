@@ -577,12 +577,13 @@ def ltstart():
         if mp:
             #xfromy, text, bars, percent = m.groups()
             text = mp.group(2).strip()
+            t = text[:20]
             xfromy = mp.group(1)
-            if (text != text0) and line0:
+            if (t != text0) and line0:
                 logline(line0)
             line0 = "(%s) %s" % (xfromy, text) if xfromy else text
             ui.progress.set(line[2:])
-            text0 = text
+            text0 = t
             continue
 
         # Filter the output of mksquashfs

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.01
+# 2009.12.08
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -122,8 +122,7 @@ class Installation:
         working directory, the installation path or the cache directory
         changes. It might be easier to regenerate every time pacman is used.
         """
-# At present the --noprogressbar option to pacman doesn't do anything because
-# pacman only outputs progress info to a terminal, not to a pipe.
+#TODO? Allow disabling of progress output?
 #        self.pacman_cmd = ("%s -r %s --config %s --noconfirm --noprogressbar" %
         self.pacman_cmd = ("%s -r %s --config %s --noconfirm" %
                 (config.pacman, config.get("install_path"),
