@@ -33,6 +33,8 @@ if encoding == "UTF8":
 
 class Ui(Uipi):
     def __init__(self, guiexec):
+        if guiexec and os.path.isfile(base_dir + "/" + guiexec):
+            guiexec = base_dir + "/" + guiexec
         Uipi.__init__(self, backend=guiexec, cwd=base_dir)
 
     def init(self):

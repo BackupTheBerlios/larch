@@ -1,7 +1,5 @@
 locale handling on larchify /?
 
-Documentation for new initramfs features (LABEL/UUID booting?)
-
 Initramfs generation and kernel kernel updating:
  The 'normal' mechanism is used, via 'mkinitcpio -p kernel26${KERNEL_NAME}'
 so if a custom kernel is used (KERNEL_NAME!=""), some adjustment will
