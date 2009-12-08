@@ -21,28 +21,31 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.21
+# 2009.12.03
 
 
 """Implement a command line driven user interface for larch.
 """
 
-import sys, os, traceback
-import json
-import threading
-from Queue import Queue
+import sys, os, getpass, threading
+from uipi import Uipi
 
 
 def out(line):
+    if type(line) == unicode:
+        line = line.encode("UTF-8")
     sys.stdout.write(line)
     sys.stdout.flush()
 
 
-class Ui:
-    def __init__(self, commqueue, flag, guiexec):
-        self.queue = commqueue
-        self.flag = flag
+class Ui(Uipi):
+    def __init__(self, guiexec):
+        Uipi.__init__(self, backend=None)
         self.autocontinue = ("x" in sys.argv[1])
+
+        self.logger = Logger()
+        self.out_lock = threading.Lock()
+        self.progress = Progress(self.logger)
 
         # Associate command names with functions (aliases are allowed)
         self.functions = {}
@@ -51,60 +54,77 @@ class Ui:
                 self.functions[n] = assoc[0]
 
 
+    def init(self):
+        return
+
+
     def go(self):
-        logger.init()
-        logger.setVisible("l" not in sys.argv[1])
-
-        self.block = threading.Event()
-        self.gthread = threading.Thread(target=self.t_run, args=sys.argv[2:])
-        self.gthread.start()
+        self.logger.setVisible("l" not in sys.argv[1])
+        self.input = list(sys.argv[2:])
 
 
-    def t_run(self, *arglist):
+    def mainloop(self):
         try:
             r = 1
-            for cmd in arglist:
-                self.queue.join()
+            for cmd in self.input:
                 r = self.do(cmd)
+                command.worker_wait()
                 if r != 0:
                     break
         except:
             r = 1
-        self.sendsig("$$$uiquit$$$")
-        self.queue.put("%s/%d\n" % (self.flag, r))
-        usage()
-        return
+        if r:
+            self.sendsignal("$$$uiquit$$$")
+            usage()
+        return r
 
 
-    def sendsigB(self, sig, *args):
-        self.block.clear()
-        self.sendsig(sig, *args)
-        self.block.wait()
-        assert self.ok
+    def _dialog(self, title, message=None):
+        logqueue.join()
+        out("***** %s *****\n" % title)
+        if message:
+            out(message + "\n")
 
-
-    def infoDialog(self, message, title=None):
+    def infoDialog(self, message, title=None, async=""):
         if title == None:
             title = _("Information")
-        out("***** %s *****\n" % title)
-        out(message + "\n")
-        if self.autocontinue:
-            return True
-        else:
-            raw_input(_("Press <Enter> to continue"))
-            return True
+        self._dialog(title, message)
+        if not self.autocontinue:
+            raw_input(_("Press <Enter> to continue").encode("UTF-8"))
+        return self.async(async, True)
 
 
-    def confirmDialog(self, message, title=None):
+    def confirmDialog(self, message, title=None, async=""):
         if title == None:
             title = _("Confirmation")
-        out("***** %s *****\n" % title)
-        out(message + "\n")
+        self._dialog(title, message)
         if self.autocontinue:
-            return True
+            r = True
         else:
             l = raw_input("%s (y) | %s (n) ? " % (_("Yes"), _("No")))
-            return (l.strip()[0] in "yY")
+            r = (l.strip()[0] in "yY")
+        return self.async(async, r)
+
+
+    def textLineDialog(self, label=None, title=None, text="", pw=False,
+            async=""):
+        if title == None:
+            title = _("Input Required")
+        self._dialog(title)
+        x = (": (%s) " % text) if text else ": "
+        if pw:
+            r = getpass.getpass(label + x)
+        else:
+            out(label + x)
+            r = raw_input()
+        return self.async(async, (True, r))
+
+
+    def async(self, sig, result):
+        if sig:
+            self.sendsignal(sig, result)
+        else:
+            return result
 
 
     def error(self, message, title=None, fatal=True):
@@ -115,14 +135,6 @@ class Ui:
         self.infoDialog(message, title)
         command.uiquit()
         assert False
-
-
-    def sendsig(self, sig, *args):
-        self.queue.put("%s^%s %s" % (self.flag, sig, json.dumps([None, args])))
-
-
-    def respond(self, result):
-        self.queue.put("%s@%s\n" % (self.flag, json.dumps(result)))
 
 
     def do(self, cmdline):
@@ -142,43 +154,45 @@ class Ui:
     def ask(self, cmd, *args):
         return None
 
+    def asknowait(self, cmd, *args):
+        return
+
     def sendui(self, line):
         return
 
     def busy(self):
         return
 
-    def completed(self, ok):
-        self.ok = ok
-        self.block.set()
+    def unbusy(self):
+        return
 
 
 #-----------------------------------------------------------
 # Main Actions
 
 def x_install():
-    ui.sendsigB(":&install*clicked")
+    ui.sendsignal("&-:install*clicked")
 
 def x_larchify(opts=""):
     """opts: string containing 's' to generate sshkeys, 'r' to use oldsquash
     """
-    ui.sendsigB("&larchify&", "s" not in opts, "r" in opts)
+    ui.sendsignal("&larchify&", "s" not in opts, "r" in opts)
 
 def x_create_iso():
     """Create an iso of the live system
     """
-    ui.sendsigB("&makelive&", True, "", False, True)
+    ui.sendsignal("&makelive&", True, "", False, True)
     # + iso? + partition + format? + larchboot?
 
 def x_write_partition(part, opts=""):
     """Write the live system to the given partition.
     opts: string containing 'n' to suppress formatting, 'l' to force larchboot
     """
-    ui.sendsigB("&makelive&", False, part, 'n' not in opts, 'l' in opts)
+    ui.sendsignal("&makelive&", False, part, 'n' not in opts, 'l' in opts)
     # + iso? + partition + format? + larchboot?
 
 def x_create_bootiso(part):
-    ui.sendsigB("&bootiso&", part)
+    ui.sendsignal("&bootiso&", part)
 #-----------------------------------------------------------
 
 
@@ -225,16 +239,16 @@ def show_partitions():
 def set_project(name):
     try:
         i = config.getsections().index(name)
-        ui.sendsig(":choose_project_combo*changed", i)
+        ui.sendsignal(":choose_project_combo*changed", i)
     except:
         ui.error(_("Unknown project name: '%s'") % name)
 
 def new_project(name):
-    ui.sendsig("$*new_project_name*$", name)
+    ui.sendsignal("$*new_project_name*$", name)
 
 def del_project(name):
     if name in config.getsections():
-        ui.sendsigB(":&project_delete*clicked", name)
+        ui.sendsignal("&-:project_delete*clicked", name)
     else:
         ui.error(_("Unknown project name: '%s'") % name)
 
@@ -242,53 +256,49 @@ def del_project(name):
 def set_profile(name):
     try:
         i = config.profiles().index(name)
-        ui.sendsig(":choose_profile_combo*changed", i)
+        ui.sendsignal(":choose_profile_combo*changed", i)
     except:
         ui.error(_("Unknown profile name: '%s'") % name)
 
 def rename_profile(name):
-    ui.sendsig("$*rename_profile*$", name)
+    ui.sendsignal("$*rename_profile*$", name)
 
 def new_profile(path, name=None):
-    ui.sendsig("$*make_new_profile*$", path, name)
+    ui.sendsignal("$*make_new_profile*$", path, name)
 
 def del_profile(name):
     if name in config.profiles():
-        ui.sendsigB(":&profile_delete*clicked", name)
+        ui.sendsignal("&-:profile_delete*clicked", name)
     else:
         ui.error(_("Unknown profile name: '%s'") % name)
 
 
 def set_ipath(path):
-    ui.sendsig("$*set_ipath*$", path)
+    ui.sendsignal("$*set_ipath*$", path)
 
 
 def set_platform(arch):
     try:
         i = config.platforms.index(arch)
-        ui.sendsig(":platform*changed", i)
+        ui.sendsignal(":platform*changed", i)
     except:
         ui.error(_("Available platforms: %s") % repr(config.platforms))
 
 
 def set_buildmirror(path):
-    ui.sendsig("$*set_build_mirror*$", path)
+    ui.sendsignal("$*set_build_mirror*$", path)
 
 
 def set_pacman_cache(path):
-    ui.sendsig("$*set_pacman_cache*$", path)
+    ui.sendsignal("$*set_pacman_cache*$", path)
 
 
 def use_build_mirror(on):
-    ui.sendsig(":use_local_mirror*toggled", on[0] in "yY")
+    ui.sendsignal(":use_local_mirror*toggled", on[0] in "yY")
 
 
 def use_project_mirrorlist(on):
-    ui.sendsig(":mirrorlist*toggled", on[0] in "yY")
-
-
-def log_dl_progress(on):
-    ui.sendsig(":dlprogress*toggled", on[0] in "yY")
+    ui.sendsignal(":mirrorlist*toggled", on[0] in "yY")
 
 
 def set_bootloader(bl):
@@ -296,7 +306,7 @@ def set_bootloader(bl):
     if bl == "isolinux":
         bl = "syslinux"
     elif bl in ("grub", "syslinux", "none"):
-        ui.sendsig(":$%s*toggled" % bl, True)
+        ui.sendsignal(":%s*toggled" % bl, True)
     else:
         ui.error(_("Invalid bootloader: %s") % bl)
 
@@ -304,27 +314,28 @@ def set_bootloader(bl):
 def set_medium_detection(mdet):
     mdet = mdet.lower()
     if mdet in ("search", "uuid", "label", "device"):
-        ui.sendsig(":$%s*toggled" % mdet, True)
+        ui.sendsignal(":%s*toggled" % mdet, True)
 
 
 def set_label(label):
-    ui.sendsig("$*new_label*$", label)
+    ui.sendsignal("$*new_label*$", label)
 
 
 def pacman_s(*names):
-    ui.sendsigB("&*pacmanS*&", " ".join(names))
+    ui.sendsignal("&*pacmanS*&", " ".join(names))
 
 
 def pacman_r(*names):
-    ui.sendsigB("&*pacmanR*&", " ".join(names))
+    ui.sendsignal("&*pacmanR*&", " ".join(names))
 
 
 def pacman_u(filepaths):
-    ui.sendsigB("&*pacmanU*&", " ".join(filepaths))
+    ui.sendsignal("&*pacmanU*&", " ".join(filepaths))
 
 
 def pacman_sy():
-    ui.sendsigB(":&sync*clicked")
+    ui.sendsignal("&-:sync*clicked")
+
 
 
 function_list = (
@@ -358,52 +369,53 @@ function_list = (
     [pacman_r, "pacman_r", "pr:"],
     [pacman_u, "pacman_u", "pu:"],
     [pacman_sy, "pacman_sy", "psy"],
-    [log_dl_progress, "log_dl_progress", "lp:"],
 )
+
 
 
 class Logger:
     def __init__(self):
         self.visible = True
         self.buffered = None
-
-    def init(self):
-        self._openfile()
-
-    def _openfile(self):
-        self.logfile = open(config.working_dir + "/larch.log", "w")
+        self.dirty = False
 
     def setVisible(self, on):
         self.visible = on
 
     def clear(self):
-        self.logfile.close()
-        self._openfile()
-        if self.visible:
-            sys.stdout.write("**** CLEAR LOG ****\n")
-            sys.stdout.flush()
+        return
 
     def addLine(self, line):
-        if self.buffered != None:
-            self.logfile.write(self.buffered + "\n")
-            if self.visible:
-                sys.stdout.write("\n")
-        self.buffered = line
         if self.visible:
-            sys.stdout.write("LOG: " + line.rstrip())
-            sys.stdout.flush()
+            if self.dirty:
+                sys.stdout.write("\r" + " "*80 + "\r")
+            out("LOG: " + line + "\n")
+        self.dirty = False
 
-    def undo(self):
-        self.buffered = None
-        if self.visible:
+
+class Progress:
+    def __init__(self, logger):
+        self.active = False
+        self.logger = logger
+
+    def _done(self):
+        return
+
+    def start(self):
+        self.active = True
+        out("+Working ...\n")
+
+    def end(self):
+        self.active = False
+        out("+ ... Completed\n")
+
+    def addLine(self, line):
+        return
+
+    def set(self, text=""):
+        if self.active and text and self.logger.visible:
             sys.stdout.write("\r" + " "*80 + "\r")
-            sys.stdout.flush()
+            out(text)
+            self.logger.dirty = True
 
-    def quit(self):
-        if self.buffered != None:
-            self.logfile.write(self.buffered)
-        self.logfile.close()
-        if self.visible:
-            sys.stdout.write("\n**** Done ****\n")
-            sys.stdout.flush()
 

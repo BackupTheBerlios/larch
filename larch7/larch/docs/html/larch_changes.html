@@ -22,9 +22,9 @@
 
 <br />
 
-<h1><big>larch</big> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
+<h1><em>larch</em> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
 
-<img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch1.jpg"
+<img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch.png"
   name="graphics1" align="right" hspace="10" vspace="10" />
 <br /><br />
 
@@ -43,11 +43,11 @@ starts!), but there are some advantages ...
    for obscure command line parameters.
    </li>
    <li>The use of python rather than bash for the bulk of the code means
-that internationalization is relatively easy. ***+ The display strings are prepared for 
-gettext and the code to implement the translation is also in place, there just aren't
-any translations, yet. -***
+   that internationalization, using <em>gettext</em> is relatively easy.
+   A rough German translation is in place as an example, but that's the
+   limit of my linguistic flexibility!
    </li>
-   <li>The front end code can run as a normal user. I don't think this significantly 
+   <li>The front end code can run as a normal user. I don't think this significantly
    reduces the risk of your system being destroyed, but it does mean that it is easy
    to keep the configuration files with normal user ownership, while the installation
    is handled with root privileges, and not get things mixed up.
@@ -55,24 +55,23 @@ any translations, yet. -***
 </ul>
 
 <p>Most of the other changes are concerned with providing new features.
-***+ The
-extent of the changes means that it will probably take a while until the bugs get
-ironed out and everything works. I am calling the present state
-<strong>alpha</strong>, while the documentation is not finished and a few
-implementation details are still under review. I will call it <em>beta</em> and
-give it release numbers starting with 7.1 when most of that is cleared up. -***
+***+ The extent of the changes means that it will probably take a while
+until the bugs get ironed out and everything works. I am calling the
+present state <strong>alpha</strong>, while a few implementation details
+are still under review. I will call it <em>beta</em> and give it release
+numbers starting with 7.1 when most of that is cleared up. -***
 </p>
 
 <ul>
    <li>Selection of the boot partition is now possible via UUID or label, as well as the
    previously available methods of partition (/dev/sdb1, etc.) and search for 'larchboot'
-   file.   
+   file.
    </li>
    <li><em>larch</em> now manages all configuration files and project information
    internally. The relevant files are of course still accessible from outside of the
    <em>larch</em> program, but the need for this should be reduced. I hope this
-   will help users keep their projects tidy. ***+ This is an experimental feature that
-   will probably need some tweaking. -***
+   will help users (me!) keep their projects tidy. ***+ This is an experimental
+   feature that will probably need some tweaking. -***
    </li>
    <li>Kernel update using the normal pacman commands is now supported.
    </li>
@@ -83,9 +82,6 @@ give it release numbers starting with 7.1 when most of that is cleared up. -***
    <li>Installation to partitions, irrespective of whether they are USB-sticks or hard
    disks, is easily possible, with or without installation of a bootloader.
    </li>
-   <li>It is possible to rebuild the system by merging all the overlays - like a fresh
-   build - so long as sufficient storage space is available.
-   </li>
    <li>I have tried to minimize the extent to which the underlying <em>Arch</em>
    system must be modified to work as a <em>live</em> system. The introduction
    of 'hooks' in the <em>Arch</em> initscripts should ease the situation quite a bit.
@@ -95,7 +91,7 @@ give it release numbers starting with 7.1 when most of that is cleared up. -***
    <li>The overlay structure is slightly different, an extra layer (filter.sqf) has been
    added between system.sqf and mods.sqf, with the result that mods.sqf no longer
    contains whiteouts. This approach means that overlay merging doesn't require a
-   specially configured aufs and I hope it will turn out to be less buggy.
+   specially configured <em>aufs</em> and I hope it will turn out to be less buggy.
    </li>
    <li>Another change to the overlay structure is that initially, and after an overlay
    merge, there is no memory overlay file (now called 'overlay.tar.lzo') at all. This
@@ -110,14 +106,16 @@ give it release numbers starting with 7.1 when most of that is cleared up. -***
    correspond to those in the profile's 'addedpacks' file), but it could be useful
    for experimentation and quick fixes.
    </li>
-   <li>The 'larch-rebuild' script allows the overlays to be merged back into the base
-   ('system.sqf') archive. This would allow a <em>live</em> system which had become
-   bloated with overlay files to be 'rejuvenated'. It itself is not a complete solution
-   because it only rebuilds 'system.sqf' and 'mods.sqf', it can't replace the old system,
-   but it can form the basis of such a scheme.
+   <li>The 'larch-rebuild' script (in the 'larch-live' package) allows the
+   overlays to be merged back into the base ('system.sqf') archive, if enough
+   storage space is available. This would allow a <em>live</em> system
+   which had become bloated with overlay files to be 'rejuvenated'. It
+   itself is not a complete solution because it only rebuilds 'system.sqf'
+   and 'mods.sqf', it can't replace the old system, but it can form the
+   basis of such a scheme.
    </li>
 </ul>
-   
+
  <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>

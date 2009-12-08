@@ -21,9 +21,9 @@
 
 <br />
 
-<h1><big>larch</big> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
+<h1><em>larch</em> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
 
-<img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch1.jpg"
+<img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch.png"
   name="graphics1" align="right" hspace="10" vspace="10" />
 <br /><br />
 
@@ -33,14 +33,17 @@
 <blockquote>
 <h3>Warning</h3>
 
-<p><em>Before we get started I should point out that <em>larch</em> must have
-root privileges in order to do its work, and that much of this work consists of
-deleting and overwriting files and even complete directories. If just one of these
-is wrong it might make quite a mess of your system. That is quite normal for an
-installer, but you will be using it on a system that is already configured and this
-is somewhat risky - if you set up your configuration wrong (or if you or I made some
-other mistake ...), you might find you have destroyed some important data and/or
-your system doesn't work any more. But that's life - Share and Enjoy!</strong></em>
+<p><em>Before we get started I should point out that <em>larch</em> must
+gain root privileges in order to do its work (though it is advisable to
+start it as a non-privileged user), and that much of this work consists
+of deleting and overwriting files and even complete directories. If just
+one of these is wrong it might make quite a mess of your system. That is
+quite normal for an installer, but you will be using it on a system that
+is already configured and this is somewhat risky - if you set up your
+configuration wrong (or if you or I made some other mistake ...), you
+might find you have destroyed some important data and/or your system
+doesn't work any more. But that's life - <strong>Share and
+Enjoy!</strong></em>
 </p>
 </blockquote>
 
@@ -57,9 +60,10 @@ found at <a href="ftp://ftp.berlios.de/pub/larch/larch7/i686/"><strong>berlios</
 This should also work on non-<em>Arch Linux</em> systems (but see next paragraph).
 Download the latest <em>larch</em> package from the repository and unpack
 it somewhere convenient.
-To start <em>larch</em> you need to run the file 'opt/larch/run/larch'. If you have
-installed the package with <em>pacman</em>, 'opt/larch/run' should now be in
-your $PATH (at least after the next login), so just 'larch' should suffice to get it going.
+To start <em>larch</em> run /usr/bin/larch if you have installed the
+package with <em>pacman</em>, otherwise larch.py in the <em>larch</em>
+root directory. Don't start it as root unless you have some good reason
+for doing so - when it needs the root password it will ask you for it.
 </p>
 
 <p>If you are not running <em>Arch Linux</em>, you will need to download
@@ -72,40 +76,24 @@ a pacman executable together with all the libraries it needs, the
 
 <h3><a name="larch_using"></a>Using the <em>larch</em> build system</h3>
 
-<h4><a name="larch_projects"></a>Projects</h4>
+<h4><a name="larch_projects"></a>Projects and Profiles</h4>
 
-<p>A <em>larch</em> project simply gathers together a few configuration options
+<p>A <em>larch</em> 'project' simply gathers together a few configuration options
 concerning the build environment. Examples are the location of the installation,
 pacman options, such as package repository locations, which profile to build
 with, which boot loader to use, and so on. These are all options which don't
 directly affect the design of the <em>live</em> system to be built. Most of the
 remaining configuration options do concern the design and are specified in the
-profile.
+'profile'.
 </p>
 
-<p>All project information is kept in the simply structured configuration file
-'~/.config/larch/larch-config'.
+<p>A <em>larch</em> 'profile' contains the information needed to build a
+particular flavour of <em>Arch Linux</em> - which packages to install, and
+how it should be set up.
 </p>
 
-<p>Unlike a normal system installation, that used by <em>larch</em> need not be
-a separate partition, it can be placed anywhere convenient.
-The default installation directory ('/home/larchbuild') should normally be acceptable
-(the building work is done in the '.larch' sub-directory), so long as there is enough
-free space on that partition. Note that lots of space is necessary, nearly 4GB for a
-700MB CD, for example.
-</p>
-
-<h4><a name="larch_profiles"></a>Profiles</h4>
-
-<p>A profile contains the information needed to build a particular flavour of
-<em>Arch Linux</em> - which packages to install, which locales, system
-configuration in '/etc/rc.conf', boot entries, and so on. There is also a folder
-'rootoverlay', into which any files can be put that the design needs but differ
-from those in a basic, fresh <em>Arch Linux</em> system.
-</p>
-
-<p>All profile information is kept in the corresponding folder in the directory
-'~/.config/larch/working_dir/MyProfiles'.
+<p>For further details see <a href="gui_project_settings.html">GUI Tab:
+Project Settings</a>.
 </p>
 
 <h3><a name="larch_install"></a>System Installation overview</h3>
@@ -114,39 +102,33 @@ from those in a basic, fresh <em>Arch Linux</em> system.
 (unmodified, unconfigured) <em>Arch</em> installation. The Installation stage
 handles the creation of this installation by downloading all the desired packages
 (if they are not already in the host's package cache) and installing them to the
-directory set by the project (the default is /home/larchbuild). The profile files
-'addedpacks' and to a lesser extent 'baseveto' determine which packages will
-be installed. The 'base' group of packages will always be installed automatically,
-unless there are entries in 'baseveto' to veto certain of these (this will have no
-effect if a vetoed package is required by one selected for installation). 'addedpacks'
-is simply a list of additional packages to install, along with any dependencies. Both
-these files are simply one package name per line, empty lines and lines starting with
-'#' being ignored.
+directory set by the project (the default is /home/larchbuild).
 </p>
 
 <p>By default the package cache on the build host will be used, so that only
 packages which have not already been downloaded will be fetched from the
-chosen mirror. But it is possible to select another cache location. Note
-that this can also be on a remote machine, mounted using <em>sshfs</em>
-or <em>NFS</em>.
+chosen mirror. But it is possible to select another cache location, which
+can also be on a remote machine, mounted using <em>sshfs</em> or <em>NFS</em>.
 </p>
 
-<p>This raw installation will not normally be modified by <em>larch</em>, so it can
-be reused, or even carefully experimented with. However, note that any changes
-you make to this installation manually will not be reflected in the profile, so it might be
-difficult to reproduce what you have done at a later time, or to revert the changes.
+<p>See <a href="gui_installation.html">GUI Tab: Installation</a> for
+further details.
+</p>
+
+<p>This raw installation will not normally be modified by <em>larch</em>,
+so it can be reused, or even carefully experimented with. However, note
+that any changes you make to this installation manually will not be
+reflected in the profile, so it might be difficult to reproduce what you
+have done at a later time, or to revert the changes.
 ***+ Would it be useful to incorporate changes made via the Tweaks page into the
 profile? Offer it as an option? -***
-If you want to configure your system, then the raw installation is probably not the
-best place for it, consider rather using the 'rootoverlay' directory in the profile. All
-files in this directory will 'overwrite' (well, 'overlay', actually) corresponding files in
-the base installation, by placing them in a higher layer in the <em>aufs</em>
-mount in the <em>live</em> system. This makes it very easy to collect your own
-customizations in a way that can be applied quickly to a future build.
-</p>
-
-<p>The gui allows easy access to some of the main configuration files (e.g.
-'/etc/rc.conf' and '/etc/locale.gen').
+If you want to configure your system, then the raw installation is probably
+not the best place for it, consider rather using the 'rootoverlay' directory
+in the profile. All files in this directory will 'overwrite' (well, 'overlay',
+actually) corresponding files in the base installation, by placing them
+in a higher layer in the <em>aufs</em> mount in the <em>live</em> system.
+This makes it very easy to collect your own customizations in a way that
+can be applied quickly to a future build.
 </p>
 
 <h3><a name="running_larchify"></a>Quick <em>larchify</em> overview</h3>
@@ -177,7 +159,7 @@ or whatever). It is also possible to select a bootloader and tweak its configura
 
 <p>When the <em>live</em> system is installed to a partition (e.g. USB-stick) it is
 possible to choose how the boot partition will be recognized. So long as
-<em>larch</em> also installs a bootloader, it can also add the appropriate entries
+<em>larch</em> also installs a bootloader it can also add the appropriate entries
 to the bootloader configuration file automatically. The options available are via UUID,
 partition label, partition name (e.g. '/dev/sdb1'), or by searching for a partition
 containing the file 'larch/larchboot'. See also
@@ -202,7 +184,8 @@ mounted!) and selected in the 'Partition' entry.
 
 <p><em>larch</em> has been designed to work without extensive demands on the
 build system. The main requirement is pyqt for the gui (I am not sure what
-the oldest working version is, but 4.4 should be safe). Although it has been
+the oldest working version is, but 4.4 should be safe) and python's pexpect
+module (<em>Arch</em> package 'python-pexpect'). Although it has been
 developed under <em>Arch Linux</em>, <em>larch</em> should run on other
 <em>GNU/Linux</em> systems. By means of a sort of bootstrapping, the required
 software has been kept to a minimum - many of the build functions are carried
@@ -216,34 +199,17 @@ the build system. But <em>bash</em>, <em>mkfs.vfat</em>, <em>mkfs.ext2</em>,
 
 <h3><a name="pacman_conf"></a>'pacman.conf' and 'mirrorlist'</h3>
 
-<p>The <em>larch</em> repository must be available for building the
-<em>live</em> system, i.e. it must be included in the 'pacman.conf' used
-for the installation process. To ease the incorporation
-of updates to the structure of the file 'pacman.conf' I am currently experimenting
-with a split version. The header part is extracted from the default pacman.conf
-(distributed with the 'larch' package) and the repository list is kept
-separately. Both parts can be edited separately, from the <em>larch</em> gui,
-and altered versions are then stored within the profile.
-</p>
-
-<p>If there are 'Include' lines in repository list in 'pacman.conf', the
-corresponding 'mirrorlist' file must be present and suitably configured.
-By default the host's /etc/pacman.d/mirrorlist will be used, but it is also
-possible to use an edited version - which is not stored within the profile,
-but in <em>larch's</em> working directory.
-</p>
-
-<p>A special feature of <em>larch</em> is the ease of using a local package
-mirror during installation. The supplied path need not even be a complete
-mirror. During development work I have indeed just placed the appropriate
-****.db.tar.gz files there and relied on all the packages being taken from
-the host's cache. (The script 'repos.sh' supplied with larch in the 'run'
-directory can build these db files from the current state of the pacman
-sync database on the host.)
-</p>
-
-<p>The path entered for this build mirror can contain the variables "*platform*"
-and "*repo*", these being substituted automatically by <em>larch</em>.
+<p>The GUI offers easy adjustment of the pacman.conf and mirror used for
+installing the <em>Arch</em> system to be converted into a <em>live</em>
+system. A customized 'mirrorlist' file can be used just for the
+installation, but there is also a special feature in <em>larch-7</em> to
+ease the use of a local package mirror (again, just for the installation).
+The supplied path need not even be a complete mirror. During development
+work I have indeed used a 'dummy' mirror containing only the appropriate
+****.db.tar.gz files, relying on all the packages being taken from the
+host's cache. (The script 'repos.sh' supplied with <em>larch</em> in the
+'scripts' directory can build these 'db' files from the current state of
+the pacman sync database on the host.)
 </p>
 
 <h3><a name="Squashfs_and_Unionfs"></a>squashfs and aufs</h3>
@@ -287,7 +253,7 @@ developed to manage the requirements of a <em>larch live</em> system.
 <h4><a name="aufs"></a>unionfs as an alternative to aufs</h4>
 
 <p>***+ In principle, <em>unionfs</em> can be used instead of <em>aufs</em>,
-but as <em>aufs</em> is included in current <em>Arch Linux</em> kernels
+but as <em>aufs</em> is supported by current <em>Arch Linux</em> kernels
 it is obviously the first choice. Indeed the current <em>larch</em> code
 probably won't work with <em>unionfs</em>, as it hasn't been tested - but
 the framework to support it is in place. -***
@@ -309,9 +275,9 @@ listed in <strong>addedpacks</strong>.
 </p>
 
 <p>It is not necessary to build a custom kernel for <em>larch</em>, the
-standard kernel ('kernel26') can be used. It includes <em>aufs</em>
-and <em>squashfs</em> modules, and is now included in the set of 'base'
-packages.
+standard kernel ('kernel26') can be used. It includes the <em>squashfs</em>
+module and is included in the set of 'base' packages. <em>aufs</em> is
+available in the package 'aufs2'.
 </p>
 
 <h3><a name="Generating_the_basepacks_list"></a>Generating
@@ -321,7 +287,8 @@ the base package list</h3>
 provided by 'pacman -Sg base' is used. However, it is possible to filter
 out certain unwanted packages from the base set.
 In most cases the default setting (empty) will be satisfactory, but you
-can change it by editing 'baseveto' (one package per line), part of the profile.
+can change it by editing 'baseveto' (one package per line), which is part
+of the profile.
 Be aware, however, that vetoed packages will be installed anyway if they are
 required by some other installed package.
 </p>
@@ -342,20 +309,18 @@ the <em>Arch</em> base group must be installed in the system to be 'larchified'
 <pre style="margin-left: 80px;"><em>squashfs-tools</em>, <em>lzop</em>, <em>larch-live</em>,
 
 <em>aufs2</em>, <em>aufs2-util</em> (unless using the untested <em>unionfs</em> these <strong>must</strong>
-                be present, except that the <em>aufs</em> module might be
-                provided with the kernel, in which case you only
-                need <em>aufs2-util</em>),
+                be present),
 
 <em>syslinux</em> (if using isolinux or syslinux),
 <em>cdrkit</em> (for building an iso),
 <em>eject</em> (to eject a CD at shutdown).
 
-For the hard-disk installer - <em>larchin</em>, <em>python</em>, <em>pygtk</em>,
+For the hard-disk installer - <em>larchin</em>, <em>python</em>, <em>pyqt</em>,
 <em>parted</em>, <em>ntfsprogs</em>,
-(optional, but recommended) <em>gparted</em>.
+(optional, but recommended) <em>gparted</em> or <em>partitionmanager</em>.
 
-for this documentation, and for the capability of doing complete
-rebuilds - <em>larch</em>
+For this documentation, and for the capability of making further
+<em>live</em> media - <em>larch</em>.
 </pre>
 </p>
 
@@ -363,7 +328,7 @@ rebuilds - <em>larch</em>
 installation</h3>
 
 <p>By setting the installation path to an existing <em>Arch</em> installation,
-a live medium can be made from it, by skipping to the larchify page.
+a <em>live</em> medium can be made from it, by skipping to the larchify page.
 The installation must already be mounted, including any sub-mounts
 (e.g. /home on another partition). The main mount must be with
 options 'exec,dev', because most of the building is done via a <em>chroot</em>

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.13
+# 2009.12.08
 
 import os
 
@@ -33,13 +33,13 @@ class ProjectPage:
         return [
                 (":platform*changed", self.switch_platform),
                 (":choose_profile_combo*changed", self.switch_profile),
-                (":&profile_rename*clicked", self.get_new_profile_name),
-                (":&profile_browse*clicked", self.new_profile),
-                (":&profile_delete*clicked", self.delete_profile),
-                (":&installation_path_change*clicked", self.get_new_installation_path),
+                ("&-:profile_rename*clicked", self.get_new_profile_name),
+                ("&-:profile_browse*clicked", self.new_profile),
+                ("&-:profile_delete*clicked", self.delete_profile),
+                ("&-:installation_path_change*clicked", self.get_new_installation_path),
                 (":choose_project_combo*changed", self.switch_project),
-                (":&new_project*clicked", self.get_new_project_name),
-                (":&project_delete*clicked", self.delete_project),
+                ("&-:new_project*clicked", self.get_new_project_name),
+                ("&-:project_delete*clicked", self.delete_project),
                 ("$*new_project_name*$", self.new_project_name),
                 ("$*rename_profile*$", self.rename_profile),
                 ("$*make_new_profile*$", self.make_new_profile),
@@ -47,7 +47,52 @@ class ProjectPage:
             ]
 
     def __init__(self):
-        pass
+        ui.widget("Frame", ":settings_profile", text=_("Profile"))
+        ui.widget("Label", ":choose_profile", align="right",
+                text=_("Choose Existing Profile:"))
+        ui.widget("Label", ":new_profile", align="right",
+                text=_("New Profile:"))
+        ui.widget("ComboBox", "^:choose_profile_combo",
+                tt=_("Choose a profile from those already in your larch working folder"))
+        ui.widget("Button", "^&-:profile_browse", text=_("Browse for Profile"),
+                tt=_("Fetch a profile from the file-system"))
+        ui.widget("Button", "^&-:profile_rename", text=_("Rename"),
+                tt=_("Rename the current profile"))
+        ui.widget("Button", "^&-:profile_delete", text=_("Delete"),
+                tt=_("Delete the current profile"))
+
+        ui.widget("Label", ":lplat", text=_("Platform (processor architecture):"))
+        ui.widget("ComboBox", "^:platform",
+                tt=_("Which processor architecture?"))
+
+        ui.widget("OptionalFrame", ":options_advanced", text=_("Advanced Options"))
+
+        ui.widget("Frame", ":project", text=_("Project"))
+        ui.widget("Label", ":choose_project", text=_("Choose Existing Project:"))
+        ui.widget("ComboBox", "^:choose_project_combo",
+                tt=_("Choose a project from those already defined"))
+        ui.widget("Button", "^&-:new_project", text=_("New Project"),
+                tt=_("Create a new project"))
+        ui.widget("Button", "^&-:project_delete", text=_("Delete"),
+                tt=_("Delete the current project"))
+
+        ui.widget("Label", ":installation_path", text=_("Installation Path:"))
+        ui.widget("LineEdit", ":installation_path_show", ro=True,
+                tt=_("The root directory of the Arch installation to larchify"))
+        ui.widget("Button", "^&-:installation_path_change", text=_("Change"),
+                tt=_("Change the root directory of the Arch installation"))
+
+        ui.layout(":page_settings", ["*VBOX*", ":settings_profile",
+                "*SPACE", ["*HBOX*", "*SPACE", ":lplat", ":platform"],
+                ":options_advanced"])
+        ui.layout(":settings_profile", ["*GRID*",
+                ["*+*", ":choose_profile", ":choose_profile_combo", "*VLINE", "&-:profile_rename"],
+                ["*+*", ":new_profile",    "&-:profile_browse",       "*|",   "&-:profile_delete"]])
+        ui.layout(":options_advanced", ["*VBOX*", ":project",
+                ["*HBOX*", ":installation_path", ":installation_path_show",
+                        "&-:installation_path_change"]])
+        ui.layout(":project", ["*HBOX*", ":choose_project", ":choose_project_combo",
+                "&-:new_project", "&-:project_delete"])
 
 
     def setup(self):
@@ -90,7 +135,7 @@ class ProjectPage:
         ui.command(":choose_project_combo.set", self.projects,
                 self.projects.index(self.project))
         installpath = config.get("install_path")
-        ui.command(":installation_path_show.set", installpath)
+        ui.command(":installation_path_show.x__text", installpath)
         command.enable_install()
 
 
@@ -131,19 +176,21 @@ class ProjectPage:
             self.setup()
 
 
-#TODO: There's a problem when renaming a profile that is used by another
-# project! I think I've stopped it crashing now, but keep an eye on it.
-# When a project's profile doesn't exist it gets set to the default one,
-# which is copied over if necessary.
     def get_new_profile_name(self):
-        ok, new = ui.ask("textLineDialog",
-                _("Enter new name for current profile:"),
-                None, self.profilename)
-        if ok:
-            self.rename_profile(new)
+        if self.check_profile(self.profile):
+            ok, new = ui.textLineDialog(
+                    _("Enter new name for current profile:"),
+                    text=self.profilename)
+            if ok:
+                self._rename_profile(new)
 
 
     def rename_profile(self, name):
+        if self.check_profile(self.profile):
+             self._rename_profile(name)
+
+
+    def _rename_profile(self, name):
         if config.renameprofile(name):
             self.setup()
 
@@ -156,11 +203,20 @@ class ProjectPage:
         else:
             p = self.profile
 
-        if ui.confirmDialog(_("Do you really want to delete profile '%s'?")
+        if self.check_profile(p) and ui.confirmDialog(
+                _("Do you really want to delete profile '%s'?")
                 % os.path.basename(p)):
             config.deleteprofile(p)
             if not name:
                 self.setup()
+
+
+    def check_profile(self, p):
+        proj = config.checkprofile(p)
+        if proj:
+            config_error(_("Profile '%s' in use by project '%s") %
+                    (os.path.basename(p), proj))
+        return proj == None
 
 
     def get_new_installation_path(self):
@@ -168,11 +224,11 @@ class ProjectPage:
         # I don't think so, the installation code does that.
         # If the path is "/", the installation page should be inhibited,
         # but that is handled by 'setup'.
-        ok, path = ui.ask("textLineDialog",
+        ok, path = ui.textLineDialog(
                 _("WARNING: Double check your path -\n"
                 "  If you make a mistake here it could destroy your system!"
                 "\n\nEnter new installation path:"),
-                None, config.get("install_path"))
+                text=config.get("install_path"))
         if ok:
             self.set_ipath(path)
 
@@ -192,7 +248,7 @@ class ProjectPage:
                     nok.append(f)
             if ok < 0:
                 if not ui.confirmDialog(_("Your selected installation path"
-                        "(%s) contains unexpected items:\n %s\n"
+                        " (%s) contains unexpected items:\n %s\n"
                         "\nIs that really ok?") %
                         (ip, " ".join(nok))):
                     return
@@ -206,9 +262,8 @@ class ProjectPage:
 
 
     def get_new_project_name(self):
-        ok, new = ui.ask("textLineDialog",
-                _("Enter name for new project:"),
-                None, self.project)
+        ok, new = ui.textLineDialog(_("Enter name for new project:"),
+                text=self.project)
         if ok:
             self.new_project_name(new)
 

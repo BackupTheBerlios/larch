@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.16
+# 2009.12.07
 
 from build import Builder
 import os
@@ -32,17 +32,43 @@ class BuildPage:
     """
     def connect(self):
         return [
-                (":&build*clicked", self.build),
+                ("&-:build*clicked", self.build),
                 (":ssh*toggled", self.sshtoggle),
-                (":&locales*clicked", self.locales),
-                (":&rcconf*clicked", self.rcconf),
-                (":&initcpio*clicked", self.initcpio),
+                (":locales*clicked", self.locales),
+                (":rcconf*clicked", self.rcconf),
+                (":initcpio*clicked", self.initcpio),
                 (":overlay*clicked", self.overlay),
                 ("&larchify&", self.larchify),
             ]
 
 
     def __init__(self):
+        ui.widget("Label", ":larchify",
+                text=_("The system to be compressed must be installed and ready."))
+        ui.widget("Button", "^:locales", text=_("Edit supported locales"),
+                tt=_("Edit the /etc/locale.gen file to select supported glibc locales"))
+        ui.widget("Button", "^:rcconf", text=_("Edit Arch configuration file (/etc/rc.conf)"),
+                tt=_("Edit the /etc/rc.conf file to configure the live system"))
+        ui.widget("OptionalFrame", ":larchify_advanced",
+                text=_("Advanced Options"))
+        ui.widget("Button", "^:initcpio", text=_("Edit mkinitcpio.conf"),
+                tt=_("Edit the configuration file for generating the initramfs via mkinitcpio"))
+        ui.widget("Button", "^:overlay", text=_("Edit overlay (open in file browser)"),
+                tt=_("Open a file browser on the profile's 'rootoverlay'"))
+        ui.widget("CheckBox", "^:ssh", text=_("Generate ssh keys"),
+                tt=_("Enables pre-generation of ssh keys"))
+        ui.widget("CheckBox", ":oldsquash", text=_("Reuse existing system.sqf"),
+                tt=_("Reuse existing system.sqf, to save time if the base system hasn't changed"))
+        ui.widget("Button", "^&-:build", text=_("Larchify"),
+                tt=_("Build the main components of the larch system"))
+
+        ui.layout(":page_larchify", ["*VBOX*", ":larchify", "*SPACE",
+                ["*HBOX*", ":locales", "*SPACE", ":rcconf"], "*SPACE",
+                ":larchify_advanced", ["*HBOX*", "*SPACE", "&-:build"]])
+        ui.layout(":larchify_advanced", ["*HBOX*",
+                ["*VBOX*", ":initcpio", ":overlay"], "*SPACE",
+                ["*VBOX*", ":ssh", "*SPACE", ":oldsquash"]])
+
         self.builder = Builder()
         self.sshgen = True
 
@@ -55,9 +81,9 @@ class BuildPage:
         self.sshgen = ssh and self.sshgen
         ui.command(":ssh.set", self.sshgen)
         ui.command(":ssh.enable", ssh)
+#TODO: Remove hack if the underlying bug gets fixed
         # A hack to overcome a bug (?) in (py)qt
         ui.command(":larchify_advanced.enable_hack")
-
 
     def sshtoggle(self, on):
         self.sshgen = on
@@ -84,6 +110,7 @@ class BuildPage:
 
 
     def larchify(self, sshkeys, oldsquash):
-        self.builder.build(self.builder.ssh_available() and sshkeys,
+        command.worker(self.builder.build,
+                self.builder.ssh_available() and sshkeys,
                 self.builder.oldsqf_available() and oldsquash)
 

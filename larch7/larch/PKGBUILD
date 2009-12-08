@@ -1,29 +1,34 @@
-# Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.10.28
+# Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
+# 2009.12.08
 pkgname=larch
-pkgver=7.0.65
-pkgrel=1
-
-# If I need the architecture, I can get it as ${CARCH}
+pkgver=7.0.101
+pkgrel=2
 
 pkgdesc="Design your own 'live' Archlinux CDs and USB-sticks (etc.)"
 url="http://larch.berlios.de"
-depends=(python)
-optdepends=('pyqt: for nice graphical interface')
+depends=(python python-pexpect)
+optdepends=('pyqt: for a nice graphical interface')
 arch=(any)
 license=('GPL')
+install=larch.install
 
 build() {
-  mkdir -p ${pkgdir}/opt/larch
-  for d in buildscripts cd-root data docs i18n modules profiles run; do
-    cp -dr ${startdir}/${d} ${pkgdir}/opt/larch
+  _destdir=opt/apps/larch
+  cd ${pkgdir}
+  mkdir -p usr/bin
+  mkdir -p usr/share/{pixmaps,applications}
+  mkdir -p ${_destdir}
+
+  rm -f ${startdir}/modules/*.pyc
+  for d in buildscripts cd-root data docs i18n images modules profiles scripts; do
+    cp -dr ${startdir}/${d} ${_destdir}
   done
 
-  cp -dr ${startdir}/etc ${pkgdir}
-  cp ${startdir}/{larchicon.png,larch80.png} ${pkgdir}/opt/larch
+  cp ${startdir}/larch.py ${_destdir}
+  ln -s /${_destdir}/larch.py ${pkgdir}/usr/bin/larch
 
   mkdir -p ${pkgdir}/usr/share/pixmaps
-  cp ${startdir}/larch.png ${pkgdir}/usr/share/pixmaps
+  ln -s /${_destdir}/images/larch.png ${pkgdir}/usr/share/pixmaps/larch.png
   mkdir -p ${pkgdir}/usr/share/applications
   cp ${startdir}/larch.desktop ${pkgdir}/usr/share/applications
 }

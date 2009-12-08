@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.22
+# 2009.12.02
 
 import os, sys
 from glob import glob
@@ -93,7 +93,7 @@ class Builder:
         supershell("cp -f %s/boot/%s %s/boot/larch.kernel" %
                 (self.installation0, self.kname, self.medium))
         # Remember file name (to ease update handling)
-        supershell('echo "%s" > %s/larch/kernelname'
+        supershell("echo '%s' > %s/larch/kernelname"
                 % (self.kname, self.medium))
 
         # if no saved system.sqf, squash the Arch installation at self.installation_dir
@@ -107,7 +107,7 @@ class Builder:
             # others
             ignoredirs += " usr/lib/locale"
 
-            if not command.chroot('/sbin/mksquashfs "/" "%s" -e %s'
+            if not command.chroot("/sbin/mksquashfs '/' '%s' -e %s"
                     % (config.system_sqf, ignoredirs)):
                 command.error("Warning", _("Squashing system.sqf failed"))
                 return False
@@ -134,8 +134,8 @@ class Builder:
             supershell("cp %s %s" % (it0, itsave))
         if not os.path.isfile(inittab):
             supershell("cp %s/etc/inittab %s/etc" % (it0, inittab))
-        supershell('sed -i "s|/etc/rc.sysinit|/etc/rc.larch.sysinit|" %s' % inittab)
-        supershell('sed -i "s|/etc/rc.shutdown|/etc/rc.larch.shutdown|" %s' % inittab)
+        supershell("sed -i 's|/etc/rc.sysinit|/etc/rc.larch.sysinit|' %s" % inittab)
+        supershell("sed -i 's|/etc/rc.shutdown|/etc/rc.larch.shutdown|' %s" % inittab)
 ###-
 
         command.log("#Generating larch initcpio")
@@ -154,7 +154,7 @@ class Builder:
             supershell("mkdir -p %s" % config.ipath(sshdir))
             for k, f in [("rsa1", "ssh_host_key"), ("rsa", "ssh_host_rsa_key"),
                     ("dsa", "ssh_host_dsa_key")]:
-                command.chroot('ssh-keygen -t %s -N "" -f %s/%s >/dev/null'
+                command.chroot("ssh-keygen -t %s -N '' -f %s/%s >/dev/null"
                         % (k, sshdir, f), ["dev"])
 
         # Ensure the hostname is in /etc/hosts
@@ -170,7 +170,7 @@ class Builder:
         supershell("mkdir -p %s/boot" % self.overlay)
 
         command.log("#Squashing mods.sqf")
-        if not command.chroot('/sbin/mksquashfs "%s" "%s/larch/mods.sqf"'
+        if not command.chroot("/sbin/mksquashfs '%s' '%s/larch/mods.sqf'"
                 % (config.overlay_build_dir, config.medium_dir)):
             command.error("Warning", _("Squashing mods.sqf failed"))
             return False
@@ -320,12 +320,12 @@ class Builder:
             conf0 = conf + "0"
         else:
             conf0 = self.installation0 + "/etc/mkinitcpio.conf.larch0"
-        supershell('sed "s|___aufs___|%s|g" <%s >%s' % (self.ufs, conf0, conf))
+        supershell("sed 's|___aufs___|%s|g' <%s >%s" % (self.ufs, conf0, conf))
 
         presets = [os.path.basename(f) for f in glob(
                 self.installation0 + "/etc/mkinitcpio.d/kernel26*.preset")]
         if len(presets) != 1:
-            run_error(_("Couldn't find usable %s") %
+            run_error(_("Couldn't find usable mkinitcpio preset: %s") %
                     self.installation0 + "/etc/mkinitcpio.d/kernel26*.preset")
             return False
 
@@ -338,7 +338,7 @@ class Builder:
                     (idir, presets[0], oldir, presets[0]))
 
         # Adjust larch.preset file for custom kernels
-        supershell('sed "s|___|%s|" <%s/larch.preset0 >%s/larch.preset' %
+        supershell("sed 's|___|%s|' <%s/larch.preset0 >%s/larch.preset" %
                 (presets[0].rsplit(".", 1)[0], idir, oldir))
 
         # Replace 'normal' preset in overlay

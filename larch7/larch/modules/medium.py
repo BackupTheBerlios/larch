@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.07
+# 2009.12.02
 
 import os
 
@@ -135,7 +135,7 @@ class Medium:
 
             # - insert the resulting file into the bootloader config file
             # This doesn't work, maybe one day I'll find out why ...
-            #supershell('sed "/###LARCH/ { r %s\n  d }" -i %s/%s/%s' %
+            #supershell("sed '/###LARCH/ { r %s\n  d }' -i %s/%s/%s" %
             #        (insert, self.medium, d0, configfile))
             configtmp = config.working_dir + "/bootconfig_"
             configpath = "%s/%s/%s" % (self.medium, d0, configfile)
@@ -233,14 +233,14 @@ class Medium:
         if larchboot:
             lbfile = (r"The presence of the file 'larch/larchboot' enables\n"
                         r"booting the device in 'search' mode.\n")
-            supershell('echo -e "%s" >%s/larch/larchboot' % (lbfile, self.medium))
+            supershell("echo -e '%s' >%s/larch/larchboot" % (lbfile, self.medium))
 
         if device:
 #TODO: Is this really the best way to handle the 'save' file?
             if not os.path.isfile(self.profile + "/nosave"):
                 savefile = (r"The presence of the file 'larch/save'"
                         r"enables session saving.\n")
-                supershell('echo -e "%s" >%s/larch/save' % (savefile, self.medium))
+                supershell("echo -e '%s' >%s/larch/save" % (savefile, self.medium))
 
             self._build_partition(btype, device, grub, label, format)
 
@@ -366,11 +366,11 @@ def _mkiso(parms, iso="mylivecd.iso", source=None):
     if not source:
         source = config.medium_dir
     path = config.larch_build_dir + "/" + iso
-    if command.chroot(('mkisofs -r -l %s -no-emul-boot -boot-load-size 4'
-            ' -boot-info-table -input-charset=UTF-8'
-            ' -publisher "designed by gradgrind, licence: GPL"'
-            ' -A "larch_7"'
-            ' -o "%s" "%s"') % (parms, path, source)):
+    if command.chroot(("mkisofs -r -l %s -no-emul-boot -boot-load-size 4"
+            " -boot-info-table -input-charset=UTF-8"
+            " -publisher 'designed by gradgrind, licence: GPL'"
+            " -A 'larch_7'"
+            " -o '%s' '%s'") % (parms, path, source)):
         ui.infoDialog(_("Your larch iso, %s, was successfully created")
                 % config.ipath(path))
         return True

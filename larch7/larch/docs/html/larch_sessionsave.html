@@ -22,15 +22,15 @@
 </table>
 
 <br />
-<h1><big>larch</big> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
+<h1><em>larch</em> &ndash; a do-it-yourself <em>live Arch Linux</em> system</h1>
 
-<img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch1.jpg"
+<img style="border: 0px solid ; width: 320px; height: 320px;" alt="" src="larch.png"
   name="graphics1" align="right" hspace="10" vspace="10" />
 <br /><br />
 
 <h2>Saving a session back to the boot device (or even somewhere else)</h2>
 
-<p>An easy way to create a customized <em>live</em> is to start from an
+<p>An easy way to create a customized <em>live</em> system is to start from an
 existing one, make whatever changes you like, and then save the result back to
 the boot device. Of course, for this you need a writeable boot device, e.g.
 a USB-stick.
@@ -102,8 +102,14 @@ quite a bit of space, but should otherwise pose no great problems
 
 <h3><a name="de-Act"></a>Activating and deactivating the session-saving feature</h3>
 
-<p>As mentioned above, for this feature to be available, there must be a file with
-the name 'save' in the boot medium's 'larch' directory.
+<p>As mentioned above, for this feature to be available, there must be a
+file with the name 'save' in the boot medium's 'larch' directory. This
+will be generated automatically if installing to a partition (i.e. if not
+building an <em>iso</em>) and if there is no 'nosave' file in the profile
+***+ This sounds a bit perverse, and it may indeed be so, but it seemed like
+a good idea at the time -***. The gui provides a button to create and
+delete this 'nosave' file, thus disabling or enabling session saving on
+the created medium.
 </p>
 
 <h3><a name="custom"></a>Customizing the behaviour using scripts</h3>

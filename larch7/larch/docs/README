@@ -5,7 +5,7 @@ Licence: GPL (see COPYING, LICENCE)
 
 The documentation is in the html subdirectory, please read it.
 
-To start the program run the 'larch' script in the 'run' directory.
+To start the program run the 'larch.py' script in the root directory.
 
 Logos are derived from the Arch Linux logos, and are released under a
 Creative Commons Licence, see 'http://www.archlinux.org/art'.

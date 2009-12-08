@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.16
+# 2009.12.04
 
 """This module handles the basic framework and configuration of the
 larch build system.
@@ -44,9 +44,9 @@ defaults = {    "install_path"  : "/home/larchbuild",
                 "uselocalmirror" : "",
                 "localmirror"   : "",
                 "usemirrorlist" : "",
-                "dl_progress"   : "",
+                "dl_progress"   : "",               # Not used
                 "filebrowser"   : "xdgx-open $",
-                "html_reader"   : "xdg-open $",
+                "html_reader"   : "xdg-open $",     # Not used
                 "medium_iso"    : "yes",    # "yes" / ""
                 "medium_btldr"  : "grub",   # "grub" / "syslinux" / "none"
                 "medium_search" : "search", # "search" / "uuid" / "label" / "device"
@@ -154,6 +154,15 @@ class LarchConfig:
         sys.stderr.write(_("Unknown configuration option: %s\n") % item)
         sys.stderr.flush()
         assert False
+
+
+    def checkprofile(self, profile):
+        for proj in self.getsections():
+            if proj == self.project:
+                continue
+            if self.config.get(proj, "profile") == profile:
+                return proj
+        return None
 
 
     def set(self, item, value):

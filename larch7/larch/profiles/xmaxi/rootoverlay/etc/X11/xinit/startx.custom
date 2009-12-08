@@ -1,14 +1,11 @@
+cp -f /etc/X11/xorg.conf /tmp/xorg.conf.$USER
 for x in $(cat /proc/cmdline); do
     [ "${x}" = "nox" ] && return 1
-    [ "${x}" = "nodri" ] && nodri="yes"
+    [ "${x}" = "xvesa" ] && sed 's|^#xvesa||' -i /tmp/xorg.conf.$USER
+    [ "${x}" = "nodri" ] && sed 's|^#nodri||' -i </tmp/xorg.conf.$USER
 done
 if [ -z "$DISPLAY" ] && echo $(tty) | grep "tty1" &>/dev/null; then
-    if [ "$nodri" = "yes" ]; then
-    sed 's|^#nodri||' </etc/X11/xorg.conf >/tmp/xorg.conf.$USER
-        startx -- -config  /tmp/xorg.conf.$USER
-    else
-        startx
-    fi
+    startx -- -config  /tmp/xorg.conf.$USER
 
     # Maybe there should be some code here to handle a failed startx?
 

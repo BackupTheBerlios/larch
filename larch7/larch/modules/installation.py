@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.17
+# 2009.12.01
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -75,8 +75,7 @@ class Installation:
 
         fhi = open(pc0)
         fho = open(config.working_dir + "/pacman.conf", "w")
-        fho.write(self.pacmanoptions(fhi.read(),
-                (config.get("dl_progress") != "") and (mirror != "final")))
+        fho.write(self.pacmanoptions(fhi.read()))
         fhi.close()
 
         # Get the repositories from pacman.conf.larch
@@ -143,18 +142,18 @@ class Installation:
 
         # Can't delete the whole directory because it might be a mount point
         if os.path.isdir(installation_path):
-            supershell("rm -rf %s/{*,.*}" % installation_path)
+            command.script("cleardir %s" % installation_path)
 
         # Ensure installation directory exists and check that device nodes
         # can be created (creating /dev/null is also a workaround for an
         # Arch bug - which may have been fixed, but this does no harm)
-        if not (supershell("mkdir -p %s/{dev,proc,sys}" % installation_path).ok
+        if not (supershell("mkdir -p %s/{dev,proc,sys}" % installation_path)[0]
                 and supershell("mknod -m 666 %s/dev/null c 1 3" %
-                installation_path).ok):
+                installation_path)[0]):
             config_error(_("Couldn't write to the installation path (%s).") %
                     installation_path)
             return False
-        if not supershell("echo 'test' >%s/dev/null" % installation_path).ok:
+        if not supershell("echo 'test' >%s/dev/null" % installation_path)[0]:
             config_error(_("The installation path (%s) is mounted 'nodev'.") %
                     installation_path)
             return False
@@ -162,14 +161,14 @@ class Installation:
         # I should also check that it is possible to run stuff in the
         # installation directory.
         supershell("cp $( which echo ) %s" % installation_path)
-        if not supershell("%s/echo 'yes'" % installation_path).ok:
+        if not supershell("%s/echo 'yes'" % installation_path)[0]:
             config_error(_("The installation path (%s) is mounted 'noexec'.") %
                     installation_path)
             return False
         supershell("rm %s/echo" % installation_path)
 
         # Fetch package database
-        if not (supershell("mkdir -p %s/var/lib/pacman" % installation_path).ok
+        if not (supershell("mkdir -p %s/var/lib/pacman" % installation_path)[0]
                 and self.update_db()):
             return False
 
@@ -187,7 +186,7 @@ class Installation:
         packages = []
         self.make_pacman_command()
         # In the next line the call could be done as a normal user.
-        for line in supershell("%s -Sg base" % self.pacman_cmd).result:
+        for line in supershell("%s -Sg base" % self.pacman_cmd)[1]:
             l = line.split()
             if l and (l[0] == "base") and (l[1] not in veto_packages):
                 packages.append(l[1])
@@ -254,7 +253,7 @@ class Installation:
         if mounts:
             return self.pacmancall(op, arg)
         else:
-            return supershell("%s %s %s" % (self.pacman_cmd, op, arg)).ok
+            return supershell("%s %s %s" % (self.pacman_cmd, op, arg))[0]
 
 
     def pacmancall(self, op, arg):
@@ -270,16 +269,15 @@ class Installation:
 
         # (b) Call pacman
         # Note that I will probably want incremental output from this.
-        ok = supershell("%s %s %s" % (self.pacman_cmd, op, arg)).ok
+        ok = supershell("%s %s %s" % (self.pacman_cmd, op, arg))[0]
 
         # (c) Remove bound mounts
         command.unmount(("%s/sys" % ipath, "%s/proc" % ipath))
         return ok
 
 
-    def pacmanoptions(self, text, xfer=False):
+    def pacmanoptions(self, text):
         """A filter for pacman.conf to remove the repository info.
-        It also, optionally adds a transfer command line.
         """
         texto = ""
         block = ""
@@ -289,16 +287,8 @@ class Installation:
                 break
             if line.startswith("[") and not line.startswith("[options]"):
                 break
-            line = line.strip()
-            if line:
-                if line.startswith("XferCommand"):
-                    xfer = False
-            else:
+            if not line.strip():
                 texto += block
                 block = ""
-
-        if xfer and (call(["which", "curl"], stdout=PIPE, stderr=STDOUT) == 0):
-            texto += ("XferCommand = %s/buildscripts/pacman-dl %s\n\n"
-                    % (base_dir, "%u %o"))
         return texto
 

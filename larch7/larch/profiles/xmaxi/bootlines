@@ -1,6 +1,6 @@
 # The information here will be adapted for the bootloader and inserted into its configuration
 # file at the place marked '###LARCH'
-# This header will be removed. 
+# This header will be removed.
 # Each block must have an empty line before and after it.
 # There may be no empty lines within a block.
 
@@ -9,8 +9,8 @@ title: larch boot to xfce desktop
 options:
 
 comment:
-title: larch boot to xfce desktop, with DRI disabled
-options: nodri
+title: larch boot to xfce desktop, with vesa xorg driver
+options: xvesa
 
 comment: Might be useful if there is some trouble with starting xorg
 title: larch boot to console

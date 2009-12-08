@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.09.13
+# 2009.12.02
 
 import os, shutil
 
@@ -31,26 +31,41 @@ class TweakPage:
     """
     def connect(self):
         return [
-                (":&sync*clicked", installation.update_db),
-                (":&update*clicked", self.doupdate),
-                (":&add*clicked", self.doadd),
-                (":&remove*clicked", self.doremove),
+                ("&-:sync*clicked", self.dosync),
+                ("&-:update*clicked", self.doupdate),
+                ("&-:add*clicked", self.doadd),
+                ("&-:remove*clicked", self.doremove),
                 ("&*pacmanU*&", self.pacmanU),
                 ("&*pacmanS*&", self.pacmanS),
                 ("&*pacmanR*&", self.pacmanR),
-                (":dlprogress*toggled", self.dlprogress),
             ]
 
 
     def __init__(self):
-        pass
+        ui.widget("Frame", ":pacmanops", text=_("Package Management"))
+        ui.widget("Button", "^&-:sync", text=_("Synchronize db"),
+                tt=_("Synchronize the pacman db on the target (pacman -Sy)"))
+        ui.widget("Button", "^&-:update", text=_("Update / Add package    [-U]"),
+                tt=_("Update / Add a package from a package file using pacman -U"))
+        ui.widget("Button", "^&-:add", text=_("Add package(s)    [-S]"),
+                tt=_("Add one or more packages (space separated) using pacman -S"))
+        ui.widget("Button", "^&-:remove", text=_("Remove package(s)    [-Rs]"),
+                tt=_("Remove one or more packages (space separated) using pacman -Rs"))
+
+        ui.layout(":page_tweaks", ["*VBOX*", ":pacmanops", "*SPACE"])
+        ui.layout(":pacmanops", ["*GRID*",
+                ["*+*", "&-:sync", "&-:update"],
+                ["*+*", "&-:add", "&-:remove"]])
 
 
     def setup(self):
         """Set up the tweak page widget.
         """
         self.profile = config.get("profile")
-        ui.command(":dlprogress.set", config.get("dl_progress") != "")
+
+
+    def dosync(self):
+        command.worker(installation.update_db)
 
 
     def doupdate(self):
@@ -58,7 +73,7 @@ class TweakPage:
                 None, "pacman -U", False, False,
                 (_("Packages"), "*.pkg.tar.gz"))
         if f:
-            self.pacmanU(f)
+            command.worker(self.pacmanU, f)
 
 
     def pacmanU(self, flist):
@@ -72,7 +87,7 @@ class TweakPage:
                 "\n  separated by spaces:"),
                 "pacman -S")
         if ok:
-            self.pacmanS(plist.strip())
+            command.worker(self.pacmanS, plist.strip())
 
 
     def pacmanS(self, plist):
@@ -86,13 +101,9 @@ class TweakPage:
                 "\n  separated by spaces:"),
                 "pacman -Rs")
         if ok:
-            self.pacmanR(plist.strip())
+            command.worker(self.pacmanR, plist.strip())
 
 
     def pacmanR(self, plist):
         if plist and not installation.x_pacman("-Rs", plist):
             run_error(_("Error during package removal."))
-
-
-    def dlprogress(self, on):
-        config.set("dl_progress", "yes" if on else "")
