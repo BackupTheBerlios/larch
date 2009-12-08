@@ -15,7 +15,7 @@ pre_remove() {
 
 pre_upgrade() {
   echo "Remove .pyc files ..."
-  rm $_destdir/*.pyc
+  rm -f $_destdir/*.pyc
 }
 
 op=$1
