@@ -50,20 +50,25 @@ so that it is retained from one <em>larch</em> run to the next.
    <em>Arch</em> machine, but as all the current <em>larch</em> packages
    have architecture 'any', both architectures should be supported.
    </li>
-   <li>Download the latest <em>larch</em> package from
-   <a href="ftp://ftp.berlios.de/pub/larch/larch7/i686/"><strong>here</strong></a>
-   and unpack it somewhere convenient. It can also be installed as a normal
-   <em>Arch</em> package (you can put the <em>larch</em> repository in
-   pacman.conf if you like).
-   </li>
    <li>Make sure you have 'pyqt' and 'python-pexpect' packages installed.
    </li>
-   <li>If you install it as a package it should be available via the desktop application
-   list, or just by running 'larch'.
-   If you haven't installed it, run the 'larch.py' script in the
-   <em>larch</em> root directory. As it is a gui program, you must of course
-   be running xorg (see <a href="larch_console.html">Command-Line Interface</a>
-   for use from the command line).
+   <li>Download the latest
+   <a href="ftp://ftp.berlios.de/pub/larch/larch7/i686/larch-setup">
+   <strong>larch-setup</strong></a> script
+   to an empty working directory. Then run it (it is a shell script).
+   It will download and prepare the uipi and larch packages so that larch
+   can be run from this directory. You can also (if you are running
+   <em>Arch</em>) install them normally with 'pacman -U uipi* larch*'
+   (or you can put the <em>larch</em> repository in pacman.conf if you
+   like, and run 'pacman -Sy larch').
+   </li>
+   <li>If you install it as a package it should be available via the
+   desktop application list, or just by running 'larch'.
+   If you haven't installed it, run './larch' in the working directory.
+   As it is a gui program, you must of course be running xorg (see
+   <a href="larch_console.html">Command-Line Interface</a>
+   for use from the command line). In general you should start <em>larch</em>
+   as a normal, unprivileged user.
    </li>
    <li>To build a <em>larch live</em> system you basically just have to go through
    the first four pages one after the other.

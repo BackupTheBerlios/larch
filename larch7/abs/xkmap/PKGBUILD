@@ -1,8 +1,8 @@
 # Contributor: Michael Towers <larch42 (at) googlemail (dot) com>
-#2009.11.23
+#2009.12.08
 pkgname=xkmap
 pkgver=4.1
-pkgrel=1
+pkgrel=2
 pkgdesc="A simple keymap setter for xorg based on evdev and/or setxkbmap"
 license=('GPL')
 arch=(any)

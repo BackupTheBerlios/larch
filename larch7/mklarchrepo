@@ -76,6 +76,8 @@ for ad in $( ls ${scriptdir}/abs ); do
     fi
 done
 
-${fkroot} ${scriptdir}/larch/run/gen_repo ${repodir} larch
+${fkroot} ${scriptdir}/larch/scripts/gen_repo ${repodir} larch
+
+cp ${scriptdir}/larch-setup ${repodir}
 
 echo "Repository at ${repodir} created/updated."
