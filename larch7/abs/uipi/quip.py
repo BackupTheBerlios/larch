@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.11
+# 2009.12.06
 
 """UIP - User Interface Program
 
@@ -137,6 +137,21 @@ class WBase:
             self.setFont(f)                                 #qt
 
 
+class BBase:
+    """Button mixin.
+    """
+    def x__icon(self, icon):
+        self.setIcon(self.style().standardIcon(icondict[icon])) #qt
+
+#qt
+icondict = {    "left"      : QtGui.QStyle.SP_ArrowLeft,
+                "right"     : QtGui.QStyle.SP_ArrowRight,
+                "down"      : QtGui.QStyle.SP_ArrowDown,
+                "up"        : QtGui.QStyle.SP_ArrowUp,
+                "reload"    : QtGui.QStyle.SP_BrowserReload,
+        }
+
+
 class TopLevel:
     def setVisible(self, on=True):
         self.setVisible(on)                                 #qt
@@ -229,7 +244,12 @@ class Dialog(QtGui.QDialog, TopLevel):
 
 
 class DialogButtons(QtGui.QDialogButtonBox):                #qt
-    def __init__(self, *args):
+    def __init__(self):
+        return
+
+    def x__buttons(self, args):
+        """This keyword argument MUST be present.
+        """
         buttons = 0
         for a in args:
             try:
@@ -327,6 +347,33 @@ def fileDialog(message, start=None, title=None, dir=False, create=False, filter=
         return ""
 
 
+# See if PyQt4.5 allows me to set the options
+# Also see if I can add home and filesystem to the urls
+def specialFileDialog(caption, directory, label, urls):
+    dlg = QtGui.QFileDialog(None, caption, directory)       #qt
+    dlg.setFileMode(QtGui.QFileDialog.Directory)            #qt
+    urlsqt = [ QtCore.QUrl.fromLocalFile(u) for u in urls ] #qt
+    dlg.setSidebarUrls(urlsqt)                              #qt
+    dlg.setReadOnly(True)
+    #dlg.setOptions(dlg.DontUseNativeDialog | dlg.ShowDirsOnly)
+    #     | dlg.ReadOnly)                                   #qt
+    # add new name line instead of file type
+    dlg.setLabelText(dlg.FileType, label)
+
+    l = dlg.layout()
+#    lbl=QtGui.QLabel(label)                                 #qt
+#    l.itemAtPosition (3, 0).widget().hide()
+#    l.addWidget(lbl, 3, 0)
+    e = QtGui.QLineEdit()
+    l.itemAtPosition (3, 1).widget().hide()
+    l.addWidget(e, 3, 1)
+    if dlg.exec_():
+        path = dlg.selectedFiles()[0]
+        return((True, str(path).strip(), str(e.text()).strip()))
+    else:
+        return ((False, None, None))
+
+
 class Stack(QtGui.QStackedWidget):                          #qt
     def __init__(self):
         QtGui.QStackedWidget.__init__(self)                 #qt
@@ -348,7 +395,7 @@ class Notebook(QtGui.QTabWidget):                           #qt
     s_signals = {
             "changed": "currentChanged(int)"                #qt
         }
-    def __init__(self, args):
+    def __init__(self):
         QtGui.QTabWidget.__init__(self)                     #qt
         self.x_tabs = []
         self.x_mywidgets = {}
@@ -418,7 +465,7 @@ class Label(QtGui.QLabel, WBase):                           #qt
         self.setAlignment(a)                                #qt
 
 
-class Button(QtGui.QPushButton, WBase):                     #qt
+class Button(QtGui.QPushButton, WBase, BBase):              #qt
     s_default = "clicked"
     s_signals = {
             "clicked": "clicked()"                          #qt
@@ -427,7 +474,7 @@ class Button(QtGui.QPushButton, WBase):                     #qt
         QtGui.QPushButton.__init__(self)                    #qt
 
 
-class ToggleButton(QtGui.QPushButton, WBase):               #qt
+class ToggleButton(QtGui.QPushButton, WBase, BBase):        #qt
     s_default = "toggled"
     s_signals = {
             "toggled": "toggled(bool)"                      #qt
@@ -651,6 +698,15 @@ class HtmlView(QtGui.QTextBrowser, WBase):                  #qt
 
     def x__html(self, content):
         self.setHtml(content)                               #qt
+
+    def setUrl(self, url):
+        self.setSource(QtCore.QUrl(url))                    #qt
+
+    def prev(self):
+        self.backward()                                     #qt
+
+    def next(self):
+        self.forward()                                      #qt
 
 
 class SpinBox(QtGui.QDoubleSpinBox, WBase):                 #qt
@@ -1131,6 +1187,7 @@ specials_table = {
     "errorDialog": gui_error,
     "warningDialog": gui_warning,
     "fileDialog": fileDialog,
+    "specialFileDialog": specialFileDialog,
 }
 
 layout_table = {

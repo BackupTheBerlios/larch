@@ -1,8 +1,8 @@
 # Contributor: Michael Towers <larch42 (at) googlemail (dot) com>
-#2009.12.01
+#2009.12.08
 pkgname=ldm
 pkgver=1.4
-pkgrel=1
+pkgrel=2
 pkgdesc="Larch Display Manager (for logging into xorg sessions)"
 license=('GPL')
 arch=(any)

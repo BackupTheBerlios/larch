@@ -7,7 +7,7 @@ post_install() {
 
 pre_remove() {
   echo "Remove .pyc files ..."
-  rm ${_pylib}/uipi.pyc
+  rm -f ${_pylib}/uipi.pyc
 }
 
 post_upgrade() {

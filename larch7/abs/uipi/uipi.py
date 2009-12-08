@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.24
+# 2009.11.25
 
 """This is an example of an interface class to the larch text-line
 based ui toolkit ([q]uip).
@@ -28,7 +28,7 @@ It includes a very simple signal-slot mechanism, which can easily be
 overridden.
 """
 
-import sys
+import sys, traceback
 from subprocess import Popen, PIPE, STDOUT
 import threading
 import json
@@ -108,7 +108,7 @@ class Uipi:
                 slot(*args)
         except:
             if not self.interrupt:
-                debug(traceback.fmt_exc())
+                debug(traceback.format_exc())
         if name.startswith("&-"):
             self.interrupt = False
             self.unbusy()

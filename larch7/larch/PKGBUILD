@@ -2,12 +2,11 @@
 # 2009.12.08
 pkgname=larch
 pkgver=7.0.101
-pkgrel=2
+pkgrel=3
 
 pkgdesc="Design your own 'live' Archlinux CDs and USB-sticks (etc.)"
 url="http://larch.berlios.de"
-depends=(python python-pexpect)
-optdepends=('pyqt: for a nice graphical interface')
+depends=(uipi python-pexpect)
 arch=(any)
 license=('GPL')
 install=larch.install

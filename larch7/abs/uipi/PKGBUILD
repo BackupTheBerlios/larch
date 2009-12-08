@@ -1,13 +1,14 @@
 # Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
-# 2009.11.24
+# 2009.12.08
 pkgname=uipi
-pkgver=1.3
-pkgrel=1
+pkgver=1.11
+pkgrel=2
 _pylib=/usr/lib/python2.6/site-packages
 
 pkgdesc="A simple gui toolkit with json and python interfaces"
 url="http://larch.berlios.de"
-depends=(pyqt)
+depends=(python)
+optdepends=('pyqt: for the nice graphical interface')
 arch=(any)
 license=('GPL')
 install=uipi.install
@@ -18,4 +19,6 @@ build() {
   mkdir -p ${pkgdir}${_pylib}
   cp ${startdir}/uipi.py ${pkgdir}${_pylib}
   sed "s|^_pylib=.*|_pylib=${_pylib}|" -i ${startdir}/uipi.install
+  mkdir -p ${pkgdir}/usr/sbin
+  cp ${startdir}/sudopw.py ${pkgdir}/usr/sbin/sudopw
 }
