@@ -113,8 +113,8 @@ class Ldmd:
     def start_session(self, display, tty, user):
         # Start new session
         process = Popen(["/usr/bin/xinit", "/bin/bash", "--login", "-c",
-                "%s/ldm.py %s!%s" % (ldm_dir, display, user),
-                "--", "/usr/bin/X", display, tty, "-nolisten", "tcp"],
+                "%s/ldm.py %s_%s" % (ldm_dir, display, user),
+                "--", "/usr/bin/X", display, "vt" + tty[3:], "-nolisten", "tcp"],
                 stdout=PIPE, stderr=STDOUT)
         displays.append(tty)
         while True:

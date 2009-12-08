@@ -1,3 +1,6 @@
+N.B. ldm is not playing well with hal 0.5.13-3, a normal user gets no
+access to at least the sound device. It worked with hal 0.5.13-2.
+
 Each user must have a valid ~/.xinitrc file, otherwise no session can be
 started. It could be as simple as:
 

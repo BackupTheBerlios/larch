@@ -86,7 +86,7 @@ class Ldm(ldmgui.LdmGui):
 if __name__ == "__main__":
     try:
         dok = False
-        display, user = sys.argv[1].split("!")
+        display, user = sys.argv[1].split("_", 1)
         for d, t in ldmd_displays:
             if d == display:
                 dok = True
