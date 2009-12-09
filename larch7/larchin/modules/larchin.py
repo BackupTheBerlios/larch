@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.23
+# 2009.12.09
 
 
 """
@@ -81,9 +81,12 @@ __builtin__.bug = bug
 
 
 import gettext
-lang = os.getenv("LANG")
-if lang:
-    gettext.install('larchin', base_dir+'/i18n', unicode=1)
+gettext.install('larchin', base_dir+'/i18n', unicode=1)
+__builtin__.lang = (os.environ.get("LANGUAGE") or os.environ.get("LC_ALL")
+            or os.environ.get("LC_MESSAGES") or os.environ.get("LANG"))
+# Needed to ensure that subprocess output is as expected:
+os.environ["LANGUAGE"] = "C"
+
 
 from backend import Backend
 
@@ -100,8 +103,6 @@ class Command:
         self.blocking_lock = threading.Lock()
         # A single-entry queue for background signals
         self.bgnext = None
-        # Used to indicate that a background thread was interrupted
-        self.breakin = 0
 
         # Connect up the signals and slots
         self.addconnections([
@@ -110,7 +111,7 @@ class Command:
                 ("$$$uiquit$$$", self.uiquit),
                 ("larchin:quit*clicked", self.uiquit),
                 ("larchin:cancel*clicked", self.cancel),
-                ("larchin:forward*clicked", self.next),
+                ("&-larchin:forward*clicked", self.next),
                 ("larchin:goback*clicked", self.previous),
            ])
 
@@ -135,7 +136,7 @@ class Command:
         # Start on the welcome page
         ui.command("larchin:cancel.enable", False)
         ui.go()
-        ui.sendsignal("&welcome!")
+        ui.sendsignal("welcome!")
 
 
     def next(self):
@@ -155,49 +156,6 @@ class Command:
         ui.set_stageheader(title)
         ui.command("doc:content.x__html", self.pages[index].getHelp())
         self.pages[index].init()
-
-
-    def background(self, *args):
-        self.blocking_lock.acquire()
-        queued = False
-        if self.blocking:
-            if self.bgnext:
-                fatal_error("Bug: attempt to queue a second background signal")
-            self.bgnext = args
-            queued = True
-        self.blocking = True
-        self.blocking_lock.release()
-        if queued:
-            return
-        self.pthread = self.simple_thread(self.worker_run, *args)
-
-
-    def worker_run(self, slots, *args):
-        ui.busy()
-        self.breakin = 0
-        while True: # Use a loop to handle queued signals easily
-            try:
-                for s in slots:
-                    s(*args)
-            except:
-                if self.breakin == 0:
-                    fatal_error("".join(traceback.format_exc()))
-
-            # Check for successor signal
-            self.blocking_lock.acquire()
-            if self.bgnext:
-                slots = self.bgnext[0]
-                args = self.bgnext[1:]
-                self.bgnext = None
-                done = (self.breakin != 0) or not slots
-            else:
-                done = True
-            if done:
-                ui.completed(self.breakin == 0)
-                self.blocking = False
-            self.blocking_lock.release()
-            if done:
-                break
 
 
 #???
@@ -236,10 +194,8 @@ class Command:
         # Kill any running background process
         backend.killprocess()
 
-        if self.blocking:
-            # Wait until background process has terminated
-            self.pthread.join()
-        self.breakin = 0
+        # Wait until background process has terminated
+        ui.unblocked()
 
         ui.progressPopup.end()
 
@@ -318,6 +274,7 @@ def tidyquit():
 __builtin__.tt_seedocs = _("See documentation for further details")
 
 
+
 if __name__ == "__main__":
     parser = OptionParser(usage="usage: %prog [options] ['cmd1'] ['cmd2'] ...")
     parser.add_option("-u", "--ui", action="store", type="string", dest="ui",
@@ -342,14 +299,12 @@ if __name__ == "__main__":
     __builtin__.dbg_flags = options.dbg
 #-
     host = options.host
-    if (host != "") and (os.getuid() != 0):
-        errout(_("You need to run larchin as root!\n  - otherwise"
-                " the installation cannot be carried out.\n"))
-        sys.exit(1)
 
     # Various ui toolkits could be supported, but at the moment there
     # is only support for pyqt (apart from the console)
     if options.ui == "cli":
+        errout("cli: Not Yet Implemented")
+        exit(1)
         from console import Ui, Logger
         guiexec = None
     else:
@@ -366,12 +321,10 @@ if __name__ == "__main__":
     logger = Logger()
     __builtin__.backend = Backend(host)
     __builtin__.command = Command()
-    if not backend.init():
-        sys.exit(1)
     command.makepages()
     signal.signal(signal.SIGINT, command.sigint)
-
     command.run()
+
     exitcode = ui.mainloop()
 
     logfile.close()

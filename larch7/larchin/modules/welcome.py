@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.06
+# 2009.12.09
 
 
 doc = _("""
@@ -68,8 +68,7 @@ class Stage:
 
     def connect(self):
         return [
-                ("&welcome!", self.select_page),
-                ("&step1&", self.step1),
+                ("welcome!", self.select_page),
             ]
 
     def __init__(self, index):
@@ -105,15 +104,11 @@ class Stage:
             parts = ""
             for p in self.plist:
                 parts += "\n  " + " : ".join(p)
-            ui.confirmDialog("Debugging. Using:" + parts,
-                async="&step1&")
-            return
+            if ui.confirmDialog("Debugging. Using:" + parts):
+                ui.sendsignal("install!", self.plist)
+                return
 #-
-        self.step1(False)
-
-
-    def step1(self, dbg):
-        if dbg:
-            ui.sendsignal("&install!", self.plist)
+        if backend.start():
+            ui.sendsignal("device-select!")
         else:
-            ui.sendsignal("&device-select!")
+            ui.sendsignal("$$$uiquit$$$")

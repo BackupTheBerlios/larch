@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.23
+# 2009.12.09
 
 import os, pwd
 from uipi import Uipi
@@ -42,10 +42,16 @@ def chid():
     # pwdinfo[3] is gid
     # pwdinfo[5] is home dir
     os.environ["HOME"] = pwdinfo[5]
+#TODO
+# Not all display managers put XAUTHORITY here! (gdm doesn't at present)
     os.environ["XAUTHORITY"]=pwdinfo[5] + "/.Xauthority"
     os.setgid(pwdinfo[3])
     os.setuid(pwdinfo[2])
 
+#TODO
+# Note also that the remote version will probably not get xorg access if
+# a user switch occurs here (and if XAUTHORITY is wrong, then certainly not)
+# because ssh -Y runs as the initial user.
 
 class Ui(Uipi):
     def __init__(self, guiexec):
@@ -88,7 +94,7 @@ class Ui(Uipi):
         # - Footer
         self.widget("Button", "^larchin:goback", text=_("Go Back"),
                 tt=_("Return to previous stage"))
-        self.widget("Button", "^larchin:forward", text=_("OK"),
+        self.widget("Button", "^&-larchin:forward", text=_("OK"),
                 tt=_("Execute any operations pending on this page and continue to next"))
 
         self.layout("larchin:", ["*VBOX*",
@@ -101,8 +107,11 @@ class Ui(Uipi):
                 "larchin:tabs",
                 ])
         self.layout("tab:main", ["*VBOX*", "larchin:stack",
-                ["*HBOX*", "larchin:goback", "*SPACE", "larchin:forward"]
+                ["*HBOX*", "larchin:goback", "*SPACE", "&-larchin:forward"]
                 ])
+
+        self.setDisableWidgets("larchin:", ("&-larchin:forward",
+                "larchin:goback", "larchin:stack"))
 
 
     def go(self):
@@ -138,38 +147,28 @@ class Ui(Uipi):
     def sendsignal(self, sig, *args):
         #debug("SIG:" + sig + "---" + repr(args))
         if sig.endswith("-"):
-            # Remove the '-'
+            # This is to suppress appending to the pagehistory (used by
+            # the 'Go Back' feature. Remove the '-'.
             sig = sig[:-1]
         elif sig.endswith("!"):
             # It is a page switch, and needs an extra argument
             command.pagehistory.append(sig)
             args = (True,) + (args)
 
-        slots = self.signal_dict.get(sig)
-        if slots:
-            if sig[0] == "&":
-                # Such slots must be run by a background thread
-                # Only one at a time is permitted
-                command.background(slots, *args)
-            else:
-                # Normal slots are run directly - they must be quick.
-                # They cannot request info from the ui.
-                # They should (really!) not run syscall commands.
-                for s in slots:
-                    s(*args)
+        Uipi.sendsignal(self, sig, *args)
 
 
     def busy(self):
-        self.diswidgets = ("larchin:forward",
-                "larchin:goback", "larchin:stack")
-        self.command("larchin:.busy", self.diswidgets, True)
+        # Override Uipi method
         self.command("larchin:cancel.enable", True)
+        Uipi.busy(self)
 
 
-    def completed(self, ok):
+    def unbusy(self, ok=True):
+        # Override Uipi method
         # 'ok' is not used here, but might be in the console interface
         self.command("larchin:cancel.enable", False)
-        self.command("larchin:.busy", self.diswidgets, False)
+        Uipi.unbusy(self)
 
 
     def set_stageheader(self, text=None):

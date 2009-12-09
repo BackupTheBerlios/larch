@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.06
+# 2009.12.09
 
 from backend import DiskInfo
 
@@ -89,9 +89,6 @@ class Stage:
     def __init__(self, index):
         self.page_index = index
         self.run0 = True
-
-        self.systemsize = self.get_system_size_estimate()
-        self.memsize = float(backend.memsize()) / 10**9     # GB
         self.larchboot = False
 
 
@@ -162,6 +159,8 @@ class Stage:
             self.device, self.keep1 = args
             if self.run0:
                 self.run0 = False
+                self.systemsize = self.get_system_size_estimate()
+                self.memsize = float(backend.memsize()) / 10**9     # GB
                 self.buildgui()
 
         command.pageswitch(self.page_index,

@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.06
+# 2009.12.09
 
 from backend import DiskInfo
 
@@ -58,7 +58,7 @@ class Stage:
 
     def connect(self):
         return [
-                ("&device-select!", self.select_page),
+                ("device-select!", self.select_page),
                 ("disks:device-list*select", self.select_device),
                 ("disks:auto*toggled", self.auto_toggle),
                 ("disks:guipart*toggled", self.guipart_toggle),
@@ -72,14 +72,6 @@ class Stage:
         self.device_index = 0
         self.method = ""
         self.run0 = True
-
-        # Test for a graphical partition manager
-        if backend.available("gparted"):
-            self.gparted = "gparted"
-        elif backend.available("partitionmanager"):
-            self.gparted = "partitionmanager"
-        else:
-            self.gparted = None
 
 
     def buildgui(self):
@@ -124,6 +116,13 @@ class Stage:
     def select_page(self, init):
         if self.run0:
             self.run0 = False
+            # Test for a graphical partition manager
+            if backend.available("gparted"):
+                self.gparted = "gparted"
+            elif backend.available("partitionmanager"):
+                self.gparted = "partitionmanager"
+            else:
+                self.gparted = None
             self.buildgui()
 
         command.pageswitch(self.page_index,
@@ -224,11 +223,11 @@ class Stage:
 
     def ok(self):
         if self.method == "auto":
-            ui.sendsignal("&auto-partition!", self.device, self.keep1)
+            ui.sendsignal("auto-partition!", self.device, self.keep1)
         elif self.method == "guipart":
-            ui.sendsignal("&gui-partition!", self.gparted, self.device)
+            ui.sendsignal("gui-partition!", self.gparted, self.device)
         elif self.method == "cfdisk":
-            ui.sendsignal("&cfdisk-partition!", self.device)
+            ui.sendsignal("cfdisk-partition!", self.device)
         else:
-            ui.sendsignal("&manual-partition!", self.device)
+            ui.sendsignal("manual-partition!", self.device)
 

@@ -19,10 +19,11 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.28
+# 2009.12.09
 
-from subprocess import Popen, PIPE, STDOUT
+#from subprocess import Popen, PIPE, STDOUT
 import os, shutil, threading
+import pexpect
 from Queue import Queue
 import re, json
 import crypt, random
@@ -44,7 +45,7 @@ class Backend:
         self.process = None
         # Lock to protect starting and ending of processes
         self.process_lock = threading.Lock()
-        # Event to wait for backend shutdown
+        # Event to wait for backend shutdown (initially unset, blocking a wait)
         self.process_event = threading.Event()
         self.fgid = None
         self.idcount = 0
@@ -57,13 +58,37 @@ class Backend:
         self.totalMB = 0
 
 
-    def init(self):
+    def start(self):
+        """Because it may be necessary to fetch the root password, the gui
+        must be running when this is entered.
+        """
+        if self.process:
+            return True
         if self.host:
-            cmd = "ssh -Y root@%s larchin-0call" % self.host
+            cmd = "ssh -Y root@%s" % self.host
         else:
-            cmd = "larchin-0call"
-        self.process = Popen(cmd, stdin=PIPE,
-                stdout=PIPE, stderr=STDOUT, bufsize=1)
+            cmd = "su -c"
+        cmd +=  " 'echo _GO_ && larchin-0call'"
+        # Run the command as root with pexpect.
+        # Return True if it succeeded, else False.
+        p = pexpect.spawn(cmd, timeout=None)
+        e = p.expect(["_GO_.*\n", pexpect.TIMEOUT, "Password:"], 5)
+        while e != 0:
+            if e == 2:
+                ok, pw = ui.textLineDialog(_("Please enter root password"),
+                        "larchin: root pw", pw=True)
+                if not ok:
+                    run_error( _("No root password, cancelling run"))
+                    return False
+
+                p.sendline(pw.strip())
+                e = p.expect(["_GO_.*\n", pexpect.TIMEOUT, pexpect.EOF], 5)
+            else:
+                run_error(_("Couldn't start larchin-0call"))
+                return False
+        self.process = p
+        p.setecho(False)
+
         # Start a thread to read input from 0call.
         command.simple_thread(self.read0call)
         # Perform initialization of the installation system
@@ -75,11 +100,21 @@ class Backend:
 
 
     def read0call(self):
+        line0 = ""
         while True:
-            line = self.process.stdout.readline()
-            if not line:
-                break
-            line = line.strip()
+            ch = self.process.read(1)
+            if not ch:
+                if not line0:
+                    break
+            elif ch == "\n":
+                continue
+            elif ch != "\r":
+                line0 += ch
+                continue
+            line = line0.strip()
+            line0 = ""
+#            if not line:
+#                continue
             if line[0] == "/":
                 plog(line)
 
@@ -132,7 +167,7 @@ class Backend:
                 self.fgid = id
                 self.interrupt = 0
             self.queues[id] = Queue()
-            self.process.stdin.write("call %d %s %s\n" %
+            self.process.sendline("call %d %s %s" %
                     (id, cmd, json.dumps(args)))
         finally:
             self.process_lock.release()
@@ -144,7 +179,7 @@ class Backend:
             return False
         self.process_lock.acquire()
         self.kill_event = threading.Event()
-        self.process.stdin.write("kill\n")
+        self.process.sendline("kill")
         self.kill_event.wait()
         if self.fgid:
             self.interrupt = 1
@@ -156,9 +191,9 @@ class Backend:
     def tidy(self, terminate):
         if self.process:
             self.unmount()
-        if terminate:
-            self.process.stdin.write("/\n")
-            self.process_event.wait()
+            if terminate:
+                self.process.sendline("/")
+                self.process_event.wait()
 
 
     def readline(self, id):
@@ -176,39 +211,12 @@ class Backend:
         plog("Write FILE: %s (target)" % dest)
         self.process_lock.acquire()
         self.file_event = threading.Event()
-        self.process.stdin.write("file %s\n" %
+        self.process.sendline("file %s" %
                 json.dumps((IBASE, dest, contents)))
         self.file_event.wait()
         ret = self.file_rc == "0"
         self.process_lock.release()
         return ret
-
-
-#TODO
-#Not yet used/updated
-    def terminal(self, cmd):
-        """Run a command in a terminal. The environment variable 'XTERM' is
-        recognized, otherwise one will be chosen from a list.
-        """
-        term = os.environ.get("XTERM", "")
-        if (os.system("which %s &>/dev/null" % term) != 0):
-            for term in ("terminal", "konsole", "xterm", "rxvt", "urxvt"):
-                if (os.system("which %s &>/dev/null" % term) != 0):
-                    term = None
-                else:
-                    break
-
-        assert term, _("No terminal emulator found")
-        if (term == "terminal"):
-            term += " -x "
-        else:
-            term += " -e "
-
-        plog("TERMINAL: %s" % cmd)
-        self.process = Popen(term + cmd, shell=True)
-        plog(self.process.communicate()[0])
-        self.process = None
-        assert self.interrupt == None
 
 
     def xlist(self, cmd, *args, **kargs):
@@ -226,10 +234,12 @@ class Backend:
                 lines.append(rest)
         plog("END-XCALL")
         self.process_lock.acquire()
-        command.breakin = self.interrupt
+        if self.interrupt != 0:
+            ui.setInterrupt()
+        interrupt = self.interrupt
         self.fgid = None
         self.process_lock.release()
-        assert command.breakin == 0
+        assert interrupt == 0
         return (rest == "0", lines)
 
 
