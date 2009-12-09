@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.08
+# 2009.12.09
 
 
 """
@@ -170,7 +170,7 @@ class Command:
             result = True
         except:
             result = False
-            debug("WORKER: " + traceback.format_exc())
+            #debug("WORKER: " + traceback.format_exc())
         ui.progress.end()
 
         self.worker_lock.acquire()
@@ -293,10 +293,7 @@ class Command:
         """
         self.worker_lock.acquire()
         if self.supershell_process:
-            p = self.asroot("%s/supershell-kill.py %d"
-                    % (script_dir, self.supershell_process.pid))
-            while p.isalive():
-                time.sleep(0.1)
+            self.asroot("pkill -g %d" % self.supershell_process.pid)
         self.worker_breakin = True
         self.worker_lock.release()
 
@@ -351,6 +348,7 @@ class Command:
     def _quit_run(self, terminate):
         # Kill any running supershell process
         self.worker_cancel()
+        self.worker_wait()
 
         if terminate:
             # Tell the logger to quit
@@ -577,8 +575,8 @@ def ltstart():
         if mp:
             #xfromy, text, bars, percent = m.groups()
             text = mp.group(2).strip()
-            t = text[:20]
             xfromy = mp.group(1)
+            t = text if xfromy else text[:20]
             if (t != text0) and line0:
                 logline(line0)
             line0 = "(%s) %s" % (xfromy, text) if xfromy else text
