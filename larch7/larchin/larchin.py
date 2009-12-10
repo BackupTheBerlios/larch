@@ -21,26 +21,20 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.09
+# 2009.12.10
 
 
 """
-This is the main module of the larchin program, which must be started with
-root priveleges - unless performing a remote installation via ssh.
+This is the main module of the larchin program. If not started as rooot
+it will prompt for the root password.
 
-The actual installation commands are run as a separate process, possibly even
-on a different machine (using ssh with public-key authentication). These
-installation commands are shell scripts in the package 'larchin-syscalls'.
+The actual installation commands are run as a separate process, possibly
+even on a different machine (using ssh). These installation commands are
+shell scripts in the package 'larchin-syscalls'.
 
-Also the graphical user interface is run as a separate process and the
-communication runs via pipes to the subprocess's stdio channels.
-Data is passed as json objects.
-
-
-???NYI: The command-line user interface runs in the same process but a separate
-thread is used to dispatch the commands - several commands can be passed
-on the command line. The dispatcher waits for one command to complete
-before sending the next, so the behaviour should be 'as expected'.
+Also the graphical user interface is run as a separate process, using the
+uipi package and the communication runs via pipes to the subprocess's stdio
+channels. Data is passed as json objects.
 
 The main loop reads the output from the user interface and acts on the
 commands received. Longer running commands, or those needing to run

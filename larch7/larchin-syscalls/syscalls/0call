@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.24
+# 2009.12.09
 
 import sys, os, threading, signal, json, time
 from subprocess import call, Popen, PIPE, STDOUT
@@ -49,17 +49,6 @@ def out(line):
     sys.stdout.write(line + '\n')
     sys.stdout.flush()
     out_lock.release()
-
-def killp(pid):
-    sublist = Popen(["pgrep", "-P", str(pid)],
-                stdout=PIPE).communicate()[0].split()
-    try:
-        os.kill(pid, signal.SIGKILL)
-    except:
-        out("! (Process %d already dead)" % pid)
-    for p in sublist:
-        killp(int(p))
-    kill_list.append(pid)
 
 def pcall(syscall, id, arglist):
     # Correct call path
@@ -89,21 +78,8 @@ while True:
         out("!!! *** Killing all syscall processes *** !!!")
         kill_list = []
         for pid in pidlist:
-            killp(pid)
-
-        # Now wait a few seconds until the processes have actually exited
-        for i in range(50):
-            undead=Popen(["ps", "-o", "pid", "--no-headers", "-p"]
-                    + [str(i) for i in kill_list],
-                    stdout=PIPE, stderr=PIPE).communicate()[0].strip()
-            if not undead:
-                break
-            time.sleep(0.2)
-        if undead:
-            out("!*PROBLEM* Processes still running:\n  " + undead)
-        else:
-            out("!!! *** All syscall processes killed *** !!!")
-        out("/kill:" + ("1" if undead else "0"))
+            Popen(["pkill", "-g", str(pid)], stdout=PIPE).communicate()
+        out("/kill:0")
 
     elif line.startswith("/"):
         # Exit program

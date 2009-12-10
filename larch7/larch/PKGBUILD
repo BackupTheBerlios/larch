@@ -1,8 +1,8 @@
 # Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
 # 2009.12.09
 pkgname=larch
-pkgver=7.0.104
-pkgrel=1
+pkgver=7.0.105
+pkgrel=2
 
 pkgdesc="Design your own 'live' Archlinux CDs and USB-sticks (etc.)"
 url="http://larch.berlios.de"
@@ -24,10 +24,8 @@ build() {
   done
 
   cp ${startdir}/larch.py ${_destdir}
-  ln -s /${_destdir}/larch.py ${pkgdir}/usr/bin/larch
+  ln -s /${_destdir}/larch.py usr/bin/larch
 
-  mkdir -p ${pkgdir}/usr/share/pixmaps
-  ln -s /${_destdir}/images/larch.png ${pkgdir}/usr/share/pixmaps/larch.png
-  mkdir -p ${pkgdir}/usr/share/applications
-  cp ${startdir}/larch.desktop ${pkgdir}/usr/share/applications
+  ln -s /${_destdir}/images/larch.png usr/share/pixmaps/larch.png
+  cp ${startdir}/larch.desktop usr/share/applications
 }

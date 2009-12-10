@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.09
+# 2009.12.10
 
 from backend import DiskInfo
 
@@ -225,7 +225,7 @@ class Stage:
         if self.method == "auto":
             ui.sendsignal("auto-partition!", self.device, self.keep1)
         elif self.method == "guipart":
-            ui.sendsignal("gui-partition!", self.gparted, self.device)
+            backend.xlist("runcom", self.gparted, self.device)
         elif self.method == "cfdisk":
             ui.sendsignal("cfdisk-partition!", self.device)
         else:

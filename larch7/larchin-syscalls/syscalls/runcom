@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# runcom
+
+# Run the given command
+
+"$@"

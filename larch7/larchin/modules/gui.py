@@ -21,41 +21,16 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.09
+# 2009.12.10
 
 import os, pwd
 from uipi import Uipi
 import locale
 
 
-def chid():
-    """Drop root privileges and reset the home-directory.
-    """
-    if os.getuid() != 0:
-        return
-    # This will give the wrong name (root) if started via 'su -'
-    user = os.environ["USER"]
-
-    pwdinfo = pwd.getpwnam(user)
-    # pwdinfo[0] is user name
-    # pwdinfo[2] is uid
-    # pwdinfo[3] is gid
-    # pwdinfo[5] is home dir
-    os.environ["HOME"] = pwdinfo[5]
-#TODO
-# Not all display managers put XAUTHORITY here! (gdm doesn't at present)
-    os.environ["XAUTHORITY"]=pwdinfo[5] + "/.Xauthority"
-    os.setgid(pwdinfo[3])
-    os.setuid(pwdinfo[2])
-
-#TODO
-# Note also that the remote version will probably not get xorg access if
-# a user switch occurs here (and if XAUTHORITY is wrong, then certainly not)
-# because ssh -Y runs as the initial user.
-
 class Ui(Uipi):
     def __init__(self, guiexec):
-        Uipi.__init__(self, backend=guiexec, cwd=base_dir, preexec_fn= chid)
+        Uipi.__init__(self, backend=guiexec, cwd=base_dir)
 
         self.stagetext = None
 
