@@ -1,8 +1,8 @@
-# Maintainer: Michael Towers (larch42 at googlemail dot com)
-# 2009.12.10
+# Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
+# 2009.12.13
 pkgname=larchin
-pkgver=7.0.4
-pkgrel=3
+pkgver=7.0.5
+pkgrel=1
 
 pkgdesc="Arch hard disk installer with gui for larch live media"
 url="http://larch.berlios.de"

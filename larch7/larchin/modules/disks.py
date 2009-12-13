@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.10
+# 2009.12.13
 
 from backend import DiskInfo
 
@@ -39,12 +39,14 @@ option is more flexible than the automatic one.
 <p>The automatically calculated partitioning scheme allows only a limited
 amount of tweaking, so if you want more control over the partitioning of
 your disk drives and the location of the installation, you will need to
-select manual partitioning. This will normally allow the use of the
-external tools cfdisk and gparted or kde's partition-manager.
+select manual partitioning. The most advanced partition editing option
+('Advanced graphical partition manager') uses one of the external tools
+gparted or (kde's) partitionmanager, if available.
 </p>
-<p>In the case of manual partitioning the selection of the mount points
-is done separately in the 'Select Installation Partitions' stage, which
-will be skipped if the automatic partitioning scheme is accepted.
+<p>The internal manual partitioner also handles selection of the mount
+points, so even if you use the advanced option you must complete the
+partitioning with the internal partitioner (but not if the automatic
+partitioning option is used).
 </p>
 <p>Selecting one of the devices offered for automatic partitioning will
 not immediately cause it to be modified, so try it out without fear. You
@@ -62,8 +64,7 @@ class Stage:
                 ("disks:device-list*select", self.select_device),
                 ("disks:auto*toggled", self.auto_toggle),
                 ("disks:guipart*toggled", self.guipart_toggle),
-                ("disks:cfdisk*toggled", self.cfdisk_toggle),
-                ("disks:nopart*toggled", self.nopart_toggle),
+                ("disks:manual*toggled", self.manual_toggle),
                 ("disks:keep1*toggled", self.keep1_toggle),
             ]
 
@@ -90,15 +91,12 @@ class Stage:
         ui.widget("RadioButton", "^disks:auto",
                 text=_("Autopartition and install to selected device"))
         ui.widget("RadioButton", "^disks:guipart",
-                text=_("Graphical partition manager"))
-        ui.widget("RadioButton", "^disks:cfdisk",
-                text=_("Console partition manager (cfdisk) on selected device"))
-        ui.widget("RadioButton", "^disks:nopart",
-                text=_("Use existing partitions"))
+                text=_("Advanced graphical partition manager"))
+        ui.widget("RadioButton", "^disks:manual",
+                text=_("Manual partitioning OR use existing partitions"))
 
         ui.layout("disks:choose_partition_method", ["*HBOX*",
-                ["*VBOX*", "disks:auto", "disks:guipart",
-                        "disks:cfdisk", "disks:nopart"],
+                ["*VBOX*", "disks:auto", "disks:guipart", "disks:manual"],
                 ["*SPACE", 50],
                 ["*VBOX*", "disks:keep1", "disks:ntfs-shrink", "*SPACE"]])
         ui.layout("page:disks", ["*VBOX*",
@@ -187,8 +185,11 @@ class Stage:
         else:
             noauto = True
         ui.command("disks:auto.enable", not noauto)
-        if (self.method == "auto") and noauto:
-            ui.command("disks:nopart.set", True)
+        if not self.method:
+            ui.command("disks:%s.set" % ("manual" if noauto else "auto"),
+                    True)
+        elif (self.method == "auto") and noauto:
+            method = ui.command("disks:manual.set", True)
         self.setkeep1(self.ntfs1 and
                 (self.method == "auto") and not noauto)
 
@@ -212,13 +213,9 @@ class Stage:
         if on:
             self.method = "guipart"
 
-    def cfdisk_toggle(self, on):
+    def manual_toggle(self, on):
         if on:
-            self.method = "cfdisk"
-
-    def nopart_toggle(self, on):
-        if on:
-            self.method = ""
+            self.method = "manual"
 
 
     def ok(self):
@@ -226,8 +223,6 @@ class Stage:
             ui.sendsignal("auto-partition!", self.device, self.keep1)
         elif self.method == "guipart":
             backend.xlist("runcom", self.gparted, self.device)
-        elif self.method == "cfdisk":
-            ui.sendsignal("cfdisk-partition!", self.device)
         else:
             ui.sendsignal("manual-partition!", self.device)
 

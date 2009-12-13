@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.10
+# 2009.12.13
 
 
 """
@@ -49,7 +49,7 @@ import os, sys, traceback, signal
 
 import __builtin__
 
-__builtin__.base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+__builtin__.base_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append("%s/modules" % base_dir)
 
 from subprocess import Popen, call, PIPE, STDOUT
@@ -106,7 +106,8 @@ class Command:
                 ("larchin:quit*clicked", self.uiquit),
                 ("larchin:cancel*clicked", self.cancel),
                 ("&-larchin:forward*clicked", self.next),
-                ("larchin:goback*clicked", self.previous),
+                ("&-larchin:goback*clicked", self.previous),
+                ("$$$goback$$$", self.previous),
            ])
 
 
@@ -117,10 +118,10 @@ class Command:
 
     def makepages(self):
         # Initialize gui modules
-        import welcome, disks, autopart, install, rootpw, grub, done
+        import welcome, disks, autopart, manupart, install, rootpw, grub, done
         self.pages = []
-        for s in (welcome, disks, autopart, install, rootpw, grub,
-                done):
+        for s in (welcome, disks, autopart, manupart, install, rootpw,
+                grub, done):
             stage = s.Stage(len(self.pages))
             self.pages.append(stage)
             self.addconnections(stage.connect())

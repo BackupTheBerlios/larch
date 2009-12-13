@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.10
+# 2009.12.13
 
 import os, pwd
 from uipi import Uipi
@@ -60,6 +60,7 @@ class Ui(Uipi):
                 "page:welcome",
                 "page:disks",
                 "page:autopart",
+                "page:manupart",
                 "page:install",
                 "page:passwd",
                 "page:grub",
@@ -67,7 +68,7 @@ class Ui(Uipi):
                 ])
 
         # - Footer
-        self.widget("Button", "^larchin:goback", text=_("Go Back"),
+        self.widget("Button", "^&-larchin:goback", text=_("Go Back"),
                 tt=_("Return to previous stage"))
         self.widget("Button", "^&-larchin:forward", text=_("OK"),
                 tt=_("Execute any operations pending on this page and continue to next"))
@@ -82,11 +83,11 @@ class Ui(Uipi):
                 "larchin:tabs",
                 ])
         self.layout("tab:main", ["*VBOX*", "larchin:stack",
-                ["*HBOX*", "larchin:goback", "*SPACE", "&-larchin:forward"]
+                ["*HBOX*", "&-larchin:goback", "*SPACE", "&-larchin:forward"]
                 ])
 
         self.setDisableWidgets("larchin:", ("&-larchin:forward",
-                "larchin:goback", "larchin:stack"))
+                "&-larchin:goback", "larchin:stack"))
 
 
     def go(self):

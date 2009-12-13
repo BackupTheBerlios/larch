@@ -19,13 +19,13 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.06
+# 2009.12.13
 
-from backend import DiskInfo
+from backend import DiskInfo, PartInfo
 
 doc = _("""
 <h2>Manual Partitioning</h2>
-<p>This tool allow deletion and creation of partitions, setting of
+<p>This tool allows deletion and creation of partitions, setting of
 partition types and mount-points, specification of a file-system type
 for a partition (i.e. with which it will be formatted). The actual
 formatting takes place at a later stage, except for swap partitions
@@ -41,6 +41,21 @@ useful if you don't have a lot of memory installed, or if you want to use
 does not set it up). It is difficult to say how much space you should allocate
 for a swap partition, it depends on your system and your usage patterns.
 </p>
+<h3>Creating Partitions</h3>
+<p>This tool only offers very basic partitioning options, and tries to
+produce an unproblematic partition table. It only works with DOS-type
+partition tables. If for some reason it cannot handle the formatting
+on your drive, you will need to use some external tool - e.g. (c)fdisk to
+make preliminary alterations.
+</p>
+<p>You should add partitions in order of increasing partition number. As
+many as possible will be allocated as primary partitions, but primary
+partitions will never be allocated with higher partition numbers than the
+extended partition or at higher cylinder numbers than logical partitions.
+</p>
+
+#####################################################
+
 <h3>Partition for User Data</h3>
 <p>If you have enough free space on your device you also have the option of
 creating a separate partition for user data. This allows you to keep your data
@@ -77,7 +92,7 @@ class Stage:
 
     def connect(self):
         return [
-                ("&manual-partition!", self.select_page),
+                ("manual-partition!", self.select_page),
                 ("manu:part-list*select", self.select_part),
 
 
@@ -86,7 +101,6 @@ class Stage:
     def __init__(self, index):
         self.page_index = index
         self.run0 = True
-        self.memsize = float(backend.memsize()) / 10**9     # GB
         self.larchboot = False
 
 
@@ -97,10 +111,15 @@ class Stage:
                 text=_("Total device capacity:"))
         ui.widget("LineEdit", "manupart:disksize", ro=True)
         ui.widget("List", "^manu:part-list", selectionmode="Single",
-                tt=_("Select the partition (or free space) to alter"))
+                tt=_("Select the partition (or free space block) to alter"))
 
+        ui.command("manu:part-list.setHeaders", ["#", _("Size (GB)"),
+                _("Type"), _("fs-type"), _("Format"), _("Mount-point")])
 
         ui.layout("page:manupart", ["*VBOX*",
+                ["*HBOX*", "manupart:disk_l", "manupart:disk", ["*SPACE", 100],
+                        "manupart:disksize_l", "manupart:disksize"],
+                "manu:part-list"])
 
 
     def select_page(self, init, device=None):
@@ -109,6 +128,7 @@ class Stage:
             self.device = device
             if self.run0:
                 self.run0 = False
+                self.memsize = float(backend.memsize()) / 10**9     # GB
                 self.buildgui()
 
         command.pageswitch(self.page_index,
@@ -116,18 +136,152 @@ class Stage:
 
 
     def init(self):
+        # I suppose there might be support for RAID/LVM one day, so use
+        # a separate method for a normal drive.
+        self.diskpartition()
+
+
+    def diskpartition(self):
         # Info on drive
         di = DiskInfo(self.device)
         c2G = float(di.cyl2B()) / 10**9
         self.disksize = di.drvcyls * c2G
         ui.command("manupart:disk.x__text", self.device)
         ui.command("manupart:disksize.x__text", "%4.0f GB" % self.disksize)
+        drive_info = self.driveinfo(di)
+        if drive_info:
+            self.extpa, self.prim, self.logi, self.free = drive_info
+        else:
+            ui.sendsignal("$$$goback$$$")
+            return
+
+        self.parts = self.prim + self.logi + self.free
+        self.parts.sort()
+
+
+        self.formatinfo = {}
+        self.mountinfo = {}
+#TODO: The question is - how to keep a fairly persistent record of
+# formatting and mount-point wishes which is not restricted to just
+# one device (or should it be restricted to one device?)
+
+
+        parts = []
+        for ps, pe, pn, pt in self.parts:
+            size = "%5.1f" % ((pe - ps + 1) * c2G)
+            if pn == 0:
+                parts.append((_("Free"), size, "", "", "", ""))
+            else:
+                d = self.device + str(pn)
+                fst = PartInfo(d).getfstype()
+                fmt = self.formatinfo.get(d, "")
+                mp = self.mountinfo.get(d, "")
+                parts.append((str(pn), size, pt, fst, fmt, mp))
+
+        ui.command("manu:part-list.set", parts)
+        ui.command("manu:part-list.compact")
+
+#TODO
 
 
 
 
+    def driveinfo(self, di):
+        """Scan existing partitions and order them according to their
+        positions on the device.
+        Return a tuple (extended partition (0 if none),
+            primary partitions, logical partitions, free blocks).
+        Each of the last three entries is a list of tuples
+            (start cylinder, end cylinder, partition number (0 for free
+             block), type-id ("-" for free block)).
+        If the operation fails return None.
+        """
+        exp = 0             # Number of extended partition
+        ex0, ex1 = 0, -1    # Extended partition start and end
+        log0, log1 = 0, -1  # Start and end of area used by logical partitions
+        plist = []          # List of primary partitons
+        llist = []          # List of logical partitons
+        freelist = []       # List of free areas
+        for p in di.parts:
+            pn = int(p[0][len(self.device):])
+            scyl, ecyl = p[1:3]
+            if pn <= 4:
+                # primary
+                if p[3] in ("5", "f"):
+                    # extended
+                    exp = pn
+                    ex0, ex1 = scyl, ecyl
+                    continue
+                plist.append((scyl, ecyl, pn, p[3]))
+            else:
+                # logical
+                if (scyl < ex0) or (ecyl > ex1):
+                    run_error(_("Logical partition (%d) outside of extended"
+                            " partition on %s") % (pn, self.device))
+                    return None
+                if log0:
+                    gap = scyl - log1 - 1
+                    if gap < 0:
+                        run_error(_("Logical partition (%s%d) overlap")
+                                % (self.device, pn))
+                        return None
+# Note that great care is needed with logical partitions and gaps, the
+# numbering of subsequent partitions can change!
+                    if gap > 0:
+                        freelist.append((log1 + 1, log1 + gap, 0, "-"))
+                else:
+                    log0 = scyl
+                log1 = ecyl
+                llist.append((scyl, ecyl, pn, p[3]))
+
+        # Adjust extended partition, if necessary
+        if (log0 != ex0) or (log1 != ex1):
+            if not self.xcheck("parted -s %s unit cyl resize %d %d %d"
+                    % (self.device, exp, log0, log1),
+                    onfail=_("Resizing of extended partition failed")):
+                return None
+
+        plist.sort()        # so that the order is according to start cyl
+        i = len(plist)
+        prelog = 0
+        postlog = log1
+        for p in plist:
+            err = False
+            sc, ec = p[0:2]
+            if sc >= log0:
+                gap = sc - postlog - 1
+                if (gap < 0) or (ec >= di.drvcyls):
+                    err = True
+                elif gap > 0:
+                    freelist.append((postlog + 1, postlog + gap, 0, "-"))
+                postlog = ec
+            else:
+                gap = sc - prelog
+                if (ec >= log0) or (gap < 0):
+                    err = True
+                elif gap > 0:
+                    freelist.append((prelog, prelog - 1 + gap, 0, "-"))
+                prelog = ec + 1
+            if err:
+                run_error(_("Primary partition (%s%d) overlap/overflow")
+                        % (self.device, p[2]))
+                return None
+
+        # Check for remaining gaps
+        gap = log0 - prelog
+        if gap > 0:
+            freelist.append((prelog, prelog - 1 + gap, 0, "-"))
+        gap = di.drvcyls - postlog - 1
+        if gap > 0:
+            freelist.append((postlog + 1, postlog + gap, 0, "-"))
+
+        # Sort gaps in order of increasing start cylinder
+        freelist.sort()
+        return (exp, plist, llist, freelist)
 
 
+    def select_part(self, i=-1):
+        debug("part: " + repr(i))
 
 
     def get_system_size_estimate(self):

@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.09
+# 2009.12.13
 
 from backend import DiskInfo
 
@@ -74,7 +74,7 @@ class Stage:
 
     def connect(self):
         return [
-                ("&auto-partition!", self.select_page),
+                ("auto-partition!", self.select_page),
                 ("autopart:free*changed", self.freesizechanged),
                 ("autopart:swapsize*changed", self.swapsizechanged),
                 ("autopart:swap*toggled", self.swaptoggled),
