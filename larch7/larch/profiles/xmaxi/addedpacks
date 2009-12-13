@@ -27,6 +27,7 @@ dvd+rw-tools
 sudo
 
 base-devel
+pyqt
 larch
 
 alsa-lib
@@ -58,6 +59,7 @@ firefox
 thunderbird
 
 # xfce
+gamin
 xfce4
 thunar-volman
 thunar-archive-plugin
@@ -75,7 +77,6 @@ xfce4-sensors-plugin
 xfce4-xkb-plugin
 gstreamer0.10-good-plugins
 #xfburn
-gamin
 
 #desktop-file-utils is required by thunar, etc.
 gimp
@@ -88,8 +89,11 @@ ttf-dejavu
 gdm
 dlarch-theme-gdm
 
+tango-icon-theme
+
 #cups-pdf
 gutenprint
+hplip
 
 openntpd
 cpufrequtils
@@ -97,8 +101,6 @@ cpufrequtils
 xf86-input-synaptics
 gsynaptics
 
-#slim
-#slim-theme-dlarch
 lxde
 
 xsane
@@ -122,6 +124,3 @@ mirage
 k3b
 
 #scribus
-
-hplip
-pyqt

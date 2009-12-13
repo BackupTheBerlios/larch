@@ -1,11 +1,10 @@
-
 [Desktop Entry]
 Encoding=UTF-8
 Type=Application
 Name=Install Arch Linux
 Comment=larchin, the larch / Arch installer
 Categories=Application;
-Exec=larchin.py
+Exec=larchin
 Icon=larchin
 Terminal=false
 StartupNotify=true

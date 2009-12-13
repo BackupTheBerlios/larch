@@ -92,7 +92,9 @@ import gettext
 gettext.install('larch', base_dir+'/i18n', unicode=1)
 __builtin__.lang = (os.environ.get("LANGUAGE") or os.environ.get("LC_ALL")
             or os.environ.get("LC_MESSAGES") or os.environ.get("LANG"))
-os.environ["LANG"] = "C"
+# Some of the subprocesses must be run without i18n because the text
+# output is parsed.
+os.environ["LANGUAGE"] = "C"
 
 class Command:
     def __init__(self):
