@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.02
+# 2009.12.16
 
 import os, sys
 from glob import glob
@@ -122,6 +122,8 @@ class Builder:
         # Copy over the overlay from the selected profile
         if os.path.isdir("%s/rootoverlay" % self.profile):
             supershell("cp -rf %s/rootoverlay/* %s" % (self.profile, self.overlay))
+        # Ensure there is an /etc directory in the overlay
+        supershell("mkdir -p %s/etc" % self.overlay)
 
 ###+ This code can be changed or omitted when the rc. script hooks have
 ###  established themselves firmly.
