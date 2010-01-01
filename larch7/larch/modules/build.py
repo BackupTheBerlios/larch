@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.16
+# 2010.01.01
 
 import os, sys
 from glob import glob
@@ -270,7 +270,7 @@ class Builder:
 
             self.kversion = None
             for kv in os.listdir(config.ipath("lib/modules")):
-                if os.path.islink(config.ipath("lib/modules/%s/build" % kv)):
+                if os.path.isfile(config.ipath("lib/modules/%s/modules.dep" % kv)):
                     if self.kversion:
                         fatal_error(_("More than one set of kernel modules in %s")
                                 % config.ipath("lib/modules"))

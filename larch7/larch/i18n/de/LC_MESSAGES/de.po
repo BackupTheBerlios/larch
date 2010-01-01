@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: larch 7\n"
-"POT-Creation-Date: 2009-12-08 07:55+CET\n"
+"POT-Creation-Date: 2010-01-01 11:09+CET\n"
 "PO-Revision-Date: 2009-08-04 22:10+CEST\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -15,23 +15,23 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: larch.py:200
+#: larch.py:202
 msgid "Please enter root password"
 msgstr "Bitte 'root'-Passwort eingeben"
 
-#: larch.py:212
+#: larch.py:214
 msgid "Incorrect root password"
 msgstr "Falsches 'root'-Passwort"
 
-#: larch.py:215
+#: larch.py:217
 msgid "No root password, cancelling operation"
 msgstr "Kein 'root'-Passwort, Vorgang wird abgebrochen"
 
-#: larch.py:231
+#: larch.py:233
 msgid "Supershell couldn't be started"
 msgstr "'Supershell' konnte nicht starten"
 
-#: larch.py:321
+#: larch.py:320
 msgid "Enter '%s' application ('$' for path argument):"
 msgstr "'%s'-Anwendung eingeben ('$' für Pfad-Parameter):"
 
@@ -71,7 +71,7 @@ msgstr "FEHLER"
 msgid "This error could not be handled"
 msgstr "Konnte diesen Fehler nicht verdauen"
 
-#: larch.py:621
+#: larch.py:622
 msgid ""
 "   Please see '%s/%s'\n"
 "   for usage information.\n"
@@ -79,16 +79,16 @@ msgstr ""
 "   Siehe bitte '%s/%s'\n"
 "   für Gebrauchsanweisungen.\n"
 
-#: larch.py:639
+#: larch.py:640
 msgid "ERROR: Unsupported option - '%s'\n"
 msgstr "FEHLER: Option nicht zulässig - '%s'\n"
 
-#: larch.py:640
+#: larch.py:641
 msgid "Start without arguments or with '--pyqt' to start pyqt gui.\n"
 msgstr ""
 "Starte ohne Parameter oder mit '--pyqt', um pyqt-Oberfläche zu starten.\n"
 
-#: larch.py:641
+#: larch.py:642
 msgid "The command line interface is started with '-c':\n"
 msgstr "Verwende '-c', um im Befehlszeilenmodus zu starten:\n"
 
@@ -136,23 +136,23 @@ msgstr ""
 msgid "Squashing system.sqf failed"
 msgstr "Komprimierung der system.sqf-Datei ist fehlgeschlagen"
 
-#: modules/build.py:175
+#: modules/build.py:177
 msgid "Squashing mods.sqf failed"
 msgstr "Komprimierung der mods.sqf-Datei ist fehlgeschlagen"
 
-#: modules/build.py:194
+#: modules/build.py:196
 msgid "No squashfs module found\n"
 msgstr "Kein squashfs-Modul wurde gefunden\n"
 
-#: modules/build.py:204
+#: modules/build.py:206
 msgid "No aufs or unionfs module found\n"
 msgstr "Kein aufs- oder unionfs-Modul wurde gefunden\n"
 
-#: modules/build.py:208
+#: modules/build.py:210
 msgid "Package '%s' is needed by larch systems\n"
 msgstr "larch-Systeme brauchen das Paket '%s'\n"
 
-#: modules/build.py:211
+#: modules/build.py:213
 msgid ""
 "Without package 'syslinux' you will not be able\n"
 "to create syslinux or isolinux booting media\n"
@@ -160,7 +160,7 @@ msgstr ""
 "Das Paket 'syslinux' ist für die Herstellung\n"
 "syslinux und isolinux Boot-Medien notwendig\n"
 
-#: modules/build.py:215
+#: modules/build.py:217
 msgid ""
 "Without package 'cdrkit' (or 'cdrtools') you will\n"
 "not be able to create CD/DVD media\n"
@@ -168,7 +168,7 @@ msgstr ""
 "Das Paket 'cdrkit' (oder 'cdrtools') ist für die\n"
 "Herstellung CD/DVD-Medien notwendig\n"
 
-#: modules/build.py:219
+#: modules/build.py:221
 msgid ""
 "Without package 'eject' you will have problems\n"
 "using CD/DVD media\n"
@@ -176,7 +176,7 @@ msgstr ""
 "Das Paket 'eject' ist beim Einsatz CD/DVD-Boot-Medien\n"
 "sehr sinnvoll\n"
 
-#: modules/build.py:223
+#: modules/build.py:225
 msgid ""
 "WARNING:\n"
 "%s\n"
@@ -186,7 +186,7 @@ msgstr ""
 "%s\n"
 "    Verfahren fortsetzen?"
 
-#: modules/build.py:229
+#: modules/build.py:231
 msgid ""
 "ERROR:\n"
 "%s"
@@ -194,7 +194,7 @@ msgstr ""
 "FEHLER:\n"
 "%s"
 
-#: modules/build.py:256
+#: modules/build.py:258
 msgid ""
 "Problem running %s:\n"
 "  %s"
@@ -202,7 +202,7 @@ msgstr ""
 "Problem beim Ausführen von %s:\n"
 "  %s"
 
-#: modules/build.py:261
+#: modules/build.py:263
 msgid ""
 "More than one kernel found:\n"
 "  %s"
@@ -210,15 +210,15 @@ msgstr ""
 "Mehr als ein Kernel gefunden:\n"
 "  %s"
 
-#: modules/build.py:265
+#: modules/build.py:267
 msgid "No kernel found"
 msgstr "Kein Kernel gefunden"
 
-#: modules/build.py:273
+#: modules/build.py:275
 msgid "More than one set of kernel modules in %s"
 msgstr "Module von mehr als einem Kernel in %s gefunden"
 
-#: modules/build.py:299
+#: modules/build.py:301
 msgid ""
 "WARNING:\n"
 "  You seem to have installed a package containing modules\n"
@@ -238,11 +238,11 @@ msgstr ""
 "\n"
 "    Verfahren fortsetzen?"
 
-#: modules/build.py:308
+#: modules/build.py:310
 msgid "Couldn't find kernel modules"
 msgstr "Kernel-Module nicht gefunden"
 
-#: modules/build.py:328
+#: modules/build.py:330
 msgid "Couldn't find usable mkinitcpio preset: %s"
 msgstr "Brauchbare mkinitcpio-preset-Datei nicht gefunden: %s"
 
@@ -306,9 +306,9 @@ msgstr ""
 "Schon vorhandenes system.sqf wiederverwenden, um Zeit zu sparen, falls das "
 "Basis-System unverändert ist."
 
-#: modules/buildpage.py:62 modules/gui.py:63
+#: modules/buildpage.py:62 modules/gui.py:65
 msgid "Larchify"
-msgstr "Verlarchifizieren"
+msgstr "Larchifizieren"
 
 #: modules/buildpage.py:63
 msgid "Build the main components of the larch system"
@@ -426,143 +426,143 @@ msgstr "Mögliche Prozessorklassen: %s"
 msgid "Invalid bootloader: %s"
 msgstr "Ungültiger 'bootloader': %s"
 
-#: modules/gui.py:47
+#: modules/gui.py:49
 msgid "<em>larch</em> Live Arch Linux Construction Kit"
 msgstr "<em>larch</em> Live-Arch-Linux-Baukasten"
 
-#: modules/gui.py:48
+#: modules/gui.py:50
 msgid "View Log"
 msgstr "Protokoll Zeigen"
 
-#: modules/gui.py:49
+#: modules/gui.py:51
 msgid "This button switches to the log viewer"
 msgstr "Dieser Knopf wechselt zum Protokoll-Anzeige"
 
-#: modules/gui.py:50
+#: modules/gui.py:52
 msgid "Help"
 msgstr "Hilfe"
 
-#: modules/gui.py:51
+#: modules/gui.py:53
 msgid "This button switches to the documentation viewer"
 msgstr "Dieser Knopf wechselt zur Dokumentationsanzeige"
 
-#: modules/gui.py:52
+#: modules/gui.py:54
 msgid "Quit"
 msgstr "Schließen"
 
-#: modules/gui.py:53
+#: modules/gui.py:55
 msgid "Stop the current action and quit the program"
 msgstr "Aktuellen Vorgang anhalten und Anwendung schließen"
 
-#: modules/gui.py:61
+#: modules/gui.py:63
 msgid "Project Settings"
 msgstr "Projekteinstellungen"
 
-#: modules/gui.py:62
+#: modules/gui.py:64
 msgid "Installation"
 msgstr "Installation"
 
-#: modules/gui.py:64
+#: modules/gui.py:66
 msgid "Prepare Medium"
 msgstr "Medium Vorbereiten"
 
-#: modules/gui.py:65
+#: modules/gui.py:67
 msgid "Installation Tweaks"
 msgstr "Installation-Feinkontrolle"
 
-#: modules/gui.py:111
+#: modules/gui.py:113
 msgid "Processing ..."
 msgstr "Prozess läuft ..."
 
-#: modules/gui.py:112 modules/gui.py:160
+#: modules/gui.py:114 modules/gui.py:162
 msgid "Here you can follow the detailed, low-level progress of the commands."
 msgstr "Hier kann man die einzelnen Schritte detailliert verfolgen"
 
-#: modules/gui.py:116
+#: modules/gui.py:118
 msgid "An indication of the progress of the current operation, if possible"
 msgstr "Zeigt den Fortschritt der aktuellen Operation, insoweit möglich"
 
-#: modules/gui.py:117 modules/gui.py:252
+#: modules/gui.py:119 modules/gui.py:254
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: modules/gui.py:118
+#: modules/gui.py:120
 msgid "Stop the current action"
 msgstr "Aktuellen Vorgang anhalten"
 
-#: modules/gui.py:119
+#: modules/gui.py:121
 msgid "Done"
 msgstr "Fertig"
 
-#: modules/gui.py:159
+#: modules/gui.py:161
 msgid "Low-level Command Logging"
 msgstr "Protokoll der einzelnen Befehle"
 
-#: modules/gui.py:163
+#: modules/gui.py:165
 msgid "Clear"
 msgstr "Löschen"
 
-#: modules/gui.py:164 modules/gui.py:194
+#: modules/gui.py:166 modules/gui.py:196
 msgid "Hide"
 msgstr "Schließen"
 
-#: modules/gui.py:165 modules/gui.py:195
+#: modules/gui.py:167 modules/gui.py:197
 msgid "Go back to the larch controls"
 msgstr "Zurückkehren zu den larch-Kontrollen"
 
-#: modules/gui.py:192
+#: modules/gui.py:194
 msgid "Documentation"
 msgstr "Dokumentation"
 
-#: modules/gui.py:197
+#: modules/gui.py:199
 msgid "Go back in the viewing history"
 msgstr "Zurück in der Browser-Geschichte"
 
-#: modules/gui.py:199
+#: modules/gui.py:201
 msgid "Go forward in the viewing history"
 msgstr "Nach vorne in der Browser-Seitengeschichte"
 
-#: modules/gui.py:201
+#: modules/gui.py:203
 msgid "Reload the documentation for the current larch tab"
 msgstr "Die Dokumentation für die aktuelle larch-Seite anzeigen"
 
-#: modules/gui.py:203
+#: modules/gui.py:205
 msgid "Go to the general larch documentation index"
 msgstr "Das allgemeine larch-Inhaltsverzeichnis anzeigen"
 
-#: modules/gui.py:248
+#: modules/gui.py:250
 msgid "Editor"
 msgstr "Editor"
 
-#: modules/gui.py:251
+#: modules/gui.py:253
 msgid "OK"
 msgstr "Annehmen"
 
-#: modules/gui.py:253
+#: modules/gui.py:255
 msgid "Revert"
 msgstr "Zurücksetzen"
 
-#: modules/gui.py:254
+#: modules/gui.py:256
 msgid "Restore the text to its initial state"
 msgstr "Text zum ursprünglichen Zustand zurücksetzen"
 
-#: modules/gui.py:255
+#: modules/gui.py:257
 msgid "Copy"
 msgstr "Kopieren"
 
-#: modules/gui.py:256
+#: modules/gui.py:258
 msgid "Cut"
 msgstr "Ausschneiden"
 
-#: modules/gui.py:257
+#: modules/gui.py:259
 msgid "Paste"
 msgstr "Einfügen"
 
-#: modules/gui.py:258
+#: modules/gui.py:260
 msgid "Undo"
 msgstr "Rückgängig"
 
-#: modules/gui.py:259
+#: modules/gui.py:261
 msgid "Redo"
 msgstr "Wieder ausführen"
 
@@ -570,23 +570,23 @@ msgstr "Wieder ausführen"
 msgid "No 'mirrorlist' file found"
 msgstr "Keine 'mirrorlist'-Datei gefunden"
 
-#: modules/installation.py:153
+#: modules/installation.py:152
 msgid "Couldn't write to the installation path (%s)."
 msgstr "Konnte nicht im Installationsordner (%s) abspeichern."
 
-#: modules/installation.py:157
+#: modules/installation.py:156
 msgid "The installation path (%s) is mounted 'nodev'."
 msgstr "Installationspfad (%s) 'nodev' gemountet"
 
-#: modules/installation.py:165
+#: modules/installation.py:164
 msgid "The installation path (%s) is mounted 'noexec'."
 msgstr "Installationspfad (%s) 'noexec' gemountet"
 
-#: modules/installation.py:210
+#: modules/installation.py:209
 msgid "Package installation failed"
 msgstr "Paket-Installation fehlgeschlagen"
 
-#: modules/installation.py:244
+#: modules/installation.py:243
 msgid "Couldn't synchronize pacman database (pacman -Sy)"
 msgstr "pacman-Datenbank konnte nicht aktualisiert werden (pacman -Sy)"
 
@@ -1058,7 +1058,7 @@ msgstr "Aktuelles Projekt löschen"
 
 #: modules/projectpage.py:81
 msgid "The root directory of the Arch installation to larchify"
-msgstr "Das Root-Verzeichnis der zu verlarchifizierenden Arch-Installation"
+msgstr "Das Root-Verzeichnis der zu larchifizierenden Arch-Installation"
 
 #: modules/projectpage.py:83
 msgid "Change the root directory of the Arch installation"
@@ -1165,7 +1165,7 @@ msgstr ""
 
 #: modules/tweakpage.py:52
 msgid "Remove package(s)    [-Rs]"
-msgstr "Paket(e) entferenen  [-Rs]"
+msgstr "Paket(e) entfernen  [-Rs]"
 
 #: modules/tweakpage.py:53
 msgid "Remove one or more packages (space separated) using pacman -Rs"
