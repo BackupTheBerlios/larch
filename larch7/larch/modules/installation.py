@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.08
+# 2010.01.19
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -216,15 +216,15 @@ class Installation:
             supershell("cp -f %s %s" % (
                     config.working_dir + "/pacman.conf",
                     installation_path + "/etc/pacman.conf"))
-            # Replace mirrorlist
-            mf = config.working_dir + "/mirrorlist"
-            if not (config.get("usemirrorlist") and os.path.isfile(mf)):
-                mf = "/etc/pacman.d/mirrorlist"
-                if not os.path.isfile(mf):
-                    mf = None
-            if mf:
-                supershell("cp -f %s %s" % (mf,
-                        installation_path + "/etc/pacman.d/mirrorlist"))
+            # Replace mirrorlist - I think this shouldn't be done!
+#            mf = config.working_dir + "/mirrorlist"
+#            if not (config.get("usemirrorlist") and os.path.isfile(mf)):
+#                mf = "/etc/pacman.d/mirrorlist"
+#                if not os.path.isfile(mf):
+#                    mf = None
+#            if mf:
+#                supershell("cp -f %s %s" % (mf,
+#                        installation_path + "/etc/pacman.d/mirrorlist"))
 
         # Make a note of the installation's architecture
         supershell("echo '%s' > %s" % (config.get("platform"),
