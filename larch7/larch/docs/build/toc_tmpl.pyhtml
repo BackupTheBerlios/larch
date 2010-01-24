@@ -38,11 +38,42 @@
 <?py
 level = 1
 for item in items:
-    level, html = setLevel(level, int(item['level']))
+    l = int(item['level'])
+    while l > level:
+        html = '  '*level + '<ul>'
+        level += 1
 ?>
           #{html}
+<?py
+    #endwhile
+    while l < level:
+        level -= 1
+        html = '  '*level + '</ul>'
+?>
+          #{html}
+<?py
+    #endwhile
+?>
           ${'  '*level}<li class="level${level}"><a href="${item['filename']}">${item['pagetitle']}</a></li>
-<?py #endfor ?>
+<?py
+    subitems = item['anchors']
+    if subitems:
+        html = '  '*level + '<ul>'
+?>
+          #{html}
+<?py
+        for subitem in subitems:
+?>
+            ${'  '*level}<li class="level${level+1}"><a href="${item['filename']}#${subitem[1]}">${subitem[2]}</a></li>
+<?py
+        #endfor
+        html = '  '*level + '</ul>'
+?>
+          #{html}
+<?py
+    #endif
+#endfor
+?>
           </ul>
 
         </div>

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #
 
+doprint = False
+
 input_files = ( "larch_intro.html",
                 "larch_features.html",
                 "larch_quick.html",
@@ -20,7 +22,6 @@ input_files = ( "larch_intro.html",
                 "larch_console.html",
                 "larch_changes.html",
             )
-
 
 
 import os
@@ -91,7 +92,7 @@ class Parser:
             print "No pagetitle!"
             self.pagetitle = "???"
 
-        print "pagetitle = (%s | %s | '%s')" % self.pagetitle
+        dprint("pagetitle = (%s | %s | '%s')" % self.pagetitle)
 
         item = {
                 "filename"  : os.path.basename(path),
@@ -104,29 +105,11 @@ class Parser:
             }
 
         for c in self.collected:
-            print "GOT: '%s#%s': %s" % c
-        print
+            dprint("GOT: '%s#%s': %s" % c)
+        dprint()
 
         return item
 
-
-
-def setLevel(level, l):
-    if l > level:
-        html = '  '*level + '<ul>'
-        level += 1
-        while l > level:
-            level += 1
-            html += '<ul>'
-    elif l < level:
-        level -= 1
-        html = '  '*level + '</ul>'
-        while l < level:
-            html += '</ul>'
-            level -= 1
-    else:
-        html = ''
-    return (level, html)
 
 
 def generate(folder, webpage):
@@ -136,7 +119,7 @@ def generate(folder, webpage):
     index = 0
     for hfile in files:
         fpath = "%s/%s" % (folder, hfile["filename"])
-        print "Generating", fpath
+        dprint("Generating " + fpath)
         if index > 0:
             hf = files[index-1]
             hfile["plink"] = hf["filename"]
@@ -158,7 +141,7 @@ def generate(folder, webpage):
 
 
     tocfile = "%s/index.html" % folder
-    print "Generating", tocfile
+    dprint("Generating " + tocfile)
     output = engine.render("toc_tmpl.pyhtml", {"webpage": webpage, "items": files})
     fh = open(tocfile, "w")
     fh.write(output)
@@ -166,11 +149,16 @@ def generate(folder, webpage):
 
 
 
+def dprint(line=""):
+    if doprint:
+        print line
+
+
 if __name__ == "__main__":
     parser = Parser()
     files = []
     for fn in input_files:
-        print "Parsing", fn
+        dprint("Parsing " + fn)
         files.append(parser.parsefile("src/" + fn))
 
     import tenjin

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.01.01
+# 2010.01.24
 
 import os, sys
 from glob import glob
@@ -124,6 +124,10 @@ class Builder:
             supershell("cp -rf %s/rootoverlay/* %s" % (self.profile, self.overlay))
         # Ensure there is an /etc directory in the overlay
         supershell("mkdir -p %s/etc" % self.overlay)
+        # fix sudoers if any
+        if os.path.isfile("%s/etc/sudoers" % self.overlay):
+            supershell("chmod 0440  %s/etc/sudoers" % self.overlay)
+            supershell("chown root:root %s/etc/sudoers" % self.overlay)
 
 ###+ This code can be changed or omitted when the rc. script hooks have
 ###  established themselves firmly.
