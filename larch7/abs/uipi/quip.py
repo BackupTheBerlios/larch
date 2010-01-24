@@ -85,7 +85,7 @@ from the widget 'app1:showlog', with the single argument 'true'.
 """
 
 import os, sys, traceback, threading
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore, QtWebKit
 import json
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -692,18 +692,18 @@ class TextEdit(QtGui.QTextEdit, WBase):                     #qt
         QtGui.QTextEdit.paste(self)                         #qt
 
 
-class HtmlView(QtGui.QTextBrowser, WBase):                  #qt
+class HtmlView(QtWebKit.QWebView, WBase):                   #qt
     def __init__(self):
-        QtGui.QTextBrowser.__init__(self)                   #qt
+        QtWebKit.QWebView.__init__(self)                    #qt
 
     def x__html(self, content):
         self.setHtml(content)                               #qt
 
     def setUrl(self, url):
-        self.setSource(QtCore.QUrl(url))                    #qt
+        self.load(QtCore.QUrl(url))                         #qt
 
     def prev(self):
-        self.backward()                                     #qt
+        self.back()                                         #qt
 
     def next(self):
         self.forward()                                      #qt

@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
-# 2010.01.19
+# 2010.01.24
 pkgname=larch
-pkgver=7.0.109
+pkgver=7.0.120
 pkgrel=1
 
 pkgdesc="Design your own 'live' Archlinux CDs and USB-sticks (etc.)"
@@ -23,6 +23,11 @@ build() {
     cp -dr ${startdir}/${d} ${_destdir}
   done
 
+  # Build documentation
+  mv ${_destdir}/docs/build ${srcdir}
+  python ${srcdir}/build/builddocs.py
+  cp -r ${srcdir}/build/html ${_destdir}/docs
+  
   cp ${startdir}/larch.py ${_destdir}
   ln -s /${_destdir}/larch.py usr/bin/larch
 

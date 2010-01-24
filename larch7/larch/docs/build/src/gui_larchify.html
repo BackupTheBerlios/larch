@@ -1,0 +1,68 @@
+<div class="larchdocs">
+<h2 id="pagetitle" level="2">GUI Tab: Larchify</h2>
+
+<p>You can repeat the 'larchify' command as often as you like,
+to test various configurations or to build differently configured
+<em>live</em> systems with the same underlying packages. This works
+because the 'larchify' process itself does not change anything within the
+installation - all the files it generates are placed in the 'overlay',
+which (thanks to <em>aufs</em>) will just cover up any old versions of
+the added files in the underlying installation. At present <em>larch</em>
+does not support the 'deletion' of installation files, they can only be
+overlayed by replacements.
+</p>
+
+<h3>Locales</h3>
+<p>You can select the (glibc) locales supported by the <em>live</em>
+system by editing the /etc/locale.gen file in the overlay. If there is
+no such file initially it will be copied from the new installation's
+(not the host's!) version. See (for example) the <em>Arch Wiki</em> for
+more information about locales. Note that <em>larch</em> tries to leave
+the locale files in the installation itself unchanged, new files are
+placed in the overlay.
+</p>
+
+<h3>/etc/rc.conf</h3>
+<p>This is the central configuration file for an <em>Arch Linux</em>
+system. You can edit it here (see for example the <em>Arch Wiki</em> for
+more information about this file).
+</p>
+
+<h3>Advanced options - the defaults are normally fine</h3>
+
+<h4>mkinitcpio.conf</h4>
+<p>Here you can edit the mkinitcpio.conf used for building the <em>initramfs</em>
+for the <em>live</em> system. N.B. The details of mkinitcpio handling in
+<em>larch</em> are a bit complicated, so if you change something here
+please be careful - you are not editing /etc/mkinitcpio.conf, but rather
+etc/mkinitcpio.conf.larch0 in the 'rootoverlay' of the profile. Also, don't
+change the <em>larch</em> hooks.
+</p>
+
+<h4>overlay</h4>
+<p>Apart from the few customization options offered by the GUI directly, it
+is possible to include any files in the <em>live</em> system by adding them
+at the appropriate path within the overlay directory ('rootoverlay') of
+the profile. This button opens a file browser on the 'rootoverlay' directory
+of the current profile.
+</p>
+
+<h4>ssh-keys</h4>
+<p>See <a href="larch_ssh.html#ssh_hostkeys">ssh host keys</a>. The default
+is to generate these keys (if the <em>openssh</em> package is installed).
+</p>
+
+<h4>Reuse existing system.sqf</h4>
+
+<p>After 'larchify' has been run, the base installation will have been
+'squashed' into a compressed archive. Setting this option will prevent
+the repetition of this compression (which is quite a lengthy process) on
+the next run of 'larchify'. This should only be enabled if no changes
+have been made to the base installation (otherwise these changes will
+not be picked up). This is a very useful option, also for non-'advanced'
+users, but I have put it in the 'advanced' section because you really
+need to consider whether you have changed anything in the installation
+before using it.
+</p>
+</div>
+

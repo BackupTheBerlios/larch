@@ -1,0 +1,138 @@
+@charset "UTF-8";
+/* This uses YAML's basic containers, but in a highly customized way */
+
+@media screen, projection
+{
+  /**
+   * (en) Forcing vertical scrollbars in IE8, Firefox, Webkit & Opera
+   * (de) Erzwingen vertikaler Scrollbalken in IE8, Firefox, Webkit & Opera
+   *
+   * @workaround
+   * @affected IE8, FF, Webkit, Opera
+   * @css-for all
+   * @valid CSS3
+   */
+
+  body { overflow-y: scroll; }
+
+  /*------------------------------------------------------------------------------------------------------*/
+
+  /**
+   * (en) Formatting YAML's  basic layout elements
+   * (de) Gestaltung des YAML Basis-Layouts
+   */
+
+  /* (en) Marginal areas & page background */
+  /* (de) Randbereiche & Seitenhintergrund */
+  body {background: #c55500 url(bark.jpg) repeat fixed;}
+
+  /* (en) Centering layout in old IE-versions */
+  /* (de) Zentrierung des Layouts in alten IE-versionen */
+  body { text-align: center; }
+  .page_margins { text-align:left; margin: 20px auto; }
+
+  /* (en) Layout: width, background, borders */
+  /* (de) Layout: Breite, Hintergrund, Rahmen */
+  .page_margins { width: 760px; background: #abf39c url(green-gradient200.jpg) repeat-y; }
+
+  /* (en) Designing main layout elements */
+  /* (de) Gestaltung der Hauptelemente des Layouts */
+
+  #header {
+    color: #c55500;
+    padding: 20px 2em 1em 20px;
+    border-bottom: 1px #45f202 solid;
+    margin-bottom: 20px;
+  }
+
+  #footer { margin-left: 200px; padding: 10px; border-left: 1px #45f202 solid; }
+  #footer-content {
+    color:#666;
+    padding: 10px 20px;
+    border: 2px #c55500 solid;
+    line-height: 1.5em;
+  }
+
+  /*------------------------------------------------------------------------------------------------------*/
+
+  /**
+   * (en) Formatting content container
+   * (de) Formatierung der Inhalts-Container
+   *
+   * |-------------------------------|
+   * | #header                       |
+   * |-------------------------------|
+   * | #col3        | #col1          |
+   * | fixed 200px  | 560px          |
+   * |-------------------------------|
+   * | #footer                       |
+   * |-------------------------------|
+   */
+
+  /* right column | Rechte Spalte */
+  #col1 { width: 559px; float: right; min-height: 400px; border-left: 1px #45f202 solid; }
+  #col1_content { padding-left: 10px; padding-right: 20px; }
+
+  #col3 { width: 200px; margin: 10px 560px 0 0; }
+  #col3_content { padding-left: 10px; padding-right: 10px; }
+  html>body #col3 {  /* nur fuer moderne Browser! */
+    position: fixed;
+  }
+
+  /*------------------------------------------------------------------------------------------------------*/
+
+  /**
+   * (en) Styling of layout specific elements
+   * (de) Gestaltung layoutabhängiger Elemente
+   */
+
+  #header h1 {
+    font-weight:bold;
+    font-size:2.5em;
+    letter-spacing:-1px;
+    line-height:65%;
+    color:#000;
+  }
+
+  #header span { color:#c55500; }
+
+  #footer a { color: #999; background:transparent; font-weight: bold; }
+  #footer a:focus,
+  #footer a:hover,
+  #footer a:active {color: #4D87C7; background-color: transparent; text-decoration:underline; }
+
+  .vlist { margin-top: 30px; }
+
+  li h6 { font-weight: bold; }
+  .indent1 { margin-left: 10px; }
+  .indent2 { margin-left: 20px; }
+  .level1 { font-size: 120%; }
+  .level2 { font-size: 110%; }
+  .rlink { font-size: 150%; color: #b04000; }
+
+  li { margin-bottom: 3px; }
+  h4 { font-weight: bold; }
+  table { border-top: 2px solid #c55500; border-bottom: 2px solid #c55500; margin: 15px; }
+  tbody td, tbody th { border: 1px solid #c55500; }
+  .empty td { padding: 1px; }
+
+ /**
+  * ------------------------------------------------------------------------------------------------- #
+  *
+  * Skiplinks
+  *
+  * (en) Visual styling for skiplink navigation
+  * (de) Visuelle Gestaltung der Skiplink-Navigation
+  *
+  * @section content-skiplinks
+  */
+
+  #skiplinks a.skip:focus,
+  #skiplinks a.skip:active {
+    color: #fff;
+    background: #333;
+    border-bottom: 1px #000 solid;
+    padding: 10px 0;
+    text-decoration:none;
+  }
+}

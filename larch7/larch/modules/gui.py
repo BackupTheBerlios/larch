@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.08
+# 2010.01.24
 
 from uipi import Uipi
 import locale, os
@@ -39,7 +39,7 @@ class Ui(Uipi):
 
     def init(self):
         # Build the main window
-        self.widget("Window", ":larch", title="larch", size="750_450",
+        self.widget("Window", ":larch", title="larch", size="760_560",
                 icon="images/larchicon.png", closesignal="$$$uiclose$$$")
 
         # - Header
