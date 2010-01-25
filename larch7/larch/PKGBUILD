@@ -1,12 +1,13 @@
 # Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
-# 2010.01.24
+# 2010.01.25
 pkgname=larch
-pkgver=7.0.122
+pkgver=7.0.130
 pkgrel=1
 
 pkgdesc="Design your own 'live' Archlinux CDs and USB-sticks (etc.)"
 url="http://larch.berlios.de"
 depends=(uipi python-pexpect)
+optdepends=('larch-profiles: for example build profiles')
 arch=(any)
 license=('GPL')
 install=larch.install
@@ -19,7 +20,7 @@ build() {
   mkdir -p ${_destdir}
 
   rm -f ${startdir}/modules/*.pyc
-  for d in buildscripts cd-root data docs i18n images modules profiles scripts; do
+  for d in buildscripts cd-root data docs i18n images modules scripts; do
     cp -dr ${startdir}/${d} ${_destdir}
   done
 
@@ -27,7 +28,7 @@ build() {
   mv ${_destdir}/docs/build ${srcdir}
   python ${srcdir}/build/builddocs.py
   cp -r ${srcdir}/build/html ${_destdir}/docs
-  
+
   cp ${startdir}/larch.py ${_destdir}
   ln -s /${_destdir}/larch.py usr/bin/larch
 

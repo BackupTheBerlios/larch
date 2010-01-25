@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.04
+# 2010.01.24
 
 """This module handles the basic framework and configuration of the
 larch build system.
@@ -51,6 +51,8 @@ defaults = {    "install_path"  : "/home/larchbuild",
                 "medium_btldr"  : "grub",   # "grub" / "syslinux" / "none"
                 "medium_search" : "search", # "search" / "uuid" / "label" / "device"
                 "medium_label"  : "LARCH-7",
+                "isoA"          : "larch_7",
+                "isopublisher"  : "designed by gradgrind, licence: GPL",
     }
 
 

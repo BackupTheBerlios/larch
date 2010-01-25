@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.03
+# 2010.01.25
 
 
 """Implement a command line driven user interface for larch.
@@ -213,6 +213,8 @@ def show_project_info():
     infoline(_("Bootloader:"), config.get("medium_btldr"))
     infoline(_("Medium Detection:"), config.get("medium_search"))
     infoline(_("Medium Label:"), config.get("medium_label"))
+    infoline(_("iso 'application ID':"), config.get("isoA"))
+    infoline(_("iso 'publisher':"), config.get("isopublisher"))
     infoline(_("Package Cache:"), config.get("pacman_cache"))
 
 def show_projects():
@@ -321,6 +323,14 @@ def set_label(label):
     ui.sendsignal("$*new_label*$", label)
 
 
+def set_isoa(label):
+    ui.sendsignal("$*new_isoa*$", label)
+
+
+def set_isop(label):
+    ui.sendsignal("$*new_isop*$", label)
+
+
 def pacman_s(*names):
     ui.sendsignal("&*pacmanS*&", " ".join(names))
 
@@ -365,6 +375,8 @@ function_list = (
     [set_bootloader, "set_bootloader", "bl:"],
     [set_medium_detection, "set_medium_detection", "md:"],
     [set_label, "set_label", "lab:"],
+    [set_isoa, "set_isoa", "isoa:"],
+    [set_isop, "set_isop", "isop:"],
     [pacman_s, "pacman_s", "ps:"],
     [pacman_r, "pacman_r", "pr:"],
     [pacman_u, "pacman_u", "pu:"],

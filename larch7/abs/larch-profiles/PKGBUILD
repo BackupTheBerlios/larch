@@ -1,0 +1,17 @@
+# Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
+# 2010.01.25
+pkgname=larch-profiles
+pkgver=7.0.0
+pkgrel=1
+
+pkgdesc="Example 'profiles' for larch 'live' Arch Linux builder"
+url="http://larch.berlios.de"
+arch=(any)
+license=('GPL')
+
+build() {
+  _destdir=opt/apps/larch
+  cd ${pkgdir}
+  mkdir -p ${_destdir}
+  cp -dr ${startdir}/profiles ${_destdir}
+}

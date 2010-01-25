@@ -21,7 +21,13 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.07
+# 2010.01.25
+
+#TODO
+#####
+#Add setters for isopublisher and isoA in the iso specific tab.
+#They can be LineEdits.
+#####
 
 import os
 
@@ -47,11 +53,15 @@ class MediumPage:
                 (":none*toggled", self.none_toggled),
                 ("&-:selectpart*clicked", self.selectpart),
                 ("&-:changelabel*clicked", self.changelabel),
+                ("&-:changeisoa*clicked", self.changeisoa),
+                ("&-:changeisop*clicked", self.changeisop),
                 ("&-:make*clicked", self.makedevice),
                 ("&-:bootcd*clicked", self.makebootiso),
                 (":cdroot*clicked", self.cdroot),
                 (":sessionsave*toggled", self.sessionsaving),
                 ("$*new_label*$", self.new_label),
+                ("$*new_isoa*$", self.new_isoa),
+                ("$*new_isop*$", self.new_isop),
                 ("&makelive&", self.makelive),
                 ("&bootiso&", self.bootiso),
             ]
@@ -63,8 +73,19 @@ class MediumPage:
                     (":medium_partition", _("Partition (disk / USB-stick)")),
                 ],
                 tt=_("You can choose installation to iso (for CD/DVD) or a partition (e.g. USB-stick)"))
-        ui.widget("Label", ":lmiso",
-                text=_("There are no options specific to iso media."))
+
+        ui.widget("Label", ":lmisoa",
+                text=_("Application ID:"))
+        ui.widget("LineEdit", ":isoa", ro=True,
+                tt=_("The text passed to mkisofs with the -A option"))
+        ui.widget("Button", "^&-:changeisoa", text=_("Change"),
+                tt=_("Change the application ID of the iso"))
+        ui.widget("Label", ":lmisop",
+                text=_("Publisher:"))
+        ui.widget("LineEdit", ":isop", ro=True,
+                tt=_("The text passed to mkisofs with the -publisher option"))
+        ui.widget("Button", "^&-:changeisop", text=_("Change"),
+                tt=_("Change the publisher data of the iso"))
 
         ui.widget("Label", ":lm2", text=_("Partition:"))
         ui.widget("LineEdit", ":larchpart", ro=True,
@@ -126,7 +147,11 @@ class MediumPage:
                     ":bootloader", "*SPACE", ":cdroot"]],
                 ["*HBOX*", ":bootlines", ":grubtemplate", ":syslinuxtemplate"],
                 "*HLINE", ["*HBOX*", "*SPACE", "&-:make"]])
-        ui.layout(":medium_iso", ["*VBOX*", "*SPACE", ":lmiso", "*SPACE"])
+        ui.layout(":medium_iso", ["*VBOX*", "*SPACE",
+                ["*HBOX*", ":lmisoa", "*SPACE", "&-:changeisoa"],
+                ":isoa", "*SPACE",
+                ["*HBOX*", ":lmisop", "*SPACE", "&-:changeisop"],
+                ":isop"])
         ui.layout(":medium_partition", ["*VBOX*",
                 ["*HBOX*", ":lm2", ":larchpart", "&-:selectpart", ":noformat"],
                 ["*HBOX*", ":detection", ["*VBOX*",
@@ -170,6 +195,8 @@ class MediumPage:
         ui.command(":larchboot.set", search == "search")
 
         ui.command(":labelname.x__text", config.get("medium_label"))
+        ui.command(":isoa.x__text", config.get("isoA"))
+        ui.command(":isop.x__text", config.get("isopublisher"))
         ui.command(":larchpart.x__text")
 
         ui.command(":sessionsave.set", not os.path.isfile(self.profile
@@ -266,6 +293,33 @@ class MediumPage:
         text = text.strip().replace(" ", "_")
         config.set("medium_label", text)
         ui.command(":labelname.x__text", text)
+
+
+    def changeisoa(self):
+        ok, text = ui.ask("textLineDialog",
+                _("Enter new application ID for the boot iso:"),
+                None, config.get("isoA"))
+        if ok:
+            self.new_isoa(text)
+
+
+    def new_isoa(self, text):
+        config.set("isoA", text)
+        ui.command(":isoa.x__text", text)
+
+
+
+    def changeisop(self):
+        ok, text = ui.ask("textLineDialog",
+                _("Enter new publisher for the boot iso:"),
+                None, config.get("isopublisher"))
+        if ok:
+            self.new_isop(text)
+
+
+    def new_isop(self, text):
+            config.set("isopublisher", text)
+            ui.command(":isop.x__text", text)
 
 
     def makedevice(self):
