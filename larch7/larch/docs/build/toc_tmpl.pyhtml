@@ -8,7 +8,7 @@
 <title>Table of Contents</title>
 <!-- (en) Add your meta data here -->
 
-<link href="css/larchdocs${'_web' if webpage else ''}.css" rel="stylesheet" type="text/css"/>
+<link href="css/larchdocs.css" rel="stylesheet" type="text/css"/>
 <!--[if lte IE 7]>
 <link href="css/yaml/core/iehacks.css" rel="stylesheet" type="text/css" />
 <![endif]-->
@@ -17,20 +17,37 @@
 <body>
 <!-- skip link navigation -->
 <ul id="skiplinks">
+    <li><a class="skip" href="#col1">Skip to main content (Press Enter).</a></li>
 <?py if webpage: ?>
     <li><a class="skip" href="#col3">Skip to navigation (Press Enter).</a></li>
 <?py #endif ?>
-    <li><a class="skip" href="#col1">Skip to main content (Press Enter).</a></li>
 </ul>
 
 <div class="page_margins">
   <div class="page">
-     <!-- begin: #col1 - first float column -->
+    <div id="top"><div id="tm"></div></div>
+     <!-- begin: #col1 -->
       <div id="col1" role="main">
-        <div id="col1_content" class="clearfix">
+        <div id="col1_content">
           <div id="header" role="banner">
             <h1><span><em>live Arch Linux</em> builder</span></h1>
           </div>
+
+      <!-- begin: #col3 navigation column -->
+      <div id="col3" role="complementary">
+        <div id="col3_content">
+          <img class="indent2" alt="larch logo" src="css/screen/larch150x.png" width="150" height="150" />
+<?py if webpage: ?>
+              <div class="vlist">
+                <ul>
+                  <li><a href="../index.html"><h6 class="rlink">Home</h6></a></li>
+                </ul>
+              </div>
+<?py #endif ?>
+        </div>
+      </div>
+      <!-- end: #col3 -->
+
           <h2>Table of Contents</h2>
           <p>This documentation covers <em>larch</em> version 7.0.</p>
 
@@ -76,33 +93,19 @@ for item in items:
 ?>
           </ul>
 
+          <div class="topref"><a href="#">Top</a></div>
         </div>
-      </div>
-      <!-- end: #col1 -->
-      <!-- begin: #col3 static column -->
-      <div id="col3" role="complementary">
-        <div id="col3_content">
-          <img class="indent2" alt="larch logo" src="css/screen/larch150x.png" width="150" height="150" />
-<?py if webpage: ?>
-              <div class="vlist">
-                <ul>
-                  <li><a href="../index.html"><h6 class="rlink">Home</h6></a></li>
-                </ul>
-              </div>
-<?py #endif ?>
-        </div>
-        <div id="ie_clearing">&nbsp;</div>
-        <!-- End: IE Column Clearing -->
-      </div>
-      <!-- end: #col3 -->
     <!-- begin: #footer -->
     <div id="footer">
       <div id="footer-content" role="contentinfo">© 2010 Michael Towers<br />
-        Layout assisted by <a href="http://www.yaml.de/">YAML</a> and
+        Page layout assisted by <a href="http://www.yaml.de/">YAML</a> and
         <a href="http://www.kuwata-lab.com/tenjin/">pyTenjin</a>
       </div>
     </div>
     <!-- end: #footer -->
+      </div>
+      <!-- end: #col1 -->
+    <div id="bottom"><div id="bl"><div id="bm"></div></div></div>
   </div>
 </div>
 <!-- full skiplink functionality in webkit browsers -->

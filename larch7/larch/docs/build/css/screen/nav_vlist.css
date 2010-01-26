@@ -19,30 +19,14 @@
 
 @media all
 {
-  /* title */
-  h6.vlist {
-    font-family:Arial, Helvetica, sans-serif;
-    font-weight:bold;
-    font-size:100%;
-    width:90%;
-    padding:3px 0px 3px 10%; /* LTR */
-    margin:0;
-    color:#444;
-    background-color:#fff;
-    border-top:2px #45f202 solid;
-    border-bottom:4px #888 solid;
-  }
-
   .vlist {
-    width:100%;
     overflow:hidden;
     margin:0 0 1.5em 0;
-    list-style-type:none;
+    border-top:4px #45f202 solid;
     border-bottom:2px #45f202 solid;
   }
 
   .vlist ul {
-    list-style-type:none;
     margin:0;
     padding:0;
   }
@@ -82,10 +66,8 @@
   }
 
   /* Level 1 */
-  .vlist li a,
-  .vlist li strong,
-  .vlist li span { width:90%; padding-left:10%; } /* LTR */
-
+  .vlist li a { padding-left: 15px; }
+  .vlist li a:focus { background-color:#45f202; }
   .vlist li a:hover,
   .vlist li a:active { background-color:#e08000; color:#fff; }
 
