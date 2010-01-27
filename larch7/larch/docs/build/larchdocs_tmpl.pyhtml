@@ -59,7 +59,7 @@
 
 #{source}
 
-          <div class="topref"><a href="#">Top</a></div>
+          <div class="topref"><a href="#top">Top</a></div>
         </div>
     <!-- begin: #footer -->
     <div id="footer">
