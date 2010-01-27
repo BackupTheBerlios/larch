@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
-# 2010.01.24
+# 2010.01.27
 pkgname=uipi
-pkgver=1.12
+pkgver=1.13
 pkgrel=1
 _pylib=/usr/lib/python2.6/site-packages
 

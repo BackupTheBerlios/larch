@@ -2,7 +2,7 @@
 #
 # base.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.01.24
+# 2010.01.27
 
 """This module handles the basic framework and configuration of the
 larch build system.
@@ -84,7 +84,7 @@ class LarchConfig:
             # If the host is not Arch, there will be no pacman.
             # (If there is some other program at "/usr/bin/pacman" that's
             # a real spanner in the works.)
-            self.pacman = base_dir + "/run/pacman"
+            self.pacman = base_dir + "/pacman"
             if not os.path.isfile(self.pacman):
                 fatal_error(_("No pacman executable found"))
 
@@ -183,8 +183,9 @@ class LarchConfig:
 
 
     def update(self):
-        with open(self.config_file, 'w') as configfile:
-            self.config.write(configfile)
+        configfile = open(self.config_file, 'w')
+        self.config.write(configfile)
+        configfile.close()
 
 
     def profiles(self):

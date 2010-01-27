@@ -3,7 +3,7 @@
 #
 # quip.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.06
+# 2010.01.27
 
 """UIP - User Interface Program
 
@@ -86,7 +86,10 @@ from the widget 'app1:showlog', with the single argument 'true'.
 
 import os, sys, traceback, threading
 from PyQt4 import QtGui, QtCore, QtWebKit
-import json
+try:
+    import json
+except:
+    import simplejson as json
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
 #TODO

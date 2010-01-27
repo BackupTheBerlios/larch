@@ -2,7 +2,7 @@
 #
 # installation.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.01.19
+# 2010.01.27
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -104,8 +104,12 @@ class Installation:
                             if mf:
                                 line = "Include = %s\n" % mf
                             elif not os.path.isfile("/etc/pacman.d/mirrorlist"):
-                                config_error(_("No 'mirrorlist' file found"))
-                                break
+                                smlist = base_dir + "/data/mirrorlist"
+                                if os.path.isfile(smlist):
+                                    line = "Include = %s\n" % smlist
+                                else:
+                                    config_error(_("No 'mirrorlist' file found"))
+                                    break
 
                     line = line.replace("*platform*", platform)
                 fho.write(line)

@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.08
+# 2010.01.27
 
 REPO="ftp://ftp.berlios.de/pub/larch/larch7/i686"
 #REPO=file://$( readlink -f larchrepo )
@@ -31,7 +31,6 @@ if [ "$1" = "-h" ]; then
     echo "        # Display this information."
     echo "larch-setup"
     echo "        # Set up a larch build environment in the current directory."
-    echo "        # x86_64 should be detected automatically."
     echo
     echo "This script unpacks larch, so that it"
     echo "can be run from this directory, without installing."
@@ -39,9 +38,10 @@ if [ "$1" = "-h" ]; then
     echo
     echo "TODO:"
     echo "If there is no pacman in the PATH, a package containing a"
-    echo "statically linked version of pacman and the configuration"
-    echo "files it needs can be downloaded from the larch site and"
-    echo "unpacked in the larch/run directory."
+    echo "pacman binary and the libraries and configuration files it needs"
+    echo "will be downloaded from the larch site and unpacked in the"
+
+    echo" larch/run directory."
     echo "Also repo-add is extracted there and a pacman.conf is generated in"
     echo "the current directory, presenting a dialog for choosing the package"
     echo "server."
@@ -49,11 +49,6 @@ if [ "$1" = "-h" ]; then
     echo "directory."
     echo
     exit
-fi
-
-sysarch="$( uname -m )"
-if [ "${sysarch}" != "x86_64" ]; then
-    sysarch="i686"
 fi
 
 # Get path to this directory, via the location of this script
@@ -79,24 +74,31 @@ fetch ()
 }
 
 rm -f *.pkg.tar.gz
-rm -rf tmp
-mkdir tmp
-cd tmp
+rm -rf db
+mkdir db
+cd db
 fetch larch.db.tar.gz
 tar -xzf larch.db.tar.gz
-d=$( ls | grep "^larch-7" )
-larchpak=$( grep -A 1 -e "%FILENAME%" ${d}/desc | grep -v "%" )
 cd ${scriptdir}
+d=$( ls db | grep "^larch-7" )
+larchpak=$( grep -A 1 -e "%FILENAME%" db/${d}/desc | grep -v "%" )
 fetch ${larchpak}
-cd tmp
-d=$( ls | grep "^uipi-" )
-larchpak=$( grep -A 1 -e "%FILENAME%" ${d}/desc | grep -v "%" )
-cd ${scriptdir}
+d=$( ls db | grep "^uipi-" )
+larchpak=$( grep -A 1 -e "%FILENAME%" db/${d}/desc | grep -v "%" )
 fetch ${larchpak}
 
 rm -rf tmp
 mkdir tmp
 tar -xzf larch-7*.pkg.tar.gz -C tmp
+
+if [ "$1" != "-p" ]; then
+    d=$( ls db | grep "^larch-profiles-" )
+    larchpak=$( grep -A 1 -e "%FILENAME%" db/${d}/desc | grep -v "%" )
+    fetch ${larchpak}
+    tar -xzf larch-profiles-*.pkg.tar.gz -C tmp
+fi
+
+rm -rf db
 mv tmp/opt/apps/larch larch0
 tar -xzf uipi-*.pkg.tar.gz -C tmp
 mv tmp/usr/bin/quip larch0
@@ -106,26 +108,16 @@ rm -rf tmp
 ln -s larch0/larch.py larch
 
 # Check that pacman is available.
-#if ! which pacman &>/dev/null; then
-    # Fetch the pacman package from the larch site if there isn't a
-    # pacman script in larch/run
-#    if ! [ -f larch/run/pacman ]; then
-#        fetch pacman-pack.tar.gz
-#        if ! [ -f pacman-pack.tar.gz ]; then
-#            echo "ERROR: couldn't fetch pacman package"
-#            exit 1
-#        fi
-        # Extract the needed files from the package
-#        tar -xzf pacman-pack.tar.gz
-#        cp larch/config/mirrorlist repolist
-#        if ! [ -f pacman.conf ]; then
-#            cp larch/config/pacman.conf pacman.conf
-            # Select a package server
-#            larch/run/getPackageServer -i repolist pacman.conf
-#            cp pacman.conf pacman.conf.0
-            # Prevent error messages because of missing /etc/pacman.d/mirrorlist
-#            sed 's|^\(Include =\)|#\1|' -i pacman.conf
-#        fi
-#    fi
-#fi
+if ! which pacman &>/dev/null; then
+    # Fetch the pacman package from the larch site
+    fetch pacman-allin.tar.gz
+    if ! [ -f pacman-allin.tar.gz ]; then
+        echo "ERROR: couldn't fetch pacman package"
+        exit 1
+    fi
+   # Extract the package
+    tar -xzf pacman-allin.tar.gz
+    cp -a pacman-allin/* larch0
+    rm -rf pacman-allin
+fi
 

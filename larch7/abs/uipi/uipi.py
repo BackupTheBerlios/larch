@@ -1,6 +1,6 @@
 # uipi.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.11.25
+# 2010.01.27
 
 """This is an example of an interface class to the larch text-line
 based ui toolkit ([q]uip).
@@ -31,7 +31,10 @@ overridden.
 import sys, traceback
 from subprocess import Popen, PIPE, STDOUT
 import threading
-import json
+try:
+    import json
+except:
+    import simplejson as json
 
 
 def debug(text):
