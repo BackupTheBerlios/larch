@@ -2,7 +2,7 @@
 #
 # console.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.01.25
+# 2010.02.01
 
 
 """Implement a command line driven user interface for larch.
@@ -46,6 +46,7 @@ class Ui(Uipi):
         self.logger = Logger()
         self.out_lock = threading.Lock()
         self.progress = Progress(self.logger)
+        self.docviewer = None
 
         # Associate command names with functions (aliases are allowed)
         self.functions = {}

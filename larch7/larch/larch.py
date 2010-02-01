@@ -2,7 +2,7 @@
 #
 # larch.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.09
+# 2010.02.01
 
 
 """
@@ -141,7 +141,8 @@ class Command:
 
 
     def pageswitch(self, index):
-        ui.docviewer.gohome(doc_home[index])
+        if ui.docviewer:
+            ui.docviewer.gohome(doc_home[index])
         self.pages[index].setup()
 
 
