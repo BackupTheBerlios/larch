@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# get-blkinfo
+
+# Use blkinfo to get information about available devices.
+# Without arguments, blkinfo is called 'straight', returning all info
+# on all devices, e.g.:
+#   /dev/loop0: TYPE="squashfs"
+#   /dev/loop1: TYPE="squashfs"
+#   /dev/loop2: TYPE="squashfs"
+#   /dev/sda1: UUID="e8172daa-8f47-4a93-bcf5-e267866390ca" TYPE="ext2"
+#   /dev/sdb2: UUID="9d64eb0b-8dcd-b6b5-1e70-c74141643566" TYPE="linux_raid_member"
+#   /dev/sda2: UUID="9d64eb0b-8dcd-b6b5-1e70-c74141643566" TYPE="linux_raid_member"
+#   /dev/sdb1: UUID="ab5cfc68-7922-b7dd-8c58-56b1a2506cbd" TYPE="linux_raid_member"
+#   /dev/sdc1: UUID="f5c4285f-0415-42cd-9bd4-21cdcdbe0fe9" TYPE="ext2"
+#   /dev/sdd2: LABEL="SWAP2" UUID="cdc69cbd-300f-4fd1-ac83-2edc5aa89157" TYPE="swap"
+
+# Note that this is without any detection of raid and lvm partitions.
+# /def/sda1 is actually also a raid partition but has been formatted (its
+# 'partner' - /dev/sdb1 - is not shown as "ext2", which seems a bit strange,
+# unless I made a mistake ...), so one should probably also check the
+# partition's type-id field.
+
+# By passing a device (partition) as argument you can get the info for
+# a specific device.
+# By adding, as second argument, a qualifier you can get just one piece
+# of information about the partition. The interesting qualifiers are
+# probably:
+#    TYPE (file-system type)
+#    UUID
+#    LABEL
+
+if [ -n "$2" ]; then
+    blkid -c /dev/null -o value -s $2 $1
+else
+    blkid -c /dev/null $1
+fi

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# do-unmount
+
+# Unmount a partition mounted at $1
+
+umount -l "$1"

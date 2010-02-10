@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# fix-system1  - The first set of tweaks to the installed system
+
+installmp="$1"
+fail=0
+
+# Copy kernel - first get the original filename
+kname="$( cat '/.livesys/medium/larch/kernelname' )"
+[ -z "${kname}" ] && exit 1
+if ! [ -f "${installmp}/boot/${kname}" ]; then
+    for bd in boot isolinux syslinux; do
+        if [ -f "/.livesys/medium/${bd}/larch.kernel" ]; then
+            cp "/.livesys/medium/${bd}/larch.kernel" "${installmp}/boot/${kname}" || fail=1
+            break
+        fi
+    done
+fi
+
+# Make special directories, etc.
+mkdir -m 1777 "${installmp}/tmp" || fail=1
+mkdir "${installmp}/media" || fail=1
+mkdir "${installmp}/mnt" || fail=1
+mkdir "${installmp}/sys" || fail=1
+mkdir "${installmp}/proc" || fail=1
+mkdir "${installmp}/dev" || fail=1
+mknod "${installmp}/dev/console" c 5 1 || fail=1
+mknod "${installmp}/dev/null" c 1 3 || fail=1
+mknod "${installmp}/dev/zero" c 1 5 || fail=1
+
+# Clear out /var/log
+rm -f "${installmp}/var/log/*" &>/dev/null
+rm -rf "${installmp}/var/log/*/*"
+# Initializations from 'filesystem' package post_install script:
+:> "${installmp}/var/log/lastlog"
+:> "${installmp}/var/log/wtmp"
+:> "${installmp}/var/log/btmp" && chmod 600 "${installmp}/var/log/btmp"
+
+exit ${fail}

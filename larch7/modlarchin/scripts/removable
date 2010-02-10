@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# removable
+
+# Return the removable flag (0 or 1) for the device $1
+cat /sys/block/${1:5:3}/removable 2>/dev/null

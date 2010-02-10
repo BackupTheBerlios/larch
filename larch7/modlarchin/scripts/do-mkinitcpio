@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# do-mkinitcpio  - Regenerate the initramfs for the new system
+
+installmp="$1"
+
+# For the mkinitcpio call there would probably need to be mount --bind
+# calls for dev, proc and sys, so this script should be wrapped accordingly.
+
+# This makes a number of assumptions about the files in /etc/mkinitcpio.d,
+# so if you are using a non-standard kernel they may turn out to be wrong!
+fail=0
+
+idir=${installmp}/etc/mkinitcpio.d
+presets=$( ls ${idir} | grep "kernel.*\.preset" )
+
+# I'm not sure why I put this here, could it be necessary?
+cat /proc/mounts | grep ${installmp} | sed "s|${installmp}|/|" | \
+        sed "s|//|/|" >${installmp}/etc/mtab
+
+for p in ${presets}; do
+    chroot ${installmp} /sbin/mkinitcpio -p ${p%.preset} || fail=1
+done
+
+:>${installmp}/etc/mtab
+
+exit ${fail}

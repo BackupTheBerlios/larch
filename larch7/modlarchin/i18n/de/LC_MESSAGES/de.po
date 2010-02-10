@@ -1,0 +1,187 @@
+# German translations for larchin package.
+# Copyright (C) 2010 Michael Towers
+# Automatically generated, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 7.100\n"
+"POT-Creation-Date: 2010-02-10 19:57+CET\n"
+"PO-Revision-Date: 2010-02-10 16:33+CET\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: modules/backend.py:73
+msgid "Something went wrong, quitting (see log)"
+msgstr "Irgendwas ging schief, es wird abgebrochen (siehe Protokoll)"
+
+#: modules/backend.py:78
+msgid ""
+"Another instance of the installer seems to be running already.$If you are "
+"absolutely sure no other installer instance is$running, you may continue. "
+"Otherwise you should cancel.$$Shall I continue?"
+msgstr ""
+"Der Installer scheint schon am Laufen zu sein.$Wenn du sicher bist, dass das "
+"nicht der Fall ist,$darfst du hier fortfahren. Sonst abbrechen.$$"
+"$Weiterfahren?"
+
+#: modules/backend.py:94
+msgid "Installation mount-point (%s) in use"
+msgstr "Installations-Einhängepunkt nicht frei"
+
+#: modules/backend.py:111
+msgid "Couldn't remount '%s' %s"
+msgstr "'remount %s %s' schlug fehl"
+
+#: modules/backend.py:119
+msgid "Couldn't bind-mount %s at %s"
+msgstr "'mount --bind %s %s' schlug fehl"
+
+#: modules/backend.py:138
+msgid "No root partition ('/') specified"
+msgstr "Keine 'root'-Partition ('/') angegeben"
+
+#: modules/backend.py:144
+msgid "Mounting %s at %s"
+msgstr "%s wird an %s eingehängt"
+
+#: modules/backend.py:160
+msgid "Couldn't mount %s at %s"
+msgstr "%s konnte nicht an %s eingehängt werden"
+
+#: modules/backend.py:176
+msgid "Couldn't unmount %s"
+msgstr "Medium an %s konnte nicht ausgehängt werden"
+
+#: modules/backend.py:184
+msgid "Couldn't create directory '%s'"
+msgstr "Ordner %s konnte nicht erstelltt werden"
+
+#: modules/backend.py:265
+msgid "Bad partition descriptor: %s"
+msgstr "Ungültige Partitionsangabe: %s"
+
+#: modules/backend.py:283
+msgid "Couldn't save partition data to %s"
+msgstr "Partitionierungsinformationen konnten nicht in %s gespeichert werden"
+
+#: modules/console.py:45
+msgid "y(es)|n(o)"
+msgstr "j(a)|n(ein)"
+
+#: modules/fstab.py:51
+msgid "Unusable partition: %s"
+msgstr "Unbrauchbare Partition: %s"
+
+#: modules/fstab.py:58
+msgid "Invalid swap partition: %s"
+msgstr "Ungültige 'swap'-Partition: %s"
+
+#: modules/fstab.py:63
+msgid "%s seems to be a swap partition"
+msgstr "%s sieht aus wie eine 'swap'-Partition"
+
+#: modules/fstab.py:66
+msgid "Detected fstype not same as format spec: %s"
+msgstr "Entdeckter Dateisystemtyp entspricht nicht der Formatangabe: %s"
+
+#: modules/installer.py:78
+msgid "Copying of system data failed"
+msgstr "Das Kopieren der Systemdaten schlug fehl"
+
+#: modules/installer.py:80
+msgid "Copy finished:"
+msgstr "Kopiervorgang abgeschlossen:"
+
+#: modules/installer.py:85
+msgid "Initial tweaks to installed system"
+msgstr "Erste Systemanpassungen"
+
+#: modules/installer.py:87
+msgid "Initial installed-system tweaks failed"
+msgstr "Problem bei den ersten Systemanpassungen"
+
+#: modules/installer.py:91
+msgid "Removing live-system modifications"
+msgstr "Live-System-Besonderheiten werden entfernt"
+
+#: modules/installer.py:93
+msgid "Failure while removing live-system modifications"
+msgstr "Entfernung der Live-System-Besonderheiten schlug fehl"
+
+#: modules/installer.py:97
+msgid "Generating initramfs"
+msgstr "Erzeuge initramfs"
+
+#: modules/installer.py:100
+msgid "Problem building initramfs"
+msgstr "Problem bei der Erzeugung des initramfs"
+
+#: modules/installer.py:108
+msgid "Generating /etc/fstab"
+msgstr "Erzeuge /etc/fstab"
+
+#: modules/installer.py:117
+msgid "Formatting %s"
+msgstr "Formatiere %s"
+
+#: modules/installer.py:119
+msgid "Formatting of %s failed"
+msgstr "Das Formatieren von %s schlug fehl"
+
+#: modules/installer.py:125
+msgid "Copying system to selected partition(s)"
+msgstr "System wird auf die vorgegebene(n) Partition(en) kopiert"
+
+#: modules/installer.py:171
+msgid "usage: %prog [options]"
+msgstr "Gebrauch: %prog [Optionen]"
+
+#: modules/installer.py:174
+msgid "Output installed MB (progress) with step of this size"
+msgstr "Zeige installierte MB (Fortschritt) mit Schritten dieser Größe an"
+
+#: modules/installer.py:176
+msgid "Output estimated progress as percent"
+msgstr "Zeige geschätzten Fortschritt in Prozent"
+
+#: modules/installer.py:178
+msgid "Debug flags %s"
+msgstr "Debug-Optionen %s"
+
+#: modules/installer.py:181
+msgid "Suppress output messages, except errors"
+msgstr "Keine Ausgabe, außer Fehler"
+
+#: modules/installer.py:182
+msgid "Passing installation partitions"
+msgstr "Eingabe der Installationspartitionen"
+
+#: modules/installer.py:183
+msgid ""
+"   mount-point:device:format:uuid/label ... More than one such descriptor "
+"can be passed, using ',' as separator.   The first entry should be for root "
+"(mount-point is '/'), swap partitions have mount-point 'swap'.   format "
+"should be 'ext4' or 'jfs', for example. If it is empty, no formatting will "
+"be performed. Also swap partitions should have this field empty.   The final "
+"entry may be empty (implying the system default will be used), "
+"otherwise:      -: using straight device names (/dev/sdXN),   LABEL=xxxxx: "
+"using partition labels,   UUID=xxxxx: using UUIDs"
+msgstr ""
+"   Einhängepfad:Gerät:Format:uuid/label ... Mehrere solche Angaben sind "
+"möglich, wenn sie durch ',' getrennt sind.   Der erste Eintrag muss für die "
+"Wurzelpartition (mount-point is '/') sein, 'swap'-Partitionen haben "
+"Einhängepfad 'swap'.   Format sollte z.B. 'ext4' or 'jfs' sein. Wenn dieses "
+"Feld leer ist, die Partition wird nicht formatiert. Auch 'swap'-Partitionen "
+"sollten hier ein leeres Feld haben.   Das letzte Feld darf leer sein (die "
+"Systemvoreinstellung wird übernommen), sonst:     -: mit gewöhnlichen "
+"Gerätenamen (/dev/sdXN),   LABEL=xxxxx: mit Partition-Label,   UUID=xxxxx: "
+"mit UUID"
+
+#: modules/installer.py:196
+msgid "Pass partition list"
+msgstr "Eingabe der Partitionsliste"

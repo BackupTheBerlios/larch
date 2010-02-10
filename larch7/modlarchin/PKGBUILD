@@ -1,0 +1,35 @@
+# Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
+# 2010.02.07
+pkgname=larchin
+pkgver=7.0.100
+pkgrel=1
+
+pkgdesc="Arch hard disk installer with gui for larch live media"
+url="http://larch.berlios.de"
+depends=('uipi' 'python-pexpect')
+arch=(any)
+license=('GPL')
+install=${pkgname}.install
+
+build() {
+  _destdir=opt/apps/larchin
+  cd ${pkgdir}
+  mkdir -p usr/sbin
+#  mkdir -p usr/share/{pixmaps,applications}
+  mkdir -p ${_destdir}
+
+  rm -f ${startdir}/modules/*.pyc
+  cp -dr ${startdir}/modules ${_destdir}
+#  cp -dr ${startdir}/data ${_destdir}
+  cp -dr ${startdir}/i18n ${_destdir}
+#  cp -dr ${startdir}/images ${_destdir}
+
+#  cp ${startdir}/larchin.py ${_destdir}
+#  ln -s /${_destdir}/larchin.py usr/sbin/larchin
+  ln -s /${_destdir}/modules/installer.py usr/sbin/larchin-install
+
+#  cp -dr ${startdir}/images ${_destdir}
+#  ln -s /${_destdir}/images/larchin.png usr/share/pixmaps/larchin.png
+
+#  cp ${startdir}/larchin.desktop usr/share/applications
+}
