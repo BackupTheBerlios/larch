@@ -151,7 +151,7 @@ class Installer:
             mb = (self.installed + 5*10**5) / 10**6
             if (self.out_mb > 0) and ((mb - mbi) >= self.out_mb):
                 io.out(":m>%d" % mb)
-                mbi += self.out_mb
+                mbi = mb
             if self.nfiles:
                 pc = files * 100 / self.nfiles
                 if (pc > percent) and pc <= 100:

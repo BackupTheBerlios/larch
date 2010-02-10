@@ -81,6 +81,8 @@ def init(io, app_quit=None):
                 "$running, you may continue. Otherwise you should cancel."
                 "$$Shall I continue?")):
             quit_function(102)
+    else:
+        writefile("", LOCKFILE)
 
     __builtin__.scripts = Scripts(base_dir + "/scripts/")
     __builtin__.mounting = Mounting()
@@ -92,6 +94,22 @@ def init(io, app_quit=None):
     for d, m in Devices().get_mounts():
         if m.split('/')[:mpl] == mpa:
             errout(_("Installation mount-point (%s) in use") % mp, 103)
+
+
+def writefile(text, path):
+    try:
+        pd = os.path.dirname(path)
+        if not os.path.isdir(pd):
+            os.makedirs(pd)
+        fh = None
+        fh = open(path, 'w')
+        fh.write(text)
+        return True
+    except:
+        return False
+    finally:
+        if fh:
+            fh.close()
 
 
 class Mounting:
@@ -270,20 +288,13 @@ class Partlist:
         self.save()
 
     def save(self):
-        try:
-            pd = os.path.dirname(PARTLIST)
-            if not os.path.isdir(pd):
-                os.makedirs(pd)
-            fh = None
-            fh = open(PARTLIST, 'w')
-            for line in self.partition_list:
-                fh.write(':'.join(line) + '\n')
+        text = ""
+        for line in self.partition_list:
+            text += ':'.join(line) + '\n'
+        if writefile(text, PARTLIST):
             return True
-        except:
-            errout(_("Couldn't save partition data to %s") % PARTLIST, quit=99)
-        finally:
-            if fh:
-                fh.close()
+        errout(_("Couldn't save partition data to %s") % PARTLIST, quit=99)
+        return False    # superfluous if errout quits ...
 
     def get_all(self):
         return self.partition_list
@@ -301,7 +312,7 @@ class Devices:
     def get_mounts(self):
         """Return a list of mounted (partition, mount-point) pairs.
         """
-        return [m.split() for m in scripts.script("get-mounts")[1]]
+        return [m.split() for m in scripts.script("get-mounts")[1].splitlines()]
 
     def get_mountable(self):
         """Get a dict of all 'mountable' partitions.
@@ -315,7 +326,7 @@ class Devices:
         for pline in self.fdiskl():
             partid[pline[0]] = pline[4]
         ups = {}
-        for s in scripts.script("get-blkinfo")[1]:
+        for s in scripts.script("get-blkinfo")[1].splitlines():
             mo = re.match(r'(/dev/[^:]*):(?: LABEL="([^"]*)")?(?:'
                     ' UUID="([^"]*)")?(?: TYPE="([^"]*)")?', s)
             if mo:
@@ -332,12 +343,13 @@ class Devices:
                         # linux_raid_member", for the the first device
                         # in a formatted raid array
                         continue
-                    rem = scripts.script("removable", dev)[1][0].strip() == "1"
+                    rem = (scripts.script("removable", dev)[1].splitlines()
+                            [0].strip() == "1")
                 ups[dev] = (fstype, label, uuid, rem)
         return ups
 
     def fdiskl(self, parts=True):
-        lines = scripts.script("fdisk-l")[1]
+        lines = scripts.script("fdisk-l")[1].splitlines()
         if parts:
             # Return a list of information for each partition.
             # The information is itself in list form:

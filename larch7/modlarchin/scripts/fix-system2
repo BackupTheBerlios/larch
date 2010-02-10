@@ -12,7 +12,7 @@ find /etc -name '*.larchsave' -type f -print | while read fls; do
     done
 
 # Remove live-specific packages
-for p in larch-live larchin larchin-syscalls; do
+for p in larch-live larchin; do
     pacman -r "${installmp}" -R "${p}" 2>/dev/null
 done
 
