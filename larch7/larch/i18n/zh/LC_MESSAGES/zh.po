@@ -1,34 +1,34 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: larch\n"
-"POT-Creation-Date: 2009-12-08 07:55+CET\n"
-"PO-Revision-Date: 2009-12-27 05:30+0800\n"
+"POT-Creation-Date: 2010-01-25 07:55+CET\n"
+"PO-Revision-Date: 2010-02-03 22:18+0800\n"
 "Last-Translator: Dong-Jun Wu <ziyawu@gmail.com>\n"
 "Language-Team: Chinese Traditional <zh-l10n@linux.org.tw>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: Chinese (Traditional)\n"
 "X-Poedit-Country: TAIWAN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: larch.py:200
+#: larch.py:202
 msgid "Please enter root password"
 msgstr "請輸入 root 密碼"
 
-#: larch.py:212
+#: larch.py:214
 msgid "Incorrect root password"
 msgstr "root 密碼不正確"
 
-#: larch.py:215
+#: larch.py:217
 msgid "No root password, cancelling operation"
 msgstr "沒有 root 密碼，正在取消操作"
 
-#: larch.py:231
+#: larch.py:233
 msgid "Supershell couldn't be started"
 msgstr "無法啟動 Supershell"
 
-#: larch.py:321
+#: larch.py:320
 msgid "Enter '%s' application ('$' for path argument):"
 msgstr "輸入「%s」應用程式 (路徑參數「$」)："
 
@@ -68,47 +68,47 @@ msgstr "嚴重錯誤"
 msgid "This error could not be handled"
 msgstr "無法處理這個錯誤"
 
-#: larch.py:621
+#: larch.py:622
 msgid ""
 "   Please see '%s/%s'\n"
 "   for usage information.\n"
 msgstr ""
 "   請看「%s/%s」\n"
-"   獲得有用的資訊。\n"
+"   獲得使用方法資訊。\n"
 
-#: larch.py:639
+#: larch.py:640
 msgid "ERROR: Unsupported option - '%s'\n"
 msgstr "錯誤：不支援的操作 -「%s」\n"
 
-#: larch.py:640
+#: larch.py:641
 msgid "Start without arguments or with '--pyqt' to start pyqt gui.\n"
 msgstr "不使用參數啟動或用「--pyqt」啟動 pyqt 圖形介面。\n"
 
-#: larch.py:641
+#: larch.py:642
 msgid "The command line interface is started with '-c':\n"
 msgstr "用「-c」啟動為命令列介面：\n"
 
-#: modules/base.py:87
+#: modules/base.py:89
 msgid "No pacman executable found"
 msgstr "沒有找到 pacman 可執行檔"
 
-#: modules/base.py:115
+#: modules/base.py:117
 msgid "Unknown platform: '%s'"
 msgstr "未知的平台：「%s」"
 
-#: modules/base.py:154
+#: modules/base.py:156
 msgid "Unknown configuration option: %s\n"
 msgstr "未知的組態設定選項：%s\n"
 
-#: modules/base.py:213
+#: modules/base.py:215
 msgid "No name for new profile"
 msgstr "新描述檔沒有名稱"
 
-#: modules/base.py:217
+#: modules/base.py:219
 msgid "Profile '%s' already exists"
 msgstr "描述檔「%s」已存在"
 
-#: modules/base.py:231
+#: modules/base.py:233
 msgid "Profile '%s' exists already."
 msgstr "描述檔「%s」已存在。"
 
@@ -131,23 +131,23 @@ msgstr ""
 msgid "Squashing system.sqf failed"
 msgstr "擠壓 system.sqf 失敗"
 
-#: modules/build.py:175
+#: modules/build.py:181
 msgid "Squashing mods.sqf failed"
 msgstr "擠壓 mods.sqf 失敗"
 
-#: modules/build.py:194
+#: modules/build.py:200
 msgid "No squashfs module found\n"
 msgstr "沒有找到 squashfs 模組\n"
 
-#: modules/build.py:204
+#: modules/build.py:210
 msgid "No aufs or unionfs module found\n"
 msgstr "沒有找到 aufs 或 unionfs 模組\n"
 
-#: modules/build.py:208
+#: modules/build.py:214
 msgid "Package '%s' is needed by larch systems\n"
 msgstr "larch 系統需要套件「%s」\n"
 
-#: modules/build.py:211
+#: modules/build.py:217
 msgid ""
 "Without package 'syslinux' you will not be able\n"
 "to create syslinux or isolinux booting media\n"
@@ -155,7 +155,7 @@ msgstr ""
 "沒有套件「syslinux」您會無法建\n"
 "立 syslinux 或 isolinux 開機媒體\n"
 
-#: modules/build.py:215
+#: modules/build.py:221
 msgid ""
 "Without package 'cdrkit' (or 'cdrtools') you will\n"
 "not be able to create CD/DVD media\n"
@@ -163,7 +163,7 @@ msgstr ""
 "沒有套件「cdrkit」(或「cdrtools」) 您會\n"
 "無法建立 CD/DVD 媒體\n"
 
-#: modules/build.py:219
+#: modules/build.py:225
 msgid ""
 "Without package 'eject' you will have problems\n"
 "using CD/DVD media\n"
@@ -171,7 +171,7 @@ msgstr ""
 "沒有套件「eject」您使用 CD/DVD 時\n"
 "會發生問題\n"
 
-#: modules/build.py:223
+#: modules/build.py:229
 msgid ""
 "WARNING:\n"
 "%s\n"
@@ -181,7 +181,7 @@ msgstr ""
 "%s\n"
 "    要繼續建構嗎？"
 
-#: modules/build.py:229
+#: modules/build.py:235
 msgid ""
 "ERROR:\n"
 "%s"
@@ -189,7 +189,7 @@ msgstr ""
 "錯誤：\n"
 "%s"
 
-#: modules/build.py:256
+#: modules/build.py:262
 msgid ""
 "Problem running %s:\n"
 "  %s"
@@ -197,7 +197,7 @@ msgstr ""
 "執行 %s 發生問題：\n"
 "  %s"
 
-#: modules/build.py:261
+#: modules/build.py:267
 msgid ""
 "More than one kernel found:\n"
 "  %s"
@@ -205,15 +205,15 @@ msgstr ""
 "找到多個內核：\n"
 "  %s"
 
-#: modules/build.py:265
+#: modules/build.py:271
 msgid "No kernel found"
 msgstr "沒有找到內核"
 
-#: modules/build.py:273
+#: modules/build.py:279
 msgid "More than one set of kernel modules in %s"
 msgstr "在 %s 裡有多組內核模組"
 
-#: modules/build.py:299
+#: modules/build.py:305
 msgid ""
 "WARNING:\n"
 "  You seem to have installed a package containing modules\n"
@@ -230,11 +230,11 @@ msgstr ""
 "\n"
 "    要續續建構嗎？"
 
-#: modules/build.py:308
+#: modules/build.py:314
 msgid "Couldn't find kernel modules"
 msgstr "無法找到內核模組"
 
-#: modules/build.py:328
+#: modules/build.py:334
 msgid "Couldn't find usable mkinitcpio preset: %s"
 msgstr "無法找到可用的 mkinitcpio 預設：%s"
 
@@ -297,7 +297,7 @@ msgid "Reuse existing system.sqf, to save time if the base system hasn't changed
 msgstr "重複使用現有的 system.sqf，如果系統沒有變更則儲存時間"
 
 #: modules/buildpage.py:62
-#: modules/gui.py:63
+#: modules/gui.py:65
 msgid "Larchify"
 msgstr "Larchify"
 
@@ -385,185 +385,193 @@ msgid "Medium Label:"
 msgstr "媒體標籤："
 
 #: modules/console.py:216
+msgid "iso 'application ID':"
+msgstr "iso '應用程式 ID':"
+
+#: modules/console.py:217
+msgid "iso 'publisher':"
+msgstr "iso '發行人'："
+
+#: modules/console.py:218
 #: modules/installpage.py:75
 msgid "Package Cache:"
 msgstr "套件快取："
 
-#: modules/console.py:219
+#: modules/console.py:221
 msgid "Projects:\n"
 msgstr "專案：\n"
 
-#: modules/console.py:224
+#: modules/console.py:226
 msgid "Profiles (in %s):\n"
 msgstr "描述檔 (在 %s 中)：\n"
 
-#: modules/console.py:229
+#: modules/console.py:231
 msgid "Example Profiles (in %s):\n"
 msgstr "範例描述檔 (在 %s 中)：\n"
 
-#: modules/console.py:234
+#: modules/console.py:236
 msgid "Available Partitions:\n"
 msgstr "可用的分割區：\n"
 
-#: modules/console.py:244
-#: modules/console.py:253
+#: modules/console.py:246
+#: modules/console.py:255
 msgid "Unknown project name: '%s'"
 msgstr "未知的專案名稱：「%s」"
 
-#: modules/console.py:261
-#: modules/console.py:273
+#: modules/console.py:263
+#: modules/console.py:275
 msgid "Unknown profile name: '%s'"
 msgstr "未知的描述檔名稱：「%s」"
 
-#: modules/console.py:285
+#: modules/console.py:287
 msgid "Available platforms: %s"
 msgstr "可用的平台：%s"
 
-#: modules/console.py:311
+#: modules/console.py:313
 msgid "Invalid bootloader: %s"
 msgstr "無效的開機管理程式：%s"
 
-#: modules/gui.py:47
+#: modules/gui.py:49
 msgid "<em>larch</em> Live Arch Linux Construction Kit"
 msgstr "<em>larch</em> Live Arch Linux 建構工具組"
 
-#: modules/gui.py:48
+#: modules/gui.py:50
 msgid "View Log"
 msgstr "檢視日誌"
 
-#: modules/gui.py:49
+#: modules/gui.py:51
 msgid "This button switches to the log viewer"
 msgstr "這個按鈕可切換到日誌檢視器"
 
-#: modules/gui.py:50
+#: modules/gui.py:52
 msgid "Help"
 msgstr "說明"
 
-#: modules/gui.py:51
+#: modules/gui.py:53
 msgid "This button switches to the documentation viewer"
 msgstr "這個按鈕可切換到文件檢視器"
 
-#: modules/gui.py:52
+#: modules/gui.py:54
 msgid "Quit"
 msgstr "離開"
 
-#: modules/gui.py:53
+#: modules/gui.py:55
 msgid "Stop the current action and quit the program"
 msgstr "停止目前的動作並離開程式"
 
-#: modules/gui.py:61
+#: modules/gui.py:63
 msgid "Project Settings"
 msgstr "專案設定值"
 
-#: modules/gui.py:62
+#: modules/gui.py:64
 msgid "Installation"
 msgstr "安裝"
 
-#: modules/gui.py:64
+#: modules/gui.py:66
 msgid "Prepare Medium"
 msgstr "準備媒體"
 
-#: modules/gui.py:65
+#: modules/gui.py:67
 msgid "Installation Tweaks"
 msgstr "安裝微調"
 
-#: modules/gui.py:111
+#: modules/gui.py:113
 msgid "Processing ..."
 msgstr "正在處理..."
 
-#: modules/gui.py:112
-#: modules/gui.py:160
+#: modules/gui.py:114
+#: modules/gui.py:162
 msgid "Here you can follow the detailed, low-level progress of the commands."
 msgstr "您可以在這裡追查底層指令進度的詳細資訊。"
 
-#: modules/gui.py:116
+#: modules/gui.py:118
 msgid "An indication of the progress of the current operation, if possible"
 msgstr "顯示目前操作的進度，如果可能的話"
 
-#: modules/gui.py:117
-#: modules/gui.py:252
+#: modules/gui.py:119
+#: modules/gui.py:254
 msgid "Cancel"
 msgstr "取消"
 
-#: modules/gui.py:118
+#: modules/gui.py:120
 msgid "Stop the current action"
 msgstr "停止目前動作"
 
-#: modules/gui.py:119
+#: modules/gui.py:121
 msgid "Done"
 msgstr "完成"
 
-#: modules/gui.py:159
+#: modules/gui.py:161
 msgid "Low-level Command Logging"
 msgstr "底層指令日誌"
 
-#: modules/gui.py:163
+#: modules/gui.py:165
 msgid "Clear"
 msgstr "清除"
 
-#: modules/gui.py:164
-#: modules/gui.py:194
+#: modules/gui.py:166
+#: modules/gui.py:196
 msgid "Hide"
 msgstr "隱藏"
 
-#: modules/gui.py:165
-#: modules/gui.py:195
+#: modules/gui.py:167
+#: modules/gui.py:197
 msgid "Go back to the larch controls"
 msgstr "回到 larch 控制"
 
-#: modules/gui.py:192
+#: modules/gui.py:194
 msgid "Documentation"
 msgstr "文件"
 
-#: modules/gui.py:197
+#: modules/gui.py:199
 msgid "Go back in the viewing history"
 msgstr "在檢視歷史中向後"
 
-#: modules/gui.py:199
+#: modules/gui.py:201
 msgid "Go forward in the viewing history"
 msgstr "在檢視歷史中向前"
 
-#: modules/gui.py:201
+#: modules/gui.py:203
 msgid "Reload the documentation for the current larch tab"
 msgstr "重新載入目前 larch 分頁的文件"
 
-#: modules/gui.py:203
+#: modules/gui.py:205
 msgid "Go to the general larch documentation index"
 msgstr "前往一般 larch 文件索引"
 
-#: modules/gui.py:248
+#: modules/gui.py:250
 msgid "Editor"
 msgstr "編輯器"
 
-#: modules/gui.py:251
+#: modules/gui.py:253
 msgid "OK"
 msgstr "確定"
 
-#: modules/gui.py:253
+#: modules/gui.py:255
 msgid "Revert"
 msgstr "回復"
 
-#: modules/gui.py:254
+#: modules/gui.py:256
 msgid "Restore the text to its initial state"
 msgstr "將文字還原成初始狀態"
 
-#: modules/gui.py:255
+#: modules/gui.py:257
 msgid "Copy"
 msgstr "複製"
 
-#: modules/gui.py:256
+#: modules/gui.py:258
 msgid "Cut"
 msgstr "剪下"
 
-#: modules/gui.py:257
+#: modules/gui.py:259
 msgid "Paste"
 msgstr "貼上"
 
-#: modules/gui.py:258
+#: modules/gui.py:260
 msgid "Undo"
 msgstr "復原"
 
-#: modules/gui.py:259
+#: modules/gui.py:261
 msgid "Redo"
 msgstr "取消復原"
 
@@ -572,23 +580,23 @@ msgstr "取消復原"
 msgid "No 'mirrorlist' file found"
 msgstr "沒有找到「mirrorlist」檔案"
 
-#: modules/installation.py:153
+#: modules/installation.py:152
 msgid "Couldn't write to the installation path (%s)."
 msgstr "無法寫入到安裝路徑 (%s)。"
 
-#: modules/installation.py:157
+#: modules/installation.py:156
 msgid "The installation path (%s) is mounted 'nodev'."
 msgstr "安裝路徑 (%s) 掛載為「nodev」。"
 
-#: modules/installation.py:165
+#: modules/installation.py:164
 msgid "The installation path (%s) is mounted 'noexec'."
 msgstr "安裝路徑 (%s) 掛載為「noexec」。"
 
-#: modules/installation.py:210
+#: modules/installation.py:209
 msgid "Package installation failed"
 msgstr "套件安裝失敗"
 
-#: modules/installation.py:244
+#: modules/installation.py:243
 msgid "Couldn't synchronize pacman database (pacman -Sy)"
 msgstr "無法同步 pacman 資料庫 (pacman -Sy)"
 
@@ -662,7 +670,9 @@ msgstr "安裝鏡像的網址"
 
 #: modules/installpage.py:72
 #: modules/installpage.py:78
-#: modules/mediumpage.py:91
+#: modules/mediumpage.py:81
+#: modules/mediumpage.py:87
+#: modules/mediumpage.py:112
 #: modules/projectpage.py:82
 msgid "Change"
 msgstr "變更"
@@ -748,166 +758,186 @@ msgstr ""
 "沒有找到 %s -\n"
 "   「syslinux」必須安裝在隨用系統上"
 
-#: modules/medium.py:374
+#: modules/medium.py:375
 msgid "Your larch iso, %s, was successfully created"
 msgstr "您的 larch iso，%s，已建立成功"
 
-#: modules/mediumpage.py:63
+#: modules/mediumpage.py:73
 msgid "Partition (disk / USB-stick)"
 msgstr "分割區 (磁碟 / USB 隨身碟)"
 
-#: modules/mediumpage.py:65
+#: modules/mediumpage.py:75
 msgid "You can choose installation to iso (for CD/DVD) or a partition (e.g. USB-stick)"
 msgstr "您可以選擇安裝到 iso (CD/DVD) 或一個分割區 (例如 USB 隨身碟)"
 
-#: modules/mediumpage.py:67
-msgid "There are no options specific to iso media."
-msgstr "沒有指定給 iso 媒體的選項。"
+#: modules/mediumpage.py:78
+msgid "Application ID:"
+msgstr "應用程式 ID："
 
-#: modules/mediumpage.py:69
+#: modules/mediumpage.py:80
+msgid "The text passed to mkisofs with the -A option"
+msgstr "用 -A 選項將這些文字傳到 mkisofs"
+
+#: modules/mediumpage.py:82
+msgid "Change the application ID of the iso"
+msgstr "變更此 iso 的應用程式 ID"
+
+#: modules/mediumpage.py:84
+msgid "Publisher:"
+msgstr "發行人："
+
+#: modules/mediumpage.py:86
+msgid "The text passed to mkisofs with the -publisher option"
+msgstr "用 -publisher 選項將這些文字傳到 mkisofs"
+
+#: modules/mediumpage.py:88
+msgid "Change the publisher data of the iso"
+msgstr "變更此 iso 的發行人資料"
+
+#: modules/mediumpage.py:90
 msgid "Partition:"
 msgstr "分割區"
 
-#: modules/mediumpage.py:71
+#: modules/mediumpage.py:92
 msgid "The partition to which the larch system is to be installed"
 msgstr "要安裝 larch 系統的分割區"
 
-#: modules/mediumpage.py:72
+#: modules/mediumpage.py:93
 msgid "Choose"
 msgstr "選擇"
 
-#: modules/mediumpage.py:73
+#: modules/mediumpage.py:94
 msgid "Select the partition to receive the larch system"
 msgstr "選擇要接收 larch 系統的分割區"
 
-#: modules/mediumpage.py:74
+#: modules/mediumpage.py:95
 msgid "Don't format"
 msgstr "不要格式化"
 
-#: modules/mediumpage.py:75
+#: modules/mediumpage.py:96
 msgid "Copy the data to the partition without formatting first (not the normal procedure)"
 msgstr "不先格式化直接複製資料到分割區 (非正常步驟)"
 
-#: modules/mediumpage.py:77
+#: modules/mediumpage.py:98
 msgid "Medium Detection"
 msgstr "偵測媒體"
 
-#: modules/mediumpage.py:78
+#: modules/mediumpage.py:99
 msgid "Choose how the boot scripts determine where to look for the larch system"
 msgstr "選擇開機腳本尋找 larch 系統位置的方式"
 
-#: modules/mediumpage.py:80
+#: modules/mediumpage.py:101
 msgid "Use the partition's UUID to find it"
 msgstr "使用分割區的 UUID 來尋找它"
 
-#: modules/mediumpage.py:82
+#: modules/mediumpage.py:103
 msgid "Use the partition's label to find it"
 msgstr "使用分割區的標籤來尋找它"
 
-#: modules/mediumpage.py:83
+#: modules/mediumpage.py:104
 msgid "Partition"
 msgstr "分割區"
 
-#: modules/mediumpage.py:84
+#: modules/mediumpage.py:105
 msgid "Use the partition name (/dev/sdb1, etc.)"
 msgstr "使用分割區名稱 (/dev/sdb1 等)"
 
-#: modules/mediumpage.py:85
+#: modules/mediumpage.py:106
 msgid "Search (for larchboot)"
 msgstr "搜尋 (針對 larchboot)"
 
-#: modules/mediumpage.py:86
+#: modules/mediumpage.py:107
 msgid "Test all CD/DVD devices and partitions until the file larch/larchboot is found"
 msgstr "測試所有 CD/DVD 裝置和分割區直到發現 larch/larchboot 檔案"
 
-#: modules/mediumpage.py:88
+#: modules/mediumpage.py:109
 msgid "Medium label:"
 msgstr "媒體標籤："
 
-#: modules/mediumpage.py:90
+#: modules/mediumpage.py:111
 msgid "The label that the partition will be given"
 msgstr "給定此分割區的標籤"
 
-#: modules/mediumpage.py:92
+#: modules/mediumpage.py:113
 msgid "Change the label"
 msgstr "變更此標籤"
 
-#: modules/mediumpage.py:94
+#: modules/mediumpage.py:115
 msgid "Enable session saving"
 msgstr "啟用作業階段儲存"
 
-#: modules/mediumpage.py:95
+#: modules/mediumpage.py:116
 msgid "If checked, the medium will have the file 'larch/save'"
 msgstr "如果勾選，此媒體會有「larch/save」檔案"
 
-#: modules/mediumpage.py:97
+#: modules/mediumpage.py:118
 msgid "Bootloader"
 msgstr "開機管理程式"
 
-#: modules/mediumpage.py:98
+#: modules/mediumpage.py:119
 msgid "You can choose between GRUB and syslinux/isolinux as bootloader"
 msgstr "您可以選擇 GRUB 或 syslinux/isolinux 作為開機管理程式"
 
-#: modules/mediumpage.py:100
+#: modules/mediumpage.py:121
 msgid "Use GRUB as bootloader"
 msgstr "使用 GRUB 作為開機管理程式"
 
-#: modules/mediumpage.py:102
+#: modules/mediumpage.py:123
 msgid "Use syslinux (partition) or isolinux (CD/DVD) as bootloader"
 msgstr "使用 syslinux (分割區) 或 isolinux (CD/DVD) 作為開機管理程式"
 
-#: modules/mediumpage.py:103
-#: modules/mediumpage.py:211
+#: modules/mediumpage.py:124
+#: modules/mediumpage.py:238
 msgid "None"
 msgstr "無"
 
-#: modules/mediumpage.py:104
+#: modules/mediumpage.py:125
 msgid "Don't install a bootloader (you'll need to provide some means of booting)"
 msgstr "不要安裝開機管理程式 (您需要提供開機的某種辦法)"
 
-#: modules/mediumpage.py:106
+#: modules/mediumpage.py:127
 msgid "Bootable via search"
 msgstr "通過搜尋可開機"
 
-#: modules/mediumpage.py:107
+#: modules/mediumpage.py:128
 msgid "Create the file larch/larchboot to mark the medium as a bootable larch system"
 msgstr "建立檔案 larch/larchboot 來標記媒體作為可開機 larch 系統"
 
-#: modules/mediumpage.py:109
+#: modules/mediumpage.py:130
 msgid "Edit boot entries"
 msgstr "編輯開機項目"
 
-#: modules/mediumpage.py:110
+#: modules/mediumpage.py:131
 msgid "Edit the file determining the boot entries"
 msgstr "編輯用來決定開機項目的檔案"
 
-#: modules/mediumpage.py:111
-#: modules/mediumpage.py:112
+#: modules/mediumpage.py:132
+#: modules/mediumpage.py:133
 msgid "Edit grub template"
 msgstr "編輯 grub 範本"
 
-#: modules/mediumpage.py:113
-#: modules/mediumpage.py:114
+#: modules/mediumpage.py:134
+#: modules/mediumpage.py:135
 msgid "Edit syslinux/isolinux template"
 msgstr "編輯 syslinux/isolinux 範本"
 
-#: modules/mediumpage.py:116
+#: modules/mediumpage.py:137
 msgid "Create boot iso"
 msgstr "建立開機 iso"
 
-#: modules/mediumpage.py:117
+#: modules/mediumpage.py:138
 msgid "Create a small boot iso for this system (for machines that can't boot from USB)"
 msgstr "建立這個系統的小開機 iso (針對無法從 USB 開機的電腦)"
 
-#: modules/mediumpage.py:118
+#: modules/mediumpage.py:139
 msgid "Create larch medium"
 msgstr "建立 larch 媒體"
 
-#: modules/mediumpage.py:119
+#: modules/mediumpage.py:140
 msgid "Create the larch iso or set up the chosen partition"
 msgstr "建立 larch iso 或安裝選擇的分割區"
 
-#: modules/mediumpage.py:121
+#: modules/mediumpage.py:142
 msgid ""
 "Edit cd-root\n"
 "(open in file browser)"
@@ -915,15 +945,15 @@ msgstr ""
 "編輯 cd-root\n"
 "(用檔案瀏覽程式開啟)"
 
-#: modules/mediumpage.py:122
+#: modules/mediumpage.py:143
 msgid "Open a file browser on the profile's 'cd-root' folder"
 msgstr "用檔案瀏覽程式開啟描述檔的「cd-root」資料夾"
 
-#: modules/mediumpage.py:144
+#: modules/mediumpage.py:169
 msgid "Choose Partition"
 msgstr "選擇分割區"
 
-#: modules/mediumpage.py:146
+#: modules/mediumpage.py:171
 msgid ""
 "BE CAREFUL - if you select the wrong\n"
 "   partition you might well destroy your system!\n"
@@ -935,27 +965,35 @@ msgstr ""
 "\n"
 "選擇要接收 larch 系統的分割區："
 
-#: modules/mediumpage.py:231
+#: modules/mediumpage.py:258
 msgid "Editing larch boot entries"
 msgstr "編輯 larch 開機項目"
 
-#: modules/mediumpage.py:242
+#: modules/mediumpage.py:269
 msgid "Editing grub template"
 msgstr "編輯 grub 範本"
 
-#: modules/mediumpage.py:254
+#: modules/mediumpage.py:281
 msgid "Editing syslinux/isolinux template"
 msgstr "編輯 syslinux/isolinux 範本"
 
-#: modules/mediumpage.py:259
+#: modules/mediumpage.py:286
 msgid "Enter new label for the boot medium:"
 msgstr "輸入開機媒體的新標籤："
 
-#: modules/mediumpage.py:317
+#: modules/mediumpage.py:300
+msgid "Enter new application ID for the boot iso:"
+msgstr "輸入開機 iso 的新應用程式 ID："
+
+#: modules/mediumpage.py:314
+msgid "Enter new publisher for the boot iso:"
+msgstr "輸入開機 iso 的新發行人："
+
+#: modules/mediumpage.py:371
 msgid "No partition selected for larch"
 msgstr "沒有選擇分割區給 larch"
 
-#: modules/mediumpage.py:340
+#: modules/mediumpage.py:394
 msgid ""
 "The partition containing the larch live system\n"
 "must be specifed."
@@ -1181,4 +1219,7 @@ msgstr ""
 #: modules/tweakpage.py:109
 msgid "Error during package removal."
 msgstr "套件移除時發生錯誤。"
+
+#~ msgid "There are no options specific to iso media."
+#~ msgstr "沒有指定給 iso 媒體的選項。"
 

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-01-25 07:55+CET\n"
+"POT-Creation-Date: 2010-02-10 20:05+CET\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,79 +15,79 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: larch.py:202
+#: larch.py:203
 msgid "Please enter root password"
 msgstr ""
 
-#: larch.py:214
+#: larch.py:215
 msgid "Incorrect root password"
 msgstr ""
 
-#: larch.py:217
+#: larch.py:218
 msgid "No root password, cancelling operation"
 msgstr ""
 
-#: larch.py:233
+#: larch.py:234
 msgid "Supershell couldn't be started"
 msgstr ""
 
-#: larch.py:320
+#: larch.py:321
 msgid "Enter '%s' application ('$' for path argument):"
 msgstr ""
 
-#: larch.py:428
+#: larch.py:429
 msgid "Editing '%s'"
 msgstr ""
 
-#: larch.py:462
+#: larch.py:463
 msgid "Platform error, installed system is %s"
 msgstr ""
 
-#: larch.py:467
+#: larch.py:468
 msgid "No installed system found"
 msgstr ""
 
-#: larch.py:517
+#: larch.py:518
 msgid "Couldn't read file '%s'"
 msgstr ""
 
-#: larch.py:526
+#: larch.py:527
 msgid "Couldn't save file '%s'"
 msgstr ""
 
-#: larch.py:530
+#: larch.py:531
 msgid "CONFIG ERROR"
 msgstr ""
 
-#: larch.py:534
+#: larch.py:535
 msgid "BUILD ERROR"
 msgstr ""
 
-#: larch.py:538
+#: larch.py:539
 msgid "FATAL ERROR"
 msgstr ""
 
-#: larch.py:546
+#: larch.py:547
 msgid "This error could not be handled"
 msgstr ""
 
-#: larch.py:622
+#: larch.py:623
 msgid ""
 "   Please see '%s/%s'\n"
 "   for usage information.\n"
 msgstr ""
 
-#: larch.py:640
+#: larch.py:641
 msgid ""
 "ERROR: Unsupported option - '%s'\n"
 msgstr ""
 
-#: larch.py:641
+#: larch.py:642
 msgid ""
 "Start without arguments or with '--pyqt' to start pyqt gui.\n"
 msgstr ""
 
-#: larch.py:642
+#: larch.py:643
 msgid ""
 "The command line interface is started with '-c':\n"
 msgstr ""
@@ -105,15 +105,15 @@ msgid ""
 "Unknown configuration option: %s\n"
 msgstr ""
 
-#: modules/base.py:215
+#: modules/base.py:216
 msgid "No name for new profile"
 msgstr ""
 
-#: modules/base.py:219
+#: modules/base.py:220
 msgid "Profile '%s' already exists"
 msgstr ""
 
-#: modules/base.py:233
+#: modules/base.py:234
 msgid "Profile '%s' exists already."
 msgstr ""
 
@@ -284,127 +284,127 @@ msgstr ""
 msgid "Build the main components of the larch system"
 msgstr ""
 
-#: modules/console.py:90
+#: modules/console.py:91
 msgid "Information"
 msgstr ""
 
-#: modules/console.py:93
+#: modules/console.py:94
 msgid "Press <Enter> to continue"
 msgstr ""
 
-#: modules/console.py:99
+#: modules/console.py:100
 msgid "Confirmation"
 msgstr ""
 
-#: modules/console.py:104 modules/console.py:203
+#: modules/console.py:105 modules/console.py:204
 msgid "Yes"
 msgstr ""
 
-#: modules/console.py:104 modules/console.py:204
+#: modules/console.py:105 modules/console.py:205
 msgid "No"
 msgstr ""
 
-#: modules/console.py:112
+#: modules/console.py:113
 msgid "Input Required"
 msgstr ""
 
-#: modules/console.py:134
+#: modules/console.py:135
 msgid "ERROR"
 msgstr ""
 
-#: modules/console.py:147
+#: modules/console.py:148
 msgid "Unknown command: %s"
 msgstr ""
 
-#: modules/console.py:205
+#: modules/console.py:206
 msgid "Project Name:"
 msgstr ""
 
-#: modules/console.py:206
+#: modules/console.py:207
 msgid "Profile:"
 msgstr ""
 
-#: modules/console.py:207 modules/projectpage.py:79
+#: modules/console.py:208 modules/projectpage.py:79
 msgid "Installation Path:"
 msgstr ""
 
-#: modules/console.py:208
+#: modules/console.py:209
 msgid "Working Directory:"
 msgstr ""
 
-#: modules/console.py:209
+#: modules/console.py:210
 msgid "Platform:"
 msgstr ""
 
-#: modules/console.py:210
+#: modules/console.py:211
 msgid "Installation Mirror:"
 msgstr ""
 
-#: modules/console.py:211
+#: modules/console.py:212
 msgid "--- use mirror:"
 msgstr ""
 
-#: modules/console.py:212
+#: modules/console.py:213
 msgid "Use Project Mirrorlist:"
 msgstr ""
 
-#: modules/console.py:213
+#: modules/console.py:214
 msgid "Bootloader:"
 msgstr ""
 
-#: modules/console.py:214
+#: modules/console.py:215
 msgid "Medium Detection:"
 msgstr ""
 
-#: modules/console.py:215
+#: modules/console.py:216
 msgid "Medium Label:"
 msgstr ""
 
-#: modules/console.py:216
+#: modules/console.py:217
 msgid "iso 'application ID':"
 msgstr ""
 
-#: modules/console.py:217
+#: modules/console.py:218
 msgid "iso 'publisher':"
 msgstr ""
 
-#: modules/console.py:218 modules/installpage.py:75
+#: modules/console.py:219 modules/installpage.py:75
 msgid "Package Cache:"
 msgstr ""
 
-#: modules/console.py:221
+#: modules/console.py:222
 msgid ""
 "Projects:\n"
 msgstr ""
 
-#: modules/console.py:226
+#: modules/console.py:227
 msgid ""
 "Profiles (in %s):\n"
 msgstr ""
 
-#: modules/console.py:231
+#: modules/console.py:232
 msgid ""
 "Example Profiles (in %s):\n"
 msgstr ""
 
-#: modules/console.py:236
+#: modules/console.py:237
 msgid ""
 "Available Partitions:\n"
 msgstr ""
 
-#: modules/console.py:246 modules/console.py:255
+#: modules/console.py:247 modules/console.py:256
 msgid "Unknown project name: '%s'"
 msgstr ""
 
-#: modules/console.py:263 modules/console.py:275
+#: modules/console.py:264 modules/console.py:276
 msgid "Unknown profile name: '%s'"
 msgstr ""
 
-#: modules/console.py:287
+#: modules/console.py:288
 msgid "Available platforms: %s"
 msgstr ""
 
-#: modules/console.py:313
+#: modules/console.py:314
 msgid "Invalid bootloader: %s"
 msgstr ""
 
@@ -548,27 +548,27 @@ msgstr ""
 msgid "Redo"
 msgstr ""
 
-#: modules/installation.py:107 modules/installpage.py:135
+#: modules/installation.py:111 modules/installpage.py:135
 msgid "No 'mirrorlist' file found"
 msgstr ""
 
-#: modules/installation.py:152
+#: modules/installation.py:156
 msgid "Couldn't write to the installation path (%s)."
 msgstr ""
 
-#: modules/installation.py:156
+#: modules/installation.py:160
 msgid "The installation path (%s) is mounted 'nodev'."
 msgstr ""
 
-#: modules/installation.py:164
+#: modules/installation.py:168
 msgid "The installation path (%s) is mounted 'noexec'."
 msgstr ""
 
-#: modules/installation.py:209
+#: modules/installation.py:213
 msgid "Package installation failed"
 msgstr ""
 
-#: modules/installation.py:243
+#: modules/installation.py:247
 msgid "Couldn't synchronize pacman database (pacman -Sy)"
 msgstr ""
 
