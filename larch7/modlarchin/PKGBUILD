@@ -2,11 +2,11 @@
 # 2010.02.07
 pkgname=larchin
 pkgver=7.0.100
-pkgrel=1
+pkgrel=2
 
 pkgdesc="Arch hard disk installer with gui for larch live media"
 url="http://larch.berlios.de"
-depends=('uipi' 'python-pexpect')
+depends=('python')
 arch=(any)
 license=('GPL')
 install=${pkgname}.install
