@@ -1,8 +1,8 @@
 # Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
-# 2010.02.10
+# 2010.02.11
 pkgname=larch
-pkgver=7.0.134
-pkgrel=2
+pkgver=7.0.135
+pkgrel=1
 
 pkgdesc="Design your own 'live' Archlinux CDs and USB-sticks (etc.)"
 url="http://larch.berlios.de"
@@ -20,7 +20,7 @@ build() {
   mkdir -p ${_destdir}
 
   rm -f ${startdir}/modules/*.pyc
-  for d in buildscripts cd-root data docs i18n images modules scripts; do
+  for d in buildscripts cd-root data docs i18n images modules profiles scripts; do
     cp -dr ${startdir}/${d} ${_destdir}
   done
 

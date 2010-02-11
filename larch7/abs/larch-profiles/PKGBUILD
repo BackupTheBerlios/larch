@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
-# 2010.02.10
+# 2010.02.11
 pkgname=larch-profiles
-pkgver=7.0.100
+pkgver=7.0.101
 pkgrel=1
 
 pkgdesc="Example 'profiles' for larch 'live' Arch Linux builder"
