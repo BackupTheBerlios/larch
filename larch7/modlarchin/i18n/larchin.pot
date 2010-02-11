@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-02-10 19:57+CET\n"
+"POT-Creation-Date: 2010-02-11 07:23+CET\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,43 +23,43 @@ msgstr ""
 msgid "Another instance of the installer seems to be running already.$If you are absolutely sure no other installer instance is$running, you may continue. Otherwise you should cancel.$$Shall I continue?"
 msgstr ""
 
-#: modules/backend.py:94
+#: modules/backend.py:96
 msgid "Installation mount-point (%s) in use"
 msgstr ""
 
-#: modules/backend.py:111
+#: modules/backend.py:129
 msgid "Couldn't remount '%s' %s"
 msgstr ""
 
-#: modules/backend.py:119
+#: modules/backend.py:137
 msgid "Couldn't bind-mount %s at %s"
 msgstr ""
 
-#: modules/backend.py:138
+#: modules/backend.py:156
 msgid "No root partition ('/') specified"
 msgstr ""
 
-#: modules/backend.py:144
+#: modules/backend.py:162
 msgid "Mounting %s at %s"
 msgstr ""
 
-#: modules/backend.py:160
+#: modules/backend.py:178
 msgid "Couldn't mount %s at %s"
 msgstr ""
 
-#: modules/backend.py:176
+#: modules/backend.py:194
 msgid "Couldn't unmount %s"
 msgstr ""
 
-#: modules/backend.py:184
+#: modules/backend.py:202
 msgid "Couldn't create directory '%s'"
 msgstr ""
 
-#: modules/backend.py:265
+#: modules/backend.py:293
 msgid "Bad partition descriptor: %s"
 msgstr ""
 
-#: modules/backend.py:283
+#: modules/backend.py:306
 msgid "Couldn't save partition data to %s"
 msgstr ""
 
@@ -115,51 +115,55 @@ msgstr ""
 msgid "Problem building initramfs"
 msgstr ""
 
-#: modules/installer.py:108
+#: modules/installer.py:104
 msgid "Generating /etc/fstab"
 msgstr ""
 
-#: modules/installer.py:117
+#: modules/installer.py:109
+msgid "Couldn't write /etc/fstab"
+msgstr ""
+
+#: modules/installer.py:118
 msgid "Formatting %s"
 msgstr ""
 
-#: modules/installer.py:119
+#: modules/installer.py:120
 msgid "Formatting of %s failed"
 msgstr ""
 
-#: modules/installer.py:125
+#: modules/installer.py:126
 msgid "Copying system to selected partition(s)"
 msgstr ""
 
-#: modules/installer.py:171
+#: modules/installer.py:172
 msgid "usage: %prog [options]"
 msgstr ""
 
-#: modules/installer.py:174
+#: modules/installer.py:175
 msgid "Output installed MB (progress) with step of this size"
 msgstr ""
 
-#: modules/installer.py:176
+#: modules/installer.py:177
 msgid "Output estimated progress as percent"
 msgstr ""
 
-#: modules/installer.py:178
+#: modules/installer.py:179
 msgid "Debug flags %s"
 msgstr ""
 
-#: modules/installer.py:181
+#: modules/installer.py:182
 msgid "Suppress output messages, except errors"
 msgstr ""
 
-#: modules/installer.py:182
+#: modules/installer.py:183
 msgid "Passing installation partitions"
 msgstr ""
 
-#: modules/installer.py:183
+#: modules/installer.py:184
 msgid "   mount-point:device:format:uuid/label ... More than one such descriptor can be passed, using ',' as separator.   The first entry should be for root (mount-point is '/'), swap partitions have mount-point 'swap'.   format should be 'ext4' or 'jfs', for example. If it is empty, no formatting will be performed. Also swap partitions should have this field empty.   The final entry may be empty (implying the system default will be used), otherwise:      -: using straight device names (/dev/sdXN),   LABEL=xxxxx: using partition labels,   UUID=xxxxx: using UUIDs"
 msgstr ""
 
-#: modules/installer.py:196
+#: modules/installer.py:197
 msgid "Pass partition list"
 msgstr ""
 

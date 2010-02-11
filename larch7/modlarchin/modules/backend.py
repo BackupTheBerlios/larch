@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.10
+# 2010.02.11
 
 # Mount point for the installation root partition
 IBASE = "/tmp/larchin/install"
@@ -208,29 +208,39 @@ class Scripts:
         self.scriptdir = scriptdir
         self.processes = []
 
-    def script(self, *args):
-        p = self.start_script(*args)
-        op = p.communicate()[0]
-        self.processes.remove(p)
-        return p.returncode, op
-
-    def start_script(self, scriptname, *args):
-        p = Popen((self.scriptdir + scriptname,) + args,
+    def start_script(self, *args):
+        io.out("#+" + " ".join(args))
+        p = Popen((self.scriptdir + args[0],) + args[1:],
                 stdout=PIPE, stderr=STDOUT)
         self.processes.append(p)
+        p.scriptname = args[0]
+        p.output = None
         return p
 
     def end_script(self, p):
         p.wait()
+        io.out("#-" + p.scriptname)
         self.processes.remove(p)
         return p.returncode==0
 
     def run(self, *args):
         p = self.start_script(*args)
+        return self._runscript(p)
+
+    def script(self, *args):
+        p = self.start_script(*args)
+        if self._runscript(p):
+            return p.outputtext
+        else:
+            return None
+
+    def _runscript(self, p):
+        p.outputtext = ""
         while True:
             line = p.stdout.readline()
             if not line:
                 break
+            p.outputtext += line
             io.out("##" + line.rstrip())
         # The process has ended.
         return self.end_script(p)
@@ -312,7 +322,7 @@ class Devices:
     def get_mounts(self):
         """Return a list of mounted (partition, mount-point) pairs.
         """
-        return [m.split() for m in scripts.script("get-mounts")[1].splitlines()]
+        return [m.split() for m in scripts.script("get-mounts").splitlines()]
 
     def get_mountable(self):
         """Get a dict of all 'mountable' partitions.
@@ -326,7 +336,7 @@ class Devices:
         for pline in self.fdiskl():
             partid[pline[0]] = pline[4]
         ups = {}
-        for s in scripts.script("get-blkinfo")[1].splitlines():
+        for s in scripts.script("get-blkinfo").splitlines():
             mo = re.match(r'(/dev/[^:]*):(?: LABEL="([^"]*)")?(?:'
                     ' UUID="([^"]*)")?(?: TYPE="([^"]*)")?', s)
             if mo:
@@ -343,13 +353,13 @@ class Devices:
                         # linux_raid_member", for the the first device
                         # in a formatted raid array
                         continue
-                    rem = (scripts.script("removable", dev)[1].splitlines()
+                    rem = (scripts.script("removable", dev).splitlines()
                             [0].strip() == "1")
                 ups[dev] = (fstype, label, uuid, rem)
         return ups
 
     def fdiskl(self, parts=True):
-        lines = scripts.script("fdisk-l")[1].splitlines()
+        lines = scripts.script("fdisk-l").splitlines()
         if parts:
             # Return a list of information for each partition.
             # The information is itself in list form:

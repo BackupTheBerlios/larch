@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
-# 2010.02.10
+# 2010.02.11
 pkgname=larchin
-pkgver=7.0.101
+pkgver=7.0.102
 pkgrel=1
 
 pkgdesc="Arch hard disk installer with gui for larch live media"

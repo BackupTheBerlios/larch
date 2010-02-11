@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.10
+# 2010.02.11
 
 import backend
 
@@ -95,21 +95,7 @@ def generate(partlist0, devname=False):
     fstab += "\n# Other partitions\n"
     for part in noautomounts:
         fstab += fstabentry(part, devname, 0)
-
-    # Mount
-    if not mounting.mount():
-        return 2
-
-    try:
-        fh = None
-        fh = open(mounting.mount_point("/etc/fstab"), "w")
-        fh.write(fstab)
-        return 0
-    except:
-        return 10
-    finally:
-        if fh:
-            fh.close()
+    return fstab
 
 
 def fstabentry(part, devname, pas):

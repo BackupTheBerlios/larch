@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.10
+# 2010.02.11
 
 import threading
 
@@ -40,8 +40,8 @@ class Installer:
         self.out_percent = out_percent
 
     def count_files(self):
-        rc, op = scripts.script("count-files")
-        if rc == 0:
+        op = scripts.script("count-files")
+        if op:
             self.nfiles = int(op.strip())
 
 
@@ -100,13 +100,14 @@ class Installer:
                 errout(_("Problem building initramfs"))
                 return 6
 
-        # The partition(s) must be unmounted before autogenerating /etc/fstab
-        if not mounting.unmount():
-            return 7
-
         # /etc/fstab
         io.out("#>" + _("Generating /etc/fstab"))
-        return fstab.generate(self.partlist)
+        fst = fstab.generate(self.partlist)
+        if fst and backend.writefile(fst, mounting.mount_point('/etc/fstab')):
+            return 0
+        else:
+            errout(_("Couldn't write /etc/fstab"))
+            return 7
 
 
     def format(self):
