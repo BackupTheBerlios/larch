@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.01
+# 2010.02.12
 
 
 """
@@ -143,7 +143,8 @@ class Command:
     def pageswitch(self, index):
         if ui.docviewer:
             ui.docviewer.gohome(doc_home[index])
-        self.pages[index].setup()
+        if (not self.pages[index].setup()) and (index != 0):
+            ui.command(":notebook.set", 0)
 
 
     def log(self, line):

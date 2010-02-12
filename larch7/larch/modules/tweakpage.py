@@ -2,7 +2,7 @@
 #
 # installpage.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.02
+# 2010.02.12
 
 import os, shutil
 
@@ -62,6 +62,7 @@ class TweakPage:
         """Set up the tweak page widget.
         """
         self.profile = config.get("profile")
+        return True
 
 
     def dosync(self):

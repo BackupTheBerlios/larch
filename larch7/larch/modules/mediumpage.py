@@ -2,7 +2,7 @@
 #
 # mediumpage.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -21,13 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.01.25
-
-#TODO
-#####
-#Add setters for isopublisher and isoA in the iso specific tab.
-#They can be LineEdits.
-#####
+# 2010.02.12
 
 import os
 
@@ -201,6 +195,7 @@ class MediumPage:
 
         ui.command(":sessionsave.set", not os.path.isfile(self.profile
                 + "/nosave"))
+        return True
 
 
     def search_toggled(self, on):

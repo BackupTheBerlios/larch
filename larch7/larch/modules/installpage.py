@@ -2,7 +2,7 @@
 #
 # installpage.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.02
+# 2010.02.12
 
 import os, shutil
 
@@ -105,6 +105,7 @@ class InstallPage:
         ui.command(":mirrorlist.enable", not ulm)
         ui.command(":use_local_mirror.opton", ulm)
         ui.command(":local_mirror.x__text", config.get("localmirror"))
+        return True
 
 
     def edit_addedpacks(self):

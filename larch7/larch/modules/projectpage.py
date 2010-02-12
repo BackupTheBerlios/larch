@@ -2,7 +2,7 @@
 #
 # projectpage.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.08
+# 2010.02.12
 
 import os
 
@@ -137,6 +137,7 @@ class ProjectPage:
         installpath = config.get("install_path")
         ui.command(":installation_path_show.x__text", installpath)
         command.enable_install()
+        return True
 
 
     def switch_platform(self, index):
@@ -235,7 +236,7 @@ class ProjectPage:
 
     def set_ipath(self, path):
         ip = "/" + path.strip().strip("/")
-        if (ip != "/") and os.path.isdir("/"):
+        if (ip != "/") and os.path.isdir(ip):
             ok = 0
             nok = []
             for f in os.listdir(ip):

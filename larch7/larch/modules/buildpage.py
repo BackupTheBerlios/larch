@@ -2,7 +2,7 @@
 #
 # buildpage.py
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009-2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This file is part of the larch project.
 #
@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.12.07
+# 2010.02.12
 
 from build import Builder
 import os
@@ -76,6 +76,10 @@ class BuildPage:
     def setup(self):
         """Set up the build page widget.
         """
+        idir = config.ipath()
+        if not os.path.isdir(idir + "/var/lib/pacman/local"):
+            config_error(_("No Arch installation at %s") % idir)
+            return False
         ui.command(":oldsquash.enable", self.builder.oldsqf_available())
         ssh = self.builder.ssh_available()
         self.sshgen = ssh and self.sshgen
@@ -84,6 +88,7 @@ class BuildPage:
 #TODO: Remove hack if the underlying bug gets fixed
         # A hack to overcome a bug (?) in (py)qt
         ui.command(":larchify_advanced.enable_hack")
+        return True
 
     def sshtoggle(self, on):
         self.sshgen = on
