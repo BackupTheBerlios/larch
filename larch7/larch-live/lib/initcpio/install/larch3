@@ -1,7 +1,7 @@
 install ()
 {
     MODULES="squashfs"
-    BINARIES=""
+    BINARIES="/usr/bin/lzop /bin/tar"
     FILES=""
     SCRIPT="larch3"
 }

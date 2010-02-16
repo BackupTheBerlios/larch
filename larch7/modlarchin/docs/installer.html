@@ -1,0 +1,42 @@
+<h2>System Installation</h2>
+<p>The chosen partitions will be formatted and mounted
+and then the <em>live</em> system will be copied onto them.
+After this has completed, all the <em>live</em> modifications are
+removed/undone so that a normal <em>Arch Linux</em> system is left.
+</p>
+<p><em>larch(in)</em> also provides for further tweaks during the installation
+process by means of the larch/copy/install-tweak file on the <em>live</em> medium,
+which is run at the end of this stage. The contents of this file are
+entirely left up to the creator of the <em>larch</em> profile.
+</p>
+<p>The individual steps are:
+<ol>
+  <li>Format installation partitions.</li>
+  <li>Mount installation partitions.</li>
+  <li>Copy system to installation partitions.</li>
+  <li>Remove <em>live</em>-specific features.</li>
+  <li>Perform custom installation tweaks (medium:larch/copy/install-tweak).</li>
+  <li>Generate new initramfs.</li>
+  <li>Generate /etc/fstab.</li>
+  <li>Unmount installation partitions.</li>
+</ol>
+</p>
+
+<h3>Device recognition via LABEL or UUID</h3>
+<p>Because of the way block devices are detected in <em>Linux</em> it is
+possible under certain circumstances for a partition to get assigned a
+different name (e.g. /dev/sda can become /dev/sdb) from one boot to the
+next. For this reason it is often sensible to address these devices in a
+more stable way in grub and /etc/fstab.
+</p>
+<p>???The default in <em>larchin</em> is to use the device LABEL, if there
+is one, otherwise the UUID. Only if the checkbox 'Use device name' is
+checked will the device name (/dev/sda1, etc.) be used.
+</p>
+
+<h3>Customizing Formatting</h3>
+<p>To allow tweaking of the way partitions are formatted, the syscall
+script 'part-format' sources a script in the sub-directory 'tweaks' with
+    a name built from the file-system type, 'tweaks/format-<em>fstype</em>'.
+    If you want to make use of this feature, see the 'part-format' script.
+</p>

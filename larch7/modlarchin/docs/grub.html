@@ -1,0 +1,32 @@
+<h2>Set up the GRUB bootloader</h2>
+<p>GRUB allows the booting of more than one operating system.
+Normally it will be installed to the 'Master Boot Record' on the
+first disk drive. Here it can be installed to the MBR of the drive
+on which the '/boot' directory of the new installation is found - which
+may be the root ('/') partition, or else a partition of its own (in which
+case it will not contain a directory called '/boot')!
+</p>
+<p>Alternatively, GRUB may be installed to the partition containing the
+'/boot' directory of the new installation (as above, either the root
+partition or else, if the '/boot' directory has its own partition, the
+partition mounted at '/boot').
+</p>
+<p>A further alternative is to boot the new Linux system from an existing
+GRUB set-up by adding the entries for the new system to its menu.lst file.
+</p>
+<p>It is also possible to add the entries from an existing menu.lst to
+those arising from the new installation, so that the operating systems
+therein can still be booted, but from the newly installed bootloader.
+</p>
+<p>If an NTFS formatted partition is detected it will be added to the list
+automatically.
+</p>
+<h3>WARNING</h3>
+<p>If you have mixed IDE(PATA)/SCSI/SATA devices attached it is quite
+possible that GRUB will get confused about their order. In other words you
+might find that the association of GRUB names (hd0, hd1, etc.) to Linux
+device names (/dev/sda, /dev/sdb, etc.) is incorrect. The result is
+probably that you will not be able to boot your new system. In this case
+you will have to manually edit menu.lst and put the correct number after
+the 'hd' device entries.
+</p>

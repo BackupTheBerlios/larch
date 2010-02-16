@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-#2009.08.15
+#2010.02.15
 
 # Replacement for msg which includes leading and trailing spaces
 msg_ () { [ "${quiet}" != "y" ] && echo "$@"; }
@@ -28,13 +28,8 @@ msg_v () { [ "${quiet}" != "y" ] && [ "${verbose}" = "y" ] && echo "$@"; }
 
 testdevice ()
 {
-    eval $( /lib/udev/vol_id ${LDEV} )
-    #eval $( /bin/fstype ${LDEV} )
-    # doesn't work for vfat, ntfs:
-    #FSTYPE=unknown
-    #FSSIZE=0
-
-    /bin/mount -r -t ${ID_FS_TYPE} -o noatime "${LDEV}" "${cdmount}" >/dev/null 2>/dev/null
+    fstype=$( blkid -s TYPE -o value ${LDEV} )
+    /bin/mount -r -t ${fstype} -o noatime "${LDEV}" "${cdmount}" >/dev/null 2>/dev/null
     if [ $? -eq 0 ]; then
         if [ -f "${cdmount}/larch/system.sqf" ]; then
             msg ":: larch system at ${LDEV}"
@@ -66,7 +61,7 @@ run_hook ()
     cdmount="/livecd"
     /bin/mkdir "${cdmount}"
 
-    /sbin/modprobe loop
+    modprobe loop
 
     # Loop device test every second up to some limit
     if [ "x${usbdelay}" != "x" ]; then
@@ -79,17 +74,15 @@ run_hook ()
 
         if [ "x${uuid}" != "x" ]; then
             [ ${waitcount} -eq 0 ] && msg ":: Looking for UUID ${uuid}"
-            if [ -e /dev/disk/by-uuid/${uuid} ]; then
-                ldev0=$( /bin/readlink /dev/disk/by-uuid/${uuid} )
-                LDEV=/dev/${ldev0##*/}
+            LDEV=$( blkid -U ${uuid} )
+            if [ "x${LDEV}" != "x" ]; then
                 testdevice
             fi
 
         elif [ "x${label}" != "x" ]; then
             [ ${waitcount} -eq 0 ] && msg ":: Looking for LABEL ${label}"
-            if [ -e /dev/disk/by-label/${label} ]; then
-                ldev0=$( /bin/readlink /dev/disk/by-label/${label} )
-                LDEV=/dev/${ldev0##*/}
+            LDEV=$( blkid -L ${label} )
+            if [ "x${LDEV}" != "x" ]; then
                 testdevice
             fi
 

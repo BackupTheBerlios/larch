@@ -23,7 +23,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2009.10.20
+# 2010.02.16
 
 #TODO:
 # Is c2r still relevant? I should test it!
@@ -106,45 +106,29 @@ run_hook ()
     while [ ! -e "/dev/loop0" ]; do
         sleep 1
     done
-    # The klibc mount command doesn't support '-o loop'
-    /bin/losetup /dev/loop0 ${sysSqf}
-    /bin/mount -r -t squashfs /dev/loop0 /tfs/system
+    /bin/mount -r -o loop -t squashfs ${sysSqf} /tfs/system
 
     # Begin preparing union mount command
     layers="/tfs/system=${sqfmnt}"
-
-    # Count loop devices
-    loopn=1
 
     if [ -f ${filterSqf} ]; then
         msg_v ":: Adding squashed base system filter (filter.sqf)"
         /bin/mkdir /tfs/filter
         # The klibc mount command doesn't support '-o loop'
         /bin/losetup /dev/loop${loopn} ${filterSqf}
-        /bin/mount -r -t squashfs /dev/loop${loopn} /tfs/filter
+        /bin/mount -r -o loop -t squashfs ${filterSqf} /tfs/filter
         layers="/tfs/filter=${ovlmnt}:${layers}"
-        loopn=$(( ${loopn} + 1 ))
     fi
 
     msg_v ":: Adding initial squashed overlay (mods.sqf)"
     /bin/mkdir /tfs/mods
-    # The klibc mount command doesn't support '-o loop'
-    /bin/losetup /dev/loop2 ${modsSqf}
-    /bin/mount -r -t squashfs /dev/loop2 /tfs/mods
+    /bin/mount -r -o loop -t squashfs ${modsSqf} /tfs/mods
     layers="/tfs/mods=${sqfmnt}:${layers}"
-    loopn=$(( ${loopn} + 1 ))
-
-    # Make stuff in 'system' available by providing the loader
-    # and library path
-    ldli=$( cd /tfs/system; echo lib/ld-linux*.so.2 )
-    /bin/ln -s /tfs/system/${ldli} /${ldli}
-    export LD_LIBRARY_PATH=/tfs/system/lib:/tfs/system/usr/lib
 
     # Unpack the overlay (/tfs/overlay)
     msg ":: Initializing writable layer for union (overlay)"
     if [ -f ${overlay} ]; then
-        /tfs/system/usr/bin/lzop -d < ${overlay} | \
-                /tfs/system/bin/tar -C /tfs -xf -
+        lzop -d < ${overlay} | tar -x -f - -C /tfs
     else
         /bin/mkdir /tfs/overlay
     fi
@@ -244,20 +228,22 @@ EOT
     #    echo 0 > /proc/sys/dev/cdrom/autoeject
     #fi
 
-    # The rest is copied from archiso
     if [ "${break}" = "y" ]; then
         echo ":: Break requested, type 'exit' to resume operation"
-        echo "   NOTE: klibc contains no 'ls' binary, use 'echo *' instead"
-        PS1="ramfs$ " /bin/sh -i
+        launch_interactive_shell
     fi
 
-    udevpid=$(/bin/minips -C udevd -o pid=)
-    [ "x${udevpid}" != "x" ] && /bin/kill -9 $udevpid 2>&1 >/dev/null
-    #Yep, we're bailing out here.  We don't need kinit.
-    msg ":: Passing control to Arch Linux Initscripts...Please Wait"
+    #Special handling if udev is running
+    udevpid=$(/bin/pidof udevd)
+    if [ -n "${udevpid}" ]; then
+        # Settle pending uevents, then kill udev
+        /sbin/udevadm settle
+        /bin/kill -9 ${udevpid} > /dev/null 2>&1
+        /bin/sleep 0.01
+    fi
 
-    umount /sys
     umount /proc
-    #umount /dev
-    exec /bin/run-init -c /dev/console /union /sbin/init ${CMDLINE}
+    umount /sys
+    [ -z "${init}" ] && init="/sbin/init"
+    exec /sbin/switch_root -c /dev/console /union ${init} ${CMDLINE}
 }
