@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.01.24
+# 2010.02.19
 
 import os, sys
 from glob import glob
@@ -129,20 +129,23 @@ class Builder:
             supershell("chmod 0440  %s/etc/sudoers" % self.overlay)
             supershell("chown root:root %s/etc/sudoers" % self.overlay)
 
-###+ This code can be changed or omitted when the rc. script hooks have
-###  established themselves firmly.
         # Prepare inittab
         inittab = self.overlay + "/etc/inittab"
         itsave = inittab + ".larchsave"
         it0 = self.installation0 + "/etc/inittab"
-        if (not os.path.isfile(it0 + ".larchsave")) and (not os.path.isfile(itsave)):
-            # Save the original, if there isn't already a saved one
-            supershell("cp %s %s" % (it0, itsave))
-        if not os.path.isfile(inittab):
-            supershell("cp %s/etc/inittab %s/etc" % (it0, inittab))
-        supershell("sed -i 's|/etc/rc.sysinit|/etc/rc.larch.sysinit|' %s" % inittab)
-        supershell("sed -i 's|/etc/rc.shutdown|/etc/rc.larch.shutdown|' %s" % inittab)
-###-
+        itl = self.overlay + "/etc/inittab.larch"
+        if not os.path.isfile(itl):
+            itl = self.installation0 + "/etc/inittab.larch"
+            if not os.path.isfile(itl):
+                itl = None
+        # Save the original inittab if there is an inittab.larch file,
+        #   ... if there isn't already a saved one
+        if itl:
+            if ((not os.path.isfile(it0 + ".larchsave"))
+                    and (not os.path.isfile(itsave))):
+                supershell("cp %s %s" % (it0, itsave))
+            # Use the .larch version in the live system
+            supershell("cp -f %s %s" % (itl, inittab))
 
         command.log("#Generating larch initcpio")
         if not self.gen_initramfs():

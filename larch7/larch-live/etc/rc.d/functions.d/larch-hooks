@@ -1,8 +1,9 @@
 # larch handlers for rc. script hooks
-# 2009.08.30
+# 2010.02.19
 
 
 sysinit_premount_larch() {
+    status "larch sysinit_premount hook"
     # Rebuild /etc/mtab
     grep "^aufs */ " /proc/mounts               >/etc/mtab.new
     grep "^unionfs */ " /proc/mounts            >>/etc/mtab.new
@@ -19,7 +20,16 @@ sysinit_premount_larch() {
 add_hook sysinit_premount sysinit_premount_larch
 
 
+sysinit_end_larch() {
+    # Allow setting up of xorg.conf before xorg is started
+    status "larch sysinit_end hook"
+    [ -x /etc/X11/xinit/xorg.conf.set ] && /etc/X11/xinit/xorg.conf.set
+}
+add_hook sysinit_end sysinit_end_larch
+
+
 shutdown_postkillall_larch() {
+    status "larch shutdown_postkillall hook"
     if ! [ -f /.livesys/saveclock ]; then
         # This will prevent the hardware clock from being set
         HARDWARECLOCK='LIVE'
@@ -29,6 +39,7 @@ add_hook shutdown_postkillall shutdown_postkillall_larch
 
 
 shutdown_poweroff_larch() {
+    status "larch shutdown_poweroff hook"
     # larch session saving
     dosessionsave
 

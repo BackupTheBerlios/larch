@@ -6,7 +6,7 @@
 
 INSTALL=$1
 if [ -z "${INSTALL}" ] || [ ! -f /etc/rc.conf ]; then
-    echo "ERROR: larch0 installation adjustments failed:"
+    echo "ERROR: delarch installation adjustments failed:"
     echo "      Please check installation mount point (${INSTALL})"
     exit 1
 fi
@@ -23,17 +23,6 @@ fi
 
 # start gdm from rc.conf
 sed -i '/^DAEMONS=/ s|!gdm|@gdm|' ${INSTALL}/etc/rc.conf
-
-# Adjust xorg.conf for vesa driver or no DRI if necessary
-for x in $(cat /proc/cmdline); do
-    if [ "${x}" = "xvesa" ]; then
-        sed 's|^#xvesa||' -i ${INSTALL}/etc/X11/xorg.conf
-        break
-    elif [ "${x}" = "nodri" ]; then
-        sed 's|^#nodri||' -i ${INSTALL}/etc/X11/xorg.conf
-        break
-    fi
-done
 
 #***************************************************#
 # Replace uses of larchquit in xfce panels and menu.#

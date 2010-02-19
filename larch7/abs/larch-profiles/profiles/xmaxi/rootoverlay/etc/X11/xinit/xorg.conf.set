@@ -1,0 +1,9 @@
+#!/bin/sh
+if [ -f /etc/X11/xorg.conf.base ]; then
+    cp -f /etc/X11/xorg.conf.base /etc/X11/xorg.conf
+    for x in $(cat /proc/cmdline); do
+        [ "${x}" = "nox" ] && return 1
+        [ "${x}" = "xvesa" ] && sed 's|^#xvesa||' -i /etc/X11/xorg.conf
+        [ "${x}" = "nodri" ] && sed 's|^#nodri||' -i /etc/X11/xorg.conf
+    done
+fi

@@ -23,7 +23,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.16
+# 2010.02.19
 
 #TODO:
 # Is c2r still relevant? I should test it!
@@ -114,8 +114,6 @@ run_hook ()
     if [ -f ${filterSqf} ]; then
         msg_v ":: Adding squashed base system filter (filter.sqf)"
         /bin/mkdir /tfs/filter
-        # The klibc mount command doesn't support '-o loop'
-        /bin/losetup /dev/loop${loopn} ${filterSqf}
         /bin/mount -r -o loop -t squashfs ${filterSqf} /tfs/filter
         layers="/tfs/filter=${ovlmnt}:${layers}"
     fi

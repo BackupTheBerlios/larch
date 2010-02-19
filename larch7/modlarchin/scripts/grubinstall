@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# grubinstall
+
+# Install grub to device $2, installation mounted at $1
+INSTALL="$1"
+
+cat /proc/mounts | grep ${INSTALL} | sed "s|[^ ]*${INSTALL}/*|/|" | \
+    sed "s|//|/|" >${INSTALL}/etc/mtab
+chroot ${INSTALL} /sbin/grub-install --no-floppy $2
+ret=$?
+: >${INSTALL}/etc/mtab
+exit ${ret}

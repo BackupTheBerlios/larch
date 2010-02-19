@@ -22,6 +22,6 @@ find ${installmp}/etc -name '*.larch' -type f -print | while read fl; do
     done
 
 # Perform any other custom tweaks
-if [ -f /.livesys/larch0 ]; then
-    bash /.livesys/larch0 ${installmp}
+if [ -f /.livesys/delarch ]; then
+    bash /.livesys/delarch ${installmp}
 fi

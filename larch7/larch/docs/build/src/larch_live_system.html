@@ -99,8 +99,8 @@ the preset by the original, which gets saved with '.larchsave' appended.
 
 <p>The initial boot script and the shutdown script must be customized for use
 in a <em>larch live</em> environment. This is achieved by using hooks in the
-standard /etc/rc.sysinit and /etc/rc.shutdown scripts.
-***+ What are the script names? Where are they? -***
+standard /etc/rc.sysinit and /etc/rc.shutdown scripts. The file
+'etc/rc.d/functions.d/larch-hooks', in the 'larch-live' package, defines these.
 During startup the main tweaks are to the content of /etc/mtab and /etc/fstab.
 During shutdown we probably want to disable writing to the hardware clock, but
 the main addition is the session saving code. If booting from CD/DVD we will

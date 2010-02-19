@@ -72,6 +72,14 @@ into your working directory, and rename it.
   you change, don't change the larch hooks.
   </li>
 
+  <li><strong>rootoverlay/etc/inittab.larch</strong> - If this file is
+  present it will cause the original /etc/inittab to be saved with a
+  '.larchsave' suffix, and this new version will be used for the
+  <em>live</em> 'inittab'. This allows a special version of this file to
+  be used just for the <em>live</em> system, an installer
+  can replace it by the original during the installation process.
+  </li>
+
   <li><strong>cd-root</strong> (directory) - This directory contains files
   that will be (more or less) directly copied to the <em>larch</em> medium,
   partly dependent on the chosen bootloader.

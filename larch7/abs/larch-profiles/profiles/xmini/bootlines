@@ -10,7 +10,7 @@ options:
 
 comment:
 title: larch boot to xfce desktop, with vesa xorg driver
-options: xvesa
+options: nomodeset xvesa
 
 comment: Might be useful if there is some trouble with starting xorg
 title: larch boot to console

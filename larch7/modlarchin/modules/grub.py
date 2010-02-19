@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.14
+# 2010.02.15
 
 
 import time, re
@@ -102,38 +102,68 @@ class Grub:
         self.newmenulst()
         return self.getmenulst()
 
-
-    def grubsetup(self):
-        if (self.where == 'old'):
+#TODO
+    def grubsetup(self, where=None, bootdevice=None, dummy=False):
+        """'where' can be 'old', 'mbr' or 'part' (default, or if invalid).
+        'bootdevice' is the partition containing the '/boot' directory if
+        adding to existing grub menu, otherwise it will be set from the
+        partition list.
+        """
+        newentries = self.newgrubentries()
+        if (where == 'old'):
             # Add this installation to an already existing menu.lst
-            device = None
-            path = self.oldwhere
+            ok, menulst = backend.file_rw(bootdevice, '/boot/grub/menu.lst')
+            if ok:
+                path = '/boot/grub/menu.lst'
+            else:
+                ok, menulst = backend.file_rw(bootdevice, '/grub/menu.lst')
+                if ok:
+                    path = '/grub/menu.lst'
+                else:
+                    errout(_("Couldn't find (/boot)/grub/menu.lst on %s")
+                            % bootdevice)
+                    return None
+
+            menulst += "\n" + newentries
+            if not dummy:
+                # Just replace the appropriate menu.lst
+                if not backend.file_rw(bootdevice, path, menulst):
+                    errout(_("Couldn't modify %s on %s") % (path, bootdevice))
+                    return None
+
         else:
             # Install grub to partition or mbr
             if self.bootpart:
-                device = self.bootpart
+                bootdevice = self.bootpart
+                path = '/grub/menu.lst'
             else:
-                device = self.rootpart
-            if self.where == 'mbr':
-                device = device.rstrip("0123456789")
-            path = None
+                bootdevice = self.rootpart
+                path = '/boot/grub/menu.lst'
+            if where == 'mbr':
+                device = bootdevice.rstrip("0123456789")
+            else:
+                device = bootdevice
 
-        text = self.getmenulst()
-        if not text:
-            errout(_("Couldn't construct GRUB menu - see log"))
-            return False
+            menulst = self.getmenulst(newentries)
+            if not dummy:
+                res = (mounting.mount()
+                        and scripts.run_mount_devprocsys("grubinstall",
+                                mounting.mount_point(), bootdevice)
+                        and backend.writefile(text,
+                                mounting.mount_point("/boot/grub/menu.lst")))
+                if not (mounting.unmount() and res):
+                    errout(_("GRUB setup failed - see log"))
+                    return None
 
-        if device:
-            res = (mounting.mount()
-                    and scripts.run_mount_devprocsys("grubinstall",
-                            mounting.mount_point(), device)
-                    and backend.writefile(text,
-                            mounting.mount_point("/boot/grub/menu.lst")))
+        return '%s:%s:%s' % (bootdevice, path, menulst)
+
+
+
         else:
             # Just replace the appropriate menu.lst
             d, p = path.split(':')
             res = backend.file_rw(d, p, text)
-        if mounting.unmount() and res:
+        return mounting.unmount() and res:
             return True
         errout(_("GRUB setup failed - see log"))
         return False
@@ -200,41 +230,50 @@ class Grub:
     def newmenulst(self, text=None):
         self.menulst = text
 
+#TODO
+    def getmenulst(self, oldwhere):
+        # Get template
+#TODO
+        text = command.readfile("menu_lst_base")
 
-    def getmenulst(self):
-        if self.menulst == None:
-            if self.where != "old":
-                # Get template
-                text = command.readfile("menu_lst_base")
+        # Add entries for new installation
+#TODO
+        text += self.newentries
 
-                # Add entries for new installation
-                text += self.newentries
-
-                # add old entries
-                if self.include:
-                    dev, path = self.oldwhere.split(':')
-                    ml = backend.readfile(dev, path)
-                    # Take everything from the first 'title'
-                    mlp = re.compile(".*?^(title.*)", re.M | re.S)
-                    m = mlp.search(ml)
-                    if m:
-                        text += "\n" + m.group(1)
+        # add old entries
+        if self.include:
+            dev, path = oldwhere.split(':')
+#TODO
+            ml = backend.readfile(dev, path)
+            # Take everything from the first 'title'
+            mlp = re.compile(".*?^(title.*)", re.M | re.S)
+            m = mlp.search(ml)
+            if m:
+                text += "\n" + m.group(1)
 
             else:
                 # Get existing menu.lst
                 dev, path = self.oldwhere.split(':')
+#TODO
                 text = backend.readfile(dev, path)
 
                 # Add entries for new installation
+#TODO
                 text += "\n" + self.newentries
 
+#TODO
             self.menulst = text
 
+#TODO
         return self.menulst
 
 
 #done
     def newgrubentries(self):
+        """Generate the grub menu.lst entries for the new installation.
+        Also set self.rootpart and self.rootname from the partition list,
+        and self.bootpart if /boot is on a separate partition.
+        """
         # look for separate boot partition
         self.bootpart = None
         for m, d, f, l in self.partlist().get_all():
