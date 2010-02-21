@@ -15,19 +15,12 @@ EOF
 # Report device.map contents
 cat ${INSTALL}/boot/grub/device.map
 
-# Search all partitions for /boot/grub/menu.lst
-${INSTALL}/sbin/grub --batch --no-floppy \
-        --device-map=${INSTALL}/boot/grub/device.map \
-        2>/dev/null <<EOT | grep '(h' | sed 's|(|+++ /boot/grub/menu.lst (|'
-find /boot/grub/menu.lst
+for p in /boot/grub/menu.lst /grub/menu.lst /boot/grub/grub.cfg /grub/grub.cfg; do
+    # Search all partitions for /boot/grub/menu.lst
+    ${INSTALL}/sbin/grub --batch --no-floppy \
+            --device-map=${INSTALL}/boot/grub/device.map \
+            2>/dev/null <<EOT | grep '(h' | sed "s|(|+++ ${p} (|"
+find ${p}
 quit
 EOT
-
-# Search all partitions for /grub/menu.lst
-${INSTALL}/sbin/grub --batch --no-floppy \
-        --device-map=${INSTALL}/boot/grub/device.map \
-        2>/dev/null <<EOT | grep '(h' | sed 's|(|+++ /grub/menu.lst (|'
-find /grub/menu.lst
-quit
-EOT
-
+done

@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.14
+# 2010.02.21
 
 # Mount point for the installation root partition
 IBASE = "/tmp/larchin/install"
@@ -96,6 +96,21 @@ def init(io, app_quit=None):
             errout(_("Installation mount-point (%s) in use") % mp, 103)
 
 
+def readdata(filename):
+    return readfile(os.path.join(base_dir, filename))
+
+
+def readfile(fpath):
+    try:
+        fh = open(fpath)
+        text = fh.read()
+        fh.close()
+    except:
+        errout(_("Couldn't read file: %s") % fpath)
+        return None
+    return text
+
+
 def writefile(text, path):
     try:
         pd = os.path.dirname(path)
@@ -112,7 +127,6 @@ def writefile(text, path):
             fh.close()
 
 
-#TODO
 def file_rw(dev, path, text=None):
     """Reads or writes the file at 'path' on device 'dev'.
     Mounts the given device at IBASE (which means this method
@@ -121,57 +135,44 @@ def file_rw(dev, path, text=None):
     If text!=None it is a write operation, and if the device is
     already mounted, but ro, an attempt will be made to remount it
     rw for the duration of the operation.
-    On writing the result can be None or True, but on reading the
-    result is more complicated. None indicates something went wrong
-    with the mounting, otherwise the pair (ok, linelist) is returned,
-    in which linelist is the file contents if ok is True, otherwise
-    whatever output the low level command provides.
+    On writing the result can be None or True, on reading None indicates
+    something went wrong with the mounting or reading, otherwise the
+    file contents are returned.
     """
+    if mounting.mounts:
+        errout(_("BUG: file_rw cannot be used with mounted installed system"))
+        return None
     rorw = None     # Flag to indicate remount rw
     bind = False    # Flag to indicate mount --bind
-#TODO
-    for m in self.xlist("get-mounts")[1]:
+    for m in scripts.script("get-mounts").splitlines():
         md, mp = m.split()
         if md == dev:
-#TODO
-            if (text != None) and self.xlist("testromount", mp)[0]:
+            if (text != None) and scripts.run("testromount", mp):
                 # Writing to ro mount, attempt to remount rw
-#TODO
-                if not self.remount(mp, "rw"):
+                if not mounting.remount(mp, "rw"):
                     return None
                 rorw = mp
-#TODO
-            if not self.mountbind(mp):
+            if not mounting.mountbind(mp):
                 if rorw:
-#TODO
-                    self.remount(mp, "ro")
+                    mounting.remount(mp, "ro")
                 return None
             bind = True
             break
-#TODO
-    if (not bind) and not self.imount(dev, "/"):
+    if (not bind) and not mounting.imount(dev, "/"):
         return None
     if (text != None):
         # Write file
-#TODO
-        ok = self.xwritefile(text, path)
-#TODO
-        ok = self.unmount() and ok
+        ok = writefile(text, path)
+        ok = mounting.unmount() and ok
         if rorw:
-#TODO
-            ok = self.remount(rorw, "ro") and ok
+            ok = mounting.remount(rorw, "ro") and ok
         return True if ok else None
     else:
         # Read file
-#TODO
-        ok, lines = self.xlist("readfile", IBASE + path)
-#TODO
+        text = readfile(IBASE + path)
         if not self.unmount():
             return None
-#TODO
-        return (ok, lines)
-
-
+        return text
 
 
 class Mounting:
@@ -226,7 +227,6 @@ class Mounting:
         return self.imounts(mlist)
 
     def imounts(self, mlist):
-        self.mountlist = mlist
         for d, m in mlist:
             if not self.imount(d, m):
                 return False

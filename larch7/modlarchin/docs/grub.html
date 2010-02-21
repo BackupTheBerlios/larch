@@ -13,13 +13,14 @@ partition mounted at '/boot').
 </p>
 <p>A further alternative is to boot the new Linux system from an existing
 GRUB set-up by adding the entries for the new system to its menu.lst file.
+At the moment this must be done manually, as it is not easy to know how
+the other system handles its configuration files (they might be
+generated automatically, overwriting changes).
 </p>
-<p>It is also possible to add the entries from an existing menu.lst to
-those arising from the new installation, so that the operating systems
-therein can still be booted, but from the newly installed bootloader.
-</p>
-<p>If an NTFS formatted partition is detected it will be added to the list
-automatically.
+<p>Existing bootloaders may also be linked from the new one, if this is
+installed to the MBR. If these are also GRUB (having menu.lst) an entry
+for their configuration file can be added to the new menu, otherwise
+they can be chain-loaded (e.g. GRUB2 or NTFS).
 </p>
 <h3>WARNING</h3>
 <p>If you have mixed IDE(PATA)/SCSI/SATA devices attached it is quite

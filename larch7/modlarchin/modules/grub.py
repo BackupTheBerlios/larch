@@ -19,164 +19,117 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.15
+# 2010.02.21
 
+"""
+mbr:
+ possibility of chain-loading other bootloaders
+
+partition:
+ no sense in including other stuff, but you will want to be able
+to chain-load this partition from somewhere else, which is not necessarily
+straightforward.
+
+ The problem with adjusting the configuration of other bootloaders is that
+there is a variety of approaches to handling these. Some linux distributions
+have tools to update these automatically from possibly non-standard source
+files, and the standard configuration files should not be edited.
+At least initially I think it would be best to let the user make such
+changes manually. She can use the generated menu.lst (which in this case
+should contain only entries for the new installation) as a basis.
+
+ I think a sensible approach might be to install a small 'live' rescue
+system in one partition, this also accommodating the main (MBR) bootloader.
+From here any other OSes can be chain-loaded or - if they also use GRUB -
+their configfile can be loaded. In any case I think this is possibly an
+improvement over the old idea of putting /boot on its own partition.
+
+ In order to aid manual editing of entries, it might be an idea to provide
+an editor interface - say a function call with the test to be edited, the
+result being returned for saving, with special returns for cancellation,
+etc. As in the old code, there can be additional (functional?) arguments
+for reversion, etc.
+"""
 
 import time, re
-
+import backend
 
 class Grub:
 
-    def init(self):
-        # Set up grub's device map and a list of existing menu.lst files.
-        if not self.set_devicemap():
+    def init(self, partlist0=None):
+        """Set up grub's device map and a list of existing menu.lst files.
+        Also set self.rootpart and self.rootname from the partition list,
+        and self.bootpart if /boot is on a separate partition.
+        """
+        if not self.scan_devices():
             errout(_("Couldn't get device map for GRUB"))
             return False
-
-        self.ntfsboot = None
-        # Seek likely candidate for Windows boot partition
-        devices = Devices()
-        dinfo = devices.fdiskl()
-        nlist = scripts.script("get-ntfs-parts").splitlines()
-        for p in dinfo:
-            # First look for (first) partition marked with boot flag
-            if p[6] and p[0] in nlist:
-                self.ntfsboot = p[0]
-                break
-        if (not self.ntfsboot) and nlist:
-            # Else just guess first NTFS partition
-            self.ntfsboot = nlist[0]
-
-        self.newgrubentries()
-        self.includetoggled(False)
-
-# Do we want to pass an initial partlist to the constructor?
-        self.partlist = backend.Partlist(???)
+        self.partlist = backend.Partlist(partlist0).get_all()
+        if not self.partlist:
+            return False
+        # look for separate boot partition
+        self.bootpart = None
+        for m, d, f, l in self.partlist:
+            if (m == '/'):
+                self.rootpart = d
+                self.rootname = l
+            elif (m == '/boot'):
+                self.bootpart = d
+        return True
 
 
-    def mbrtoggled(self, on):
-        if on:
-            self.where = "mbr"
-
-
-    def oldtoggled(self, on):
-        if on:
-            self.where = "old"
-        ui.command("grub:include.enable", not on)
-        self.newmenulst()
-
-
-    def parttoggled(self, on):
-        if on:
-            self.where = "part"
-
-
-    def includetoggled(self, on):
-        self.include = on
-        self.newmenulst()
-
-
-    def select_old(self, index=-1):
-        if index < 0:
-            return
-        self.old_index = index
-        self.oldwhere = ":".join(self.xmenulist[index])
-        self.newmenulst()
-
-
-    def editnew(self):
-        ui.edit(_("Bootloader entries for new installation"),
-            self.setnewentries, self.newentries, self.newgrubentries)
-
-
-    def setnewentries(self, text):
-        self.newentries = text
-
-
-    def editmbr(self):
-        ui.edit(_("New menu.lst"),
-            self.newmenulst, self.getmenulst(), self.revert)
-
-
-    def revert(self):
-        self.newmenulst()
-        return self.getmenulst()
-
-#TODO
-    def grubsetup(self, where=None, bootdevice=None, dummy=False):
-        """'where' can be 'old', 'mbr' or 'part' (default, or if invalid).
-        'bootdevice' is the partition containing the '/boot' directory if
-        adding to existing grub menu, otherwise it will be set from the
-        partition list.
+    def get_existing(self):
+        """Return a list of partitions containing grub configuration files:
+            [(grub-device, path)]
         """
-        newentries = self.newgrubentries()
-        if (where == 'old'):
-            # Add this installation to an already existing menu.lst
-            ok, menulst = backend.file_rw(bootdevice, '/boot/grub/menu.lst')
-            if ok:
-                path = '/boot/grub/menu.lst'
-            else:
-                ok, menulst = backend.file_rw(bootdevice, '/grub/menu.lst')
-                if ok:
-                    path = '/grub/menu.lst'
-                else:
-                    errout(_("Couldn't find (/boot)/grub/menu.lst on %s")
-                            % bootdevice)
-                    return None
+        return self.xmenulst
 
-            menulst += "\n" + newentries
-            if not dummy:
-                # Just replace the appropriate menu.lst
-                if not backend.file_rw(bootdevice, path, menulst):
-                    errout(_("Couldn't modify %s on %s") % (path, bootdevice))
-                    return None
 
+    def get_menu_lst_base(self):
+        return backend.readdata("menu_lst_base")
+
+
+    def install(self, mbr=False, extra=True):
+        """Install grub to the MBR or to the installation's boot partition.
+        """
+        if self.bootpart:
+            bootdevice = self.bootpart
+            path = '/grub/menu.lst'
         else:
-            # Install grub to partition or mbr
-            if self.bootpart:
-                bootdevice = self.bootpart
-                path = '/grub/menu.lst'
-            else:
-                bootdevice = self.rootpart
-                path = '/boot/grub/menu.lst'
-            if where == 'mbr':
-                device = bootdevice.rstrip("0123456789")
-            else:
-                device = bootdevice
-
-            menulst = self.getmenulst(newentries)
-            if not dummy:
-                res = (mounting.mount()
-                        and scripts.run_mount_devprocsys("grubinstall",
-                                mounting.mount_point(), bootdevice)
-                        and backend.writefile(text,
-                                mounting.mount_point("/boot/grub/menu.lst")))
-                if not (mounting.unmount() and res):
-                    errout(_("GRUB setup failed - see log"))
-                    return None
-
-        return '%s:%s:%s' % (bootdevice, path, menulst)
-
-
-
+            bootdevice = self.rootpart
+            path = '/boot/grub/menu.lst'
+        if mbr:
+            device = bootdevice.rstrip("0123456789")
         else:
-            # Just replace the appropriate menu.lst
-            d, p = path.split(':')
-            res = backend.file_rw(d, p, text)
-        return mounting.unmount() and res:
+            device = bootdevice
+
+        menulst = self.get_menu_lst_base() + self.newgrubentries(extra)
+        if self.install_grub(menulst, device):
+            return '%s:%s:%s' % (bootdevice, path, menulst)
+        return None
+
+
+    def install_grub(self, menu_lst, device):
+        """Set up GRUB on the given device, writing menu_lst
+        to /boot/grub/menu.lst.
+        """
+        res = (mounting.mount()
+                and scripts.run_mount_devprocsys("grubinstall",
+                        mounting.mount_point(), device)
+                and backend.writefile(text,
+                        mounting.mount_point("/boot/grub/menu.lst")))
+        if (mounting.unmount() and res):
             return True
         errout(_("GRUB setup failed - see log"))
         return False
 
 
-##################################
-
-#done
-    def set_devicemap(self):
-        """Generate a (temporary) device.map file on the target and read
+    def scan_devices(self):
+        """Generate a device.map file on the target and read
         its contents to a list of pairs in self.device_map.
-        It also scans all partitions for menu.lst files, which are
-        then stored as (device, path) pairs, in the list self.xmenulist.
+        It also scans all partitions for menu.lst and grub.cfg files,
+        which are then stored as (device, path) pairs, in the list
+        self.xmenulist.
         """
         if mounting.mount():
             # Filter out new system '/' and '/boot'
@@ -199,7 +152,6 @@ class Grub:
         return False
 
 
-#(done)
     def grubdevice(self, device):
         """Convert from a grub drive name to a linux drive name, or vice
         versa. Uses the information previously gathered by set_devicemap().
@@ -227,61 +179,10 @@ class Grub:
         return None
 
 
-    def newmenulst(self, text=None):
-        self.menulst = text
-
-#TODO
-    def getmenulst(self, oldwhere):
-        # Get template
-#TODO
-        text = command.readfile("menu_lst_base")
-
-        # Add entries for new installation
-#TODO
-        text += self.newentries
-
-        # add old entries
-        if self.include:
-            dev, path = oldwhere.split(':')
-#TODO
-            ml = backend.readfile(dev, path)
-            # Take everything from the first 'title'
-            mlp = re.compile(".*?^(title.*)", re.M | re.S)
-            m = mlp.search(ml)
-            if m:
-                text += "\n" + m.group(1)
-
-            else:
-                # Get existing menu.lst
-                dev, path = self.oldwhere.split(':')
-#TODO
-                text = backend.readfile(dev, path)
-
-                # Add entries for new installation
-#TODO
-                text += "\n" + self.newentries
-
-#TODO
-            self.menulst = text
-
-#TODO
-        return self.menulst
-
-
-#done
-    def newgrubentries(self):
+    def newgrubentries(self, extra=False):
         """Generate the grub menu.lst entries for the new installation.
-        Also set self.rootpart and self.rootname from the partition list,
-        and self.bootpart if /boot is on a separate partition.
+        If extra is True also add section for other, discovered partitions.
         """
-        # look for separate boot partition
-        self.bootpart = None
-        for m, d, f, l in self.partlist().get_all():
-            if (m == '/'):
-                self.rootpart = d
-                self.rootname = l
-            elif (m == '/boot'):
-                self.bootpart = d
         # add an entry for each initramfs
         text = "# ++++ Section added by larchin (%s)\n\n" % time.ctime()
         bi = self.getbootinfo()
@@ -307,21 +208,36 @@ class Grub:
             text += "kernel %s/%s root=%s ro\n" % (bp, kernel, r)
             text += "initrd %s/%s\n\n" % (bp, init)
 
-        if self.ntfsboot:
-            text += "# ....\n"
-            text += "title Windows\n"
-            text += "rootnoverify %s\n" % self.grubdevice(self.ntfsboot)
-            text += "makeactive\n"
-            text += "chainloader +1\n\n"
+        if extra:
+            # GRUB partitions
+            for dev, path in self.get_existing():
+                text += "\n# ....\n"
+                if path.endswith('menu.lst'):
+                    text += "title Other GRUB menu (%s)\n" % dev
+                    text += "root %s\n" % self.grubdevice(dev)
+                    text += "configfile %s\n" % path
+                else:
+                    text += "title GRUB2 Bootloader (%s)\n" % dev
+                    text += "root %s\n" % self.grubdevice(dev)
+                    text += "makeactive\n"
+                    text += "chainloader +1\n\n"
+
+            # Windows partitions
+            ntfsboot = self.get_ntfsboot()
+            if ntfsboot:
+                text += "\n# ....\n"
+                text += "title Windows\n"
+                text += "rootnoverify %s\n" % self.grubdevice(ntfsboot)
+                text += "makeactive\n"
+                text += "chainloader +1\n\n"
 
         text += "# ---- End of section added by larchin\n"
         self.newentries = text
         return text
 
 
-#done
     def getbootinfo(self):
-        """Retrieves kernel file name and a list of initramfs files from
+        """Retrieve kernel file name and a list of initramfs files from
         the boot directory of the newly installed system.
         """
         mounting.mount()
@@ -338,6 +254,25 @@ class Grub:
             errout(_("No initramfs found"))
             return None
         if not kernel:
-            errout(_("GRUB problem:\n") + inits[0])
+            errout(_("Kernel not found:\n") + inits[0])
             return None
         return (kernel, inits)
+
+
+    def get_ntfsboot(self):
+        """Seek likely candidate for Windows boot partition.
+        """
+        ntfsboot = None
+        devices = Devices()
+        dinfo = devices.fdiskl()
+        nlist = scripts.script("get-ntfs-parts").splitlines()
+        for p in dinfo:
+            # First look for (first) partition marked with boot flag
+            if p[6] and p[0] in nlist:
+                ntfsboot = p[0]
+                break
+        if (ntfsboot == None) and nlist:
+            # Else just guess first NTFS partition
+            ntfsboot = nlist[0]
+        return ntfsboot
+
