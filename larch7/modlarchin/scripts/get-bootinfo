@@ -16,7 +16,7 @@ echo -n "+++ "
 basename ${kernels}
 
 # Find initramfs (could well be more than one!)
-inits="$( ls ${INSTALL}/boot/kernel*.img 2>/dev/null | \
+inits="$( ls ${INSTALL}/boot/*.img 2>/dev/null | \
         sed "s|.*/|${bp}/|" | sort -r - )"
 
 for i in ${inits}; do

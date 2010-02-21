@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.11
+# 2010.02.21
 
 import threading
 
@@ -165,7 +165,7 @@ class Installer:
 
 
 if __name__ == "__main__":
-    import os, sys, traceback, console
+    import console
     backend.start_translator()
 
     from optparse import OptionParser, OptionGroup

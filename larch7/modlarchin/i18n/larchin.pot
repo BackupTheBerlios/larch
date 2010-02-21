@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-02-11 07:23+CET\n"
+"POT-Creation-Date: 2010-02-21 11:45+CET\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,39 +27,47 @@ msgstr ""
 msgid "Installation mount-point (%s) in use"
 msgstr ""
 
-#: modules/backend.py:129
+#: modules/backend.py:109
+msgid "Couldn't read file: %s"
+msgstr ""
+
+#: modules/backend.py:143
+msgid "BUG: file_rw cannot be used with mounted installed system"
+msgstr ""
+
+#: modules/backend.py:192
 msgid "Couldn't remount '%s' %s"
 msgstr ""
 
-#: modules/backend.py:137
+#: modules/backend.py:200
 msgid "Couldn't bind-mount %s at %s"
 msgstr ""
 
-#: modules/backend.py:156
+#: modules/backend.py:219
 msgid "No root partition ('/') specified"
 msgstr ""
 
-#: modules/backend.py:162
+#: modules/backend.py:225
 msgid "Mounting %s at %s"
 msgstr ""
 
-#: modules/backend.py:178
+#: modules/backend.py:240
 msgid "Couldn't mount %s at %s"
 msgstr ""
 
-#: modules/backend.py:194
+#: modules/backend.py:256
 msgid "Couldn't unmount %s"
 msgstr ""
 
-#: modules/backend.py:202
+#: modules/backend.py:264
 msgid "Couldn't create directory '%s'"
 msgstr ""
 
-#: modules/backend.py:293
+#: modules/backend.py:355
 msgid "Bad partition descriptor: %s"
 msgstr ""
 
-#: modules/backend.py:306
+#: modules/backend.py:368
 msgid "Couldn't save partition data to %s"
 msgstr ""
 
@@ -81,6 +89,79 @@ msgstr ""
 
 #: modules/fstab.py:66
 msgid "Detected fstype not same as format spec: %s"
+msgstr ""
+
+#: modules/grub.py:70
+msgid "Couldn't get device map for GRUB"
+msgstr ""
+
+#: modules/grub.py:125
+msgid "GRUB setup failed - see log"
+msgstr ""
+
+#: modules/grub.py:256
+msgid "No initramfs found"
+msgstr ""
+
+#: modules/grub.py:259
+msgid ""
+"Kernel not found:\n"
+msgstr ""
+
+#: modules/grub.py:289 modules/installer.py:172
+msgid "usage: %prog [options]"
+msgstr ""
+
+#: modules/grub.py:292
+msgid "Install GRUB to Master Boot Record of installation device"
+msgstr ""
+
+#: modules/grub.py:294
+msgid "Exclude entries for other bootloaders"
+msgstr ""
+
+#: modules/grub.py:296
+msgid "Don't install GRUB, just print boot entries"
+msgstr ""
+
+#: modules/grub.py:298
+msgid "List other, discovered bootloaders"
+msgstr ""
+
+#: modules/grub.py:300 modules/installer.py:182
+msgid "Suppress output messages, except errors"
+msgstr ""
+
+#: modules/grub.py:301 modules/installer.py:183
+msgid "Passing installation partitions"
+msgstr ""
+
+#: modules/grub.py:302 modules/installer.py:184
+msgid "   mount-point:device:format:uuid/label ... More than one such descriptor can be passed, using ',' as separator.   The first entry should be for root (mount-point is '/'), swap partitions have mount-point 'swap'.   format should be 'ext4' or 'jfs', for example. If it is empty, no formatting will be performed. Also swap partitions should have this field empty.   The final entry may be empty (implying the system default will be used), otherwise:      -: using straight device names (/dev/sdXN),   LABEL=xxxxx: using partition labels,   UUID=xxxxx: using UUIDs"
+msgstr ""
+
+#: modules/grub.py:315 modules/installer.py:197
+msgid "Pass partition list"
+msgstr ""
+
+#: modules/grub.py:327
+msgid "Partitions containing bootloader configuration files:"
+msgstr ""
+
+#: modules/grub.py:332
+msgid "Not installing GRUB!"
+msgstr ""
+
+#: modules/grub.py:334
+msgid "Boot entries:"
+msgstr ""
+
+#: modules/grub.py:338
+msgid "Installing GRUB!"
+msgstr ""
+
+#: modules/grub.py:343
+msgid "GRUB installation failed"
 msgstr ""
 
 #: modules/installer.py:78
@@ -135,10 +216,6 @@ msgstr ""
 msgid "Copying system to selected partition(s)"
 msgstr ""
 
-#: modules/installer.py:172
-msgid "usage: %prog [options]"
-msgstr ""
-
 #: modules/installer.py:175
 msgid "Output installed MB (progress) with step of this size"
 msgstr ""
@@ -149,21 +226,5 @@ msgstr ""
 
 #: modules/installer.py:179
 msgid "Debug flags %s"
-msgstr ""
-
-#: modules/installer.py:182
-msgid "Suppress output messages, except errors"
-msgstr ""
-
-#: modules/installer.py:183
-msgid "Passing installation partitions"
-msgstr ""
-
-#: modules/installer.py:184
-msgid "   mount-point:device:format:uuid/label ... More than one such descriptor can be passed, using ',' as separator.   The first entry should be for root (mount-point is '/'), swap partitions have mount-point 'swap'.   format should be 'ext4' or 'jfs', for example. If it is empty, no formatting will be performed. Also swap partitions should have this field empty.   The final entry may be empty (implying the system default will be used), otherwise:      -: using straight device names (/dev/sdXN),   LABEL=xxxxx: using partition labels,   UUID=xxxxx: using UUIDs"
-msgstr ""
-
-#: modules/installer.py:197
-msgid "Pass partition list"
 msgstr ""
 

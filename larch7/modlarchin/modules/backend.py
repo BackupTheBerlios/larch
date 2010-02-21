@@ -97,7 +97,7 @@ def init(io, app_quit=None):
 
 
 def readdata(filename):
-    return readfile(os.path.join(base_dir, filename))
+    return readfile(base_dir + '/data/' + filename)
 
 
 def readfile(fpath):
@@ -215,7 +215,7 @@ class Mounting:
 
     def mount(self):
         partitions = Partlist().get_all()
-        if partitions[0][0] != "/":
+        if (not partitions) or partitions[0][0] != "/":
             errout(_("No root partition ('/') specified"))
             return False
         mlist = []

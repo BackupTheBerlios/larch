@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # grub.py - set up grub bootloader
 #
 # (c) Copyright 2010 Michael Towers (larch42 at googlemail dot com)
@@ -61,11 +63,11 @@ class Grub:
         Also set self.rootpart and self.rootname from the partition list,
         and self.bootpart if /boot is on a separate partition.
         """
-        if not self.scan_devices():
-            errout(_("Couldn't get device map for GRUB"))
-            return False
         self.partlist = backend.Partlist(partlist0).get_all()
         if not self.partlist:
+            return False
+        if not self.scan_devices():
+            errout(_("Couldn't get device map for GRUB"))
             return False
         # look for separate boot partition
         self.bootpart = None
@@ -80,9 +82,9 @@ class Grub:
 
     def get_existing(self):
         """Return a list of partitions containing grub configuration files:
-            [(grub-device, path)]
+            [(device, path)]
         """
-        return self.xmenulst
+        return self.xmenulist
 
 
     def get_menu_lst_base(self):
@@ -103,9 +105,9 @@ class Grub:
         else:
             device = bootdevice
 
-        menulst = self.get_menu_lst_base() + self.newgrubentries(extra)
+        menulst = self.get_menu_lst_base() + self.newgrubentries(extra and mbr)
         if self.install_grub(menulst, device):
-            return '%s:%s:%s' % (bootdevice, path, menulst)
+            return '%s:%s' % (bootdevice, path)
         return None
 
 
@@ -134,7 +136,7 @@ class Grub:
         if mounting.mount():
             # Filter out new system '/' and '/boot'
             bar = []
-            for md in backend.partlist():
+            for md in self.partlist:
                 if md[0] in ('/', '/boot'):
                     bar.append(md[1])
 
@@ -263,16 +265,82 @@ class Grub:
         """Seek likely candidate for Windows boot partition.
         """
         ntfsboot = None
-        devices = Devices()
+        devices = backend.Devices()
         dinfo = devices.fdiskl()
-        nlist = scripts.script("get-ntfs-parts").splitlines()
-        for p in dinfo:
-            # First look for (first) partition marked with boot flag
-            if p[6] and p[0] in nlist:
-                ntfsboot = p[0]
-                break
-        if (ntfsboot == None) and nlist:
-            # Else just guess first NTFS partition
-            ntfsboot = nlist[0]
+        np = scripts.script("get-ntfs-parts")
+        if np:
+            nlist = np.splitlines()
+            for p in dinfo:
+                # First look for (first) partition marked with boot flag
+                if p[6] and p[0] in nlist:
+                    ntfsboot = p[0]
+                    break
+            if (ntfsboot == None) and nlist:
+                # Else just guess first NTFS partition
+                ntfsboot = nlist[0]
         return ntfsboot
 
+
+if __name__ == "__main__":
+    import console
+    backend.start_translator()
+
+    from optparse import OptionParser, OptionGroup
+    parser = OptionParser(usage=_("usage: %prog [options]"))
+    parser.add_option("-m", "--mbr", action="store_true", dest="mbr",
+            default=False,
+            help=_("Install GRUB to Master Boot Record of installation device"))
+    parser.add_option("-x", "--exclude", action="store_false", dest="include",
+            default=True, help=_("Exclude entries for other bootloaders"))
+    parser.add_option("-n", "--noinstall", action="store_true", dest="noinstall",
+            default=False, help=_("Don't install GRUB, just print boot entries"))
+    parser.add_option("-b", "--listboot", action="store_true", dest="list",
+            default=False, help=_("List other, discovered bootloaders"))
+    parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
+            default=False, help=_("Suppress output messages, except errors"))
+    group = OptionGroup(parser, _("Passing installation partitions"),
+            _("   mount-point:device:format:uuid/label ..."
+            " More than one such descriptor can be passed, using ',' as"
+            " separator.   The first entry should be for root"
+            " (mount-point is '/'), swap partitions have mount-point 'swap'."
+            "   format should be 'ext4' or 'jfs', for example. If it is"
+            " empty, no formatting will be performed. Also swap"
+            " partitions should have this field empty.   The final entry"
+            " may be empty (implying the system default will be used),"
+            " otherwise:   "
+            "   -: using straight device names (/dev/sdXN),"
+            "   LABEL=xxxxx: using partition labels,"
+            "   UUID=xxxxx: using UUIDs"))
+    group.add_option("-l", "--partitions", action="store", type="string",
+            default="", dest="parts", help=_("Pass partition list"),
+            metavar="PARTLIST")
+    parser.add_option_group(group)
+    (options, args) = parser.parse_args()
+
+    backend.init(console.Console(options.quiet))
+
+    grub = Grub()
+    if not grub.init(options.parts.split(',')):
+        sys_quit(1)
+
+    if options.list:
+        io.out(_("Partitions containing bootloader configuration files:"))
+        for dp in grub.get_existing():
+            io.out("    %s: %s" % dp, True)
+
+    if options.noinstall:
+        io.out(_("Not installing GRUB!"))
+        lines = grub.newgrubentries(options.include and options.mbr)
+        io.out(_("Boot entries:"))
+        for line in lines.splitlines():
+            io.out("  >  %s" % line, True)
+    else:
+        io.out(_("Installing GRUB!"))
+        r = grub.install(options.mbr, options.include)
+        if r:
+            io.out(r)
+        else:
+            errout(_("GRUB installation failed"))
+            sys_quit(2)
+
+    sys_quit(0)

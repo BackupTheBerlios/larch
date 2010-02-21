@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 7.100\n"
-"POT-Creation-Date: 2010-02-11 07:23+CET\n"
+"POT-Creation-Date: 2010-02-21 11:45+CET\n"
 "PO-Revision-Date: 2010-02-10 16:33+CET\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -33,39 +33,47 @@ msgstr ""
 msgid "Installation mount-point (%s) in use"
 msgstr "Installations-Einhängepunkt nicht frei"
 
-#: modules/backend.py:129
+#: modules/backend.py:109
+msgid "Couldn't read file: %s"
+msgstr "Die Datei %s konnte nicht gelesen werden"
+
+#: modules/backend.py:143
+msgid "BUG: file_rw cannot be used with mounted installed system"
+msgstr "BUG: file_rw kann nicht bei eingehängter Installation verwendet werden"
+
+#: modules/backend.py:192
 msgid "Couldn't remount '%s' %s"
 msgstr "'remount %s %s' schlug fehl"
 
-#: modules/backend.py:137
+#: modules/backend.py:200
 msgid "Couldn't bind-mount %s at %s"
 msgstr "'mount --bind %s %s' schlug fehl"
 
-#: modules/backend.py:156
+#: modules/backend.py:219
 msgid "No root partition ('/') specified"
 msgstr "Keine 'root'-Partition ('/') angegeben"
 
-#: modules/backend.py:162
+#: modules/backend.py:225
 msgid "Mounting %s at %s"
 msgstr "%s wird an %s eingehängt"
 
-#: modules/backend.py:178
+#: modules/backend.py:240
 msgid "Couldn't mount %s at %s"
 msgstr "%s konnte nicht an %s eingehängt werden"
 
-#: modules/backend.py:194
+#: modules/backend.py:256
 msgid "Couldn't unmount %s"
 msgstr "Medium an %s konnte nicht ausgehängt werden"
 
-#: modules/backend.py:202
+#: modules/backend.py:264
 msgid "Couldn't create directory '%s'"
 msgstr "Ordner %s konnte nicht erstelltt werden"
 
-#: modules/backend.py:293
+#: modules/backend.py:355
 msgid "Bad partition descriptor: %s"
 msgstr "Ungültige Partitionsangabe: %s"
 
-#: modules/backend.py:306
+#: modules/backend.py:368
 msgid "Couldn't save partition data to %s"
 msgstr "Partitionierungsinformationen konnten nicht in %s gespeichert werden"
 
@@ -88,6 +96,95 @@ msgstr "%s sieht aus wie eine 'swap'-Partition"
 #: modules/fstab.py:66
 msgid "Detected fstype not same as format spec: %s"
 msgstr "Entdeckter Dateisystemtyp entspricht nicht der Formatangabe: %s"
+
+#: modules/grub.py:70
+msgid "Couldn't get device map for GRUB"
+msgstr "Gerätezuordnung für GRUB konnte nicht erstellt werden"
+
+#: modules/grub.py:125
+msgid "GRUB setup failed - see log"
+msgstr "GRUB-Einrichtung schlug fehl - siehe Protokoll"
+
+#: modules/grub.py:256
+msgid "No initramfs found"
+msgstr "Kein initramfs gefunden"
+
+#: modules/grub.py:259
+msgid "Kernel not found:\n"
+msgstr "Kein Kernel gefunden:\n"
+
+#: modules/grub.py:289 modules/installer.py:172
+msgid "usage: %prog [options]"
+msgstr "Gebrauch: %prog [Optionen]"
+
+#: modules/grub.py:292
+msgid "Install GRUB to Master Boot Record of installation device"
+msgstr "GRUB auf Master-Boot-Record des Installationsgerätes einrichten"
+
+#: modules/grub.py:294
+msgid "Exclude entries for other bootloaders"
+msgstr "Einträge für andere Bootlader ausschließen"
+
+#: modules/grub.py:296
+msgid "Don't install GRUB, just print boot entries"
+msgstr "GRUB nicht einrichten, nur Einträge ausgeben"
+
+#: modules/grub.py:298
+msgid "List other, discovered bootloaders"
+msgstr "Andere, entdeckte Bootlader auflisten"
+
+#: modules/grub.py:300 modules/installer.py:182
+msgid "Suppress output messages, except errors"
+msgstr "Keine Ausgabe, außer Fehler"
+
+#: modules/grub.py:301 modules/installer.py:183
+msgid "Passing installation partitions"
+msgstr "Eingabe der Installationspartitionen"
+
+#: modules/grub.py:302 modules/installer.py:184
+msgid ""
+"   mount-point:device:format:uuid/label ... More than one such descriptor "
+"can be passed, using ',' as separator.   The first entry should be for root "
+"(mount-point is '/'), swap partitions have mount-point 'swap'.   format "
+"should be 'ext4' or 'jfs', for example. If it is empty, no formatting will "
+"be performed. Also swap partitions should have this field empty.   The final "
+"entry may be empty (implying the system default will be used), "
+"otherwise:      -: using straight device names (/dev/sdXN),   LABEL=xxxxx: "
+"using partition labels,   UUID=xxxxx: using UUIDs"
+msgstr ""
+"   Einhängepfad:Gerät:Format:uuid/label ... Mehrere solche Angaben sind "
+"möglich, wenn sie durch ',' getrennt sind.   Der erste Eintrag muss für die "
+"Wurzelpartition (mount-point is '/') sein, 'swap'-Partitionen haben "
+"Einhängepfad 'swap'.   Format sollte z.B. 'ext4' or 'jfs' sein. Wenn dieses "
+"Feld leer ist, die Partition wird nicht formatiert. Auch 'swap'-Partitionen "
+"sollten hier ein leeres Feld haben.   Das letzte Feld darf leer sein (die "
+"Systemvoreinstellung wird übernommen), sonst:     -: mit gewöhnlichen "
+"Gerätenamen (/dev/sdXN),   LABEL=xxxxx: mit Partition-Label,   UUID=xxxxx: "
+"mit UUID"
+
+#: modules/grub.py:315 modules/installer.py:197
+msgid "Pass partition list"
+msgstr "Eingabe der Partitionsliste"
+
+#: modules/grub.py:327
+msgid "Partitions containing bootloader configuration files:"
+msgstr "Partitionen mit Bootlader-Konfigurationsdatei:"
+
+#: modules/grub.py:332
+msgid "Not installing GRUB!"
+msgstr "GRUB wird nicht eingerichtet!"
+
+#: modules/grub.py:334
+msgid "Boot entries:"
+msgstr "Boot-Einträge:"
+
+#: modules/grub.py:338
+msgid "Installing GRUB!"
+msgstr "GRUB wird eingerichtet!"
+
+#: modules/grub.py:343
+msgid "GRUB installation failed"
+msgstr "GRUB-Einrichtung schlug fehl"
 
 #: modules/installer.py:78
 msgid "Copying of system data failed"
@@ -141,10 +238,6 @@ msgstr "Das Formatieren von %s schlug fehl"
 msgid "Copying system to selected partition(s)"
 msgstr "System wird auf die vorgegebene(n) Partition(en) kopiert"
 
-#: modules/installer.py:172
-msgid "usage: %prog [options]"
-msgstr "Gebrauch: %prog [Optionen]"
-
 #: modules/installer.py:175
 msgid "Output installed MB (progress) with step of this size"
 msgstr "Zeige installierte MB (Fortschritt) mit Schritten dieser Größe an"
@@ -156,36 +249,3 @@ msgstr "Zeige geschätzten Fortschritt in Prozent"
 #: modules/installer.py:179
 msgid "Debug flags %s"
 msgstr "Debug-Optionen %s"
-
-#: modules/installer.py:182
-msgid "Suppress output messages, except errors"
-msgstr "Keine Ausgabe, außer Fehler"
-
-#: modules/installer.py:183
-msgid "Passing installation partitions"
-msgstr "Eingabe der Installationspartitionen"
-
-#: modules/installer.py:184
-msgid ""
-"   mount-point:device:format:uuid/label ... More than one such descriptor "
-"can be passed, using ',' as separator.   The first entry should be for root "
-"(mount-point is '/'), swap partitions have mount-point 'swap'.   format "
-"should be 'ext4' or 'jfs', for example. If it is empty, no formatting will "
-"be performed. Also swap partitions should have this field empty.   The final "
-"entry may be empty (implying the system default will be used), "
-"otherwise:      -: using straight device names (/dev/sdXN),   LABEL=xxxxx: "
-"using partition labels,   UUID=xxxxx: using UUIDs"
-msgstr ""
-"   Einhängepfad:Gerät:Format:uuid/label ... Mehrere solche Angaben sind "
-"möglich, wenn sie durch ',' getrennt sind.   Der erste Eintrag muss für die "
-"Wurzelpartition (mount-point is '/') sein, 'swap'-Partitionen haben "
-"Einhängepfad 'swap'.   Format sollte z.B. 'ext4' or 'jfs' sein. Wenn dieses "
-"Feld leer ist, die Partition wird nicht formatiert. Auch 'swap'-Partitionen "
-"sollten hier ein leeres Feld haben.   Das letzte Feld darf leer sein (die "
-"Systemvoreinstellung wird übernommen), sonst:     -: mit gewöhnlichen "
-"Gerätenamen (/dev/sdXN),   LABEL=xxxxx: mit Partition-Label,   UUID=xxxxx: "
-"mit UUID"
-
-#: modules/installer.py:197
-msgid "Pass partition list"
-msgstr "Eingabe der Partitionsliste"
