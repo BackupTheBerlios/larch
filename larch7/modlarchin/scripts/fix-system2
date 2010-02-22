@@ -5,6 +5,7 @@
 # This is separate from fix-system1 to aid diagnostics in the case of an error
 
 installmp="$1"
+sshkeys="$2"
 
 # Get the 'original' version of saved files in /etc
 find /etc -name '*.larchsave' -type f -print | while read fls; do
@@ -20,6 +21,11 @@ done
 find ${installmp}/etc -name '*.larch' -type f -print | while read fl; do
         rm "${fl}"
     done
+
+# Remove ssh_host files, unless expressly forbidden
+if [ "${sshkeys}" != "sshkeys" ]; then
+    rm -f ${installmp}/etc/ssh/ssh_host_*
+fi
 
 # Perform any other custom tweaks
 if [ -f /.livesys/delarch ]; then

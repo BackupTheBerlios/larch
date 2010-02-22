@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.21
+# 2010.02.22
 
 import threading
 
@@ -34,10 +34,6 @@ class Installer:
     and mounting, and the generation of an initramfs and initial /etc/fstab
     (the latter by means of the fstab module).
     """
-    def __init__(self, out_mb=False, out_percent=False, dbg_flags=""):
-        self.dbg_flags = dbg_flags
-        self.out_mb = out_mb
-        self.out_percent = out_percent
 
     def count_files(self):
         op = scripts.script("count-files")
@@ -45,7 +41,12 @@ class Installer:
             self.nfiles = int(op.strip())
 
 
-    def run(self, partlist=[]):
+    def run(self, partlist=[], out_mb=False, out_percent=False,
+            keepsshhost=False, dbg_flags=""):
+        self.dbg_flags = dbg_flags
+        self.keepsshhost = keepsshhost
+        self.out_mb = out_mb
+        self.out_percent = out_percent
         self.nfiles = 0
         if self.out_percent:
             t = threading.Thread(target=self.count_files, args=())
@@ -89,7 +90,8 @@ class Installer:
 
             # Delivify (including running 'larch0' script)
             io.out("#>" + _("Removing live-system modifications"))
-            if not scripts.run("fix-system2", mounting.mount_point()):
+            if not scripts.run("fix-system2", mounting.mount_point(),
+                    "sshkeys" if self.keepsshhost else ""):
                 errout(_("Failure while removing live-system modifications"))
                 return 5
 
@@ -180,6 +182,8 @@ if __name__ == "__main__":
             metavar="FLAGS")
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
             default=False, help=_("Suppress output messages, except errors"))
+    parser.add_option("-s", "--keepsshhost", action="store_true", dest="ssh",
+            default=False, help=_("Retain ssh_host keys (generally not a good idea)"))
     group = OptionGroup(parser, _("Passing installation partitions"),
             _("   mount-point:device:format:uuid/label ..."
             " More than one such descriptor can be passed, using ',' as"
@@ -201,6 +205,7 @@ if __name__ == "__main__":
 
     backend.init(console.Console(options.quiet))
 
-    installer = Installer(options.mb, options.progress, dbg_flags = options.dbg)
+    installer = Installer()
 
-    sys_quit(installer.run(options.parts.split(',')))
+    sys_quit(installer.run(options.parts.split(','), options.mb,
+            options.progress, options.ssh, dbg_flags = options.dbg))
