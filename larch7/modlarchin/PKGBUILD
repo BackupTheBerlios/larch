@@ -1,5 +1,5 @@
 # Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
-# 2010.02.22
+# 2010.02.25
 pkgname=larchin
 pkgver=7.0.105
 pkgrel=1
@@ -20,13 +20,15 @@ build() {
 
   rm -f ${startdir}/modules/*.pyc
   cp -dr ${startdir}/modules ${_destdir}
-#  cp -dr ${startdir}/data ${_destdir}
+  cp -dr ${startdir}/scripts ${_destdir}
+  cp -dr ${startdir}/data ${_destdir}
+  cp -dr ${startdir}/docs ${_destdir}
   cp -dr ${startdir}/i18n ${_destdir}
-#  cp -dr ${startdir}/images ${_destdir}
 
 #  cp ${startdir}/larchin.py ${_destdir}
 #  ln -s /${_destdir}/larchin.py usr/sbin/larchin
   ln -s /${_destdir}/modules/installer.py usr/sbin/larchin-install
+  ln -s /${_destdir}/modules/grub.py usr/sbin/larchin-grub
 
 #  cp -dr ${startdir}/images ${_destdir}
 #  ln -s /${_destdir}/images/larchin.png usr/share/pixmaps/larchin.png
