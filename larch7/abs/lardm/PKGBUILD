@@ -1,0 +1,35 @@
+# Contributor: Michael Towers <larch42 (at) googlemail (dot) com>
+#2010.02.27
+pkgname=lardm
+pkgver=1.5
+pkgrel=1
+pkgdesc="Larch Display Manager (for logging into xorg sessions)"
+license=('GPL')
+arch=(any)
+depends=('pyqt' 'xorg-utils')
+backup=(etc/lardm.conf)
+url="http://larch.berlios.de"
+install=lardm.install
+
+build() {
+  _destdir=opt/apps/lardm
+  cd $pkgdir
+  mkdir -p usr/sbin
+  mkdir -p usr/bin
+  mkdir -p etc/rc.d
+  mkdir -p $_destdir
+
+  cp $startdir/lardmd.py $pkgdir/$_destdir
+  ln -s /$_destdir/lardmd.py $pkgdir/usr/sbin/lardmd
+  cp $startdir/lardm_new_session.py $pkgdir/$_destdir
+  ln -s /$_destdir/lardm_new_session.py $pkgdir/usr/bin/lardm_new_session
+
+  cp $startdir/lardm.py $pkgdir/$_destdir
+  cp $startdir/lardmgui.py $pkgdir/$_destdir
+
+  cp $startdir/archlogo.png $pkgdir/$_destdir
+  cp $startdir/README $pkgdir/$_destdir
+
+  cp $startdir/lardm.conf $pkgdir/etc
+  cp $startdir/lardm.rc $pkgdir/etc/rc.d/lardm
+}

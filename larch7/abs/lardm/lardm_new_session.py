@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# ldm_new_session.py
+# lardm_new_session.py
 
 from socket import socket, AF_UNIX, SOCK_STREAM
 
@@ -7,9 +7,9 @@ def new_session():
     # Create an unbound and not-connected socket.
     sock = socket(AF_UNIX, SOCK_STREAM)
 
-    # Connect to the peer registered as 'ldmd' in the abstract namespace.
+    # Connect to the peer registered as 'lardmd' in the abstract namespace.
     # Note the null-byte.
-    sock.connect("\0ldmd")
+    sock.connect("\0lardmd")
 
     # Wait for message
     msg = sock.recv(64)

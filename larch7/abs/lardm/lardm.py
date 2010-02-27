@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #
-# ldm.py   --  Larch Display Manager (for logging into xorg sessions)
+# lardm.py   --  Larch Display Manager (for logging into xorg sessions)
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009, 2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,35 +19,35 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #-------------------------------------------------------------------
-# 2009.11.20
+# 2010.02.27
 
 import os, sys, pwd, spwd, crypt, traceback
 from subprocess import call, Popen, PIPE, STDOUT
 
-import ldmgui
+import lardmgui
 
-# Change to ldm directory
+# Change to lardm directory
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 # Get configuration options
-execfile("/etc/ldm.conf")
+execfile("/etc/lardm.conf")
 import __builtin__
 __builtin__.theme = theme
 
 import gettext
 lang = os.getenv("LANG")
 if lang:
-    gettext.install('ldm', 'i18n', unicode=1)
+    gettext.install('lardm', 'i18n', unicode=1)
 
 
 
-class Ldm(ldmgui.LdmGui):
+class Lardm(lardmgui.LardmGui):
     def __init__(self):
         self.loginuname = None
 
         self.hostname = Popen("hostname", stdout=PIPE).communicate()[0].strip()
         self.userlist = ["root"] + self.getUsers()
 
-        ldmgui.LdmGui.__init__(self)
+        lardmgui.LardmGui.__init__(self)
 
 
     def login(self, user, pw):
@@ -60,7 +60,7 @@ class Ldm(ldmgui.LdmGui):
 
     def shutdown(self, stype):
         self.loginuname = stype
-        for dn, tty in ldmd_displays:
+        for dn, tty in lardmd_displays:
             p = Popen(["/usr/bin/xdpyinfo", "-display", dn],
                     stdout=PIPE, stderr=STDOUT)
             p.communicate()
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     try:
         dok = False
         display, user = sys.argv[1].split("_", 1)
-        for d, t in ldmd_displays:
+        for d, t in lardmd_displays:
             if d == display:
                 dok = True
                 break
@@ -98,13 +98,13 @@ if __name__ == "__main__":
         sys.exit(1)
 
     os.environ["DISPLAY"] = display
-    if os.path.isfile("/etc/X11/xinit/xinitrc.ldm"):
-        call(["sh", "/etc/X11/xinit/xinitrc.ldm"])
+    if os.path.isfile("/etc/X11/xinit/xinitrc.lardm"):
+        call(["sh", "/etc/X11/xinit/xinitrc.lardm"])
 
     if not user:
-        ldmgui.init()
-        ui = Ldm()
-        ldmgui.mainloop(ui)
+        lardmgui.init()
+        ui = Lardm()
+        lardmgui.mainloop(ui)
         user = ui.loginuname
         ui = None
 

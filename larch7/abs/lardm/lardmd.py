@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #
-# ldmd.py   --  Larch Display Manager Daemon (for logging into xorg sessions)
+# lardmd.py   --  Larch Display Manager Daemon (for logging into xorg sessions)
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009, 2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #-------------------------------------------------------------------
-# 2009.11.20
+# 2010.02.27
 
 """This is the daemon, which waits for messages (via an AF_UNIX socket,
-'ldmd').
+'lardmd').
 When a message is received a new xorg session is started with a login
 screen.
 """
@@ -31,27 +31,27 @@ import sys, os, threading, traceback, signal
 from datetime import datetime
 from subprocess import call, Popen, PIPE, STDOUT
 
-ldm_dir = os.path.dirname(os.path.realpath(__file__))
+lardm_dir = os.path.dirname(os.path.realpath(__file__))
 # Get configuration for system-dependent paths, etc.
 
-execfile("/etc/ldm.conf")
+execfile("/etc/lardm.conf")
 
 #import gettext
 #lang = os.getenv("LANG")
 #if lang:
-#    gettext.install('ldm', 'i18n', unicode=1)
+#    gettext.install('lardm', 'i18n', unicode=1)
 
 from socket import socket, AF_UNIX, SOCK_STREAM
 
-class Ldmd:
+class Lardmd:
     def __init__(self):
         if os.path.isfile(logfile):
             call(["mv", logfile, logfile + ".1"])
         # Create an unbound and not-connected socket.
         self.sock = socket(AF_UNIX, SOCK_STREAM)
-        # Bind the socket to 'ldmd' in the abstract namespace.
+        # Bind the socket to 'lardmd' in the abstract namespace.
         # Note the null-byte.
-        self.sock.bind("\0ldmd")
+        self.sock.bind("\0lardmd")
         # Create a backlog queue for up to 1 connection.
         self.sock.listen(1)
         self.log("Started\n")
@@ -90,7 +90,7 @@ class Ldmd:
         # Determine which display to use
         # Look for a free display/tty pair
         display = None
-        for dn, tty in ldmd_displays:
+        for dn, tty in lardmd_displays:
             p = Popen(["/usr/bin/xdpyinfo", "-display", dn],
                     stdout=PIPE, stderr=STDOUT)
             p.communicate()
@@ -113,7 +113,7 @@ class Ldmd:
     def start_session(self, display, tty, user):
         # Start new session
         process = Popen(["/usr/bin/xinit", "/bin/bash", "--login", "-c",
-                "%s/ldm.py %s_%s" % (ldm_dir, display, user),
+                "%s/lardm.py %s_%s" % (lardm_dir, display, user),
                 "--", "/usr/bin/X", display, "vt" + tty[3:], "-nolisten", "tcp"],
                 stdout=PIPE, stderr=STDOUT)
         displays.append(tty)
@@ -137,15 +137,15 @@ class Ldmd:
 
 
 def tidy(type, value, tb):
-    ldmd.log("Trap:\n" +
+    lardmd.log("Trap:\n" +
             "".join(traceback.format_exception(type, value, tb)))
     end()
 
 def end(*args):
-    ldmd.log("Killing displays\n")
+    lardmd.log("Killing displays\n")
     for tty in displays:
         call(["pkill", "-t", tty])
-    ldmd.log("Exiting\n")
+    lardmd.log("Exiting\n")
     os._exit(1)
 
 sys.excepthook = tidy
@@ -155,11 +155,11 @@ signal.signal(signal.SIGTERM, end)
 
 if __name__ == "__main__":
     displays = []
-    ldmd = Ldmd()
-    fh = open("/var/run/ldmd.pid", "w")
+    lardmd = Lardmd()
+    fh = open("/var/run/lardmd.pid", "w")
     fh.write("%d\n" % os.getpid())
     fh.close()
     while True:
-        ldmd.wait()
+        lardmd.wait()
 
 

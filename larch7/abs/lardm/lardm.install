@@ -1,4 +1,4 @@
-_destdir=opt/apps/ldm
+_destdir=opt/apps/lardm
 
 post_install() {
   post_upgrade
@@ -6,7 +6,7 @@ post_install() {
 
 post_upgrade() {
   echo "byte-compile python modules ..."
-  python -m py_compile $_destdir/ldmgui.py
+  python -m py_compile $_destdir/lardmgui.py
 }
 
 pre_remove() {

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #
-# ldmgui.py   --  Qt-based GUI code for ldm
+# lardmgui.py   --  Qt-based GUI code for lardm
 #
-# (c) Copyright 2009 Michael Towers (larch42 at googlemail dot com)
+# (c) Copyright 2009, 2010 Michael Towers (larch42 at googlemail dot com)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #-------------------------------------------------------------------
-# 2009.11.23
+# 2010.02.27
 
 from PyQt4 import QtGui, QtCore
 
 
-class LdmGui(QtGui.QGraphicsView):
+class LardmGui(QtGui.QGraphicsView):
     def __init__(self):
         self.starting = True
         QtGui.QGraphicsView.__init__(self)
@@ -160,7 +160,7 @@ class LdmGui(QtGui.QGraphicsView):
 
 
     def newfocus(self, old, new):
-        if new == ldmgui:
+        if new == lardmgui:
             if self.starting:
                 self.starting = False
                 self.newSize()
@@ -219,9 +219,9 @@ class PwLineEdit(QtGui.QLineEdit):
         QtGui.QLineEdit.__init__(self)
 
     def focusInEvent(self, e):
-        user = unicode(ldmgui.username_w.text())
-        if user not in ldmgui.userlist:
-            ldmgui.username_w.setFocus()
+        user = unicode(lardmgui.username_w.text())
+        if user not in lardmgui.userlist:
+            lardmgui.username_w.setFocus()
             return
 
         QtGui.QLineEdit.focusInEvent(self, e)
@@ -278,7 +278,7 @@ def init():
 
 
 def mainloop(gui):
-    global ldmgui
-    ldmgui = gui
-    ldmgui.show()
+    global lardmgui
+    lardmgui = gui
+    lardmgui.show()
     return app.exec_()

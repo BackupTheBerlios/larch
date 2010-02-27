@@ -38,11 +38,9 @@ cdrdao
 cups
 
 # Xorg packages
-xorg-server
+xorg
 xorg-xkb-utils
 xorg-xauth
-xorg-server-utils
-xorg-xinit
 xorg-input-drivers
 xorg-video-drivers
 
@@ -52,8 +50,8 @@ localed
 xkmap
 gparted
 
-# Not yet updated for larch-7
-#larchin
+# Not yet fully updated for larch-7
+larchin
 
 firefox
 thunderbird

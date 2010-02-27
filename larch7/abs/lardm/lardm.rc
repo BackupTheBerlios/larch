@@ -4,23 +4,23 @@
 
 case "$1" in
   start)
-    stat_busy "Starting LDM"
-    /usr/sbin/ldmd &
+    stat_busy "Starting LarDM"
+    /usr/sbin/lardmd &
     if [ $? -gt 0 ]; then
       stat_fail
     else
 
-      add_daemon ldm
+      add_daemon lardm
       stat_done
     fi
     ;;
   stop)
-    stat_busy "Stopping LDM"
-    [ -f /var/run/ldmd.pid ] && kill `cat /var/run/ldmd.pid` &> /dev/null
+    stat_busy "Stopping LarDM"
+    [ -f /var/run/lardmd.pid ] && kill `cat /var/run/lardmd.pid` &> /dev/null
     if [ $? -gt 0 ]; then
       stat_fail
     else
-      rm_daemon ldm
+      rm_daemon lardm
       stat_done
     fi
     ;;
