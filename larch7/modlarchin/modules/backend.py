@@ -19,7 +19,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.21
+# 2010.03.03
 
 # Mount point for the installation root partition
 IBASE = "/tmp/larchin/install"
@@ -333,8 +333,21 @@ class Partlist:
         -: using straight device names
         LABEL=xxxxx: using partition labels
         UUID=xxxxx: using UUIDs
+    The partition list can be supplied as an argument, in python list form
+    or as a string, the partition entries being comma-separated. If none
+    is supplied the file PARTLIST will be read.
     """
     def __init__(self, plist=[]):
+        if not isinstance(plist, list):
+            try:
+                plist = plist.strip()
+                if plist:
+                    plist = [p.strip() for p in plist.split(',')]
+            except:
+                errout(_("Bad partition list: %s" % repr(plist)))
+                fail = True
+                plist = []
+
         if (not plist) and os.path.isfile(PARTLIST):
             fh = open(PARTLIST)
             plist = fh.read().splitlines()

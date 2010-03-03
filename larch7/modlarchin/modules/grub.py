@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.21
+# 2010.03.03
 
 """
 mbr:
@@ -58,12 +58,14 @@ import backend
 
 class Grub:
 
-    def init(self, partlist0=None):
+    def init(self, partlist0=[]):
         """Set up grub's device map and a list of existing menu.lst files.
         Also set self.rootpart and self.rootname from the partition list,
         and self.bootpart if /boot is on a separate partition.
         """
+        debug("plist0 " + repr(partlist0))
         self.partlist = backend.Partlist(partlist0).get_all()
+        debug("plist " + repr(self.partlist))
         if not self.partlist:
             return False
         if not self.scan_devices():
@@ -116,9 +118,9 @@ class Grub:
         to /boot/grub/menu.lst.
         """
         res = (mounting.mount()
-                and scripts.run_mount_devprocsys("grubinstall",
+                and mounting.run_mount_devprocsys("grubinstall",
                         mounting.mount_point(), device)
-                and backend.writefile(text,
+                and backend.writefile(menu_lst,
                         mounting.mount_point("/boot/grub/menu.lst")))
         if (mounting.unmount() and res):
             return True
@@ -197,16 +199,18 @@ class Grub:
             rp = self.grubdevice(self.rootpart)
             bp = "/boot"
         for init in inits:
-            text += "title  Arch Linux %s (initrd=/boot/%s)\n" % (
-                    self.rootpart, init)
-            text += "root   %s\n" % rp
-
+            titlepart = self.rootpart
             if self.rootname.startswith("UUID="):
+                titlepart += ' (UUID)'
                 r = "/dev/disk/by-uuid/%s" % self.rootname.split("=", 1)[1]
             elif self.rootname.startswith("LABEL="):
+                titlepart = self.rootname
                 r = "/dev/disk/by-label/%s" % self.rootname.split("=", 1)[1]
             else:
                 r = self.rootpart
+            text += "title  Arch Linux %s (initrd=/boot/%s)\n" % (
+                    titlepart, init)
+            text += "root   %s\n" % rp
             text += "kernel %s/%s root=%s ro\n" % (bp, kernel, r)
             text += "initrd %s/%s\n\n" % (bp, init)
 
@@ -320,7 +324,7 @@ if __name__ == "__main__":
     backend.init(console.Console(options.quiet))
 
     grub = Grub()
-    if not grub.init(options.parts.split(',')):
+    if not grub.init(options.parts):
         sys_quit(1)
 
     if options.list:

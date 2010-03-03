@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.22
+# 2010.03.03
 
 import threading
 
@@ -207,5 +207,5 @@ if __name__ == "__main__":
 
     installer = Installer()
 
-    sys_quit(installer.run(options.parts.split(','), options.mb,
+    sys_quit(installer.run(options.parts, options.mb,
             options.progress, options.ssh, dbg_flags = options.dbg))
