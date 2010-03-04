@@ -2,7 +2,56 @@
 
 # copy-init
 
-# Initialize the file copying process
-# Possibly copy the overlay to stabilize it and make a 2nd aufs mount
+# Initialize the file copying process:
+# Copy the overlay to stabilize it and make a 2nd union mount
 
-exit 0
+# Underlying system:
+base_layer=/.livesys/system
+# 'filter' layer:
+filter_layer=/.livesys/filter
+# 'mods' layer:
+mods_layer=/.livesys/mods
+# Overlay:
+overlay=/.livesys/overlay
+
+# Check that these paths match those in copy-end
+# Copied overlay
+overlay2=/.livesys/overlay2
+# union mount point
+union=/.livesys/install_union
+
+utype="$( cat /.livesys/utype )"
+if [ "${utype}" = "aufs" ]; then
+    sqfmnt="rr"
+    ovlmnt="rr+wh"
+    bropt="br:"
+
+    # flush pseudo-links (which keep track of changed hard linked files)
+    auplink / flush
+
+elif [ "${utype}" = "unionfs" ]; then
+    sqfmnt="ro"
+    ovlmnt="ro"
+    bropt="dirs="
+
+else
+    echo "ERROR: Couldn't determine type of union file-system"
+    exit 1
+fi
+
+# Copy overlay to protect it during the installation process
+rm -rf ${overlay2}
+mkdir -p ${overlay2}
+for d in bin boot etc lib home opt root sbin srv usr var; do
+    if [ -d ${overlay}/${d} ]; then
+        cp -a ${overlay}/${d} ${overlay2} || exit 1
+    fi
+done
+
+# Begin preparing union mount command
+layers="${base_layer}=${sqfmnt}"
+[ -d ${filter_layer} ] && layers="${filter_layer}=${ovlmnt}:${layers}"
+layers="${overlay2}:${mods_layer}=${sqfmnt}:${layers}"
+
+# Mount union
+mount -t ${utype} -o ${bropt}${layers} ${utype} ${union}

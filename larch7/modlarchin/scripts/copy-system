@@ -3,11 +3,14 @@
 # copy-system  - Copy the live system to the installation partitions
 
 installmp="$1"
+# union mount point
+union=/.livesys/install_union
 
+cd ${union}
 for d in bin boot etc lib home opt root sbin srv usr; do
-    rsync -a --out-format="%n!%l" "/${d}" "${installmp}" || exit 1
+    rsync -a --out-format="%n!%l" "${d}" "${installmp}" || exit 1
     # This outputs the file name (path) and size, separated by '!' for each file
     # See 'log format' in 'man 5 rsyncd.conf' for further options.
 done
 
-rsync -a --out-format="%n!%l" --exclude="/var/tmp/*" "/var" "${installmp}"
+rsync -a --out-format="%n!%l" --exclude="var/tmp/*" "var" "${installmp}"

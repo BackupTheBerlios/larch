@@ -2,7 +2,7 @@
 
 # count-files - Count the files to be copied by 'copy-system'
 
-cd /
+cd /.livesys/install_union
 
 counter=/tmp/XcountX
 :>$counter

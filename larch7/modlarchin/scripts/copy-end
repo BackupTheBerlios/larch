@@ -5,4 +5,11 @@
 # Initialize the file copying process
 # Possibly remove a 2nd aufs mount and delete the overlay copy
 
-exit 0
+# Check that these paths match those in copy-init
+# Copied overlay
+overlay2=/.livesys/overlay2
+# union mount point
+union=/.livesys/install_union
+
+unmount ${union}
+rm -rf ${overlay2}

@@ -82,13 +82,16 @@ class Installer:
                 t = threading.Thread(target=self.count_files, args=())
                 t.start()
 
+            cc = 0
             if not self.copysystem():
                 errout( _("Copying of system data failed"))
-                return 3
+                cc = 3
 
             if not scripts.run("copy-end"):
                 errout(_("Couldn't finalize file copy process"))
-                return 9
+                if cc == 0:
+                    return 9
+            if cc return cc
 
             io.out("#>" + _("Copy finished:") + "%6.1f GB" %
                     (float(self.installed) / 10**9))
