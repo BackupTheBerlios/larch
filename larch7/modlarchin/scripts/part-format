@@ -3,26 +3,43 @@
 # part-format
 
 # Format a partition (argument $1), file-system type $2
+# Also the volume label or uuid can be set ($3 is then -L or -U, $4 is
+# the value)
 p=$1
 f=$2
+o=$3
+l=$4
 
 # I'll assume that ext3 should have "journal_data_ordered", the old
 # default. The alternatives are "journal_data_writeback" - the new
 # default - and "journal_data". It can be changed in tweaks/format-ext3.
 journal_data=""
 
+label="tune2fs ${o} ${l} ${p}"
 case ${f} in
     ext4 ) mkfs.ext4 ${p} ;;
     ext3 ) journal_data="journal_data_ordered"
            mkfs.ext3 ${p} ;;
-    reiserfs ) mkreiserfs -q ${p} ;;
+    reiserfs ) mkreiserfs -q ${p}
+        if [ "${o}" = "-U" ]; then
+            o="-u"
+        elif [ "${o}" = "-L" ]; then
+            o="-l"
+        fi
+        label="reiserfstune ${o} $4 ${p}" ;;
     ext2 ) mke2fs ${p} ;;
-    jfs ) mkfs.jfs -q ${p} ;;
-    xfs ) mkfs.xfs -f ${p} ;;
+    jfs ) mkfs.jfs -q ${p}
+        label="jfs_tune ${o} ${l} ${p}" ;;
+    xfs ) mkfs.xfs -f ${p}
+        label="xfs_admin ${o} ${l} ${p}" ;;
     * ) echo -n "Bad arguments: ${p} ${f}"
         false ;;
 esac
 [ $? -ne 0 ] && exit 1
+
+if [ -n "${o}" ]; then
+    eval "${label}" || exit 1
+fi
 
 apath=$( readlink -f $0 )
 atweak=$( dirname ${apath} )/tweaks/format-${f}

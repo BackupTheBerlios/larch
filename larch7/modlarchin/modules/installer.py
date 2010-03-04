@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.03.03
+# 2010.03.04
 
 import threading
 
@@ -38,7 +38,7 @@ class Installer:
     def count_files(self):
         op = scripts.script("count-files")
         if op:
-            self.nfiles = int(op.strip())
+            self.nfiles = int(op.split('=')[1].strip())
 
 
     def run(self, partlist=[], out_mb=False, out_percent=False,
@@ -48,9 +48,6 @@ class Installer:
         self.out_mb = out_mb
         self.out_percent = out_percent
         self.nfiles = 0
-        if self.out_percent:
-            t = threading.Thread(target=self.count_files, args=())
-            t.start()
 
         self.partlist = backend.Partlist(partlist)
 
@@ -75,9 +72,24 @@ class Installer:
 #debugging
         if "i" not in self.dbg_flags:
 #-
+
+            if not scripts.run("copy-init"):
+                errout(_("Couldn't initialize file copy process"))
+                return 8
+
+            # Start thread to count the files to be copied, -> self.nfiles
+            if self.out_percent:
+                t = threading.Thread(target=self.count_files, args=())
+                t.start()
+
             if not self.copysystem():
                 errout( _("Copying of system data failed"))
                 return 3
+
+            if not scripts.run("copy-end"):
+                errout(_("Couldn't finalize file copy process"))
+                return 9
+
             io.out("#>" + _("Copy finished:") + "%6.1f GB" %
                     (float(self.installed) / 10**9))
             if self.nfiles:
@@ -114,11 +126,21 @@ class Installer:
 
     def format(self):
         for part in self.partlist.get_all():
-            dev = part[1]
             fmt = part[2]
             if fmt:
+                dev = part[1]
+                label = part[3]
+                if label.startswith('LABEL='):
+                    opt = '-L'
+                    lab = label.split('=', 1)[1]
+                elif label.startswith('UUID='):
+                    opt = '-U'
+                    lab = label.split('=', 1)[1]
+                else:
+                    opt = ''
+                    lab = ''
                 io.out("#>" + _("Formatting %s") % dev)
-                if not scripts.run("part-format", dev, fmt):
+                if not scripts.run("part-format", dev, fmt, opt, lab):
                     errout("!>" + _("Formatting of %s failed") % dev)
                     return False
         return True

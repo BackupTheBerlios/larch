@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# copy-init
+
+# Initialize the file copying process
+# Possibly remove a 2nd aufs mount and delete the overlay copy
+
+exit 0

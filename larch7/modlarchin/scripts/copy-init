@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# copy-init
+
+# Initialize the file copying process
+# Possibly copy the overlay to stabilize it and make a 2nd aufs mount
+
+exit 0

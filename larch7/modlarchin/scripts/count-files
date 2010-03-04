@@ -3,11 +3,14 @@
 # count-files - Count the files to be copied by 'copy-system'
 
 cd /
-:>XcountX
-find bin boot etc lib home opt root sbin srv usr var -printf 1 >>XcountX
+
+counter=/tmp/XcountX
+:>$counter
+find bin boot etc lib home opt root sbin srv usr var -printf 1 >>$counter
 
 # Note that /var/tmp is not excluded, but normally this would not make
 # a significant difference.
 
-stat -c %s XcountX
-rm XcountX
+echo -n "[file count]="
+stat -c %s $counter
+rm $counter
