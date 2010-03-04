@@ -10,13 +10,14 @@ read -p  "Have you checked that mirrorlist is up to date? [y/N]: " ans
 if [ -z "$( echo ${ans} | grep '^ *[yY]' )" ]; then exit 0; fi
 
 pacmanx=$( which pacman )
-basepath=opt/larch
+basepath=pacman-allin
 libpath=$basepath/lib
 rm -rf ${basepath%%/*}
 mkdir -p $libpath
 
 mkdir $basepath/data
 cp mirrorlist $basepath/data
+sed -i 's|#\(.*ftp://.*heanet.*\)|\1|' $basepath/data/mirrorlist
 
 for lib in $( ldd $pacmanx | grep "=> /" | \
         sed -r "s|.*=> ([^ ]*).*|\1|" ); do
@@ -27,10 +28,9 @@ cp $pacmanx $libpath
 cp /lib/libnss_files.so.2 $libpath
 cp /lib/ld-linux*.so.2 $libpath/loader
 
-mkdir $basepath/run
-cp $( which repo-add ) $basepath/run
-cp pacman.sh $basepath/run/pacman
-chmod 755 $basepath/run/pacman
+cp $( which repo-add ) $basepath
+cp pacman.sh $basepath/pacman
+chmod 755 $basepath/pacman
 
 tar -czf $allin ${basepath%%/*}
 

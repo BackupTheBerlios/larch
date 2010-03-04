@@ -1,0 +1,7 @@
+Note that this doesn't build a pacman-type package, it is not designed
+for installation on Arch systems, only for providing a runnable 'pacman'
+on non-Arch systems.
+
+I guess/hope the resulting package will run on x86_64 even if it is
+built on i686, because all the libraries are included. The other way
+round definitely won't work.
