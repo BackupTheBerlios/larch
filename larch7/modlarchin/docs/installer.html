@@ -4,8 +4,11 @@ and then the <em>live</em> system will be copied onto them.
 After this has completed, all the <em>live</em> modifications are
 removed/undone so that a normal <em>Arch Linux</em> system is left.
 </p>
+<p>The volume label or uuid of the installation partition(s) may be
+optionally set, by passing the appropriate values.
+</p>
 <p><em>larch(in)</em> also provides for further tweaks during the installation
-process by means of the larch/copy/install-tweak file on the <em>live</em> medium,
+process by means of the larch/copy/delarch file on the <em>live</em> medium,
 which is run at the end of this stage. The contents of this file are
 entirely left up to the creator of the <em>larch</em> profile.
 </p>
@@ -15,7 +18,7 @@ entirely left up to the creator of the <em>larch</em> profile.
   <li>Mount installation partitions.</li>
   <li>Copy system to installation partitions.</li>
   <li>Remove <em>live</em>-specific features.</li>
-  <li>Perform custom installation tweaks (medium:larch/copy/install-tweak).</li>
+  <li>Perform custom installation tweaks (medium:larch/copy/delarch).</li>
   <li>Generate new initramfs.</li>
   <li>Generate /etc/fstab.</li>
   <li>Unmount installation partitions.</li>
@@ -27,11 +30,28 @@ entirely left up to the creator of the <em>larch</em> profile.
 possible under certain circumstances for a partition to get assigned a
 different name (e.g. /dev/sda can become /dev/sdb) from one boot to the
 next. For this reason it is often sensible to address these devices in a
-more stable way in grub and /etc/fstab.
+more stable way in grub and /etc/fstab, either via volume label or UUID.
 </p>
-<p>???The default in <em>larchin</em> is to use the device LABEL, if there
-is one, otherwise the UUID. Only if the checkbox 'Use device name' is
-checked will the device name (/dev/sda1, etc.) be used.
+<p>When a partition is formatted, it will generally receive a new UUID.
+It's label will be unchanged. It is possible to change the label, by
+passing an appropriate value as the fourth item in a partition-descriptor,
+e.g.
+<pre>
+	'/:dev/sda2:ext4:LABEL=ArchRoot'
+</pre>
+Alternatively (though probably rarely useful) the UUID can be set to a
+known value pay passing this instead of the label argument, e.g.
+<pre>
+	'/:dev/sda2:ext4:UUID=e548c2e4-bb47-4fc3-9496-a8c7affd4b82'
+</pre>
+If neither of these two values are passed the default behaviour (label
+unchanged, new UUID) will result.
+</p>
+<p>The default in <em>larchin</em> is for /etc/fstab and grub to use the
+device LABEL, if there is one, otherwise the UUID. By setting the fourth
+item in the root-partition-descriptor to '-', it is possible to specify
+that the device name (e.g. /dev/sda2) should be used for addreesing the
+partition.
 </p>
 
 <h3>Customizing Formatting</h3>

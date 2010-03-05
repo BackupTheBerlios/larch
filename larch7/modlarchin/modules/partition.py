@@ -83,6 +83,7 @@ is really a good idea ...)
 """
 
 class Partition:
+    pass
 
 
 if __name__ == "__main__":

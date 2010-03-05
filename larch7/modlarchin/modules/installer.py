@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.03.04
+# 2010.03.05
 
 import threading
 
@@ -91,7 +91,8 @@ class Installer:
                 errout(_("Couldn't finalize file copy process"))
                 if cc == 0:
                     return 9
-            if cc return cc
+            if cc:
+                return cc
 
             io.out("#>" + _("Copy finished:") + "%6.1f GB" %
                     (float(self.installed) / 10**9))

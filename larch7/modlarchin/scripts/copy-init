@@ -54,4 +54,5 @@ layers="${base_layer}=${sqfmnt}"
 layers="${overlay2}:${mods_layer}=${sqfmnt}:${layers}"
 
 # Mount union
+mkdir -p ${union}
 mount -t ${utype} -o ${bropt}${layers} ${utype} ${union}
