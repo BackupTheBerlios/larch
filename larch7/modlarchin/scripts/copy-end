@@ -11,5 +11,5 @@ overlay2=/.livesys/overlay2
 # union mount point
 union=/.livesys/install_union
 
-unmount ${union}
+umount ${union}
 rm -rf ${overlay2}
