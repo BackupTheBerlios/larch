@@ -33,10 +33,17 @@ into your working directory, and rename it.
   name as supplied to 'pacman -S', e.g. 'syslinux', not the file name), one
   per line, comment lines start with '#'.
   This is the primary place for configuring which packages are installed.
+  Also package groups may occur here (e.g. 'xorg'), and if these are
+  preceded by a '*' their constituent packages will be filtered by the
+  veto list in <em>vetopacks</em>.
   </li>
 
-  <li><strong>baseveto</strong> - This file is optional. It provides a list of
-  packages (one package per line) to be ignored in the base package list.
+  <li><strong>vetopacks</strong> - This file is optional. It provides a list of
+  packages (one package per line) to be ignored when installing from package
+  groups (e.g. 'base' or 'xorg'). Note that only packages which are not
+  required by others can actually be prevented from being installed, and that
+  only packages in 'base' and in those groups in <em>addedpacks</em> which
+  are preceded by a '*' will be omitted from the installation list.
   </li>
 
   <li><strong>bootlines</strong> - This file contains bootloader independent

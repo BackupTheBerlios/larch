@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.12
+# 2010.03.07
 
 import os, shutil
 
@@ -32,7 +32,7 @@ class InstallPage:
     def connect(self):
         return [
                 (":addedpacks*clicked", self.edit_addedpacks),
-                (":baseveto*clicked", self.edit_baseveto),
+                (":vetopacks*clicked", self.edit_vetopacks),
                 (":pacmanconf*clicked", self.edit_pacmanconf),
                 (":repos*clicked", self.edit_repos),
                 (":mirrorlist_change*clicked", self.edit_mirrorlist),
@@ -50,8 +50,8 @@ class InstallPage:
         ui.widget("Frame", ":edit_profile", text=_("Edit Profile"))
         ui.widget("Button", "^:addedpacks", text=_("Edit 'addedpacks'"),
                 tt=_("Edit the list of packages to be installed"))
-        ui.widget("Button", "^:baseveto", text=_("Edit 'baseveto'"),
-                tt=_("Edit the list of base packages NOT to install"))
+        ui.widget("Button", "^:vetopacks", text=_("Edit 'vetopacks'"),
+                tt=_("Edit the list of group member packages NOT to install"))
         ui.widget("Button", "^:pacmanconf", text=_("Edit pacman.conf options"),
                 tt=_("Edit pacman.conf options - not the repositories"))
         ui.widget("Button", "^:repos", text=_("Edit pacman.conf repositories"),
@@ -85,7 +85,7 @@ class InstallPage:
                 ":settings_advanced", "*HLINE",
                 ["*HBOX*", "*SPACE", "&-:install"]])
         ui.layout(":edit_profile", ["*GRID*",
-                ["*+*", ":addedpacks", ":baseveto"],
+                ["*+*", ":addedpacks", ":vetopacks"],
                 ["*+*", ":pacmanconf", ":repos"]])
         ui.layout(":settings_advanced", ["*VBOX*",
                 ["*HBOX*", ":mirrorlist", ":use_local_mirror"],
@@ -111,8 +111,8 @@ class InstallPage:
     def edit_addedpacks(self):
         command.edit("addedpacks")
 
-    def edit_baseveto(self):
-        command.edit("baseveto", "")
+    def edit_vetopacks(self):
+        command.edit("vetopacks", "")
 
     def edit_pacmanconf(self):
         command.edit("pacman.conf.options",

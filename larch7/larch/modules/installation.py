@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.01.27
+# 2010.03.07
 
 """This module handles the Arch system which has been or will be installed
 to be made into a larch live system. If the installation path is "/" (i.e.
@@ -177,38 +177,36 @@ class Installation:
 
         # Get list of packages in 'base' group, removing those in the
         # list of vetoed packages.
-        veto_packages = []
-        veto_file = config.get("profile") + "/baseveto"
+        self.veto_packages = []
+        veto_file = config.get("profile") + "/vetopacks"
         if os.path.isfile(veto_file):
             fh = open(veto_file)
             for line in fh:
                 line = line.strip()
                 if line and (not line.startswith("#")):
-                    veto_packages.append(line)
+                    self.veto_packages.append(line)
             fh.close()
-        packages = []
         self.make_pacman_command()
-        # In the next line the call could be done as a normal user.
-        for line in supershell("%s -Sg base" % self.pacman_cmd)[1]:
-            l = line.split()
-            if l and (l[0] == "base") and (l[1] not in veto_packages):
-                packages.append(l[1])
+        self.packages = []
+        self.add_group('base')
 
         # The larch-live package and dependencies must be installed
-        packages.append("larch-live")
+        self.packages.append("larch-live")
 
         # Add additional packages and groups, from 'addedpacks' file.
         addedpacks_file = config.get("profile") + "/addedpacks"
         fh = open(addedpacks_file)
         for line in fh:
             line = line.strip()
-            if (line and (not line.startswith("#"))
-                    and (line not in packages)):
-                packages.append(line)
+            if (line and (line[0] != '#')):
+                if line[0] == '*':
+                    self.add_group(line[1:])
+                elif line not in self.packages:
+                    self.packages.append(line)
         fh.close()
 
         # Now do the actual installation.
-        ok = self.pacmancall("-S", " ".join(packages))
+        ok = self.pacmancall("-S", " ".join(self.packages))
         if not ok:
             config_error(_("Package installation failed"))
         else:
@@ -235,6 +233,17 @@ class Installation:
                 installation_path + "/.ARCH"))
         command.enable_install()
         return ok
+
+
+    def add_group(self, gname):
+        """Add the packages belonging to a group to the installaion list,
+        removing any in the veto list.
+        """
+        # In the next line the call could be done as a normal user.
+        for line in supershell('%s -Sg %s' % (self.pacman_cmd, gname))[1]:
+            l = line.split()
+            if l and (l[0] == gname) and (l[1] not in self.veto_packages):
+                self.packages.append(l[1])
 
 
     def update_db(self):

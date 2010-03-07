@@ -1,77 +1,77 @@
 # German translations for larch package.
-# Copyright (C) 2009 ORGANIZATION
-# Automatically generated, 2009.
+# Copyright (C) 2009-2010 Michael Towers
+# Automatically generated, 2010.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: larch 7\n"
-"POT-Creation-Date: 2010-02-10 20:05+CET\n"
+"POT-Creation-Date: 2010-03-07 20:30+CET\n"
 "PO-Revision-Date: 2009-08-04 22:10+CEST\n"
 "Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"Language-Team: mt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: larch.py:203
+#: larch.py:204
 msgid "Please enter root password"
 msgstr "Bitte 'root'-Passwort eingeben"
 
-#: larch.py:215
+#: larch.py:216
 msgid "Incorrect root password"
 msgstr "Falsches 'root'-Passwort"
 
-#: larch.py:218
+#: larch.py:219
 msgid "No root password, cancelling operation"
 msgstr "Kein 'root'-Passwort, Vorgang wird abgebrochen"
 
-#: larch.py:234
+#: larch.py:235
 msgid "Supershell couldn't be started"
 msgstr "'Supershell' konnte nicht starten"
 
-#: larch.py:321
+#: larch.py:322
 msgid "Enter '%s' application ('$' for path argument):"
 msgstr "'%s'-Anwendung eingeben ('$' für Pfad-Parameter):"
 
-#: larch.py:429
+#: larch.py:430
 msgid "Editing '%s'"
 msgstr "Editiere '%s'"
 
-#: larch.py:463
+#: larch.py:464
 msgid "Platform error, installed system is %s"
 msgstr "Prozessortyp-Fehler, das installierte System ist %s"
 
-#: larch.py:468
+#: larch.py:469
 msgid "No installed system found"
 msgstr "Kein installiertes System gefunden"
 
-#: larch.py:518
+#: larch.py:519
 msgid "Couldn't read file '%s'"
 msgstr "Konnte Datei '%s' nicht lesen"
 
-#: larch.py:527
+#: larch.py:528
 msgid "Couldn't save file '%s'"
 msgstr "Konnte Datei '%s' nicht speichern"
 
-#: larch.py:531
+#: larch.py:532
 msgid "CONFIG ERROR"
 msgstr "KONFIGURATIONSFEHLER"
 
-#: larch.py:535
+#: larch.py:536
 msgid "BUILD ERROR"
 msgstr "BAUFEHLER"
 
-#: larch.py:539
+#: larch.py:540
 msgid "FATAL ERROR"
 msgstr "FEHLER"
 
-#: larch.py:547
+#: larch.py:548
 msgid "This error could not be handled"
 msgstr "Konnte diesen Fehler nicht verdauen"
 
-#: larch.py:623
+#: larch.py:624
 msgid ""
 "   Please see '%s/%s'\n"
 "   for usage information.\n"
@@ -79,16 +79,16 @@ msgstr ""
 "   Siehe bitte '%s/%s'\n"
 "   für Gebrauchsanweisungen.\n"
 
-#: larch.py:641
+#: larch.py:642
 msgid "ERROR: Unsupported option - '%s'\n"
 msgstr "FEHLER: Option nicht zulässig - '%s'\n"
 
-#: larch.py:642
+#: larch.py:643
 msgid "Start without arguments or with '--pyqt' to start pyqt gui.\n"
 msgstr ""
 "Starte ohne Parameter oder mit '--pyqt', um pyqt-Oberfläche zu starten.\n"
 
-#: larch.py:643
+#: larch.py:644
 msgid "The command line interface is started with '-c':\n"
 msgstr "Verwende '-c', um im Befehlszeilenmodus zu starten:\n"
 
@@ -136,23 +136,23 @@ msgstr ""
 msgid "Squashing system.sqf failed"
 msgstr "Komprimierung der system.sqf-Datei ist fehlgeschlagen"
 
-#: modules/build.py:181
+#: modules/build.py:184
 msgid "Squashing mods.sqf failed"
 msgstr "Komprimierung der mods.sqf-Datei ist fehlgeschlagen"
 
-#: modules/build.py:200
+#: modules/build.py:203
 msgid "No squashfs module found\n"
 msgstr "Kein squashfs-Modul wurde gefunden\n"
 
-#: modules/build.py:210
+#: modules/build.py:213
 msgid "No aufs or unionfs module found\n"
 msgstr "Kein aufs- oder unionfs-Modul wurde gefunden\n"
 
-#: modules/build.py:214
+#: modules/build.py:217
 msgid "Package '%s' is needed by larch systems\n"
 msgstr "larch-Systeme brauchen das Paket '%s'\n"
 
-#: modules/build.py:217
+#: modules/build.py:220
 msgid ""
 "Without package 'syslinux' you will not be able\n"
 "to create syslinux or isolinux booting media\n"
@@ -160,7 +160,7 @@ msgstr ""
 "Das Paket 'syslinux' ist für die Herstellung\n"
 "syslinux und isolinux Boot-Medien notwendig\n"
 
-#: modules/build.py:221
+#: modules/build.py:224
 msgid ""
 "Without package 'cdrkit' (or 'cdrtools') you will\n"
 "not be able to create CD/DVD media\n"
@@ -168,7 +168,7 @@ msgstr ""
 "Das Paket 'cdrkit' (oder 'cdrtools') ist für die\n"
 "Herstellung CD/DVD-Medien notwendig\n"
 
-#: modules/build.py:225
+#: modules/build.py:228
 msgid ""
 "Without package 'eject' you will have problems\n"
 "using CD/DVD media\n"
@@ -176,7 +176,7 @@ msgstr ""
 "Das Paket 'eject' ist beim Einsatz CD/DVD-Boot-Medien\n"
 "sehr sinnvoll\n"
 
-#: modules/build.py:229
+#: modules/build.py:232
 msgid ""
 "WARNING:\n"
 "%s\n"
@@ -186,7 +186,7 @@ msgstr ""
 "%s\n"
 "    Verfahren fortsetzen?"
 
-#: modules/build.py:235
+#: modules/build.py:238
 msgid ""
 "ERROR:\n"
 "%s"
@@ -194,7 +194,7 @@ msgstr ""
 "FEHLER:\n"
 "%s"
 
-#: modules/build.py:262
+#: modules/build.py:265
 msgid ""
 "Problem running %s:\n"
 "  %s"
@@ -202,7 +202,7 @@ msgstr ""
 "Problem beim Ausführen von %s:\n"
 "  %s"
 
-#: modules/build.py:267
+#: modules/build.py:270
 msgid ""
 "More than one kernel found:\n"
 "  %s"
@@ -210,15 +210,15 @@ msgstr ""
 "Mehr als ein Kernel gefunden:\n"
 "  %s"
 
-#: modules/build.py:271
+#: modules/build.py:274
 msgid "No kernel found"
 msgstr "Kein Kernel gefunden"
 
-#: modules/build.py:279
+#: modules/build.py:282
 msgid "More than one set of kernel modules in %s"
 msgstr "Module von mehr als einem Kernel in %s gefunden"
 
-#: modules/build.py:305
+#: modules/build.py:308
 msgid ""
 "WARNING:\n"
 "  You seem to have installed a package containing modules\n"
@@ -238,11 +238,11 @@ msgstr ""
 "\n"
 "    Verfahren fortsetzen?"
 
-#: modules/build.py:314
+#: modules/build.py:317
 msgid "Couldn't find kernel modules"
 msgstr "Kernel-Module nicht gefunden"
 
-#: modules/build.py:334
+#: modules/build.py:337
 msgid "Couldn't find usable mkinitcpio preset: %s"
 msgstr "Brauchbare mkinitcpio-preset-Datei nicht gefunden: %s"
 
@@ -313,6 +313,10 @@ msgstr "Larchifizieren"
 #: modules/buildpage.py:63
 msgid "Build the main components of the larch system"
 msgstr "Die Hauptkomponenten des larch-Systems erzeugen"
+
+#: modules/buildpage.py:81
+msgid "No Arch installation at %s"
+msgstr "Keine Arch-Installation in %s"
 
 #: modules/console.py:91
 msgid "Information"
@@ -574,7 +578,7 @@ msgstr "Rückgängig"
 msgid "Redo"
 msgstr "Wieder ausführen"
 
-#: modules/installation.py:111 modules/installpage.py:135
+#: modules/installation.py:111 modules/installpage.py:136
 msgid "No 'mirrorlist' file found"
 msgstr "Keine 'mirrorlist'-Datei gefunden"
 
@@ -590,11 +594,11 @@ msgstr "Installationspfad (%s) 'nodev' gemountet"
 msgid "The installation path (%s) is mounted 'noexec'."
 msgstr "Installationspfad (%s) 'noexec' gemountet"
 
-#: modules/installation.py:213
+#: modules/installation.py:211
 msgid "Package installation failed"
 msgstr "Paket-Installation fehlgeschlagen"
 
-#: modules/installation.py:247
+#: modules/installation.py:256
 msgid "Couldn't synchronize pacman database (pacman -Sy)"
 msgstr "pacman-Datenbank konnte nicht aktualisiert werden (pacman -Sy)"
 
@@ -611,12 +615,12 @@ msgid "Edit the list of packages to be installed"
 msgstr "Zu installierende Pakete ändern"
 
 #: modules/installpage.py:53
-msgid "Edit 'baseveto'"
-msgstr "'baseveto' editieren"
+msgid "Edit 'vetopacks'"
+msgstr "'vetopacks' editieren"
 
 #: modules/installpage.py:54
-msgid "Edit the list of base packages NOT to install"
-msgstr "Zu blockierende 'base'-Pakete ändern"
+msgid "Edit the list of group member packages NOT to install"
+msgstr "Liste der zu blockierenden Gruppenmitgliedspakete editieren"
 
 #: modules/installpage.py:55
 msgid "Edit pacman.conf options"
@@ -674,7 +678,7 @@ msgid "The url of the installation mirror"
 msgstr "URL der Paket-Quelle für die Installation"
 
 #: modules/installpage.py:72 modules/installpage.py:78
-#: modules/mediumpage.py:81 modules/mediumpage.py:87 modules/mediumpage.py:112
+#: modules/mediumpage.py:75 modules/mediumpage.py:81 modules/mediumpage.py:106
 #: modules/projectpage.py:82
 msgid "Change"
 msgstr "Ändern"
@@ -699,27 +703,27 @@ msgstr "Installieren"
 msgid "This will start the installation to the set path"
 msgstr "Zum Starten der Installation zum eingestellen Pfad"
 
-#: modules/installpage.py:119
+#: modules/installpage.py:120
 msgid "Editing pacman.conf options only"
 msgstr "Editiere nur die Optionen von pacman.conf"
 
-#: modules/installpage.py:125
+#: modules/installpage.py:126
 msgid "Editing pacman.conf repositories only"
 msgstr "Editirernur di Paket-Quellen von pacman.conf"
 
-#: modules/installpage.py:137
+#: modules/installpage.py:138
 msgid "Editing mirrorlist: Uncomment ONE entry"
 msgstr "Editiere 'mirrorlist': EIN Eintrag soll nicht auskommentiert sein"
 
-#: modules/installpage.py:153
+#: modules/installpage.py:154
 msgid "Enter new local mirror path:"
 msgstr "Neuen Paket-Quelle-Pfad eingeben:"
 
-#: modules/installpage.py:159
+#: modules/installpage.py:160
 msgid "You must specify a URL, with protocol, e.g. 'file:///a/b/c'"
 msgstr "Ein URL mit Protokoll muss eingegeben werden, z.B. 'file:///a/b/c'"
 
-#: modules/installpage.py:173
+#: modules/installpage.py:174
 msgid "Enter new package cache path:"
 msgstr "Neuen Paket-cache-Pfad eingeben:"
 
@@ -763,62 +767,62 @@ msgstr ""
 msgid "Your larch iso, %s, was successfully created"
 msgstr "Dein larch-iso, %s, wurde erfolgreich hergestellt"
 
-#: modules/mediumpage.py:73
+#: modules/mediumpage.py:67
 msgid "Partition (disk / USB-stick)"
 msgstr "Partition (Festplatte / USB-stick)"
 
-#: modules/mediumpage.py:75
+#: modules/mediumpage.py:69
 msgid ""
 "You can choose installation to iso (for CD/DVD) or a partition (e.g. USB-"
 "stick)"
 msgstr ""
 "Installation zu 'iso' (für CD/DVD) oder auf eine Partition (z.B: USB-stick)"
 
-#: modules/mediumpage.py:78
+#: modules/mediumpage.py:72
 msgid "Application ID:"
 msgstr "Anwendungsname:"
 
-#: modules/mediumpage.py:80
+#: modules/mediumpage.py:74
 msgid "The text passed to mkisofs with the -A option"
 msgstr "Text für die '-A'-Option von mkisofs"
 
-#: modules/mediumpage.py:82
+#: modules/mediumpage.py:76
 msgid "Change the application ID of the iso"
 msgstr "iso-Anwendungsname ändern"
 
-#: modules/mediumpage.py:84
+#: modules/mediumpage.py:78
 msgid "Publisher:"
 msgstr "Hersteller:"
 
-#: modules/mediumpage.py:86
+#: modules/mediumpage.py:80
 msgid "The text passed to mkisofs with the -publisher option"
 msgstr "Text für die '-publisher'-Option von mkisofs"
 
-#: modules/mediumpage.py:88
+#: modules/mediumpage.py:82
 msgid "Change the publisher data of the iso"
 msgstr "iso-Hersteller-Daten ändern"
 
-#: modules/mediumpage.py:90
+#: modules/mediumpage.py:84
 msgid "Partition:"
 msgstr "Partition:"
 
-#: modules/mediumpage.py:92
+#: modules/mediumpage.py:86
 msgid "The partition to which the larch system is to be installed"
 msgstr "Die Partition, auf der das larch-System installiert werden soll"
 
-#: modules/mediumpage.py:93
+#: modules/mediumpage.py:87
 msgid "Choose"
 msgstr "Wählen"
 
-#: modules/mediumpage.py:94
+#: modules/mediumpage.py:88
 msgid "Select the partition to receive the larch system"
 msgstr "Die Partition für das larch-System wählen"
 
-#: modules/mediumpage.py:95
+#: modules/mediumpage.py:89
 msgid "Don't format"
 msgstr "Nicht formatieren"
 
-#: modules/mediumpage.py:96
+#: modules/mediumpage.py:90
 msgid ""
 "Copy the data to the partition without formatting first (not the normal "
 "procedure)"
@@ -826,36 +830,36 @@ msgstr ""
 "Kopiere die Daten zur Partition ohne zuerst zu formatieren (nicht die "
 "normale Prozedur"
 
-#: modules/mediumpage.py:98
+#: modules/mediumpage.py:92
 msgid "Medium Detection"
 msgstr "Entdeckung des Mediums"
 
-#: modules/mediumpage.py:99
+#: modules/mediumpage.py:93
 msgid ""
 "Choose how the boot scripts determine where to look for the larch system"
 msgstr "Bestimme, wie die Bootskripts das larch-System entdecken"
 
-#: modules/mediumpage.py:101
+#: modules/mediumpage.py:95
 msgid "Use the partition's UUID to find it"
 msgstr "Partition-UUID zum Identifizieren verwenden"
 
-#: modules/mediumpage.py:103
+#: modules/mediumpage.py:97
 msgid "Use the partition's label to find it"
 msgstr "Partition-Label zum Identifizierung verwenden"
 
-#: modules/mediumpage.py:104
+#: modules/mediumpage.py:98
 msgid "Partition"
 msgstr "Partition"
 
-#: modules/mediumpage.py:105
+#: modules/mediumpage.py:99
 msgid "Use the partition name (/dev/sdb1, etc.)"
 msgstr "Partition-Bezeichnung (/dev/sdb1, usw.) verwenden"
 
-#: modules/mediumpage.py:106
+#: modules/mediumpage.py:100
 msgid "Search (for larchboot)"
 msgstr "Suche (nach 'larchboot')"
 
-#: modules/mediumpage.py:107
+#: modules/mediumpage.py:101
 msgid ""
 "Test all CD/DVD devices and partitions until the file larch/larchboot is "
 "found"
@@ -863,85 +867,85 @@ msgstr ""
 "Alle Laufwerke und Partitionen durchsuchen, bis die Datei larch/larchboot "
 "gefunden wird"
 
-#: modules/mediumpage.py:109
+#: modules/mediumpage.py:103
 msgid "Medium label:"
 msgstr "Medium-'Label':"
 
-#: modules/mediumpage.py:111
+#: modules/mediumpage.py:105
 msgid "The label that the partition will be given"
 msgstr "Dieses 'Label' wird der Partition zugeordnet"
 
-#: modules/mediumpage.py:113
+#: modules/mediumpage.py:107
 msgid "Change the label"
 msgstr "'Label' ändern"
 
-#: modules/mediumpage.py:115
+#: modules/mediumpage.py:109
 msgid "Enable session saving"
 msgstr "Sitzungsabspeicherung"
 
-#: modules/mediumpage.py:116
+#: modules/mediumpage.py:110
 msgid "If checked, the medium will have the file 'larch/save'"
 msgstr "Wenn hier aktiviert, bekommt das Medium die Datei 'larch/save'"
 
-#: modules/mediumpage.py:118
+#: modules/mediumpage.py:112
 msgid "Bootloader"
 msgstr "Bootlader"
 
-#: modules/mediumpage.py:119
+#: modules/mediumpage.py:113
 msgid "You can choose between GRUB and syslinux/isolinux as bootloader"
 msgstr "Man hat die Wahl des Bootladers zwischen GRUB und syslinux/isolinux"
 
-#: modules/mediumpage.py:121
+#: modules/mediumpage.py:115
 msgid "Use GRUB as bootloader"
 msgstr "Verwende GRUB als Bootlader"
 
-#: modules/mediumpage.py:123
+#: modules/mediumpage.py:117
 msgid "Use syslinux (partition) or isolinux (CD/DVD) as bootloader"
 msgstr "Verwende syslinux (Partition) oder isolinux (CD/DVD) als Bootlader"
 
-#: modules/mediumpage.py:124 modules/mediumpage.py:238
+#: modules/mediumpage.py:118 modules/mediumpage.py:233
 msgid "None"
 msgstr "Keiner"
 
-#: modules/mediumpage.py:125
+#: modules/mediumpage.py:119
 msgid ""
 "Don't install a bootloader (you'll need to provide some means of booting)"
 msgstr ""
 "Kein Bootloader installieren (die Bootfähigkeit muss anderweitig "
 "sichergestellt werden)"
 
-#: modules/mediumpage.py:127
+#: modules/mediumpage.py:121
 msgid "Bootable via search"
 msgstr "Boot über 'Suche"
 
-#: modules/mediumpage.py:128
+#: modules/mediumpage.py:122
 msgid ""
 "Create the file larch/larchboot to mark the medium as a bootable larch system"
 msgstr ""
 "Erzeuge die Datei larch/larchboot um das Medium als bootfähiges larch-System "
 "zu kennzeichnen"
 
-#: modules/mediumpage.py:130
+#: modules/mediumpage.py:124
 msgid "Edit boot entries"
 msgstr "Boot-Optionen editieren"
 
-#: modules/mediumpage.py:131
+#: modules/mediumpage.py:125
 msgid "Edit the file determining the boot entries"
 msgstr "Die Datei editieren, die die Boot-Einträge bestimmt"
 
-#: modules/mediumpage.py:132 modules/mediumpage.py:133
+#: modules/mediumpage.py:126 modules/mediumpage.py:127
 msgid "Edit grub template"
 msgstr "'grub'-Schablone editieren"
 
-#: modules/mediumpage.py:134 modules/mediumpage.py:135
+#: modules/mediumpage.py:128 modules/mediumpage.py:129
 msgid "Edit syslinux/isolinux template"
 msgstr "'syslinux'/'isolinux'-Schablone editieren"
 
-#: modules/mediumpage.py:137
+#: modules/mediumpage.py:131
 msgid "Create boot iso"
 msgstr "Boot-iso erzeugen"
 
-#: modules/mediumpage.py:138
+#: modules/mediumpage.py:132
 msgid ""
 "Create a small boot iso for this system (for machines that can't boot from "
 "USB)"
@@ -949,15 +953,15 @@ msgstr ""
 "Ein kleines Boot-iso für das vorhandene System herstellen (für Rechner, die "
 "nicht von USB bootem können)"
 
-#: modules/mediumpage.py:139
+#: modules/mediumpage.py:133
 msgid "Create larch medium"
 msgstr "Medium Vorbereiten"
 
-#: modules/mediumpage.py:140
+#: modules/mediumpage.py:134
 msgid "Create the larch iso or set up the chosen partition"
 msgstr "Das larch-iso herstellen oder die gewählte Partition einrichten"
 
-#: modules/mediumpage.py:142
+#: modules/mediumpage.py:136
 msgid ""
 "Edit cd-root\n"
 "(open in file browser)"
@@ -965,15 +969,15 @@ msgstr ""
 "'cd-root' editieren\n"
 "(im Datei-Browser öffnen)"
 
-#: modules/mediumpage.py:143
+#: modules/mediumpage.py:137
 msgid "Open a file browser on the profile's 'cd-root' folder"
 msgstr "'cd-root'-Ordner vom Profil im Datei-Browser öffnen"
 
-#: modules/mediumpage.py:169
+#: modules/mediumpage.py:163
 msgid "Choose Partition"
 msgstr "Partition wählen"
 
-#: modules/mediumpage.py:171
+#: modules/mediumpage.py:165
 msgid ""
 "BE CAREFUL - if you select the wrong\n"
 "   partition you might well destroy your system!\n"
@@ -985,35 +989,35 @@ msgstr ""
 "\n"
 "Wähle die Partition für das larch-System:"
 
-#: modules/mediumpage.py:258
+#: modules/mediumpage.py:253
 msgid "Editing larch boot entries"
 msgstr "Editiere die larch Boot-Einträge"
 
-#: modules/mediumpage.py:269
+#: modules/mediumpage.py:264
 msgid "Editing grub template"
 msgstr "Editiere die GRUB-Schablone"
 
-#: modules/mediumpage.py:281
+#: modules/mediumpage.py:276
 msgid "Editing syslinux/isolinux template"
 msgstr "Editiere die syslinux/isolinux-Schablone"
 
-#: modules/mediumpage.py:286
+#: modules/mediumpage.py:281
 msgid "Enter new label for the boot medium:"
 msgstr "Neues 'Label' für das Boot-Medium eingeben:"
 
-#: modules/mediumpage.py:300
+#: modules/mediumpage.py:295
 msgid "Enter new application ID for the boot iso:"
 msgstr "Neuen Anwendungsnamen für das Boot-iso eingeben:"
 
-#: modules/mediumpage.py:314
+#: modules/mediumpage.py:309
 msgid "Enter new publisher for the boot iso:"
 msgstr "Neue Herstellerdaten das Boot-iso eingeben:"
 
-#: modules/mediumpage.py:371
+#: modules/mediumpage.py:366
 msgid "No partition selected for larch"
 msgstr "Keine Partition für larch gewählt"
 
-#: modules/mediumpage.py:394
+#: modules/mediumpage.py:389
 msgid ""
 "The partition containing the larch live system\n"
 "must be specifed."
@@ -1109,27 +1113,27 @@ msgstr "Fehler beim Profil-Ordner: '%s' vs. '%s'"
 msgid "Profile '%s' doesn't exist"
 msgstr "Profil '%s' existiert nicht"
 
-#: modules/projectpage.py:164
+#: modules/projectpage.py:165
 msgid "Select profile source folder and enter new name"
 msgstr "Profil-Quellordner wählen und neuen Namen eingeben"
 
-#: modules/projectpage.py:165
+#: modules/projectpage.py:166
 msgid "New name:"
 msgstr "Neuer Name:"
 
-#: modules/projectpage.py:182
+#: modules/projectpage.py:183
 msgid "Enter new name for current profile:"
 msgstr "Neuen Namen für aktuelles Profil eingeben:"
 
-#: modules/projectpage.py:207
+#: modules/projectpage.py:208
 msgid "Do you really want to delete profile '%s'?"
 msgstr "Profil '%s' wirklich löschen?"
 
-#: modules/projectpage.py:217
+#: modules/projectpage.py:218
 msgid "Profile '%s' in use by project '%s"
 msgstr "Profil '%s' wird vom Projekt '%s' gebraucht"
 
-#: modules/projectpage.py:228
+#: modules/projectpage.py:229
 msgid ""
 "WARNING: Double check your path -\n"
 "  If you make a mistake here it could destroy your system!\n"
@@ -1141,7 +1145,7 @@ msgstr ""
 "\n"
 "Neuen Installationspfad eingeben:"
 
-#: modules/projectpage.py:250
+#: modules/projectpage.py:251
 msgid ""
 "Your selected installation path (%s) contains unexpected items:\n"
 " %s\n"
@@ -1153,19 +1157,19 @@ msgstr ""
 "\n"
 "Ist das wirklich in Ordnung?"
 
-#: modules/projectpage.py:265
+#: modules/projectpage.py:266
 msgid "Enter name for new project:"
 msgstr "Neuen Projektnamen eingeben:"
 
-#: modules/projectpage.py:273
+#: modules/projectpage.py:274
 msgid "Project '%s' already exists."
 msgstr "Projekt '%s' existiert schon."
 
-#: modules/projectpage.py:281
+#: modules/projectpage.py:282
 msgid "Can't delete the only existing project."
 msgstr "Das einzige definierte Projekt kann nicht gelöscht werden."
 
-#: modules/projectpage.py:289
+#: modules/projectpage.py:290
 msgid "Do you really want to delete project '%s'?"
 msgstr "Projekt '%s' wirklich löschen?"
 
@@ -1209,19 +1213,19 @@ msgid "Remove one or more packages (space separated) using pacman -Rs"
 msgstr ""
 "Ein oder mehr Pakete (mit Leerzeichen getrennt) mittels pacman -Rs entfernen"
 
-#: modules/tweakpage.py:72
+#: modules/tweakpage.py:73
 msgid "Package to add/update"
 msgstr "Paket zum Installieren / Aktualisieren"
 
-#: modules/tweakpage.py:74
+#: modules/tweakpage.py:75
 msgid "Packages"
 msgstr "Pakete"
 
-#: modules/tweakpage.py:81
+#: modules/tweakpage.py:82
 msgid "Error during package update."
 msgstr "Fehler beim Paket-Aktualisieren."
 
-#: modules/tweakpage.py:86
+#: modules/tweakpage.py:87
 msgid ""
 "Enter the names of packages to install -\n"
 "  separated by spaces:"
@@ -1229,11 +1233,11 @@ msgstr ""
 "Die Namen der zu installierenden Pakete eingeben -\n"
 "  mit Leerzeichen getrennt:"
 
-#: modules/tweakpage.py:95
+#: modules/tweakpage.py:96
 msgid "Error during package installation."
 msgstr "Fehler beim Paket-Installieren"
 
-#: modules/tweakpage.py:100
+#: modules/tweakpage.py:101
 msgid ""
 "Enter the names of packages to remove -\n"
 "  separated by spaces:"
@@ -1241,6 +1245,6 @@ msgstr ""
 "Die Namen der zu entfernenden Pakete eingeben -\n"
 "  mit Leerzeichen getrennt:"
 
-#: modules/tweakpage.py:109
+#: modules/tweakpage.py:110
 msgid "Error during package removal."
 msgstr "Fehler beim Paket-Entfernen."

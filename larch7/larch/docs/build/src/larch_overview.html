@@ -253,12 +253,11 @@ the base package list</h3>
 
 <p>In case the base package set changes, the list
 provided by 'pacman -Sg base' is used. However, it is possible to filter
-out certain unwanted packages from the base set.
-In most cases the default setting (empty) will be satisfactory, but you
-can change it by editing 'baseveto' (one package per line), which is part
-of the profile.
-Be aware, however, that vetoed packages will be installed anyway if they are
-required by some other installed package.
+out certain unwanted packages from the base set, by placing the unwanted
+package names in the 'vetopacks' file in the profile (one package per line).
+In most cases the default setting (empty) will be satisfactory, but if you
+do change it, be aware that vetoed packages will be installed anyway if
+they are required by some other installed package.
 </p>
 
 <h3><a name="addedpacks"></a><em>addedpacks</em></h3>

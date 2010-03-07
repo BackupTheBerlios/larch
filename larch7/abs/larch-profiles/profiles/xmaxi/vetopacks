@@ -1,0 +1,10 @@
+##xorg
+xterm
+xorg-twm
+xorg-fonts-75dpi
+xorg-fonts-100dpi
+xorg-docs
+xorg-res-utils
+
+##xfce4-goodies
+xfce4-xfapplet-plugin

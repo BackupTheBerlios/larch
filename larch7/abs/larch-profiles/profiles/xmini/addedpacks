@@ -1,18 +1,18 @@
 ### These should probably be present
 syslinux
 cdrkit
-# In case necessary (depends on kernel)
+## In case necessary (depends on kernel)
 aufs2
 aufs2-util
-# To eject a cd
+## To eject a cd
 eject
 
-# Useful for use as installer, etc.
+## Useful for use as installer, etc.
 ntfsprogs
 parted
 rsync
 
-# generally useful tools which don't require X
+## generally useful tools which don't require X
 openssh
 sshfs
 dosfstools
@@ -26,7 +26,7 @@ dvd+rw-tools
 
 sudo
 
-base-devel
+*base-devel
 pyqt
 larch
 
@@ -37,28 +37,28 @@ cdparanoia
 cdrdao
 cups
 
-# Xorg packages
-xorg
+## Xorg packages
+*xorg
 xorg-xkb-utils
 xorg-xauth
-xorg-input-drivers
-xorg-video-drivers
+*xorg-input-drivers
+*xorg-video-drivers
 
-# X apps
+## X apps
 luser
 localed
 xkmap
 gparted
 
-# Not yet fully updated for larch-7
+## Not yet fully implemented, but might still be useful
 larchin
 
 firefox
 thunderbird
 
-# xfce
+## xfce
 gamin
-xfce4
+*xfce4
 thunar-volman
 thunar-archive-plugin
 xfce4-systemload-plugin
@@ -85,6 +85,5 @@ geany
 ttf-dejavu
 
 gdm
-dlarch-theme-gdm
 
 tango-icon-theme
