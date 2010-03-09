@@ -145,4 +145,43 @@ into your working directory, and rename it.
 
 </ul>
 
+<p>Further files which may be found within a profile are described below:
+</p>
+<ul>
+  <li><strong>users</strong> - It is possible to add user accounts to the
+  system during building. The construction details should be provided in this
+  file, one line per user (comment lines start with '#'):
+    <pre>    username:additional,groups:userid:'skel'-file:custom options</pre>
+  There must be exactly four ':' characters in the line.
+  The additional groups should be comma-separated and without spaces. If no
+  'skel'-file is specified, the default ('/etc/skel') is used, including
+  anything in the overlay. To use a custom 'skel'-file, place the directory
+  in the profile, giving it a name starting with 'skel_', and place the rest of
+  the name (the part after '_') in the configuration line. Users are added
+  by means of 'useradd', so anything placed after the last ':' should be a
+  valid option to that command. If a user-name already exists in the
+  system to be larchified, it will be ignored (it does not count as an error).
+  </li>
+
+  <li><strong>skel_*</strong> (directory) - Customized '/etc/skel' substitutes
+  for use at build time only. See 'users' above.
+  </li>
+
+  <li><strong>vetodirs</strong> - Do not use this unless you really know what
+  you are doing. Each directory listed in this file (one entry per line,
+  comment lines start with '#') will be excluded from the live system. The
+  directories are relative to the installation root.
+  </li>
+
+  <li><strong>build-tweak</strong> - Do not use this unless you really know
+  what you are doing. It is a program (script) - so it must be executable -
+  to customize the construction of the overlay (to a certain extent). It gets
+  two arguments on the command line: the path to the installation being
+  larchified, and the (full) path to the directory in which the overlay is
+  being constructed. It is called just before 'mods.sqf' is squashed, but
+  also before users are added.
+  </li>
+
+</ul>
+
 </div>

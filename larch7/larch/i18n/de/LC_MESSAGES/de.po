@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: larch 7\n"
-"POT-Creation-Date: 2010-03-07 20:30+CET\n"
+"POT-Creation-Date: 2010-03-09 18:39+CET\n"
 "PO-Revision-Date: 2009-08-04 22:10+CEST\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: mt\n"
@@ -132,27 +132,39 @@ msgstr ""
 "\n"
 "Fortfahren?"
 
-#: modules/build.py:112
+#: modules/build.py:125
 msgid "Squashing system.sqf failed"
 msgstr "Komprimierung der system.sqf-Datei ist fehlgeschlagen"
 
-#: modules/build.py:184
+#: modules/build.py:202
+msgid "Build customization script failed"
+msgstr "Skript zur Anpassung der Konstruktion schlug fehl"
+
+#: modules/build.py:212
 msgid "Squashing mods.sqf failed"
 msgstr "Komprimierung der mods.sqf-Datei ist fehlgeschlagen"
 
-#: modules/build.py:203
+#: modules/build.py:245
+msgid "'users' file invalid"
+msgstr "Ungültige 'users'-Datei"
+
+#: modules/build.py:301
+msgid "User creation (%s) failed"
+msgstr "Konnte neuen Benutzer (%s) nicht erstellen"
+
+#: modules/build.py:326
 msgid "No squashfs module found\n"
 msgstr "Kein squashfs-Modul wurde gefunden\n"
 
-#: modules/build.py:213
+#: modules/build.py:336
 msgid "No aufs or unionfs module found\n"
 msgstr "Kein aufs- oder unionfs-Modul wurde gefunden\n"
 
-#: modules/build.py:217
+#: modules/build.py:340
 msgid "Package '%s' is needed by larch systems\n"
 msgstr "larch-Systeme brauchen das Paket '%s'\n"
 
-#: modules/build.py:220
+#: modules/build.py:343
 msgid ""
 "Without package 'syslinux' you will not be able\n"
 "to create syslinux or isolinux booting media\n"
@@ -160,7 +172,7 @@ msgstr ""
 "Das Paket 'syslinux' ist für die Herstellung\n"
 "syslinux und isolinux Boot-Medien notwendig\n"
 
-#: modules/build.py:224
+#: modules/build.py:347
 msgid ""
 "Without package 'cdrkit' (or 'cdrtools') you will\n"
 "not be able to create CD/DVD media\n"
@@ -168,7 +180,7 @@ msgstr ""
 "Das Paket 'cdrkit' (oder 'cdrtools') ist für die\n"
 "Herstellung CD/DVD-Medien notwendig\n"
 
-#: modules/build.py:228
+#: modules/build.py:351
 msgid ""
 "Without package 'eject' you will have problems\n"
 "using CD/DVD media\n"
@@ -176,7 +188,7 @@ msgstr ""
 "Das Paket 'eject' ist beim Einsatz CD/DVD-Boot-Medien\n"
 "sehr sinnvoll\n"
 
-#: modules/build.py:232
+#: modules/build.py:355
 msgid ""
 "WARNING:\n"
 "%s\n"
@@ -186,7 +198,7 @@ msgstr ""
 "%s\n"
 "    Verfahren fortsetzen?"
 
-#: modules/build.py:238
+#: modules/build.py:361
 msgid ""
 "ERROR:\n"
 "%s"
@@ -194,7 +206,7 @@ msgstr ""
 "FEHLER:\n"
 "%s"
 
-#: modules/build.py:265
+#: modules/build.py:388
 msgid ""
 "Problem running %s:\n"
 "  %s"
@@ -202,7 +214,7 @@ msgstr ""
 "Problem beim Ausführen von %s:\n"
 "  %s"
 
-#: modules/build.py:270
+#: modules/build.py:393
 msgid ""
 "More than one kernel found:\n"
 "  %s"
@@ -210,15 +222,15 @@ msgstr ""
 "Mehr als ein Kernel gefunden:\n"
 "  %s"
 
-#: modules/build.py:274
+#: modules/build.py:397
 msgid "No kernel found"
 msgstr "Kein Kernel gefunden"
 
-#: modules/build.py:282
+#: modules/build.py:405
 msgid "More than one set of kernel modules in %s"
 msgstr "Module von mehr als einem Kernel in %s gefunden"
 
-#: modules/build.py:308
+#: modules/build.py:431
 msgid ""
 "WARNING:\n"
 "  You seem to have installed a package containing modules\n"
@@ -238,11 +250,11 @@ msgstr ""
 "\n"
 "    Verfahren fortsetzen?"
 
-#: modules/build.py:317
+#: modules/build.py:440
 msgid "Couldn't find kernel modules"
 msgstr "Kernel-Module nicht gefunden"
 
-#: modules/build.py:337
+#: modules/build.py:460
 msgid "Couldn't find usable mkinitcpio preset: %s"
 msgstr "Brauchbare mkinitcpio-preset-Datei nicht gefunden: %s"
 

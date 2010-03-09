@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.19
+# 2010.03.09
 
 import os, sys
 from glob import glob
@@ -107,6 +107,19 @@ class Builder:
             # others
             ignoredirs += " usr/lib/locale"
 
+            # Additional directories to ignore can also be specified in the
+            # profile. This is a nasty option. It was requested, and might
+            # be useful under certain special circumstances, but I recommend
+            # not using it unless you are really sure what you are doing.
+            veto_file = self.profile + '/vetodirs'
+            if os.path.isfile(veto_file):
+                fh = open(veto_file)
+                for line in fh:
+                    line = line.strip()
+                    if line and (line[0] != '#'):
+                        ignoredirs += ' ' + line.lstrip('/')
+                fh.close()
+
             if not command.chroot("/sbin/mksquashfs '/' '%s' -e %s"
                     % (config.system_sqf, ignoredirs)):
                 command.error("Warning", _("Squashing system.sqf failed"))
@@ -178,6 +191,21 @@ class Builder:
         # Ensure there is a /boot directory
         supershell("mkdir -p %s/boot" % self.overlay)
 
+        # Run customization script
+        tweak = self.profile + '/build-tweak'
+        if os.path.isfile(tweak):
+            command.log("#(WARNING): Running user's build customization script")
+            if supershell(tweak + ' %s %s' % (self.installation0,
+                    self.overlay))[0]:
+                command.log("#Customization script completed")
+            else:
+                command.error("Warning", _("Build customization script failed"))
+                return False
+
+        # Add users
+        if self.installation0 and not self.add_users():
+            return False
+
         command.log("#Squashing mods.sqf")
         if not command.chroot("/sbin/mksquashfs '%s' '%s/larch/mods.sqf'"
                 % (config.overlay_build_dir, config.medium_dir)):
@@ -190,6 +218,106 @@ class Builder:
         # The medium boot directory needs to be kept outside of the medium
         # directory to allow multiple, different media to be built easily.
         supershell("mv %s/boot %s/tmp" % (self.medium, self.larch_dir))
+
+
+    def add_users(self):
+        users = self.profile + '/users'
+        if not os.path.isfile(users):
+            return True
+
+        userdata = []
+        fh = open(users)
+        lines = fh.read()
+        fh.close()
+        for line in lines.splitlines():
+            line = line.strip()
+            if line and (line[0] != '#'):
+                data = line.split(':')
+                if (len(data) == 5):
+                    if (command.script('user-exists %s %s'
+                            % (self.installation_dir, data[0])) != ''):
+                        # Only include if the user does not yet exist
+                        userdata.append(data)
+                    else:
+                        command.log("#(WARNING): User '%s' exists already"
+                                % data[0])
+                else:
+                    command.error("Warning", _("'users' file invalid"))
+                    return False
+
+        # Only continue if there are new users in the list
+        if not userdata:
+            return True
+
+        # Save system files and replace them by the overlay versions
+        savedir = self.larch_dir + '/tmp/save_etc'
+        supershell('rm -rf %s' % savedir)
+        supershell('mkdir -p %s/default' % savedir)
+        savelist = 'group,gshadow,passwd,shadow,login.defs,skel'
+        supershell('cp -a %s/etc/{%s} %s'
+                % (self.installation0, savelist, savedir))
+        supershell('cp -a %s/etc/default/useradd %s/default'
+                % (self.installation0, savedir))
+        for f in ('group', 'gshadow', 'passwd', 'shadow', 'login.defs'):
+            if os.path.isfile(self.overlay + '/etc/%s'):
+                supershell('cp %s/etc/%s %s/etc'
+                        % (self.overlay, f, self.installation0))
+        if os.path.isfile(self.overlay + '/etc/default/useradd'):
+            supershell('cp %s/etc/default/useradd %s/etc/default'
+                    % (self.overlay, self.installation0))
+        if os.path.isdir(self.overlay + '/etc/skel'):
+            supershell('cp -r %s/etc/skel %s/etc'
+                    % (self.overlay, self.installation0))
+
+        # Build the useradd command
+        userdir0 = '/tmp/users'
+        userdir = self.larch_dir + userdir0
+        userdirs = []
+        clist = []
+        supershell('mkdir -p %s/home' % self.overlay)
+        for u in userdata:
+            cline = 'useradd -m'
+            if u[1]:
+                cline += ' -G ' + u[1]
+            if u[2]:
+                cline += ' -u ' + u[2]
+            if u[3]:
+                # Custom home initialization directories in the profile
+                # always start with 'skel_'
+                skel = 'skel_' + u[3]
+                if skel not in userdirs:
+                    userdirs.append(skel)
+                cline += ' -k %s/%s' % (config.larch_build_dir + userdir0, skel)
+            # Allow for expert tweaking
+            cline += ' ' + u[4]
+            # The user and the command to be run
+            clist.append((u[0], cline))
+
+        if userdirs:
+            # Copy custom 'skel' directories to temporary area in build space
+            supershell('rm -rf %s' % userdir)
+            supershell('mkdir -p %s' % userdir)
+            for ud in userdirs:
+                supershell('cp -r %s/%s %s/%s' %
+                        (self.profile, ud, userdir, ud))
+
+        for u, cmd in clist:
+            if not command.chroot(cmd + ' ' + u):
+                command.error("Warning", _("User creation (%s) failed")
+                        % u[0])
+                return False
+
+            if os.path.isdir('%s/home/%s' % (self.installation0, u)):
+                supershell('mv %s/home/%s %s/home'
+                        % (self.installation0, u, self.overlay))
+
+        # Move changed /etc/{group,gshadow,passwd,shadow} to overlay
+        supershell('mv %s/etc/{group,gshadow,passwd,shadow} %s/etc'
+                % (self.installation0, self.overlay))
+        # Restore system files in base installation
+        supershell('rm -rf %s/etc/skel' % self.installation0)
+        supershell('cp -a %s/* %s/etc' % (savedir, self.installation0))
+        return True
 
 
     def system_check(self):

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-03-07 20:42+CET\n"
+"POT-Creation-Date: 2010-03-09 18:39+CET\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -127,81 +127,93 @@ msgid ""
 "Do you wish to continue?"
 msgstr ""
 
-#: modules/build.py:112
+#: modules/build.py:125
 msgid "Squashing system.sqf failed"
 msgstr ""
 
-#: modules/build.py:184
+#: modules/build.py:202
+msgid "Build customization script failed"
+msgstr ""
+
+#: modules/build.py:212
 msgid "Squashing mods.sqf failed"
 msgstr ""
 
-#: modules/build.py:203
+#: modules/build.py:245
+msgid "'users' file invalid"
+msgstr ""
+
+#: modules/build.py:301
+msgid "User creation (%s) failed"
+msgstr ""
+
+#: modules/build.py:326
 msgid ""
 "No squashfs module found\n"
 msgstr ""
 
-#: modules/build.py:213
+#: modules/build.py:336
 msgid ""
 "No aufs or unionfs module found\n"
 msgstr ""
 
-#: modules/build.py:217
+#: modules/build.py:340
 msgid ""
 "Package '%s' is needed by larch systems\n"
 msgstr ""
 
-#: modules/build.py:220
+#: modules/build.py:343
 msgid ""
 "Without package 'syslinux' you will not be able\n"
 "to create syslinux or isolinux booting media\n"
 msgstr ""
 
-#: modules/build.py:224
+#: modules/build.py:347
 msgid ""
 "Without package 'cdrkit' (or 'cdrtools') you will\n"
 "not be able to create CD/DVD media\n"
 msgstr ""
 
-#: modules/build.py:228
+#: modules/build.py:351
 msgid ""
 "Without package 'eject' you will have problems\n"
 "using CD/DVD media\n"
 msgstr ""
 
-#: modules/build.py:232
+#: modules/build.py:355
 msgid ""
 "WARNING:\n"
 "%s\n"
 "    Continue building?"
 msgstr ""
 
-#: modules/build.py:238
+#: modules/build.py:361
 msgid ""
 "ERROR:\n"
 "%s"
 msgstr ""
 
-#: modules/build.py:265
+#: modules/build.py:388
 msgid ""
 "Problem running %s:\n"
 "  %s"
 msgstr ""
 
-#: modules/build.py:270
+#: modules/build.py:393
 msgid ""
 "More than one kernel found:\n"
 "  %s"
 msgstr ""
 
-#: modules/build.py:274
+#: modules/build.py:397
 msgid "No kernel found"
 msgstr ""
 
-#: modules/build.py:282
+#: modules/build.py:405
 msgid "More than one set of kernel modules in %s"
 msgstr ""
 
-#: modules/build.py:308
+#: modules/build.py:431
 msgid ""
 "WARNING:\n"
 "  You seem to have installed a package containing modules\n"
@@ -212,11 +224,11 @@ msgid ""
 "    Continue building?"
 msgstr ""
 
-#: modules/build.py:317
+#: modules/build.py:440
 msgid "Couldn't find kernel modules"
 msgstr ""
 
-#: modules/build.py:337
+#: modules/build.py:460
 msgid "Couldn't find usable mkinitcpio preset: %s"
 msgstr ""
 
