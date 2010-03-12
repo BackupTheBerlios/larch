@@ -22,7 +22,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.01.27
+# 2010.03.11
 
 """UIP - User Interface Program
 
@@ -567,6 +567,7 @@ class List(QtGui.QTreeWidget, WBase):                       #qt
     s_default = "select"
     s_signals = {
             "select": "itemSelectionChanged()" ,            #qt
+            "clicked": "itemClicked(QTreeWidgetItem *,int)",#qt
         }
     def __init__(self):
         QtGui.QTreeWidget.__init__(self)                    #qt
@@ -610,6 +611,17 @@ class List(QtGui.QTreeWidget, WBase):                       #qt
             return s
         else:
             return (s,)
+
+    def s_clicked(self, item, col):                         #qt
+        """This is intended for activating a user-defined editing function.
+        Tests showed that this is called after the selection is changed, so
+        if using this signal, use it only in 'Single' selection mode and
+        use this, not 'select' to record selection changes. Clicking on the
+        selected row should start editing the cell, otherwise just change
+        the selection.
+        """
+        ix = self.indexOfTopLevelItem(item)                 #qt
+        return (ix, col)
 
 
 class LineEdit(QtGui.QLineEdit, WBase):                     #qt

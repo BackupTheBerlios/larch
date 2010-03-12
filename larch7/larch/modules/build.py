@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.03.09
+# 2010.03.12
 
 import os, sys
 from glob import glob
@@ -220,33 +220,52 @@ class Builder:
         supershell("mv %s/boot %s/tmp" % (self.medium, self.larch_dir))
 
 
-    def add_users(self):
-        users = self.profile + '/users'
-        if not os.path.isfile(users):
-            return True
-
+    def getusers(self):
         userdata = []
-        fh = open(users)
-        lines = fh.read()
-        fh.close()
-        for line in lines.splitlines():
-            line = line.strip()
-            if line and (line[0] != '#'):
-                data = line.split(':')
-                if (len(data) == 5):
-                    if (command.script('user-exists %s %s'
-                            % (self.installation_dir, data[0])) != ''):
-                        # Only include if the user does not yet exist
+        users = config.get("profile") + '/users'
+        if os.path.isfile(users):
+            fh = open(users)
+            lines = fh.read()
+            fh.close()
+            for line in lines.splitlines():
+                line = line.strip()
+                if line and (line[0] != '#'):
+                    data = line.split(':')
+                    if (len(data) == 5):
                         userdata.append(data)
                     else:
-                        command.log("#(WARNING): User '%s' exists already"
+                        command.error("Warning", _("'users' file invalid"))
+                        return []
+        return userdata
+
+    def saveusers(self, ulist):
+        try:
+            fh = None
+            fh = open(config.get("profile") + '/users', 'w')
+            for row in ulist:
+                fh.write(':'.join(row) + '\n')
+            return True
+        except:
+            command.error("Warning", _("Couldn't save 'users' file"))
+            return False
+        finally:
+            if fh:
+                fh.close()
+
+    def add_users(self):
+        userlist = self.getusers()
+        userdata = []
+        for data in userdata:
+            if (command.script('user-exists %s %s'
+                    % (self.installation_dir, data[0])) != ''):
+                # Only include if the user does not yet exist
+                userdata.append(data)
+            else:
+                command.log("#(WARNING): User '%s' exists already"
                                 % data[0])
-                else:
-                    command.error("Warning", _("'users' file invalid"))
-                    return False
 
         # Only continue if there are new users in the list
-        if not userdata:
+        if userdata != []:
             return True
 
         # Save system files and replace them by the overlay versions

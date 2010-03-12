@@ -21,11 +21,13 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.12
+# 2010.03.12
 
 from build import Builder
 import os
 
+# Default list of 'additional' groups for a new user
+BASEGROUPS = 'video,audio,optical,floppy,storage,scanner,power,camera'
 
 class BuildPage:
     """This class manages the page dealing with larch system building.
@@ -38,13 +40,16 @@ class BuildPage:
                 (":rcconf*clicked", self.rcconf),
                 (":initcpio*clicked", self.initcpio),
                 (":overlay*clicked", self.overlay),
+                ("&-:utable*clicked", self.uedit),
+                ("&-:useradd*clicked", self.useradd),
+                ("&:userdel*clicked", self.userdel),
                 ("&larchify&", self.larchify),
             ]
 
 
     def __init__(self):
-        ui.widget("Label", ":larchify",
-                text=_("The system to be compressed must be installed and ready."))
+        ui.widget("Label", ":larchify", text=" *** <strong>%s</strong> ***" %
+                _("The system to be compressed must be installed and ready."))
         ui.widget("Button", "^:locales", text=_("Edit supported locales"),
                 tt=_("Edit the /etc/locale.gen file to select supported glibc locales"))
         ui.widget("Button", "^:rcconf", text=_("Edit Arch configuration file (/etc/rc.conf)"),
@@ -62,12 +67,28 @@ class BuildPage:
         ui.widget("Button", "^&-:build", text=_("Larchify"),
                 tt=_("Build the main components of the larch system"))
 
-        ui.layout(":page_larchify", ["*VBOX*", ":larchify", "*SPACE",
+        ui.widget("Frame", ":users", text=_("User accounts"))
+        ui.widget("List", "^&-:utable", selectionmode="Single",
+                tt=_("Click on a row to select, click on a selected cell to edit"))
+        ui.widget("Button", "^&-:useradd", text=_("Add user"),
+                tt=_("Create a new user-name"))
+        ui.widget("Button", "^&:userdel", text=_("Delete user"),
+                tt=_("Remove the selected user-name"))
+
+        ui.layout(":page_larchify", ["*VBOX*", ":larchify", ":users", "*SPACE",
                 ["*HBOX*", ":locales", "*SPACE", ":rcconf"], "*SPACE",
                 ":larchify_advanced", ["*HBOX*", "*SPACE", "&-:build"]])
         ui.layout(":larchify_advanced", ["*HBOX*",
                 ["*VBOX*", ":initcpio", ":overlay"], "*SPACE",
                 ["*VBOX*", ":ssh", "*SPACE", ":oldsquash"]])
+        ui.layout(":users", ["*VBOX*", "&-:utable",
+                ["*HBOX*", "&-:useradd", "&:userdel", "*SPACE"]])
+
+        self.userheaders = [_("User-Name"), _("Additional Groups"),
+                "UID", _("'skel' directory"), _("Expert options")]
+        ui.command("&-:utable.setHeaders", self.userheaders)
+        ui.command("&-:utable.compact")
+        ui.sendui("^&-:utable clicked")
 
         self.builder = Builder()
         self.sshgen = True
@@ -81,14 +102,58 @@ class BuildPage:
             config_error(_("No Arch installation at %s") % idir)
             return False
         ui.command(":oldsquash.enable", self.builder.oldsqf_available())
+        # ssh keys
         ssh = self.builder.ssh_available()
         self.sshgen = ssh and self.sshgen
         ui.command(":ssh.set", self.sshgen)
         ui.command(":ssh.enable", ssh)
+        # users table
+        ui.command(":users.enable", False if idir == '/' else True)
+        ui.command(":users.enable", True)
+        self.userlist = self.builder.getusers()
+        self.usersel = 0
+        ui.command("&-:utable.set", self.userlist)
+        ui.command("&-:utable.compact")
+
 #TODO: Remove hack if the underlying bug gets fixed
         # A hack to overcome a bug (?) in (py)qt
         ui.command(":larchify_advanced.enable_hack")
         return True
+
+
+    def uedit(self, row, column):
+        if self.usersel == row:
+            ulcell = self.userlist[row][column]
+            ok, text = ui.textLineDialog(self.userheaders[column] + ':',
+                    text=ulcell)
+            text = text.strip()
+            if ok and ((text != '') or (column != 0)):
+                self.userlist[row][column] = text
+                if self.builder.saveusers(self.userlist):
+                    ui.command("&-:utable.set", self.userlist)
+                    ui.command("&-:utable.compact")
+                else:
+                    self.userlist[row][column] = ulcell
+        self.usersel = row
+
+    def useradd(self):
+        ok, name = ui.textLineDialog(_("Enter login-name for new user:"))
+        if ok:
+            name = name.strip()
+            if name != "":
+                self.userlist.append([name, BASEGROUPS, "", "",""])
+                if self.builder.saveusers(self.userlist):
+                    ui.command("&-:utable.set", self.userlist)
+                    ui.command("&-:utable.compact")
+                else:
+                    del(self.userlist[-1])
+
+    def userdel(self):
+        if self.usersel >= 0:
+            del(self.userlist[self.usersel])
+            ui.command("&-:utable.set", self.userlist)
+            ui.command("&-:utable.compact")
+
 
     def sshtoggle(self, on):
         self.sshgen = on
@@ -109,6 +174,7 @@ class BuildPage:
         if not os.path.isdir(path):
             os.mkdir(path)
         command.browser(path)
+
 
     def build(self):
         self.larchify(self.sshgen, ui.ask(":oldsquash.active"))
