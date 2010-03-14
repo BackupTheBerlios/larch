@@ -1,7 +1,7 @@
 # Maintainer: Michael Towers <larch42 (at) googlemail (dot) com>
-# 2010.03.12
+# 2010.03.14
 pkgname=larch
-pkgver=7.1.3
+pkgver=7.1.4
 pkgrel=1
 
 pkgdesc="Design your own 'live' Archlinux CDs and USB-sticks (etc.)"

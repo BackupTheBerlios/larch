@@ -272,7 +272,8 @@ class Command:
         """Run the command as root with pexpect. Return the spawned process.
         If it cannot be started return None.
         """
-        p = pexpect.spawn('''su -c "echo _GO_ && %s"''' % cmd, timeout=None)
+        p = pexpect.spawn('''su -s /bin/bash -c "echo _GO_ && %s"''' % cmd,
+                timeout=None)
         e = p.expect(["_GO_.*\n", pexpect.TIMEOUT, "Password:"], 5)
         while e != 0:
             if e == 2:

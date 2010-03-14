@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.01.24
+# 2010.03.14
 
 import os
 
@@ -256,10 +256,10 @@ class Medium:
 
     def _build_partition(self, btype, device, grub, label, format):
         if not format:
-            fstype = supershell("blkid -c /dev/null -o value -s TYPE %s"
-                % device).result[0].strip()
-
-            if label:
+            ok, lines = supershell("blkid -c /dev/null -o value -s TYPE %s"
+                    % device)
+            if ok and label:
+                fstype = lines[0]
                 if grub:
                     if not fstype.startswith("ext"):
                         config_error(_("GRUB is at present only supported on extN"))
