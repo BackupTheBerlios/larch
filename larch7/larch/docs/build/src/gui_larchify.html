@@ -12,6 +12,38 @@ does not support the 'deletion' of installation files, they can only be
 overlayed by replacements.
 </p>
 
+<h3>User accounts</h3>
+<p>You can enter or edit user accounts to be added during the creation of
+the <em>live</em> system. Any of the columns except the first (the login
+name) may be empty. Each new user has as its main group 'users' (the
+<em>Arch Linux</em> default value); this can only be changed
+by a manual entry in the final column ("expert options").
+</p>
+<p>The second column is for the additional groups to which this user should
+belong. This is initialized to some default value which should be adequate
+for normal use, but may well need tweaking. This is a comma separated list
+<strong>without spaces</strong>.
+</p>
+<p>By default the UID number will be chosen automatically, but a specific
+number may be entered here. In <em>Arch Linux</em> the UIDs normally start
+at 1000.
+</p>
+<p>The fourth column ('skel'-directory) determines how the user's home
+directory will be initialized. The default (empty cell) is to copy the
+contents from '/etc/skel'. The editor popup shows a list of the available
+alternatives (folders within the profile beginning with 'skel_').
+</p>
+<p>The final column allows you to pass further options to the system
+'useradd' command used to add the new user. Do not use double-quotes in this
+option string. Read 'man useradd' for more information about the available
+options.
+</p>
+
+<h4>Editing the table</h4>
+<p>Click on a cell in the selected row to cause an editor popup to appear.
+Clicking on an unselected row selects that row.
+</p>
+
 <h3>Locales</h3>
 <p>You can select the (glibc) locales supported by the <em>live</em>
 system by editing the /etc/locale.gen file in the overlay. If there is

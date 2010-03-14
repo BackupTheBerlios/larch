@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-03-09 18:39+CET\n"
+"POT-Creation-Date: 2010-03-14 20:06+CET\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,63 +31,63 @@ msgstr ""
 msgid "Supershell couldn't be started"
 msgstr ""
 
-#: larch.py:322
+#: larch.py:323
 msgid "Enter '%s' application ('$' for path argument):"
 msgstr ""
 
-#: larch.py:430
+#: larch.py:431
 msgid "Editing '%s'"
 msgstr ""
 
-#: larch.py:464
+#: larch.py:465
 msgid "Platform error, installed system is %s"
 msgstr ""
 
-#: larch.py:469
+#: larch.py:470
 msgid "No installed system found"
 msgstr ""
 
-#: larch.py:519
+#: larch.py:520
 msgid "Couldn't read file '%s'"
 msgstr ""
 
-#: larch.py:528
+#: larch.py:529
 msgid "Couldn't save file '%s'"
 msgstr ""
 
-#: larch.py:532
+#: larch.py:533
 msgid "CONFIG ERROR"
 msgstr ""
 
-#: larch.py:536
+#: larch.py:537
 msgid "BUILD ERROR"
 msgstr ""
 
-#: larch.py:540
+#: larch.py:541
 msgid "FATAL ERROR"
 msgstr ""
 
-#: larch.py:548
+#: larch.py:549
 msgid "This error could not be handled"
 msgstr ""
 
-#: larch.py:624
+#: larch.py:625
 msgid ""
 "   Please see '%s/%s'\n"
 "   for usage information.\n"
 msgstr ""
 
-#: larch.py:642
+#: larch.py:643
 msgid ""
 "ERROR: Unsupported option - '%s'\n"
 msgstr ""
 
-#: larch.py:643
+#: larch.py:644
 msgid ""
 "Start without arguments or with '--pyqt' to start pyqt gui.\n"
 msgstr ""
 
-#: larch.py:644
+#: larch.py:645
 msgid ""
 "The command line interface is started with '-c':\n"
 msgstr ""
@@ -139,81 +139,85 @@ msgstr ""
 msgid "Squashing mods.sqf failed"
 msgstr ""
 
-#: modules/build.py:245
+#: modules/build.py:237
 msgid "'users' file invalid"
 msgstr ""
 
-#: modules/build.py:301
+#: modules/build.py:249
+msgid "Couldn't save 'users' file"
+msgstr ""
+
+#: modules/build.py:325
 msgid "User creation (%s) failed"
 msgstr ""
 
-#: modules/build.py:326
+#: modules/build.py:350
 msgid ""
 "No squashfs module found\n"
 msgstr ""
 
-#: modules/build.py:336
+#: modules/build.py:360
 msgid ""
 "No aufs or unionfs module found\n"
 msgstr ""
 
-#: modules/build.py:340
+#: modules/build.py:364
 msgid ""
 "Package '%s' is needed by larch systems\n"
 msgstr ""
 
-#: modules/build.py:343
+#: modules/build.py:367
 msgid ""
 "Without package 'syslinux' you will not be able\n"
 "to create syslinux or isolinux booting media\n"
 msgstr ""
 
-#: modules/build.py:347
+#: modules/build.py:371
 msgid ""
 "Without package 'cdrkit' (or 'cdrtools') you will\n"
 "not be able to create CD/DVD media\n"
 msgstr ""
 
-#: modules/build.py:351
+#: modules/build.py:375
 msgid ""
 "Without package 'eject' you will have problems\n"
 "using CD/DVD media\n"
 msgstr ""
 
-#: modules/build.py:355
+#: modules/build.py:379
 msgid ""
 "WARNING:\n"
 "%s\n"
 "    Continue building?"
 msgstr ""
 
-#: modules/build.py:361
+#: modules/build.py:385
 msgid ""
 "ERROR:\n"
 "%s"
 msgstr ""
 
-#: modules/build.py:388
+#: modules/build.py:412
 msgid ""
 "Problem running %s:\n"
 "  %s"
 msgstr ""
 
-#: modules/build.py:393
+#: modules/build.py:417
 msgid ""
 "More than one kernel found:\n"
 "  %s"
 msgstr ""
 
-#: modules/build.py:397
+#: modules/build.py:421
 msgid "No kernel found"
 msgstr ""
 
-#: modules/build.py:405
+#: modules/build.py:429
 msgid "More than one set of kernel modules in %s"
 msgstr ""
 
-#: modules/build.py:431
+#: modules/build.py:455
 msgid ""
 "WARNING:\n"
 "  You seem to have installed a package containing modules\n"
@@ -224,80 +228,138 @@ msgid ""
 "    Continue building?"
 msgstr ""
 
-#: modules/build.py:440
+#: modules/build.py:464
 msgid "Couldn't find kernel modules"
 msgstr ""
 
-#: modules/build.py:460
+#: modules/build.py:484
 msgid "Couldn't find usable mkinitcpio preset: %s"
 msgstr ""
 
-#: modules/buildpage.py:47
+#: modules/buildpage.py:54
 msgid "The system to be compressed must be installed and ready."
 msgstr ""
 
-#: modules/buildpage.py:48
+#: modules/buildpage.py:55
 msgid "Edit supported locales"
 msgstr ""
 
-#: modules/buildpage.py:49
+#: modules/buildpage.py:56
 msgid "Edit the /etc/locale.gen file to select supported glibc locales"
 msgstr ""
 
-#: modules/buildpage.py:50
+#: modules/buildpage.py:57
 msgid "Edit Arch configuration file (/etc/rc.conf)"
 msgstr ""
 
-#: modules/buildpage.py:51
+#: modules/buildpage.py:58
 msgid "Edit the /etc/rc.conf file to configure the live system"
 msgstr ""
 
-#: modules/buildpage.py:53 modules/installpage.py:60 modules/projectpage.py:68
+#: modules/buildpage.py:60 modules/installpage.py:60 modules/projectpage.py:68
 msgid "Advanced Options"
 msgstr ""
 
-#: modules/buildpage.py:54
+#: modules/buildpage.py:61
 msgid "Edit mkinitcpio.conf"
 msgstr ""
 
-#: modules/buildpage.py:55
+#: modules/buildpage.py:62
 msgid "Edit the configuration file for generating the initramfs via mkinitcpio"
 msgstr ""
 
-#: modules/buildpage.py:56
+#: modules/buildpage.py:63
 msgid "Edit overlay (open in file browser)"
 msgstr ""
 
-#: modules/buildpage.py:57
+#: modules/buildpage.py:64
 msgid "Open a file browser on the profile's 'rootoverlay'"
 msgstr ""
 
-#: modules/buildpage.py:58
+#: modules/buildpage.py:65
 msgid "Generate ssh keys"
 msgstr ""
 
-#: modules/buildpage.py:59
+#: modules/buildpage.py:66
 msgid "Enables pre-generation of ssh keys"
 msgstr ""
 
-#: modules/buildpage.py:60
+#: modules/buildpage.py:67
 msgid "Reuse existing system.sqf"
 msgstr ""
 
-#: modules/buildpage.py:61
+#: modules/buildpage.py:68
 msgid "Reuse existing system.sqf, to save time if the base system hasn't changed"
 msgstr ""
 
-#: modules/buildpage.py:62 modules/gui.py:65
+#: modules/buildpage.py:69 modules/gui.py:65
 msgid "Larchify"
 msgstr ""
 
-#: modules/buildpage.py:63
+#: modules/buildpage.py:70
 msgid "Build the main components of the larch system"
 msgstr ""
 
-#: modules/buildpage.py:81
+#: modules/buildpage.py:72
+msgid "User accounts"
+msgstr ""
+
+#: modules/buildpage.py:74
+msgid "Click on a row to select, click on a selected cell to edit"
+msgstr ""
+
+#: modules/buildpage.py:75
+msgid "Add user"
+msgstr ""
+
+#: modules/buildpage.py:76
+msgid "Create a new user-name"
+msgstr ""
+
+#: modules/buildpage.py:77
+msgid "Delete user"
+msgstr ""
+
+#: modules/buildpage.py:78
+msgid "Remove the selected user-name"
+msgstr ""
+
+#: modules/buildpage.py:89
+msgid "Additional Groups"
+msgstr ""
+
+#: modules/buildpage.py:89
+msgid "User-Name"
+msgstr ""
+
+#: modules/buildpage.py:90
+msgid "'skel' directory"
+msgstr ""
+
+#: modules/buildpage.py:90
+msgid "Expert options"
+msgstr ""
+
+#: modules/buildpage.py:96
+msgid "Choose 'skel' Folder"
+msgstr ""
+
+#: modules/buildpage.py:98
+msgid ""
+"This folder will be copied\n"
+"to build the user's home folder:"
+msgstr ""
+
+#: modules/buildpage.py:113
 msgid "No Arch installation at %s"
+msgstr ""
+
+#: modules/buildpage.py:155
+msgid "Default (/etc/skel)"
+msgstr ""
+
+#: modules/buildpage.py:174
+msgid "Enter login-name for new user:"
 msgstr ""
 
 #: modules/console.py:91

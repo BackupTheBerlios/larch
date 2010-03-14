@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: larch 7\n"
-"POT-Creation-Date: 2010-03-09 18:39+CET\n"
+"POT-Creation-Date: 2010-03-14 19:53+CET\n"
 "PO-Revision-Date: 2009-08-04 22:10+CEST\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: mt\n"
@@ -31,47 +31,47 @@ msgstr "Kein 'root'-Passwort, Vorgang wird abgebrochen"
 msgid "Supershell couldn't be started"
 msgstr "'Supershell' konnte nicht starten"
 
-#: larch.py:322
+#: larch.py:323
 msgid "Enter '%s' application ('$' for path argument):"
 msgstr "'%s'-Anwendung eingeben ('$' für Pfad-Parameter):"
 
-#: larch.py:430
+#: larch.py:431
 msgid "Editing '%s'"
 msgstr "Editiere '%s'"
 
-#: larch.py:464
+#: larch.py:465
 msgid "Platform error, installed system is %s"
 msgstr "Prozessortyp-Fehler, das installierte System ist %s"
 
-#: larch.py:469
+#: larch.py:470
 msgid "No installed system found"
 msgstr "Kein installiertes System gefunden"
 
-#: larch.py:519
+#: larch.py:520
 msgid "Couldn't read file '%s'"
 msgstr "Konnte Datei '%s' nicht lesen"
 
-#: larch.py:528
+#: larch.py:529
 msgid "Couldn't save file '%s'"
 msgstr "Konnte Datei '%s' nicht speichern"
 
-#: larch.py:532
+#: larch.py:533
 msgid "CONFIG ERROR"
 msgstr "KONFIGURATIONSFEHLER"
 
-#: larch.py:536
+#: larch.py:537
 msgid "BUILD ERROR"
 msgstr "BAUFEHLER"
 
-#: larch.py:540
+#: larch.py:541
 msgid "FATAL ERROR"
 msgstr "FEHLER"
 
-#: larch.py:548
+#: larch.py:549
 msgid "This error could not be handled"
 msgstr "Konnte diesen Fehler nicht verdauen"
 
-#: larch.py:624
+#: larch.py:625
 msgid ""
 "   Please see '%s/%s'\n"
 "   for usage information.\n"
@@ -79,16 +79,16 @@ msgstr ""
 "   Siehe bitte '%s/%s'\n"
 "   für Gebrauchsanweisungen.\n"
 
-#: larch.py:642
+#: larch.py:643
 msgid "ERROR: Unsupported option - '%s'\n"
 msgstr "FEHLER: Option nicht zulässig - '%s'\n"
 
-#: larch.py:643
+#: larch.py:644
 msgid "Start without arguments or with '--pyqt' to start pyqt gui.\n"
 msgstr ""
 "Starte ohne Parameter oder mit '--pyqt', um pyqt-Oberfläche zu starten.\n"
 
-#: larch.py:644
+#: larch.py:645
 msgid "The command line interface is started with '-c':\n"
 msgstr "Verwende '-c', um im Befehlszeilenmodus zu starten:\n"
 
@@ -144,27 +144,31 @@ msgstr "Skript zur Anpassung der Konstruktion schlug fehl"
 msgid "Squashing mods.sqf failed"
 msgstr "Komprimierung der mods.sqf-Datei ist fehlgeschlagen"
 
-#: modules/build.py:245
+#: modules/build.py:237
 msgid "'users' file invalid"
 msgstr "Ungültige 'users'-Datei"
 
-#: modules/build.py:301
+#: modules/build.py:249
+msgid "Couldn't save 'users' file"
+msgstr "Konnte 'users'-Datei nicht speichern"
+
+#: modules/build.py:325
 msgid "User creation (%s) failed"
 msgstr "Konnte neuen Benutzer (%s) nicht erstellen"
 
-#: modules/build.py:326
+#: modules/build.py:350
 msgid "No squashfs module found\n"
 msgstr "Kein squashfs-Modul wurde gefunden\n"
 
-#: modules/build.py:336
+#: modules/build.py:360
 msgid "No aufs or unionfs module found\n"
 msgstr "Kein aufs- oder unionfs-Modul wurde gefunden\n"
 
-#: modules/build.py:340
+#: modules/build.py:364
 msgid "Package '%s' is needed by larch systems\n"
 msgstr "larch-Systeme brauchen das Paket '%s'\n"
 
-#: modules/build.py:343
+#: modules/build.py:367
 msgid ""
 "Without package 'syslinux' you will not be able\n"
 "to create syslinux or isolinux booting media\n"
@@ -172,7 +176,7 @@ msgstr ""
 "Das Paket 'syslinux' ist für die Herstellung\n"
 "syslinux und isolinux Boot-Medien notwendig\n"
 
-#: modules/build.py:347
+#: modules/build.py:371
 msgid ""
 "Without package 'cdrkit' (or 'cdrtools') you will\n"
 "not be able to create CD/DVD media\n"
@@ -180,7 +184,7 @@ msgstr ""
 "Das Paket 'cdrkit' (oder 'cdrtools') ist für die\n"
 "Herstellung CD/DVD-Medien notwendig\n"
 
-#: modules/build.py:351
+#: modules/build.py:375
 msgid ""
 "Without package 'eject' you will have problems\n"
 "using CD/DVD media\n"
@@ -188,7 +192,7 @@ msgstr ""
 "Das Paket 'eject' ist beim Einsatz CD/DVD-Boot-Medien\n"
 "sehr sinnvoll\n"
 
-#: modules/build.py:355
+#: modules/build.py:379
 msgid ""
 "WARNING:\n"
 "%s\n"
@@ -198,7 +202,7 @@ msgstr ""
 "%s\n"
 "    Verfahren fortsetzen?"
 
-#: modules/build.py:361
+#: modules/build.py:385
 msgid ""
 "ERROR:\n"
 "%s"
@@ -206,7 +210,7 @@ msgstr ""
 "FEHLER:\n"
 "%s"
 
-#: modules/build.py:388
+#: modules/build.py:412
 msgid ""
 "Problem running %s:\n"
 "  %s"
@@ -214,7 +218,7 @@ msgstr ""
 "Problem beim Ausführen von %s:\n"
 "  %s"
 
-#: modules/build.py:393
+#: modules/build.py:417
 msgid ""
 "More than one kernel found:\n"
 "  %s"
@@ -222,15 +226,15 @@ msgstr ""
 "Mehr als ein Kernel gefunden:\n"
 "  %s"
 
-#: modules/build.py:397
+#: modules/build.py:421
 msgid "No kernel found"
 msgstr "Kein Kernel gefunden"
 
-#: modules/build.py:405
+#: modules/build.py:429
 msgid "More than one set of kernel modules in %s"
 msgstr "Module von mehr als einem Kernel in %s gefunden"
 
-#: modules/build.py:431
+#: modules/build.py:455
 msgid ""
 "WARNING:\n"
 "  You seem to have installed a package containing modules\n"
@@ -250,85 +254,148 @@ msgstr ""
 "\n"
 "    Verfahren fortsetzen?"
 
-#: modules/build.py:440
+#: modules/build.py:464
 msgid "Couldn't find kernel modules"
 msgstr "Kernel-Module nicht gefunden"
 
-#: modules/build.py:460
+#: modules/build.py:484
 msgid "Couldn't find usable mkinitcpio preset: %s"
 msgstr "Brauchbare mkinitcpio-preset-Datei nicht gefunden: %s"
 
-#: modules/buildpage.py:47
+#: modules/buildpage.py:54
 msgid "The system to be compressed must be installed and ready."
 msgstr "Das System zum Komprimieren muss schon installiert und fertig sein."
 
-#: modules/buildpage.py:48
+#: modules/buildpage.py:55
 msgid "Edit supported locales"
 msgstr "Unterstützte Lokale editieren"
 
-#: modules/buildpage.py:49
+#: modules/buildpage.py:56
 msgid "Edit the /etc/locale.gen file to select supported glibc locales"
 msgstr "/etc/locale.gen editieren, um unterstützte glibc-locales festzulegen"
 
-#: modules/buildpage.py:50
+#: modules/buildpage.py:57
 msgid "Edit Arch configuration file (/etc/rc.conf)"
 msgstr "Arch-Konfigurationsdatei (/etc/rc.conf) editieren"
 
-#: modules/buildpage.py:51
+#: modules/buildpage.py:58
 msgid "Edit the /etc/rc.conf file to configure the live system"
 msgstr "/etc/rc.conf editieren, um das Live-System zu konfigurieren"
 
-#: modules/buildpage.py:53 modules/installpage.py:60 modules/projectpage.py:68
+#: modules/buildpage.py:60 modules/installpage.py:60 modules/projectpage.py:68
 msgid "Advanced Options"
 msgstr "Optionen für Fortgeschrittene"
 
-#: modules/buildpage.py:54
+#: modules/buildpage.py:61
 msgid "Edit mkinitcpio.conf"
 msgstr "mkinitcpio.conf editieren"
 
-#: modules/buildpage.py:55
+#: modules/buildpage.py:62
 msgid "Edit the configuration file for generating the initramfs via mkinitcpio"
 msgstr ""
 "Die Konfigurationsdatei für initramfs-Erzeugung mittels mkinitcpio editieren"
 
-#: modules/buildpage.py:56
+#: modules/buildpage.py:63
 msgid "Edit overlay (open in file browser)"
 msgstr "Überlagerungsordner editieren (im Datei-Browser öffnen)"
 
-#: modules/buildpage.py:57
+#: modules/buildpage.py:64
 msgid "Open a file browser on the profile's 'rootoverlay'"
 msgstr "'rootoverlay'-Ordner vom Profil im Datei-Browser öffnen"
 
-#: modules/buildpage.py:58
+#: modules/buildpage.py:65
 msgid "Generate ssh keys"
 msgstr "ssh-Schlüssel erzeugen"
 
-#: modules/buildpage.py:59
+#: modules/buildpage.py:66
 msgid "Enables pre-generation of ssh keys"
 msgstr "Vor-Erzeugung von ssh-Schlüsseln einstellen"
 
-#: modules/buildpage.py:60
+#: modules/buildpage.py:67
 msgid "Reuse existing system.sqf"
 msgstr "Vorhandenes system.sqf verwenden"
 
-#: modules/buildpage.py:61
+#: modules/buildpage.py:68
 msgid ""
 "Reuse existing system.sqf, to save time if the base system hasn't changed"
 msgstr ""
 "Schon vorhandenes system.sqf wiederverwenden, um Zeit zu sparen, falls das "
 "Basis-System unverändert ist."
 
-#: modules/buildpage.py:62 modules/gui.py:65
+#: modules/buildpage.py:69 modules/gui.py:65
 msgid "Larchify"
 msgstr "Larchifizieren"
 
-#: modules/buildpage.py:63
+#: modules/buildpage.py:70
 msgid "Build the main components of the larch system"
 msgstr "Die Hauptkomponenten des larch-Systems erzeugen"
 
-#: modules/buildpage.py:81
+#: modules/buildpage.py:72
+msgid "User accounts"
+msgstr "Benutzer"
+
+#: modules/buildpage.py:74
+msgid "Click on a row to select, click on a selected cell to edit"
+msgstr ""
+"Klicke auf eine Zeile um sie zu selektieren,"
+"Klicke auf eine selektierte Zelle um sie zu editieren"
+
+#: modules/buildpage.py:75
+msgid "Add user"
+msgstr "Neuen Benutzer"
+
+#: modules/buildpage.py:76
+msgid "Create a new user-name"
+msgstr "Einen neuen Benutzernamen erstellen"
+
+#: modules/buildpage.py:77
+msgid "Delete user"
+msgstr "Benutzer löschen"
+
+#: modules/buildpage.py:78
+msgid "Remove the selected user-name"
+msgstr "Entferne den selektierten Benutzernamen"
+
+#: modules/buildpage.py:89
+msgid "Additional Groups"
+msgstr "Zusätzliche Gruppen"
+
+#: modules/buildpage.py:89
+msgid "User-Name"
+msgstr "Benutzername"
+
+#: modules/buildpage.py:90
+msgid "'skel' directory"
+msgstr "'skel'-Ordner"
+
+#: modules/buildpage.py:90
+msgid "Expert options"
+msgstr "Optionen für Experten"
+
+#: modules/buildpage.py:96
+msgid "Choose 'skel' Folder"
+msgstr "'skel'-Ordner auswählen"
+
+#: modules/buildpage.py:98
+msgid ""
+"This folder will be copied\n"
+"to build the user's home folder:"
+msgstr ""
+"Dieser Ordner wird kopiert\n"
+"um den Home-Ordner des neuen\n"
+"Benutzers zu erstellen:"
+
+#: modules/buildpage.py:113
 msgid "No Arch installation at %s"
 msgstr "Keine Arch-Installation in %s"
+
+#: modules/buildpage.py:155
+msgid "Default (/etc/skel)"
+msgstr "Standard (/etc/skel)"
+
+#: modules/buildpage.py:174
+msgid "Enter login-name for new user:"
+msgstr "Neuen Anmeldenamen eingeben:"
 
 #: modules/console.py:91
 msgid "Information"
@@ -955,7 +1022,7 @@ msgstr "'syslinux'/'isolinux'-Schablone editieren"
 
 #: modules/mediumpage.py:131
 msgid "Create boot iso"
-msgstr "Boot-iso erzeugen"
+msgstr "Boot-iso erstellen"
 
 #: modules/mediumpage.py:132
 msgid ""
@@ -1103,7 +1170,7 @@ msgstr "Neues Projekt"
 
 #: modules/projectpage.py:75
 msgid "Create a new project"
-msgstr "Ein neues Projekt erzeugen"
+msgstr "Ein neues Projekt erstellen"
 
 #: modules/projectpage.py:77
 msgid "Delete the current project"

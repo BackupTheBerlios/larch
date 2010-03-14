@@ -21,13 +21,14 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.03.12
+# 2010.03.14
 
 from build import Builder
 import os
+from glob import glob
 
 # Default list of 'additional' groups for a new user
-BASEGROUPS = 'video,audio,optical,floppy,storage,scanner,power,camera'
+BASEGROUPS = 'video,audio,optical,storage,scanner,power,camera'
 
 class BuildPage:
     """This class manages the page dealing with larch system building.
@@ -43,6 +44,7 @@ class BuildPage:
                 ("&-:utable*clicked", self.uedit),
                 ("&-:useradd*clicked", self.useradd),
                 ("&:userdel*clicked", self.userdel),
+                ("skel:list*changed", self.skel_selected),
                 ("&larchify&", self.larchify),
             ]
 
@@ -90,6 +92,15 @@ class BuildPage:
         ui.command("&-:utable.compact")
         ui.sendui("^&-:utable clicked")
 
+        # 'skel'-folder selection popup
+        ui.widget("Dialog",  "skel", title=_("Choose 'skel' Folder"),
+                icon="images/larchicon.png")
+        ui.widget("Label", "skel:label", text=_("This folder will be copied\n"
+                "to build the user's home folder:"))
+        ui.widget("ListChoice", "^skel:list")
+        ui.widget("DialogButtons", "skel:buttons", buttons=("Save", "Discard"), dialog="skel")
+        ui.layout("skel", ["*VBOX*", "skel:label", "skel:list", "skel:buttons"])
+
         self.builder = Builder()
         self.sshgen = True
 
@@ -124,8 +135,11 @@ class BuildPage:
     def uedit(self, row, column):
         if self.usersel == row:
             ulcell = self.userlist[row][column]
-            ok, text = ui.textLineDialog(self.userheaders[column] + ':',
-                    text=ulcell)
+            if column == 3:
+                ok, text = self.select_skel(ulcell)
+            else:
+                ok, text = ui.textLineDialog(self.userheaders[column] + ':',
+                        text=ulcell)
             text = text.strip()
             if ok and ((text != '') or (column != 0)):
                 self.userlist[row][column] = text
@@ -135,6 +149,26 @@ class BuildPage:
                 else:
                     self.userlist[row][column] = ulcell
         self.usersel = row
+
+    def select_skel(self, current):
+        # Present a list of available 'skel' folders
+        self.skellist = [_("Default (/etc/skel)")]
+        for f in glob(config.get('profile') + '/skel_*'):
+            self.skellist.append(f.rsplit("/skel_", 1)[1])
+        try:
+            i = self.skellist.index(current)
+        except:
+            i = 0
+        ui.command("skel:list.set", self.skellist, i)
+        self.skel_choice = ""
+        return (ui.ask("skel.showmodal"), self.skel_choice)
+
+    def skel_selected(self, i):
+        if i <= 0:
+            self.skel_choice = ""
+        else:
+            self.skel_choice = self.skellist[i].split()[0]
+
 
     def useradd(self):
         ok, name = ui.textLineDialog(_("Enter login-name for new user:"))
