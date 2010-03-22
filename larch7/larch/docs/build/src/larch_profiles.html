@@ -149,22 +149,11 @@ into your working directory, and rename it.
 </p>
 <ul>
   <li><strong>users</strong> - It is possible to add user accounts to the
-  system during building. The construction details should be provided in this
-  file, one line per user (comment lines start with '#'):
-    <pre>    username:additional,groups:userid:'skel'-file:custom options</pre>
-  There must be exactly four ':' characters in the line.
-  The additional groups should be comma-separated and without spaces. If no
-  'skel'-file is specified, the default ('/etc/skel') is used, including
-  anything in the overlay. To use a custom 'skel'-file, place the directory
-  in the profile, giving it a name starting with 'skel_', and place the rest of
-  the name (the part after '_') in the configuration line. Users are added
-  by means of 'useradd', so anything placed after the last ':' should be a
-  valid option to that command. If a user-name already exists in the
-  system to be larchified, it will be ignored (it does not count as an error).
+  system during building. See below.
   </li>
 
   <li><strong>skel_*</strong> (directory) - Customized '/etc/skel' substitutes
-  for use at build time only. See 'users' above.
+  for use at build time only. See below.
   </li>
 
   <li><strong>vetodirs</strong> - Do not use this unless you really know what
@@ -183,5 +172,62 @@ into your working directory, and rename it.
   </li>
 
 </ul>
+
+<h3>Adding user accounts</h3>
+
+<p>
+The construction details should be provided in the 'users' file in the
+profile directory. It is an 'ini'-style configuration file, the sections
+being the user names. Here is an example:
+<pre>[DEFAULT]
+pw =
+expert =
+skel =
+maingroup =
+uid =
+xgroups = video,audio,optical,storage,scanner,power,camera
+
+[u1]
+uid = 999
+skel =
+
+[u2]
+pw = p1
+expert =
+skel =
+maingroup =
+uid =
+xgroups = video,audio,optical,storage
+</pre>
+The 'DEFAULT' section is not necessary, but is generated automatically
+by the gui user-table editor. Only entries which differ from the default
+values need be present.
+</p>
+<p>The default primary group is defined by settings in '/etc/login.defs'
+and '/etc/default/useradd' ('USERGROUPS_ENAB yes' in 'etc/login.defs'
+causes this to be a group with the same name as the user). You can
+override this by adding an 'expert' option, or by placing modified versions
+of these files in the profile's 'rootoverlay' directory.
+</p>
+<p>The additional groups should be comma-separated and without spaces.
+</p>
+<p>If no 'skel'-file is specified, the default ('/etc/skel') is used, including
+anything in the overlay. To use a custom 'skel'-file, place the directory
+in the profile, giving it a name starting with 'skel_', and place the rest of
+the name (the part after '_') in the configuration line.
+</p>
+<p>A password can be set for the new user by entering this (plain text -
+I'm guessing this is alright in this situation ...). An empty password
+field will allow passwordless logins (at least on the console).
+</p>
+<p>By default the UID number will be chosen automatically, but a specific
+number may be entered here. In <em>Arch Linux</em> the UIDs normally start
+at 1000.
+</p>
+<p>Users are added by means of 'useradd', so anything placed in the 'expert'
+field should be a valid option to that command. If a user-name already exists
+in the system to be larchified, it will be ignored (it does not count as
+an error).
+</p>
 
 </div>

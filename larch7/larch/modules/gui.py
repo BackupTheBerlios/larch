@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.01.26
+# 2010.03.22
 
 from uipi import Uipi
 import locale, os
@@ -84,6 +84,10 @@ class Ui(Uipi):
 
         self.setDisableWidgets(":larch", [":notebook"])
         self.runningtab(0)
+
+        # A list-choice popup widget
+        self.listpopup = Popuplist()
+        self.popuplist = self.listpopup.popup
 
 
     def go(self):
@@ -319,3 +323,25 @@ class Editor:
     def redo(self):
         ui.command("edit:content.redo")
 
+
+class Popuplist:
+    def __init__(self):
+        ui.widget("Dialog",  "popuplist", icon="images/larchicon.png")
+        ui.widget("Label", "popuplist:label")
+        ui.widget("ListChoice", "^popuplist:list")
+        ui.widget("DialogButtons", "popuplist:buttons",
+                buttons=("Save", "Discard"), dialog="popuplist")
+        ui.layout("popuplist", ["*VBOX*", "popuplist:label", "popuplist:list",
+                "popuplist:buttons"])
+        ui.addslot("popuplist:list*changed", self.callback)
+
+    def popup(self, items, index=0, title=_("Choose an item"),
+            text=_("Select one of the following items:")):
+        ui.command("popuplist.x__title", title)
+        ui.command("popuplist:label.x__text", text)
+        ui.command("popuplist:list.set", items, index)
+        self.choice = index
+        return (self.choice if ui.ask("popuplist.showmodal") else None)
+
+    def callback(self, i):
+        self.choice = i

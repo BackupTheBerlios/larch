@@ -21,14 +21,12 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.03.14
+# 2010.03.22
 
-from build import Builder
+from build import Builder, BASEGROUPS, USERINFO
 import os
 from glob import glob
 
-# Default list of 'additional' groups for a new user
-BASEGROUPS = 'video,audio,optical,storage,scanner,power,camera'
 
 class BuildPage:
     """This class manages the page dealing with larch system building.
@@ -44,7 +42,6 @@ class BuildPage:
                 ("&-:utable*clicked", self.uedit),
                 ("&-:useradd*clicked", self.useradd),
                 ("&:userdel*clicked", self.userdel),
-                ("skel:list*changed", self.skel_selected),
                 ("&larchify&", self.larchify),
             ]
 
@@ -86,20 +83,12 @@ class BuildPage:
         ui.layout(":users", ["*VBOX*", "&-:utable",
                 ["*HBOX*", "&-:useradd", "&:userdel", "*SPACE"]])
 
-        self.userheaders = [_("User-Name"), _("Additional Groups"),
-                "UID", _("'skel' directory"), _("Expert options")]
+        self.userheaders = [_("User-Name"), _("Password"), _("Group"),
+                "UID", _("'skel' directory"), _("Additional Groups"),
+                _("Expert options")]
         ui.command("&-:utable.setHeaders", self.userheaders)
         ui.command("&-:utable.compact")
         ui.sendui("^&-:utable clicked")
-
-        # 'skel'-folder selection popup
-        ui.widget("Dialog",  "skel", title=_("Choose 'skel' Folder"),
-                icon="images/larchicon.png")
-        ui.widget("Label", "skel:label", text=_("This folder will be copied\n"
-                "to build the user's home folder:"))
-        ui.widget("ListChoice", "^skel:list")
-        ui.widget("DialogButtons", "skel:buttons", buttons=("Save", "Discard"), dialog="skel")
-        ui.layout("skel", ["*VBOX*", "skel:label", "skel:list", "skel:buttons"])
 
         self.builder = Builder()
         self.sshgen = True
@@ -120,35 +109,64 @@ class BuildPage:
         ui.command(":ssh.enable", ssh)
         # users table
         ui.command(":users.enable", False if idir == '/' else True)
-        ui.command(":users.enable", True)
-        self.userlist = self.builder.getusers()
-        self.usersel = 0
-        ui.command("&-:utable.set", self.userlist)
-        ui.command("&-:utable.compact")
+        self.readuserinfo()
 
 #TODO: Remove hack if the underlying bug gets fixed
         # A hack to overcome a bug (?) in (py)qt
         ui.command(":larchify_advanced.enable_hack")
         return True
 
+    def readuserinfo(self, select=None):
+        """'select' should be a username, defaulting to the first entry.
+        """
+        self.usersel = 0
+        self.userlist = []
+        i = 0
+        for u in self.builder.allusers():
+            self.userlist.append(self.userinfolist(u))
+            if u == select:
+                self.usersel = i
+            i += 1
+        ui.command("&-:utable.set", self.userlist, self.usersel)
+        ui.command("&-:utable.compact")
+
+    def userinfolist(self, user):
+        return [user] + self.builder.userinfo(user, USERINFO)
 
     def uedit(self, row, column):
         if self.usersel == row:
+            uname = self.userlist[row][0]
             ulcell = self.userlist[row][column]
-            if column == 3:
+            if column == 4:
                 ok, text = self.select_skel(ulcell)
             else:
                 ok, text = ui.textLineDialog(self.userheaders[column] + ':',
                         text=ulcell)
             text = text.strip()
-            if ok and ((text != '') or (column != 0)):
-                self.userlist[row][column] = text
-                if self.builder.saveusers(self.userlist):
-                    ui.command("&-:utable.set", self.userlist)
-                    ui.command("&-:utable.compact")
-                else:
-                    self.userlist[row][column] = ulcell
-        self.usersel = row
+            if ok:
+                try:
+                    if (column == 0) and (text != ''):
+                        # Rename the user, by adding a new one and deleting
+                        # the old
+                        uname = text
+                        self.builder.newuser(uname)
+                        i = 0
+                        for f in USERINFO:
+                            i += 1
+                            self.builder.userset(uname, f, self.userlist[row][i])
+                        self.builder.deluser(ulcell)
+
+                    else:
+                        self.builder.userset(uname, USERINFO[column-1], text)
+                        self.builder.saveusers()
+
+                except:
+                    run_error(_("Couldn't adjust user definition"))
+                    raise
+                self.readuserinfo(uname)
+
+        else:
+            self.usersel = row
 
     def select_skel(self, current):
         # Present a list of available 'skel' folders
@@ -159,34 +177,31 @@ class BuildPage:
             i = self.skellist.index(current)
         except:
             i = 0
-        ui.command("skel:list.set", self.skellist, i)
-        self.skel_choice = ""
-        return (ui.ask("skel.showmodal"), self.skel_choice)
-
-    def skel_selected(self, i):
-        if i <= 0:
-            self.skel_choice = ""
-        else:
-            self.skel_choice = self.skellist[i].split()[0]
-
+        skeli = ui.popuplist(self.skellist, index=i,
+                title=_("Choose 'skel' Folder"),
+                text=_("This folder will be copied\n"
+                "to build the user's home folder:"))
+        if skeli != None:
+            return (True, "" if skeli <= 0
+                    else self.skellist[skeli].split()[0])
+        return (False, "")
 
     def useradd(self):
         ok, name = ui.textLineDialog(_("Enter login-name for new user:"))
         if ok:
             name = name.strip()
-            if name != "":
-                self.userlist.append([name, BASEGROUPS, "", "",""])
-                if self.builder.saveusers(self.userlist):
-                    ui.command("&-:utable.set", self.userlist)
-                    ui.command("&-:utable.compact")
-                else:
-                    del(self.userlist[-1])
+            if name != "" and self.builder.newuser(name):
+                self.userlist.append(self.userinfolist(name))
+                ui.command("&-:utable.set", self.userlist)
+                ui.command("&-:utable.compact")
 
     def userdel(self):
         if self.usersel >= 0:
-            del(self.userlist[self.usersel])
-            ui.command("&-:utable.set", self.userlist)
-            ui.command("&-:utable.compact")
+            user = self.userlist[self.usersel][0]
+            if self.builder.deluser(user):
+                del(self.userlist[self.usersel])
+                ui.command("&-:utable.set", self.userlist)
+                ui.command("&-:utable.compact")
 
 
     def sshtoggle(self, on):

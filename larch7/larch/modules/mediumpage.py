@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.12
+# 2010.03.22
 
 import os
 
@@ -159,17 +159,6 @@ class MediumPage:
 
         self.mediumbuilder = Medium()
 
-        # Partition selection popup
-        ui.widget("Dialog",  "parts", title=_("Choose Partition"),
-                icon="images/larchicon.png")
-        ui.widget("Label", "parts:label", text=_("BE CAREFUL - if you select the wrong\n"
-                "   partition you might well destroy your system!"
-                "\n\nSelect the partition to receive the larch system:"))
-        ui.widget("ListChoice", "^parts:list")
-        ui.widget("DialogButtons", "parts:buttons", buttons=("Save", "Discard"), dialog="parts")
-        ui.layout("parts", ["*VBOX*", "parts:label", "parts:list", "parts:buttons"])
-        ui.addslot("parts:list*changed", self.part_selected)
-
 
     def setup(self):
         """Set up the build page widget.
@@ -231,17 +220,17 @@ class MediumPage:
         # Present a list of available partitions (only unmounted ones
         # are included)
         self.partlist = [_("None")] + command.get_partitions()
-        ui.command("parts:list.set", self.partlist)
-        self.parts_choice = ""
-        if ui.ask("parts.showmodal"):
-            ui.command(":larchpart.x__text", self.parts_choice)
-
-
-    def part_selected(self, i):
-        if i <= 0:
-            self.parts_choice = ""
-        else:
-            self.parts_choice = self.partlist[i].split()[0]
+        choice = ui.popuplist(self.partlist, title=_("Choose Partition"),
+                text=_("BE CAREFUL - if you select the wrong\n"
+                "   partition you might well destroy your system!"
+                "\n\nSelect the partition to receive the larch system:"))
+        # The partition to be used is fetched from the gui, so there is no
+        # need to save it anywhere else.
+        parts_choice = ""
+        if choice != None:
+            if choice > 0:
+                parts_choice = self.partlist[choice].split()[0]
+            ui.command(":larchpart.x__text", parts_choice)
 
 
     def edit_bootlines(self):

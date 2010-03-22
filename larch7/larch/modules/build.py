@@ -21,12 +21,18 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.03.12
+# 2010.03.22
 
 import os, sys
 from glob import glob
 from subprocess import Popen, PIPE, STDOUT
+from ConfigParser import SafeConfigParser
+import random, crypt
 
+# Default list of 'additional' groups for a new user
+BASEGROUPS = 'video,audio,optical,storage,scanner,power,camera'
+# User table fields (apart from the first column - the login name)
+USERINFO = ['pw', 'maingroup', 'uid', 'skel', 'xgroups', 'expert']
 
 class Builder:
     """This class manages 'larchifying' an Arch Linux installation.
@@ -221,51 +227,76 @@ class Builder:
 
 
     def getusers(self):
-        userdata = []
+        """Read user information by means of a SafeConfigParser instance.
+        This is then available as self.userconf.
+        """
+        self.userconf = SafeConfigParser({'pw':'', 'maingroup':'', 'uid':'',
+                'skel':'', 'xgroups':BASEGROUPS, 'expert':''})
         users = config.get("profile") + '/users'
         if os.path.isfile(users):
-            fh = open(users)
-            lines = fh.read()
-            fh.close()
-            for line in lines.splitlines():
-                line = line.strip()
-                if line and (line[0] != '#'):
-                    data = line.split(':')
-                    if (len(data) == 5):
-                        userdata.append(data)
-                    else:
-                        command.error("Warning", _("'users' file invalid"))
-                        return []
-        return userdata
+            try:
+                self.userconf.read(users)
+            except:
+                config_error(_("Invalid 'users' file"))
 
-    def saveusers(self, ulist):
+    def allusers(self):
+        self.getusers()
+        return self.userconf.sections()
+
+    def userinfo(self, user, fields):
+        """Get an ordered list of the given field data for the given user.
+        """
+        return [self.userconf.get(user, f) for f in fields]
+
+    def userset(self, uname, field, text):
+        self.userconf.set(uname, field, text)
+
+    def newuser(self, user):
+        try:
+            self.userconf.add_section(user)
+            return self.saveusers()
+        except:
+            run_error(_("Couldn't add user '%s'") % user)
+            return False
+
+    def deluser(self, user):
+        try:
+            self.userconf.remove_section(user)
+            return self.saveusers()
+        except:
+            run_error(_("Couldn't remove user '%s'") % user)
+            return False
+
+    def saveusers(self):
+        """Save the user configuration data (in 'INI' format)
+        """
         try:
             fh = None
             fh = open(config.get("profile") + '/users', 'w')
-            for row in ulist:
-                fh.write(':'.join(row) + '\n')
+            self.userconf.write(fh)
+            fh.close()
             return True
         except:
-            command.error("Warning", _("Couldn't save 'users' file"))
-            return False
-        finally:
             if fh:
                 fh.close()
+            config_error(_("Couldn't save 'users' file"))
+            self.getusers()
+            return False
 
     def add_users(self):
-        userlist = self.getusers()
-        userdata = []
-        for data in userdata:
+        self.getusers()
+        userlist = []
+        for user in self.allusers():
             if (command.script('user-exists %s %s'
-                    % (self.installation_dir, data[0])) != ''):
+                    % (self.installation_dir, user)) != ''):
                 # Only include if the user does not yet exist
-                userdata.append(data)
+                userlist.append(user)
             else:
                 command.log("#(WARNING): User '%s' exists already"
-                                % data[0])
+                                % user)
 
         # Only continue if there are new users in the list
-        if userdata != []:
+        if userlist == []:
             return True
 
         # Save system files and replace them by the overlay versions
@@ -294,23 +325,37 @@ class Builder:
         userdirs = []
         clist = []
         supershell('mkdir -p %s/home' % self.overlay)
-        for u in userdata:
+        for u in userlist:
             cline = 'useradd -m'
-            if u[1]:
-                cline += ' -G ' + u[1]
-            if u[2]:
-                cline += ' -u ' + u[2]
-            if u[3]:
+            pgroup = self.userconf.get(u, 'maingroup')
+            if pgroup:
+                cline += ' -g ' + pgroup
+            uid = self.userconf.get(u, 'uid')
+            if uid:
+                cline += ' -u ' + uid
+            xgroups = self.userconf.get(u, 'xgroups')
+            if xgroups:
+                cline += ' -G ' + xgroups
+            pw = self.userconf.get(u, 'pw')
+            if (pw == ''):
+                # Passwordless login
+                pwcrypt = ''
+            else:
+                # Normal MD5 password
+                pwcrypt = encryptPW(pw)
+            cline += " -p '%s'" % pwcrypt
+            skeldir = self.userconf.get(u, 'skel')
+            if skeldir:
                 # Custom home initialization directories in the profile
                 # always start with 'skel_'
-                skel = 'skel_' + u[3]
+                skel = 'skel_' + skeldir
                 if skel not in userdirs:
                     userdirs.append(skel)
                 cline += ' -k %s/%s' % (config.larch_build_dir + userdir0, skel)
             # Allow for expert tweaking
-            cline += ' ' + u[4]
+            cline += ' ' + self.userconf.get(u, 'expert')
             # The user and the command to be run
-            clist.append((u[0], cline))
+            clist.append((u, cline))
 
         if userdirs:
             # Copy custom 'skel' directories to temporary area in build space
@@ -322,8 +367,7 @@ class Builder:
 
         for u, cmd in clist:
             if not command.chroot(cmd + ' ' + u):
-                command.error("Warning", _("User creation (%s) failed")
-                        % u[0])
+                run_error(_("User creation (%s) failed") % u[0])
                 return False
 
             if os.path.isdir('%s/home/%s' % (self.installation0, u)):
@@ -506,4 +550,11 @@ class Builder:
                  config.overlay_build_dir + "/etc/mkinitcpio.conf.larch",
                  config.medium_dir + "/boot/larch.img"))
 
+
+def encryptPW(pw):
+    salt = '$1$'
+    for i in range(8):
+        salt += random.choice("./0123456789abcdefghijklmnopqrstuvwxyz"
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    return crypt.crypt(pw, salt)
 
