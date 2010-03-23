@@ -21,7 +21,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.03.22
+# 2010.03.23
 
 from build import Builder, BASEGROUPS, USERINFO
 import os
@@ -162,7 +162,6 @@ class BuildPage:
 
                 except:
                     run_error(_("Couldn't adjust user definition"))
-                    raise
                 self.readuserinfo(uname)
 
         else:

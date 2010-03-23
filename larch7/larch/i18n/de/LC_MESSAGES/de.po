@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: larch 7\n"
-"POT-Creation-Date: 2010-03-14 19:53+CET\n"
+"POT-Creation-Date: 2010-03-23 07:07+CET\n"
 "PO-Revision-Date: 2009-08-04 22:10+CEST\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: mt\n"
@@ -116,7 +116,7 @@ msgstr "Profil '%s' existiert schon"
 msgid "Profile '%s' exists already."
 msgstr "Profil '%s' existiert schon"
 
-#: modules/build.py:58
+#: modules/build.py:64
 msgid ""
 "Building a larch live medium from the running system is\n"
 "an error prone process. Changes to the running system\n"
@@ -132,43 +132,51 @@ msgstr ""
 "\n"
 "Fortfahren?"
 
-#: modules/build.py:125
+#: modules/build.py:131
 msgid "Squashing system.sqf failed"
 msgstr "Komprimierung der system.sqf-Datei ist fehlgeschlagen"
 
-#: modules/build.py:202
+#: modules/build.py:208
 msgid "Build customization script failed"
 msgstr "Skript zur Anpassung der Konstruktion schlug fehl"
 
-#: modules/build.py:212
+#: modules/build.py:218
 msgid "Squashing mods.sqf failed"
 msgstr "Komprimierung der mods.sqf-Datei ist fehlgeschlagen"
 
-#: modules/build.py:237
-msgid "'users' file invalid"
+#: modules/build.py:240
+msgid "Invalid 'users' file"
 msgstr "Ungültige 'users'-Datei"
 
-#: modules/build.py:249
+#: modules/build.py:259
+msgid "Couldn't add user '%s'"
+msgstr "Konnte Benutzer '%s' nicht einrichten"
+
+#: modules/build.py:267
+msgid "Couldn't remove user '%s'"
+msgstr "Konnte Benutzer '%s' nicht entfernen"
+
+#: modules/build.py:282
 msgid "Couldn't save 'users' file"
 msgstr "Konnte 'users'-Datei nicht speichern"
 
-#: modules/build.py:325
+#: modules/build.py:370
 msgid "User creation (%s) failed"
 msgstr "Konnte neuen Benutzer (%s) nicht erstellen"
 
-#: modules/build.py:350
+#: modules/build.py:394
 msgid "No squashfs module found\n"
 msgstr "Kein squashfs-Modul wurde gefunden\n"
 
-#: modules/build.py:360
+#: modules/build.py:404
 msgid "No aufs or unionfs module found\n"
 msgstr "Kein aufs- oder unionfs-Modul wurde gefunden\n"
 
-#: modules/build.py:364
+#: modules/build.py:408
 msgid "Package '%s' is needed by larch systems\n"
 msgstr "larch-Systeme brauchen das Paket '%s'\n"
 
-#: modules/build.py:367
+#: modules/build.py:411
 msgid ""
 "Without package 'syslinux' you will not be able\n"
 "to create syslinux or isolinux booting media\n"
@@ -176,7 +184,7 @@ msgstr ""
 "Das Paket 'syslinux' ist für die Herstellung\n"
 "syslinux und isolinux Boot-Medien notwendig\n"
 
-#: modules/build.py:371
+#: modules/build.py:415
 msgid ""
 "Without package 'cdrkit' (or 'cdrtools') you will\n"
 "not be able to create CD/DVD media\n"
@@ -184,7 +192,7 @@ msgstr ""
 "Das Paket 'cdrkit' (oder 'cdrtools') ist für die\n"
 "Herstellung CD/DVD-Medien notwendig\n"
 
-#: modules/build.py:375
+#: modules/build.py:419
 msgid ""
 "Without package 'eject' you will have problems\n"
 "using CD/DVD media\n"
@@ -192,7 +200,7 @@ msgstr ""
 "Das Paket 'eject' ist beim Einsatz CD/DVD-Boot-Medien\n"
 "sehr sinnvoll\n"
 
-#: modules/build.py:379
+#: modules/build.py:423
 msgid ""
 "WARNING:\n"
 "%s\n"
@@ -202,7 +210,7 @@ msgstr ""
 "%s\n"
 "    Verfahren fortsetzen?"
 
-#: modules/build.py:385
+#: modules/build.py:429
 msgid ""
 "ERROR:\n"
 "%s"
@@ -210,7 +218,7 @@ msgstr ""
 "FEHLER:\n"
 "%s"
 
-#: modules/build.py:412
+#: modules/build.py:456
 msgid ""
 "Problem running %s:\n"
 "  %s"
@@ -218,7 +226,7 @@ msgstr ""
 "Problem beim Ausführen von %s:\n"
 "  %s"
 
-#: modules/build.py:417
+#: modules/build.py:461
 msgid ""
 "More than one kernel found:\n"
 "  %s"
@@ -226,15 +234,15 @@ msgstr ""
 "Mehr als ein Kernel gefunden:\n"
 "  %s"
 
-#: modules/build.py:421
+#: modules/build.py:465
 msgid "No kernel found"
 msgstr "Kein Kernel gefunden"
 
-#: modules/build.py:429
+#: modules/build.py:473
 msgid "More than one set of kernel modules in %s"
 msgstr "Module von mehr als einem Kernel in %s gefunden"
 
-#: modules/build.py:455
+#: modules/build.py:499
 msgid ""
 "WARNING:\n"
 "  You seem to have installed a package containing modules\n"
@@ -254,129 +262,149 @@ msgstr ""
 "\n"
 "    Verfahren fortsetzen?"
 
-#: modules/build.py:464
+#: modules/build.py:508
 msgid "Couldn't find kernel modules"
 msgstr "Kernel-Module nicht gefunden"
 
-#: modules/build.py:484
+#: modules/build.py:528
 msgid "Couldn't find usable mkinitcpio preset: %s"
 msgstr "Brauchbare mkinitcpio-preset-Datei nicht gefunden: %s"
 
-#: modules/buildpage.py:54
+#: modules/buildpage.py:51
 msgid "The system to be compressed must be installed and ready."
 msgstr "Das System zum Komprimieren muss schon installiert und fertig sein."
 
-#: modules/buildpage.py:55
+#: modules/buildpage.py:52
 msgid "Edit supported locales"
 msgstr "Unterstützte Lokale editieren"
 
-#: modules/buildpage.py:56
+#: modules/buildpage.py:53
 msgid "Edit the /etc/locale.gen file to select supported glibc locales"
 msgstr "/etc/locale.gen editieren, um unterstützte glibc-locales festzulegen"
 
-#: modules/buildpage.py:57
+#: modules/buildpage.py:54
 msgid "Edit Arch configuration file (/etc/rc.conf)"
 msgstr "Arch-Konfigurationsdatei (/etc/rc.conf) editieren"
 
-#: modules/buildpage.py:58
+#: modules/buildpage.py:55
 msgid "Edit the /etc/rc.conf file to configure the live system"
 msgstr "/etc/rc.conf editieren, um das Live-System zu konfigurieren"
 
-#: modules/buildpage.py:60 modules/installpage.py:60 modules/projectpage.py:68
+#: modules/buildpage.py:57 modules/installpage.py:60 modules/projectpage.py:68
 msgid "Advanced Options"
 msgstr "Optionen für Fortgeschrittene"
 
-#: modules/buildpage.py:61
+#: modules/buildpage.py:58
 msgid "Edit mkinitcpio.conf"
 msgstr "mkinitcpio.conf editieren"
 
-#: modules/buildpage.py:62
+#: modules/buildpage.py:59
 msgid "Edit the configuration file for generating the initramfs via mkinitcpio"
 msgstr ""
 "Die Konfigurationsdatei für initramfs-Erzeugung mittels mkinitcpio editieren"
 
-#: modules/buildpage.py:63
+#: modules/buildpage.py:60
 msgid "Edit overlay (open in file browser)"
 msgstr "Überlagerungsordner editieren (im Datei-Browser öffnen)"
 
-#: modules/buildpage.py:64
+#: modules/buildpage.py:61
 msgid "Open a file browser on the profile's 'rootoverlay'"
 msgstr "'rootoverlay'-Ordner vom Profil im Datei-Browser öffnen"
 
-#: modules/buildpage.py:65
+#: modules/buildpage.py:62
 msgid "Generate ssh keys"
 msgstr "ssh-Schlüssel erzeugen"
 
-#: modules/buildpage.py:66
+#: modules/buildpage.py:63
 msgid "Enables pre-generation of ssh keys"
 msgstr "Vor-Erzeugung von ssh-Schlüsseln einstellen"
 
-#: modules/buildpage.py:67
+#: modules/buildpage.py:64
 msgid "Reuse existing system.sqf"
 msgstr "Vorhandenes system.sqf verwenden"
 
-#: modules/buildpage.py:68
+#: modules/buildpage.py:65
 msgid ""
 "Reuse existing system.sqf, to save time if the base system hasn't changed"
 msgstr ""
 "Schon vorhandenes system.sqf wiederverwenden, um Zeit zu sparen, falls das "
 "Basis-System unverändert ist."
 
-#: modules/buildpage.py:69 modules/gui.py:65
+#: modules/buildpage.py:66 modules/gui.py:65
 msgid "Larchify"
 msgstr "Larchifizieren"
 
-#: modules/buildpage.py:70
+#: modules/buildpage.py:67
 msgid "Build the main components of the larch system"
 msgstr "Die Hauptkomponenten des larch-Systems erzeugen"
 
-#: modules/buildpage.py:72
+#: modules/buildpage.py:69
 msgid "User accounts"
 msgstr "Benutzer"
 
-#: modules/buildpage.py:74
+#: modules/buildpage.py:71
 msgid "Click on a row to select, click on a selected cell to edit"
 msgstr ""
-"Klicke auf eine Zeile um sie zu selektieren,"
-"Klicke auf eine selektierte Zelle um sie zu editieren"
+"Klicke auf eine Zeile um sie zu selektieren,Klicke auf eine selektierte "
+"Zelle um sie zu editieren"
 
-#: modules/buildpage.py:75
+#: modules/buildpage.py:72
 msgid "Add user"
 msgstr "Neuen Benutzer"
 
-#: modules/buildpage.py:76
+#: modules/buildpage.py:73
 msgid "Create a new user-name"
 msgstr "Einen neuen Benutzernamen erstellen"
 
-#: modules/buildpage.py:77
+#: modules/buildpage.py:74
 msgid "Delete user"
 msgstr "Benutzer löschen"
 
-#: modules/buildpage.py:78
+#: modules/buildpage.py:75
 msgid "Remove the selected user-name"
 msgstr "Entferne den selektierten Benutzernamen"
 
-#: modules/buildpage.py:89
-msgid "Additional Groups"
-msgstr "Zusätzliche Gruppen"
+#: modules/buildpage.py:86
+msgid "Group"
+msgstr "Gruppe"
 
-#: modules/buildpage.py:89
+#: modules/buildpage.py:86
+msgid "Password"
+msgstr "Passwort"
+
+#: modules/buildpage.py:86
 msgid "User-Name"
 msgstr "Benutzername"
 
-#: modules/buildpage.py:90
+#: modules/buildpage.py:87
 msgid "'skel' directory"
 msgstr "'skel'-Ordner"
 
-#: modules/buildpage.py:90
+#: modules/buildpage.py:87
+msgid "Additional Groups"
+msgstr "Zusätzliche Gruppen"
+
+#: modules/buildpage.py:88
 msgid "Expert options"
 msgstr "Optionen für Experten"
 
-#: modules/buildpage.py:96
+#: modules/buildpage.py:102
+msgid "No Arch installation at %s"
+msgstr "Keine Arch-Installation in %s"
+
+#: modules/buildpage.py:164
+msgid "Couldn't adjust user definition"
+msgstr "Konnte Benutzer-Information nicht ändern"
+
+#: modules/buildpage.py:172
+msgid "Default (/etc/skel)"
+msgstr "Standard (/etc/skel)"
+
+#: modules/buildpage.py:180
 msgid "Choose 'skel' Folder"
 msgstr "'skel'-Ordner auswählen"
 
-#: modules/buildpage.py:98
+#: modules/buildpage.py:181
 msgid ""
 "This folder will be copied\n"
 "to build the user's home folder:"
@@ -385,15 +413,7 @@ msgstr ""
 "um den Home-Ordner des neuen\n"
 "Benutzers zu erstellen:"
 
-#: modules/buildpage.py:113
-msgid "No Arch installation at %s"
-msgstr "Keine Arch-Installation in %s"
-
-#: modules/buildpage.py:155
-msgid "Default (/etc/skel)"
-msgstr "Standard (/etc/skel)"
-
-#: modules/buildpage.py:174
+#: modules/buildpage.py:189
 msgid "Enter login-name for new user:"
 msgstr "Neuen Anmeldenamen eingeben:"
 
@@ -561,101 +581,109 @@ msgstr "Medium Vorbereiten"
 msgid "Installation Tweaks"
 msgstr "Installation-Feinkontrolle"
 
-#: modules/gui.py:113
+#: modules/gui.py:117
 msgid "Processing ..."
 msgstr "Prozess läuft ..."
 
-#: modules/gui.py:114 modules/gui.py:162
+#: modules/gui.py:118 modules/gui.py:166
 msgid "Here you can follow the detailed, low-level progress of the commands."
 msgstr "Hier kann man die einzelnen Schritte detailliert verfolgen"
 
-#: modules/gui.py:118
+#: modules/gui.py:122
 msgid "An indication of the progress of the current operation, if possible"
 msgstr "Zeigt den Fortschritt der aktuellen Operation, insoweit möglich"
 
-#: modules/gui.py:119 modules/gui.py:254
+#: modules/gui.py:123 modules/gui.py:258
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: modules/gui.py:120
+#: modules/gui.py:124
 msgid "Stop the current action"
 msgstr "Aktuellen Vorgang anhalten"
 
-#: modules/gui.py:121
+#: modules/gui.py:125
 msgid "Done"
 msgstr "Fertig"
 
-#: modules/gui.py:161
+#: modules/gui.py:165
 msgid "Low-level Command Logging"
 msgstr "Protokoll der einzelnen Befehle"
 
-#: modules/gui.py:165
+#: modules/gui.py:169
 msgid "Clear"
 msgstr "Löschen"
 
-#: modules/gui.py:166 modules/gui.py:196
+#: modules/gui.py:170 modules/gui.py:200
 msgid "Hide"
 msgstr "Schließen"
 
-#: modules/gui.py:167 modules/gui.py:197
+#: modules/gui.py:171 modules/gui.py:201
 msgid "Go back to the larch controls"
 msgstr "Zurückkehren zu den larch-Kontrollen"
 
-#: modules/gui.py:194
+#: modules/gui.py:198
 msgid "Documentation"
 msgstr "Dokumentation"
 
-#: modules/gui.py:199
+#: modules/gui.py:203
 msgid "Go back in the viewing history"
 msgstr "Zurück in der Browser-Geschichte"
 
-#: modules/gui.py:201
+#: modules/gui.py:205
 msgid "Go forward in the viewing history"
 msgstr "Nach vorne in der Browser-Seitengeschichte"
 
-#: modules/gui.py:203
+#: modules/gui.py:207
 msgid "Reload the documentation for the current larch tab"
 msgstr "Die Dokumentation für die aktuelle larch-Seite anzeigen"
 
-#: modules/gui.py:205
+#: modules/gui.py:209
 msgid "Go to the general larch documentation index"
 msgstr "Das allgemeine larch-Inhaltsverzeichnis anzeigen"
 
-#: modules/gui.py:250
+#: modules/gui.py:254
 msgid "Editor"
 msgstr "Editor"
 
-#: modules/gui.py:253
+#: modules/gui.py:257
 msgid "OK"
 msgstr "Annehmen"
 
-#: modules/gui.py:255
+#: modules/gui.py:259
 msgid "Revert"
 msgstr "Zurücksetzen"
 
-#: modules/gui.py:256
+#: modules/gui.py:260
 msgid "Restore the text to its initial state"
 msgstr "Text zum ursprünglichen Zustand zurücksetzen"
 
-#: modules/gui.py:257
+#: modules/gui.py:261
 msgid "Copy"
 msgstr "Kopieren"
 
-#: modules/gui.py:258
+#: modules/gui.py:262
 msgid "Cut"
 msgstr "Ausschneiden"
 
-#: modules/gui.py:259
+#: modules/gui.py:263
 msgid "Paste"
 msgstr "Einfügen"
 
-#: modules/gui.py:260
+#: modules/gui.py:264
 msgid "Undo"
 msgstr "Rückgängig"
 
-#: modules/gui.py:261
+#: modules/gui.py:265
 msgid "Redo"
 msgstr "Wieder ausführen"
+
+#: modules/gui.py:338
+msgid "Choose an item"
+msgstr "Eintreg wählen"
+
+#: modules/gui.py:339
+msgid "Select one of the following items:"
+msgstr "Wähle einen der folgenden Einträge:"
 
 #: modules/installation.py:111 modules/installpage.py:136
 msgid "No 'mirrorlist' file found"
@@ -982,7 +1010,7 @@ msgstr "Verwende GRUB als Bootlader"
 msgid "Use syslinux (partition) or isolinux (CD/DVD) as bootloader"
 msgstr "Verwende syslinux (Partition) oder isolinux (CD/DVD) als Bootlader"
 
-#: modules/mediumpage.py:118 modules/mediumpage.py:233
+#: modules/mediumpage.py:118 modules/mediumpage.py:222
 msgid "None"
 msgstr "Keiner"
 
@@ -1052,11 +1080,11 @@ msgstr ""
 msgid "Open a file browser on the profile's 'cd-root' folder"
 msgstr "'cd-root'-Ordner vom Profil im Datei-Browser öffnen"
 
-#: modules/mediumpage.py:163
+#: modules/mediumpage.py:223
 msgid "Choose Partition"
 msgstr "Partition wählen"
 
-#: modules/mediumpage.py:165
+#: modules/mediumpage.py:224
 msgid ""
 "BE CAREFUL - if you select the wrong\n"
 "   partition you might well destroy your system!\n"
@@ -1068,35 +1096,35 @@ msgstr ""
 "\n"
 "Wähle die Partition für das larch-System:"
 
-#: modules/mediumpage.py:253
+#: modules/mediumpage.py:242
 msgid "Editing larch boot entries"
 msgstr "Editiere die larch Boot-Einträge"
 
-#: modules/mediumpage.py:264
+#: modules/mediumpage.py:253
 msgid "Editing grub template"
 msgstr "Editiere die GRUB-Schablone"
 
-#: modules/mediumpage.py:276
+#: modules/mediumpage.py:265
 msgid "Editing syslinux/isolinux template"
 msgstr "Editiere die syslinux/isolinux-Schablone"
 
-#: modules/mediumpage.py:281
+#: modules/mediumpage.py:270
 msgid "Enter new label for the boot medium:"
 msgstr "Neues 'Label' für das Boot-Medium eingeben:"
 
-#: modules/mediumpage.py:295
+#: modules/mediumpage.py:284
 msgid "Enter new application ID for the boot iso:"
 msgstr "Neuen Anwendungsnamen für das Boot-iso eingeben:"
 
-#: modules/mediumpage.py:309
+#: modules/mediumpage.py:298
 msgid "Enter new publisher for the boot iso:"
 msgstr "Neue Herstellerdaten das Boot-iso eingeben:"
 
-#: modules/mediumpage.py:366
+#: modules/mediumpage.py:355
 msgid "No partition selected for larch"
 msgstr "Keine Partition für larch gewählt"
 
-#: modules/mediumpage.py:389
+#: modules/mediumpage.py:378
 msgid ""
 "The partition containing the larch live system\n"
 "must be specifed."
