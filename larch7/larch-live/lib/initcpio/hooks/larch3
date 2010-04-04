@@ -23,11 +23,7 @@
 #    51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #----------------------------------------------------------------------------
-# 2010.02.19
-
-#TODO:
-# Is c2r still relevant? I should test it!
-
+# 2010.04.04
 
 mvbackup()
 {
@@ -38,16 +34,18 @@ mvbackup()
 
 do_c2r()
 {
+    modpath=/tfs/modsqfs
+    /bin/mkdir ${modpath}
     msg ":: Copying base system to RAM, this will take a while ..."
     /bin/cat ${sysSqf} > /tfs/system.sqf
     if [ $? -ne 0 ]; then return 1; fi
     sysSqf=/tfs/system.sqf
 
-    msg ":: Copying base system filter to RAM"
-    modpath=/tfs/modsqfs
-    /bin/mkdir ${modpath}
-    /bin/cat ${filterSqf} > ${modpath}/filter.sqf
-    if [ $? -ne 0 ]; then return 1; fi
+    if [ -f ${filterSqf} ]; then
+        msg ":: Copying base system filter to RAM"
+        /bin/cat ${filterSqf} > ${modpath}/filter.sqf
+        if [ $? -ne 0 ]; then return 1; fi
+    fi
     filterSqf=${modpath}/filter.sqf
 
     msg ":: Copying mods archive to RAM, this might take a while ..."
@@ -156,6 +154,7 @@ run_hook ()
             cat ${f} >/union/.livesys/${f}
         done
     fi
+    cd /
 
     # Make special directories
     /bin/mkdir -m 1777 /tfs/tmp
@@ -177,7 +176,7 @@ run_hook ()
         # Set flag to inform system of copy-to-ram
         :> /tfs/c2r
         # Unmount boot device
-        /bin/umount ${cdmount}
+        /bin/umount -l ${cdmount}
     else
         /bin/mkdir /union/.livesys/medium
         /bin/mount -o move ${cdmount} /union/.livesys/medium
