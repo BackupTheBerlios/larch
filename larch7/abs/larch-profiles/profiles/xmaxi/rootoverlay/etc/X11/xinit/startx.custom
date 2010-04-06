@@ -1,4 +1,5 @@
-if [ -z "$DISPLAY" ] && echo $(tty) | grep "tty1" &>/dev/null; then
+if [ -z "$DISPLAY" ] && [ ! -f /tmp/_nox_ ] \
+	&& echo $(tty) | grep "tty1" &>/dev/null; then
     startx
 
     # Maybe there should be some code here to handle a failed startx?
